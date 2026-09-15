@@ -66,7 +66,6 @@ html, body {
   overflow: hidden;
 }
 
-/* Пунктирная граница — отступ 18px, чтобы места не пересекали */
 #poker-table::before {
   content: "";
   position: absolute;
@@ -112,7 +111,6 @@ html, body {
   margin-bottom: 12px;
   min-height: 60px;
 }
-/* Карты борда — чуть меньше, чтобы не перекрывали места игроков */
 #board-cards .card {
   --card-w: 42px;
   --card-h: 60px;
@@ -136,9 +134,7 @@ html, body {
   white-space: nowrap;
   line-height: 1.3;
 }
-#table-info .info-row.faded {
-  opacity: 0.45;
-}
+#table-info .info-row.faded { opacity: 0.45; }
 
 .card {
   width: var(--card-w);
@@ -193,7 +189,7 @@ html, body {
 
 .seat {
   position: absolute;
-  width: 120px;                     /* было 130 — уменьшил, чтобы не пересекали пунктир */
+  width: 120px;
   transform: translate(-50%, -50%);
   text-align: center;
   font-size: 14px;
@@ -351,22 +347,32 @@ html, body {
 }
 .seat .bet-chips.hidden { display: none; }
 
-#hero-slider-panel {
+/* ============================
+   ОБЩИЙ КОНТЕЙНЕР ДЛЯ СЛАЙДЕРА И КНОПОК
+   ============================ */
+#hero-actions {
   position: absolute;
   left: 3%;
-  bottom: 12.5%;
-  width: 260px;
+  bottom: 4.5%;
+  width: 270px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: rgba(20,18,16,.92);
+  border: 1px solid #3a3530;
+  border-radius: 10px;
+  padding: 8px 10px;
+  z-index: 45;
+}
+#hero-actions.hidden { display: none; }
+
+/* Строка слайдера */
+#hero-slider-row {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: rgba(20,18,16,.92);
-  border: 1px solid #3a3530;
-  border-radius: 8px;
-  padding: 8px 10px 8px 12px;
-  z-index: 45;
+  width: 100%;
 }
-#hero-slider-panel.hidden { display: none; }
-
 #raise-slider-horiz {
   flex: 1;
   -webkit-appearance: none;
@@ -377,6 +383,7 @@ html, body {
   border-radius: 4px;
   outline: none;
   accent-color: var(--gold);
+  min-width: 60px;
 }
 #raise-slider-horiz::-webkit-slider-thumb {
   -webkit-appearance: none;
@@ -404,18 +411,49 @@ html, body {
   font-weight: 800;
   white-space: nowrap;
   text-shadow: 0 1px 3px rgba(0,0,0,.95);
-  min-width: 66px;
+  min-width: 62px;
   text-align: center;
   background: rgba(0,0,0,.35);
   border: 1px solid #3a3530;
   border-radius: 6px;
   padding: 4px 8px;
+  flex-shrink: 0;
 }
 
+/* Кнопки Fold/Check/Call — внутри общего контейнера */
+#hero-buttons {
+  display: flex;
+  gap: 5px;
+  width: 100%;
+}
+#hero-buttons button {
+  flex: 1;
+  padding: 11px 8px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+  box-shadow: 0 3px 0 rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.1);
+}
+#hero-buttons button:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 rgba(0,0,0,.5);
+}
+#hero-buttons button:disabled { opacity: .35; cursor: not-allowed; box-shadow: none; }
+
+#btn-fold  { background: linear-gradient(180deg, #5a5a5a, #3a3a3a); }
+#btn-check { background: linear-gradient(180deg, #2a4a3a, #1a3a2a); }
+#btn-call  { background: linear-gradient(180deg, #3a7bd5, #2a5aa5); }
+
+/* %-кнопки — справа, на том же уровне, что и Fold/Check/Call */
 #quick-percent-list {
   position: absolute;
   right: 3%;
-  bottom: 8%;
+  bottom: 4.5%;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -439,37 +477,6 @@ html, body {
 #quick-percent-list button:hover { background: #2a2520; }
 #quick-percent-list button .label { color: var(--gold); font-weight: 800; }
 #quick-percent-list button .value { color: var(--muted); font-weight: 600; font-size: 12px; }
-
-#hero-buttons {
-  position: absolute;
-  left: 3%;
-  bottom: 8%;
-  display: flex;
-  gap: 6px;
-  z-index: 45;
-}
-#hero-buttons.hidden { display: none; }
-#hero-buttons button {
-  padding: 13px 22px;
-  border: none;
-  border-radius: 9px;
-  font-weight: 800;
-  font-size: 15px;
-  cursor: pointer;
-  color: #fff;
-  text-transform: uppercase;
-  letter-spacing: .3px;
-  box-shadow: 0 3px 0 rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.1);
-}
-#hero-buttons button:active:not(:disabled) {
-  transform: translateY(2px);
-  box-shadow: 0 1px 0 rgba(0,0,0,.5);
-}
-#hero-buttons button:disabled { opacity: .35; cursor: not-allowed; box-shadow: none; }
-
-#btn-fold  { background: linear-gradient(180deg, #5a5a5a, #3a3a3a); }
-#btn-check { background: linear-gradient(180deg, #2a4a3a, #1a3a2a); }
-#btn-call  { background: linear-gradient(180deg, #3a7bd5, #2a5aa5); }
 
 #bottom-bar {
   position: absolute;
@@ -694,11 +701,11 @@ html, body {
   #board-cards .card { --card-w: 38px; --card-h: 52px; font-size: 19px; }
   #board-cards .card .suit { font-size: 22px; }
   #table-info { font-size: 12px; }
-  #hero-slider-panel { width: 220px; bottom: 13%; padding: 7px 8px 7px 10px; }
-  #raise-amount-mini { font-size: 12px; min-width: 58px; padding: 3px 7px; }
+  #hero-actions { width: 230px; bottom: 5%; padding: 7px 8px; }
+  #raise-amount-mini { font-size: 12px; min-width: 54px; padding: 3px 7px; }
+  #hero-buttons button { padding: 9px 6px; font-size: 11px; }
   #quick-percent-list button { padding: 7px 11px; font-size: 12px; min-width: 92px; gap: 9px; }
   #quick-percent-list button .value { font-size: 11px; }
-  #hero-buttons button { padding: 11px 16px; font-size: 13px; }
   #bottom-bar { height: 56px; }
   #bottom-bar button { height: 38px; font-size: 17px; padding: 0 12px; min-width: 46px; }
   #hist-info { font-size: 13px; padding: 0 8px; }
@@ -722,9 +729,9 @@ html, body {
   .seat .bet-chips { font-size: 11px; padding: 3px 9px; bottom: -46px; }
   .seat.hero .dealer-chip { top: -22px; }
   #quick-percent-list button { min-width: 82px; font-size: 11px; padding: 6px 10px; gap: 8px; }
-  #hero-buttons button { padding: 10px 14px; font-size: 12px; }
-  #hero-slider-panel { width: 190px; bottom: 14%; }
-  #raise-amount-mini { font-size: 11px; min-width: 50px; }
+  #hero-actions { width: 200px; bottom: 5.5%; }
+  #hero-buttons button { padding: 8px 5px; font-size: 10px; }
+  #raise-amount-mini { font-size: 11px; min-width: 48px; }
   #pot-display { font-size: 18px; }
   #info-place-row { font-size: 11px; }
   #board-cards { min-height: 48px; gap: 4px; }
@@ -751,18 +758,20 @@ html, body {
       </div>
       <div id="seats"></div>
 
-      <div id="hero-slider-panel" class="hidden">
-        <input type="range" id="raise-slider-horiz" min="0" max="100" value="0" />
-        <span id="raise-amount-mini">0</span>
+      <!-- Единый контейнер: слайдер + кнопки -->
+      <div id="hero-actions" class="hidden">
+        <div id="hero-slider-row">
+          <input type="range" id="raise-slider-horiz" min="0" max="100" value="0" />
+          <span id="raise-amount-mini">0</span>
+        </div>
+        <div id="hero-buttons">
+          <button id="btn-fold">Fold</button>
+          <button id="btn-check">Check</button>
+          <button id="btn-call">Call</button>
+        </div>
       </div>
 
       <div id="quick-percent-list"></div>
-
-      <div id="hero-buttons" class="hidden">
-        <button id="btn-fold">Fold</button>
-        <button id="btn-check">Check</button>
-        <button id="btn-call">Call</button>
-      </div>
     </div>
   </div>
 
@@ -1657,16 +1666,17 @@ const UI = (() => {
 
   const el = {};
 
-  // Симметричные позиции (зеркально относительно центра x:50)
+  // Позиции: левые сдвинуты правее, правые — левее (всё ближе к центру).
+  // UTG1 и герой по центру x:50.
   const SEAT_POSITIONS = [
     { x: 50, y: 74, side: 'bottom' },  // 0 — герой
-    { x: 12, y: 58, side: 'left'   },  // 1 — SB
-    { x: 11, y: 34, side: 'left'   },  // 2 — BB
-    { x: 16, y: 10, side: 'left'   },  // 3 — UTG
+    { x: 16, y: 58, side: 'left'   },  // 1 — SB
+    { x: 15, y: 34, side: 'left'   },  // 2 — BB
+    { x: 19, y: 10, side: 'left'   },  // 3 — UTG
     { x: 50, y: 9,  side: 'top'    },  // 4 — UTG1
-    { x: 84, y: 10, side: 'right'  },  // 5 — LJ   (зерк. UTG: 100-16)
-    { x: 89, y: 34, side: 'right'  },  // 6 — HJ   (зерк. BB:  100-11)
-    { x: 88, y: 58, side: 'right'  }   // 7 — CO   (зерк. SB:  100-12)
+    { x: 81, y: 10, side: 'right'  },  // 5 — LJ   (зерк. UTG)
+    { x: 85, y: 34, side: 'right'  },  // 6 — HJ   (зерк. BB)
+    { x: 84, y: 58, side: 'right'  }   // 7 — CO   (зерк. SB)
   ];
 
   const SUIT_CLASS = { s: 'suit-spades', h: 'suit-hearts', d: 'suit-diamonds', c: 'suit-clubs' };
@@ -1689,7 +1699,7 @@ const UI = (() => {
     el.statsStreak    = document.getElementById('stat-streak');
     el.statsPlace     = document.getElementById('stat-place');
 
-    el.heroSliderPanel= document.getElementById('hero-slider-panel');
+    el.heroActions    = document.getElementById('hero-actions');
     el.heroButtons    = document.getElementById('hero-buttons');
     el.sliderHoriz    = document.getElementById('raise-slider-horiz');
     el.raiseAmountMini= document.getElementById('raise-amount-mini');
@@ -1931,18 +1941,16 @@ const UI = (() => {
     const canCall  = toCall > 0 && toCall < hero.stack;
     const canRaise = hero.stack > toCall;
 
-    el.heroButtons.classList.remove('hidden');
+    el.heroActions.classList.remove('hidden');
     el.btnFold.disabled = false;
     el.btnCheck.disabled = !canCheck;
     el.btnCall.disabled = !canCall;
     el.btnCall.textContent = canCall ? 'Call ' + formatChips(toCall, state) : 'Call';
 
     if (canRaise) {
-      el.heroSliderPanel.classList.remove('hidden');
       renderQuickRaiseOptions(state, hero, toCall);
       setupHorizontalSlider(state, hero);
     } else {
-      el.heroSliderPanel.classList.add('hidden');
       el.quickPercentList.innerHTML = '';
     }
 
@@ -2040,8 +2048,7 @@ const UI = (() => {
   }
 
   function hideActions() {
-    el.heroButtons.classList.add('hidden');
-    el.heroSliderPanel.classList.add('hidden');
+    el.heroActions.classList.add('hidden');
     el.quickPercentList.innerHTML = '';
   }
 
