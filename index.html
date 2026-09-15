@@ -42,7 +42,7 @@ html, body {
   top: 0;
   left: 0;
   right: 0;
-  bottom: 56px;
+  bottom: 62px;
   display: flex;
   align-items: stretch;
   justify-content: center;
@@ -66,12 +66,13 @@ html, body {
   overflow: hidden;
 }
 
+/* Пунктирная граница — отступ 18px, чтобы места не пересекали */
 #poker-table::before {
   content: "";
   position: absolute;
-  inset: 14px;
+  inset: 18px;
   border: 1px dashed rgba(255,255,255,.06);
-  border-radius: 34px;
+  border-radius: 30px;
   pointer-events: none;
 }
 
@@ -84,7 +85,6 @@ html, body {
   z-index: 5;
 }
 
-/* Строка "Место" — над банком, сероватая */
 #info-place-row {
   font-size: 14px;
   color: var(--text);
@@ -110,8 +110,16 @@ html, body {
   gap: 7px;
   justify-content: center;
   margin-bottom: 12px;
-  min-height: var(--card-h);
+  min-height: 60px;
 }
+/* Карты борда — чуть меньше, чтобы не перекрывали места игроков */
+#board-cards .card {
+  --card-w: 42px;
+  --card-h: 60px;
+  font-size: 22px;
+  padding: 2px 3px;
+}
+#board-cards .card .suit { font-size: 26px; }
 
 #table-info {
   display: flex;
@@ -185,7 +193,7 @@ html, body {
 
 .seat {
   position: absolute;
-  width: 130px;
+  width: 120px;                     /* было 130 — уменьшил, чтобы не пересекали пунктир */
   transform: translate(-50%, -50%);
   text-align: center;
   font-size: 14px;
@@ -255,7 +263,6 @@ html, body {
   padding: 0 2px;
 }
 
-/* D-чип — прямо в .seat, position: absolute */
 .seat .dealer-chip {
   position: absolute;
   width: 20px;
@@ -274,20 +281,9 @@ html, body {
 }
 .seat .dealer-chip.hidden { display: none; }
 
-/* Левые места — D справа от карт (сбоку) */
-.seat.left .dealer-chip {
-  right: -28px;
-  top: 36px;
-  left: auto;
-}
-/* Правые и верхнее — D слева от карт (сбоку) */
+.seat.left .dealer-chip { right: -28px; top: 36px; left: auto; }
 .seat.right .dealer-chip,
-.seat.top .dealer-chip {
-  left: -28px;
-  top: 36px;
-  right: auto;
-}
-/* Герой — D НАД его картами, по центру */
+.seat.top .dealer-chip { left: -28px; top: 36px; right: auto; }
 .seat.hero .dealer-chip {
   top: -30px;
   left: 50%;
@@ -355,7 +351,6 @@ html, body {
 }
 .seat .bet-chips.hidden { display: none; }
 
-/* Слайдер — фон + рамка + пилюля под цифрами */
 #hero-slider-panel {
   position: absolute;
   left: 3%;
@@ -403,7 +398,6 @@ html, body {
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0,0,0,.7);
 }
-/* Цифры слайдера — своя плашка с фоном */
 #raise-amount-mini {
   color: var(--gold);
   font-size: 14px;
@@ -418,7 +412,6 @@ html, body {
   padding: 4px 8px;
 }
 
-/* %-кнопки — крупнее */
 #quick-percent-list {
   position: absolute;
   right: 3%;
@@ -447,7 +440,6 @@ html, body {
 #quick-percent-list button .label { color: var(--gold); font-weight: 800; }
 #quick-percent-list button .value { color: var(--muted); font-weight: 600; font-size: 12px; }
 
-/* Fold/Check/Call — крупнее */
 #hero-buttons {
   position: absolute;
   left: 3%;
@@ -479,7 +471,6 @@ html, body {
 #btn-check { background: linear-gradient(180deg, #2a4a3a, #1a3a2a); }
 #btn-call  { background: linear-gradient(180deg, #3a7bd5, #2a5aa5); }
 
-/* Нижняя строка — кнопки крупнее */
 #bottom-bar {
   position: absolute;
   bottom: 0;
@@ -679,8 +670,8 @@ html, body {
 @media (max-width: 720px) {
   :root { --card-w: 42px; --card-h: 60px; }
   #poker-table { border-radius: 30px; border-width: 10px; }
-  #poker-table::before { inset: 10px; border-radius: 22px; }
-  .seat { width: 108px; }
+  #poker-table::before { inset: 14px; border-radius: 22px; }
+  .seat { width: 100px; }
   .seat .strat-badge { font-size: 10px; padding: 2px 7px; top: -20px; }
   .seat .seat-cards { min-height: 58px; gap: 3px; }
   .seat .seat-cards .card { --card-w: 38px; --card-h: 56px; font-size: 19px; padding: 2px 3px; }
@@ -699,7 +690,9 @@ html, body {
   .seat .bet-chips { font-size: 12px; padding: 3px 10px; bottom: -52px; }
   #pot-display { font-size: 20px; }
   #info-place-row { font-size: 12px; }
-  #board-cards { min-height: 60px; gap: 5px; }
+  #board-cards { min-height: 52px; gap: 5px; }
+  #board-cards .card { --card-w: 38px; --card-h: 52px; font-size: 19px; }
+  #board-cards .card .suit { font-size: 22px; }
   #table-info { font-size: 12px; }
   #hero-slider-panel { width: 220px; bottom: 13%; padding: 7px 8px 7px 10px; }
   #raise-amount-mini { font-size: 12px; min-width: 58px; padding: 3px 7px; }
@@ -710,6 +703,7 @@ html, body {
   #bottom-bar button { height: 38px; font-size: 17px; padding: 0 12px; min-width: 46px; }
   #hist-info { font-size: 13px; padding: 0 8px; }
   #timer-bar { bottom: 56px; }
+  #table-scene { bottom: 56px; }
   #stats-grid { grid-template-columns: repeat(2, 1fr); }
   .start-card h1 { font-size: 20px; }
   .start-card p { font-size: 12px; }
@@ -717,7 +711,7 @@ html, body {
 }
 
 @media (max-width: 420px) {
-  .seat { width: 96px; }
+  .seat { width: 90px; }
   .seat .seat-cards { min-height: 50px; }
   .seat .seat-cards .card { --card-w: 32px; --card-h: 48px; font-size: 17px; }
   .seat.hero .seat-cards { min-height: 66px; }
@@ -733,7 +727,9 @@ html, body {
   #raise-amount-mini { font-size: 11px; min-width: 50px; }
   #pot-display { font-size: 18px; }
   #info-place-row { font-size: 11px; }
-  #board-cards { min-height: 54px; gap: 4px; }
+  #board-cards { min-height: 48px; gap: 4px; }
+  #board-cards .card { --card-w: 34px; --card-h: 46px; font-size: 17px; }
+  #board-cards .card .suit { font-size: 20px; }
   #table-info { font-size: 11px; }
 }
 </style>
@@ -1661,15 +1657,16 @@ const UI = (() => {
 
   const el = {};
 
+  // Симметричные позиции (зеркально относительно центра x:50)
   const SEAT_POSITIONS = [
     { x: 50, y: 74, side: 'bottom' },  // 0 — герой
     { x: 12, y: 58, side: 'left'   },  // 1 — SB
     { x: 11, y: 34, side: 'left'   },  // 2 — BB
     { x: 16, y: 10, side: 'left'   },  // 3 — UTG
     { x: 50, y: 9,  side: 'top'    },  // 4 — UTG1
-    { x: 84, y: 10, side: 'right'  },  // 5 — LJ
-    { x: 89, y: 34, side: 'right'  },  // 6 — HJ
-    { x: 88, y: 58, side: 'right'  }   // 7 — CO
+    { x: 84, y: 10, side: 'right'  },  // 5 — LJ   (зерк. UTG: 100-16)
+    { x: 89, y: 34, side: 'right'  },  // 6 — HJ   (зерк. BB:  100-11)
+    { x: 88, y: 58, side: 'right'  }   // 7 — CO   (зерк. SB:  100-12)
   ];
 
   const SUIT_CLASS = { s: 'suit-spades', h: 'suit-hearts', d: 'suit-diamonds', c: 'suit-clubs' };
