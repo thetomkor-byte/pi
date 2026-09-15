@@ -90,6 +90,17 @@ html, body {
   z-index: 5;
 }
 
+/* Строка "Место" — над банком */
+#info-place-row {
+  font-size: 14px;
+  color: var(--text);
+  font-weight: 700;
+  text-shadow: 0 1px 4px rgba(0,0,0,.95);
+  letter-spacing: .3px;
+  margin-bottom: 8px;
+  white-space: nowrap;
+}
+
 #pot-display {
   color: var(--gold);
   font-weight: 800;
@@ -107,12 +118,12 @@ html, body {
   min-height: var(--card-h);
 }
 
-/* Инфо-панель — без фона, прямо на столе */
+/* Инфо-панель — три строки */
 #table-info {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   font-size: 14px;
   color: var(--text);
   font-weight: 700;
@@ -121,15 +132,14 @@ html, body {
 }
 #table-info .info-row {
   white-space: nowrap;
+  line-height: 1.3;
 }
-#table-info .info-row.muted {
-  color: var(--muted);
-  font-weight: 600;
-  font-size: 13px;
+#table-info .info-row.next-blinds {
+  color: var(--gold);
 }
 
 /* ============================
-   КАРТЫ — цифры и масти по центру
+   КАРТЫ
    ============================ */
 .card {
   width: var(--card-w);
@@ -274,10 +284,17 @@ html, body {
 }
 .seat .dealer-chip.hidden { display: none; }
 
-.seat.left  .dealer-chip,
-.seat.hero  .dealer-chip { right: -24px; left: auto; }
+.seat.left  .dealer-chip { right: -24px; left: auto; }
 .seat.right .dealer-chip,
 .seat.top   .dealer-chip { left: -24px; right: auto; }
+
+/* D-чип у героя — над его картами по центру */
+.seat.hero .dealer-chip {
+  top: -28px;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+}
 
 .seat .stack {
   color: var(--text);
@@ -343,15 +360,19 @@ html, body {
    ПАНЕЛЬ ДЕЙСТВИЙ ГЕРОЯ
    ============================ */
 
-/* Горизонтальный слайдер + цифры — над кнопками */
+/* Слайдер — почти вплотную к кнопкам Fold/Check/Call, с фоном как у %-кнопок */
 #hero-slider-panel {
   position: absolute;
   left: 3%;
-  bottom: 8%;
+  bottom: 12.5%;
   width: 240px;
   display: flex;
   align-items: center;
   gap: 8px;
+  background: rgba(20,18,16,.92);
+  border: 1px solid #3a3530;
+  border-radius: 6px;
+  padding: 6px 10px;
   z-index: 45;
 }
 #hero-slider-panel.hidden { display: none; }
@@ -361,7 +382,7 @@ html, body {
   -webkit-appearance: none;
   appearance: none;
   height: 6px;
-  background: rgba(20,18,16,.92);
+  background: rgba(0,0,0,.5);
   border: 1px solid #3a3530;
   border-radius: 4px;
   outline: none;
@@ -397,7 +418,7 @@ html, body {
   text-align: right;
 }
 
-/* %-кнопки (и BB-пресеты) — справа на столе, вертикально */
+/* %-кнопки */
 #quick-percent-list {
   position: absolute;
   right: 3%;
@@ -426,11 +447,11 @@ html, body {
 #quick-percent-list button .label { color: var(--gold); font-weight: 800; }
 #quick-percent-list button .value { color: var(--muted); font-weight: 600; font-size: 11px; }
 
-/* Fold/Check/Call — внизу слева */
+/* Fold/Check/Call */
 #hero-buttons {
   position: absolute;
   left: 3%;
-  bottom: 2%;
+  bottom: 8%;
   display: flex;
   gap: 5px;
   z-index: 45;
@@ -683,17 +704,17 @@ html, body {
   .seat.hero .seat-cards .card .suit { font-size: 28px; }
   .seat .pos-name { font-size: 14px; }
   .seat .dealer-chip { width: 18px; height: 18px; font-size: 10px; top: -20px; }
-  .seat.left  .dealer-chip,
-  .seat.hero  .dealer-chip { right: -22px; }
+  .seat.left  .dealer-chip { right: -22px; }
   .seat.right .dealer-chip,
   .seat.top   .dealer-chip { left: -22px; }
   .seat .stack { font-size: 12px; }
   .seat .action-badge { font-size: 10px; padding: 3px 8px; bottom: -24px; }
   .seat .bet-chips { font-size: 12px; padding: 3px 10px; bottom: -52px; }
   #pot-display { font-size: 20px; }
+  #info-place-row { font-size: 12px; }
   #board-cards { min-height: 60px; gap: 5px; }
   #table-info { font-size: 12px; }
-  #hero-slider-panel { width: 200px; bottom: 9%; }
+  #hero-slider-panel { width: 200px; bottom: 13%; }
   #quick-percent-list button { padding: 5px 9px; font-size: 11px; min-width: 82px; gap: 7px; }
   #quick-percent-list button .value { font-size: 10px; }
   #hero-buttons button { padding: 9px 14px; font-size: 11px; }
@@ -717,8 +738,9 @@ html, body {
   .seat .bet-chips { font-size: 11px; padding: 3px 9px; bottom: -46px; }
   #quick-percent-list button { min-width: 74px; font-size: 10px; padding: 5px 8px; }
   #hero-buttons button { padding: 8px 12px; font-size: 10px; }
-  #hero-slider-panel { width: 170px; bottom: 10%; }
+  #hero-slider-panel { width: 170px; bottom: 14%; }
   #pot-display { font-size: 18px; }
+  #info-place-row { font-size: 11px; }
   #board-cards { min-height: 54px; gap: 4px; }
   #table-info { font-size: 11px; }
 }
@@ -730,12 +752,13 @@ html, body {
   <div id="table-scene">
     <div id="poker-table">
       <div id="board-area">
+        <div id="info-place-row">Место: 1/8</div>
         <div id="pot-display">Банк: 0</div>
         <div id="board-cards"></div>
         <div id="table-info">
           <div class="info-row" id="info-blinds-row">Блайнды: 10/20</div>
-          <div class="info-row muted" id="info-timer-row">через 10 раздач</div>
-          <div class="info-row muted" id="info-place-row">Место: 1/8</div>
+          <div class="info-row" id="info-timer-row">Через 10 раздач</div>
+          <div class="info-row next-blinds" id="info-next-blinds-row">15/30</div>
         </div>
       </div>
       <div id="seats"></div>
@@ -1646,16 +1669,16 @@ const UI = (() => {
 
   const el = {};
 
-  // Герой — по центру стола снизу
+  // UTG1 — на уровень UTG/LJ, чуть выше
   const SEAT_POSITIONS = [
-    { x: 50, y: 78, side: 'bottom' },  // 0 — герой
-    { x: 12, y: 62, side: 'left'   },  // 1 — SB
+    { x: 50, y: 74, side: 'bottom' },  // 0 — герой
+    { x: 12, y: 58, side: 'left'   },  // 1 — SB
     { x: 11, y: 34, side: 'left'   },  // 2 — BB
-    { x: 16, y: 12, side: 'left'   },  // 3 — UTG
-    { x: 50, y: 9,  side: 'top'    },  // 4 — UTG1
-    { x: 84, y: 12, side: 'right'  },  // 5 — LJ
+    { x: 16, y: 10, side: 'left'   },  // 3 — UTG
+    { x: 50, y: 9,  side: 'top'    },  // 4 — UTG1 (на уровень UTG/LJ)
+    { x: 84, y: 10, side: 'right'  },  // 5 — LJ
     { x: 89, y: 34, side: 'right'  },  // 6 — HJ
-    { x: 88, y: 62, side: 'right'  }   // 7 — CO
+    { x: 88, y: 58, side: 'right'  }   // 7 — CO
   ];
 
   const SUIT_CLASS = { s: 'suit-spades', h: 'suit-hearts', d: 'suit-diamonds', c: 'suit-clubs' };
@@ -1666,9 +1689,10 @@ const UI = (() => {
     el.seats          = document.getElementById('seats');
     el.boardCards     = document.getElementById('board-cards');
     el.potDisplay     = document.getElementById('pot-display');
+    el.infoPlaceRow   = document.getElementById('info-place-row');
     el.infoBlindsRow  = document.getElementById('info-blinds-row');
     el.infoTimerRow   = document.getElementById('info-timer-row');
-    el.infoPlaceRow   = document.getElementById('info-place-row');
+    el.infoNextBlinds = document.getElementById('info-next-blinds-row');
 
     el.statsAccuracy  = document.getElementById('stat-accuracy');
     el.statsHit       = document.getElementById('stat-hit');
@@ -1863,10 +1887,15 @@ const UI = (() => {
     el.infoBlindsRow.textContent = `Блайнды: ${b.sb}/${b.bb}${anteStr}`;
 
     if (settings.blindGrowth === 'time') {
-      el.infoTimerRow.textContent = 'по времени';
+      el.infoTimerRow.textContent = 'По времени';
+      el.infoNextBlinds.textContent = '';
     } else {
       const left = 10 - (state.handsAtLevel || 0);
-      el.infoTimerRow.textContent = 'через ' + left + ' раздач';
+      el.infoTimerRow.textContent = `Через ${left} раздач`;
+      const nextIdx = Math.min(state.levelIndex + 1, Engine.BLIND_LEVELS.length - 1);
+      const next = Engine.BLIND_LEVELS[nextIdx];
+      const nextAnte = next.ante > 0 ? ` (${next.ante})` : '';
+      el.infoNextBlinds.textContent = `→ ${next.sb}/${next.bb}${nextAnte}`;
     }
 
     const alive = state.players.filter(p => !p.eliminated).length;
