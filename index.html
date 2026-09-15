@@ -37,9 +37,6 @@ html, body {
   overflow: hidden;
 }
 
-/* ============================
-   СТОЛ
-   ============================ */
 #table-scene {
   position: absolute;
   top: 0;
@@ -78,9 +75,6 @@ html, body {
   pointer-events: none;
 }
 
-/* ============================
-   ЦЕНТР СТОЛА
-   ============================ */
 #board-area {
   position: absolute;
   top: 48%; left: 50%;
@@ -90,7 +84,7 @@ html, body {
   z-index: 5;
 }
 
-/* Строка "Место" — над банком */
+/* Строка "Место" — над банком, сероватая */
 #info-place-row {
   font-size: 14px;
   color: var(--text);
@@ -99,6 +93,7 @@ html, body {
   letter-spacing: .3px;
   margin-bottom: 8px;
   white-space: nowrap;
+  opacity: 0.45;
 }
 
 #pot-display {
@@ -118,7 +113,6 @@ html, body {
   min-height: var(--card-h);
 }
 
-/* Инфо-панель — три строки */
 #table-info {
   display: flex;
   flex-direction: column;
@@ -134,13 +128,11 @@ html, body {
   white-space: nowrap;
   line-height: 1.3;
 }
-#table-info .info-row.next-blinds {
-  color: var(--gold);
+/* Текст "через ... раздач" и блайнды по ним — серовато-прозрачные */
+#table-info .info-row.faded {
+  opacity: 0.45;
 }
 
-/* ============================
-   КАРТЫ
-   ============================ */
 .card {
   width: var(--card-w);
   height: var(--card-h);
@@ -190,9 +182,6 @@ html, body {
 .style-2color .suit-hearts   { color: #d63535; }
 .style-2color .suit-diamonds { color: #d63535; }
 
-/* ============================
-   МЕСТА
-   ============================ */
 #seats { position: absolute; inset: 0; }
 
 .seat {
@@ -266,9 +255,10 @@ html, body {
   display: inline-block;
   padding: 0 2px;
 }
+
+/* D-чип — прямо в .seat, position: absolute */
 .seat .dealer-chip {
   position: absolute;
-  top: -22px;
   width: 20px;
   height: 20px;
   background: radial-gradient(circle at 35% 35%, #fff6d0, #ffcb2b 60%, #b8860b);
@@ -281,16 +271,26 @@ html, body {
   justify-content: center;
   box-shadow: 0 1px 4px rgba(0,0,0,.7);
   border: 1px solid #8a6508;
+  z-index: 16;
 }
 .seat .dealer-chip.hidden { display: none; }
 
-.seat.left  .dealer-chip { right: -24px; left: auto; }
+/* Левые места — D справа от карт (сбоку) */
+.seat.left .dealer-chip {
+  right: -28px;
+  top: 36px;
+  left: auto;
+}
+/* Правые и верхнее места — D слева от карт (сбоку) */
 .seat.right .dealer-chip,
-.seat.top   .dealer-chip { left: -24px; right: auto; }
-
-/* D-чип у героя — над его картами по центру */
+.seat.top .dealer-chip {
+  left: -28px;
+  top: 36px;
+  right: auto;
+}
+/* Герой — D НАД его картами, по центру */
 .seat.hero .dealer-chip {
-  top: -28px;
+  top: -20px;
   left: 50%;
   right: auto;
   transform: translateX(-50%);
@@ -356,11 +356,6 @@ html, body {
 }
 .seat .bet-chips.hidden { display: none; }
 
-/* ============================
-   ПАНЕЛЬ ДЕЙСТВИЙ ГЕРОЯ
-   ============================ */
-
-/* Слайдер — почти вплотную к кнопкам Fold/Check/Call, с фоном как у %-кнопок */
 #hero-slider-panel {
   position: absolute;
   left: 3%;
@@ -418,7 +413,6 @@ html, body {
   text-align: right;
 }
 
-/* %-кнопки */
 #quick-percent-list {
   position: absolute;
   right: 3%;
@@ -447,7 +441,6 @@ html, body {
 #quick-percent-list button .label { color: var(--gold); font-weight: 800; }
 #quick-percent-list button .value { color: var(--muted); font-weight: 600; font-size: 11px; }
 
-/* Fold/Check/Call */
 #hero-buttons {
   position: absolute;
   left: 3%;
@@ -479,9 +472,6 @@ html, body {
 #btn-check { background: linear-gradient(180deg, #2a4a3a, #1a3a2a); }
 #btn-call  { background: linear-gradient(180deg, #3a7bd5, #2a5aa5); }
 
-/* ============================
-   НИЖНЯЯ СТРОКА
-   ============================ */
 #bottom-bar {
   position: absolute;
   bottom: 0;
@@ -523,9 +513,6 @@ html, body {
 }
 #hist-info b { color: var(--gold); }
 
-/* ============================
-   НИЖНЯЯ ПАНЕЛЬ
-   ============================ */
 #bottom-panel {
   position: absolute;
   bottom: 0; left: 0; right: 0;
@@ -618,9 +605,6 @@ html, body {
 }
 #panel-handle:hover { background: #5a5550; }
 
-/* ============================
-   ТАЙМЕР
-   ============================ */
 #timer-bar {
   position: absolute;
   bottom: 56px;
@@ -636,9 +620,6 @@ html, body {
   background: var(--gold);
 }
 
-/* ============================
-   СТАРТ
-   ============================ */
 #start-overlay {
   position: absolute;
   inset: 0;
@@ -687,9 +668,6 @@ html, body {
 }
 #btn-start:active { transform: translateY(2px); box-shadow: 0 2px 0 #8a6508; }
 
-/* ============================
-   АДАПТИВ
-   ============================ */
 @media (max-width: 720px) {
   :root { --card-w: 42px; --card-h: 60px; }
   #poker-table { border-radius: 30px; border-width: 10px; }
@@ -703,10 +681,11 @@ html, body {
   .seat.hero .seat-cards .card { --card-w: 48px; --card-h: 70px; font-size: 24px; }
   .seat.hero .seat-cards .card .suit { font-size: 28px; }
   .seat .pos-name { font-size: 14px; }
-  .seat .dealer-chip { width: 18px; height: 18px; font-size: 10px; top: -20px; }
-  .seat.left  .dealer-chip { right: -22px; }
+  .seat .dealer-chip { width: 18px; height: 18px; font-size: 10px; }
+  .seat.left .dealer-chip { right: -24px; top: 32px; }
   .seat.right .dealer-chip,
-  .seat.top   .dealer-chip { left: -22px; }
+  .seat.top .dealer-chip { left: -24px; top: 32px; }
+  .seat.hero .dealer-chip { top: -18px; }
   .seat .stack { font-size: 12px; }
   .seat .action-badge { font-size: 10px; padding: 3px 8px; bottom: -24px; }
   .seat .bet-chips { font-size: 12px; padding: 3px 10px; bottom: -52px; }
@@ -736,6 +715,7 @@ html, body {
   .seat .stack { font-size: 11px; }
   .seat .action-badge { font-size: 9px; bottom: -22px; }
   .seat .bet-chips { font-size: 11px; padding: 3px 9px; bottom: -46px; }
+  .seat.hero .dealer-chip { top: -16px; }
   #quick-percent-list button { min-width: 74px; font-size: 10px; padding: 5px 8px; }
   #hero-buttons button { padding: 8px 12px; font-size: 10px; }
   #hero-slider-panel { width: 170px; bottom: 14%; }
@@ -757,8 +737,8 @@ html, body {
         <div id="board-cards"></div>
         <div id="table-info">
           <div class="info-row" id="info-blinds-row">Блайнды: 10/20</div>
-          <div class="info-row" id="info-timer-row">Через 10 раздач</div>
-          <div class="info-row next-blinds" id="info-next-blinds-row">15/30</div>
+          <div class="info-row faded" id="info-timer-row">через 10 раздач</div>
+          <div class="info-row faded" id="info-next-blinds-row">15/30</div>
         </div>
       </div>
       <div id="seats"></div>
@@ -1669,13 +1649,12 @@ const UI = (() => {
 
   const el = {};
 
-  // UTG1 — на уровень UTG/LJ, чуть выше
   const SEAT_POSITIONS = [
     { x: 50, y: 74, side: 'bottom' },  // 0 — герой
     { x: 12, y: 58, side: 'left'   },  // 1 — SB
     { x: 11, y: 34, side: 'left'   },  // 2 — BB
     { x: 16, y: 10, side: 'left'   },  // 3 — UTG
-    { x: 50, y: 9,  side: 'top'    },  // 4 — UTG1 (на уровень UTG/LJ)
+    { x: 50, y: 9,  side: 'top'    },  // 4 — UTG1
     { x: 84, y: 10, side: 'right'  },  // 5 — LJ
     { x: 89, y: 34, side: 'right'  },  // 6 — HJ
     { x: 88, y: 58, side: 'right'  }   // 7 — CO
@@ -1773,10 +1752,10 @@ const UI = (() => {
 
     seat.innerHTML = `
       <div class="strat-badge hidden" data-role="strat"></div>
+      <div class="dealer-chip hidden" data-role="btn">D</div>
       <div class="seat-cards" data-role="cards"></div>
       <div class="pos-row">
         <span class="pos-name" data-role="pos">—</span>
-        <div class="dealer-chip hidden" data-role="btn">D</div>
       </div>
       <div class="stack" data-role="stack"></div>
       <div class="action-badge hidden" data-role="action"></div>
@@ -1887,15 +1866,15 @@ const UI = (() => {
     el.infoBlindsRow.textContent = `Блайнды: ${b.sb}/${b.bb}${anteStr}`;
 
     if (settings.blindGrowth === 'time') {
-      el.infoTimerRow.textContent = 'По времени';
+      el.infoTimerRow.textContent = 'по времени';
       el.infoNextBlinds.textContent = '';
     } else {
       const left = 10 - (state.handsAtLevel || 0);
-      el.infoTimerRow.textContent = `Через ${left} раздач`;
+      el.infoTimerRow.textContent = `через ${left} раздач`;
       const nextIdx = Math.min(state.levelIndex + 1, Engine.BLIND_LEVELS.length - 1);
       const next = Engine.BLIND_LEVELS[nextIdx];
       const nextAnte = next.ante > 0 ? ` (${next.ante})` : '';
-      el.infoNextBlinds.textContent = `→ ${next.sb}/${next.bb}${nextAnte}`;
+      el.infoNextBlinds.textContent = `${next.sb}/${next.bb}${nextAnte}`;
     }
 
     const alive = state.players.filter(p => !p.eliminated).length;
