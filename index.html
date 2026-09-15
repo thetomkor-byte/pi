@@ -107,20 +107,26 @@ html, body {
   min-height: var(--card-h);
 }
 
+/* Инфо-панель — без фона, прямо на столе */
 #table-info {
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
-  background: rgba(0,0,0,.32);
-  border: 1px solid #3a3530;
-  border-radius: 6px;
-  padding: 8px 18px;
+  gap: 4px;
   font-size: 14px;
+  color: var(--text);
+  font-weight: 700;
+  text-shadow: 0 1px 4px rgba(0,0,0,.95);
+  letter-spacing: .3px;
+}
+#table-info .info-row {
+  white-space: nowrap;
+}
+#table-info .info-row.muted {
   color: var(--muted);
   font-weight: 600;
+  font-size: 13px;
 }
-#table-info b { color: var(--text); }
-#table-info .sep { color: #3a3530; }
 
 /* ============================
    КАРТЫ — цифры и масти по центру
@@ -188,7 +194,6 @@ html, body {
   z-index: 10;
   pointer-events: none;
 }
-/* Полностью убираем вылетевших игроков */
 .seat.eliminated { display: none; }
 
 .seat .strat-badge {
@@ -208,7 +213,6 @@ html, body {
   transition: opacity .2s;
 }
 .seat .strat-badge.hidden { display: none; }
-/* У сфолдивших — бейдж почти невиден, как и карты */
 .seat.folded .strat-badge { opacity: 0.1; }
 
 .seat .seat-cards {
@@ -227,7 +231,6 @@ html, body {
 }
 .seat .seat-cards .card .suit { font-size: 28px; }
 
-/* Карты героя крупнее */
 .seat.hero .seat-cards { min-height: 88px; }
 .seat.hero .seat-cards .card {
   --card-w: 56px;
@@ -339,55 +342,70 @@ html, body {
 /* ============================
    ПАНЕЛЬ ДЕЙСТВИЙ ГЕРОЯ
    ============================ */
-#hero-action-panel {
+
+/* Горизонтальный слайдер + цифры — над кнопками */
+#hero-slider-panel {
   position: absolute;
-  right: 4%;
-  bottom: 2%;
+  left: 3%;
+  bottom: 8%;
+  width: 240px;
   display: flex;
-  gap: 5px;
-  align-items: flex-end;
+  align-items: center;
+  gap: 8px;
   z-index: 45;
 }
-#hero-action-panel.hidden { display: none; }
+#hero-slider-panel.hidden { display: none; }
 
-#slider-wrap {
-  width: 40px;
-  height: 140px;
+#raise-slider-horiz {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
   background: rgba(20,18,16,.92);
   border: 1px solid #3a3530;
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  padding: 8px 3px 6px;
-  position: relative;
-  overflow: visible;
-}
-#raise-slider-vert {
-  -webkit-appearance: slider-vertical;
-  writing-mode: bt-lr;
-  appearance: slider-vertical;
-  width: 8px;
-  height: 100%;
+  border-radius: 4px;
+  outline: none;
   accent-color: var(--gold);
 }
+#raise-slider-horiz::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff6d0, #ffcb2b 60%, #b8860b);
+  border: 1px solid #8a6508;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,.7);
+}
+#raise-slider-horiz::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff6d0, #ffcb2b 60%, #b8860b);
+  border: 1px solid #8a6508;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,.7);
+}
 #raise-amount-mini {
-  position: absolute;
-  top: -22px;
-  left: 50%;
-  transform: translateX(-50%);
   color: var(--gold);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
   white-space: nowrap;
   text-shadow: 0 1px 3px rgba(0,0,0,.95);
+  min-width: 60px;
+  text-align: right;
 }
 
+/* %-кнопки (и BB-пресеты) — справа на столе, вертикально */
 #quick-percent-list {
+  position: absolute;
+  right: 3%;
+  bottom: 8%;
   display: flex;
   flex-direction: column;
   gap: 3px;
+  z-index: 45;
 }
 #quick-percent-list button {
   background: rgba(20,18,16,.92);
@@ -408,6 +426,7 @@ html, body {
 #quick-percent-list button .label { color: var(--gold); font-weight: 800; }
 #quick-percent-list button .value { color: var(--muted); font-weight: 600; font-size: 11px; }
 
+/* Fold/Check/Call — внизу слева */
 #hero-buttons {
   position: absolute;
   left: 3%;
@@ -673,9 +692,8 @@ html, body {
   .seat .bet-chips { font-size: 12px; padding: 3px 10px; bottom: -52px; }
   #pot-display { font-size: 20px; }
   #board-cards { min-height: 60px; gap: 5px; }
-  #table-info { font-size: 12px; padding: 6px 14px; gap: 8px; }
-  #slider-wrap { height: 120px; width: 36px; }
-  #raise-amount-mini { font-size: 11px; top: -20px; }
+  #table-info { font-size: 12px; }
+  #hero-slider-panel { width: 200px; bottom: 9%; }
   #quick-percent-list button { padding: 5px 9px; font-size: 11px; min-width: 82px; gap: 7px; }
   #quick-percent-list button .value { font-size: 10px; }
   #hero-buttons button { padding: 9px 14px; font-size: 11px; }
@@ -699,9 +717,10 @@ html, body {
   .seat .bet-chips { font-size: 11px; padding: 3px 9px; bottom: -46px; }
   #quick-percent-list button { min-width: 74px; font-size: 10px; padding: 5px 8px; }
   #hero-buttons button { padding: 8px 12px; font-size: 10px; }
+  #hero-slider-panel { width: 170px; bottom: 10%; }
   #pot-display { font-size: 18px; }
   #board-cards { min-height: 54px; gap: 4px; }
-  #table-info { font-size: 11px; padding: 5px 12px; }
+  #table-info { font-size: 11px; }
 }
 </style>
 </head>
@@ -714,21 +733,23 @@ html, body {
         <div id="pot-display">Банк: 0</div>
         <div id="board-cards"></div>
         <div id="table-info">
-          <span><b id="info-blinds">10/20</b></span>
-          <span class="sep">·</span>
-          <span id="info-timer"></span>
+          <div class="info-row" id="info-blinds-row">Блайнды: 10/20</div>
+          <div class="info-row muted" id="info-timer-row">через 10 раздач</div>
+          <div class="info-row muted" id="info-place-row">Место: 1/8</div>
         </div>
       </div>
       <div id="seats"></div>
 
-      <div id="hero-action-panel" class="hidden">
-        <div id="slider-wrap">
-          <div id="raise-amount-mini">0</div>
-          <input type="range" id="raise-slider-vert" min="0" max="100" value="0" orient="vertical" />
-        </div>
-        <div id="quick-percent-list"></div>
+      <!-- Слайдер — над кнопками, слева -->
+      <div id="hero-slider-panel" class="hidden">
+        <input type="range" id="raise-slider-horiz" min="0" max="100" value="0" />
+        <span id="raise-amount-mini">0</span>
       </div>
 
+      <!-- %-кнопки — справа -->
+      <div id="quick-percent-list"></div>
+
+      <!-- Fold/Check/Call — внизу слева -->
       <div id="hero-buttons" class="hidden">
         <button id="btn-fold">Fold</button>
         <button id="btn-check">Check</button>
@@ -1629,7 +1650,7 @@ const UI = (() => {
   const el = {};
 
   const SEAT_POSITIONS = [
-    { x: 36, y: 78, side: 'left'  },  // 0 — герой (выше, чтобы ставка не перекрывалась кнопками)
+    { x: 30, y: 76, side: 'left'  },  // 0 — герой (по центру и выше)
     { x: 12, y: 62, side: 'left'  },  // 1 — SB
     { x: 11, y: 34, side: 'left'  },  // 2 — BB
     { x: 16, y: 12, side: 'left'  },  // 3 — UTG
@@ -1647,9 +1668,9 @@ const UI = (() => {
     el.seats          = document.getElementById('seats');
     el.boardCards     = document.getElementById('board-cards');
     el.potDisplay     = document.getElementById('pot-display');
-    el.infoBlinds     = document.getElementById('info-blinds');
-    el.infoPlace      = document.getElementById('info-place');
-    el.infoTimer      = document.getElementById('info-timer');
+    el.infoBlindsRow  = document.getElementById('info-blinds-row');
+    el.infoTimerRow   = document.getElementById('info-timer-row');
+    el.infoPlaceRow   = document.getElementById('info-place-row');
 
     el.statsAccuracy  = document.getElementById('stat-accuracy');
     el.statsHit       = document.getElementById('stat-hit');
@@ -1658,9 +1679,9 @@ const UI = (() => {
     el.statsStreak    = document.getElementById('stat-streak');
     el.statsPlace     = document.getElementById('stat-place');
 
-    el.heroActionPanel= document.getElementById('hero-action-panel');
+    el.heroSliderPanel= document.getElementById('hero-slider-panel');
     el.heroButtons    = document.getElementById('hero-buttons');
-    el.sliderVert     = document.getElementById('raise-slider-vert');
+    el.sliderHoriz    = document.getElementById('raise-slider-horiz');
     el.raiseAmountMini= document.getElementById('raise-amount-mini');
     el.quickPercentList = document.getElementById('quick-percent-list');
     el.btnFold        = document.getElementById('btn-fold');
@@ -1747,7 +1768,6 @@ const UI = (() => {
       const seat = document.getElementById(`seat-${p.id}`);
       if (!seat) continue;
 
-      // Полностью скрываем вылетевших
       if (p.eliminated) {
         seat.classList.add('eliminated');
         continue;
@@ -1841,14 +1861,21 @@ const UI = (() => {
 
   function updateLevel(state) {
     const b = state.blinds || Engine.getBlindLevel(state.levelIndex);
-    const anteStr = b.ante > 0 ? ` (${b.ante})` : '';
-    el.infoBlinds.textContent = `${b.sb}/${b.bb}${anteStr}`;
+    const anteStr = b.ante > 0 ? '   Анте: ' + b.ante : '';
+    el.infoBlindsRow.textContent = `Блайнды: ${b.sb}/${b.bb}${anteStr}`;
+
     if (settings.blindGrowth === 'time') {
-      el.infoTimer.textContent = 'по времени';
+      el.infoTimerRow.textContent = 'по времени';
     } else {
       const left = 10 - (state.handsAtLevel || 0);
-      el.infoTimer.textContent = 'через ' + left + ' раздач';
+      el.infoTimerRow.textContent = 'через ' + left + ' раздач';
     }
+
+    const alive = state.players.filter(p => !p.eliminated).length;
+    const hero = state.players.find(p => p.isHero);
+    let place = alive;
+    if (hero && hero.eliminated) place = alive + 1;
+    el.infoPlaceRow.textContent = 'Место: ' + place + '/' + Engine.SEATS;
   }
 
   function createCardElement(card) {
@@ -1896,11 +1923,12 @@ const UI = (() => {
     el.btnCall.textContent = canCall ? 'Call ' + formatChips(toCall, state) : 'Call';
 
     if (canRaise) {
-      el.heroActionPanel.classList.remove('hidden');
+      el.heroSliderPanel.classList.remove('hidden');
       renderQuickRaiseOptions(state, hero, toCall);
-      setupVerticalSlider(state, hero);
+      setupHorizontalSlider(state, hero);
     } else {
-      el.heroActionPanel.classList.add('hidden');
+      el.heroSliderPanel.classList.add('hidden');
+      el.quickPercentList.innerHTML = '';
     }
 
     bindActionHandlers(state, heroIndex, toCall, handlers);
@@ -1947,20 +1975,20 @@ const UI = (() => {
     }
   }
 
-  function setupVerticalSlider(state, hero) {
+  function setupHorizontalSlider(state, hero) {
     const minTarget = state.currentBet + state.minRaise;
     const maxTarget = hero.committedThisStreet + hero.stack;
     const realMin = Math.min(minTarget, maxTarget);
     const realMax = maxTarget;
-    el.sliderVert.min   = realMin;
-    el.sliderVert.max   = realMax;
-    el.sliderVert.step  = state.blinds.bb >= 100 ? 10 : 1;
-    el.sliderVert.value = realMin;
+    el.sliderHoriz.min   = realMin;
+    el.sliderHoriz.max   = realMax;
+    el.sliderHoriz.step  = state.blinds.bb >= 100 ? 10 : 1;
+    el.sliderHoriz.value = realMin;
     updateSliderDisplay(state);
   }
 
   function updateSliderDisplay(state) {
-    el.raiseAmountMini.textContent = formatChips(Number(el.sliderVert.value), state);
+    el.raiseAmountMini.textContent = formatChips(Number(el.sliderHoriz.value), state);
   }
 
   function bindActionHandlers(state, heroIndex, toCall, handlers) {
@@ -1968,9 +1996,9 @@ const UI = (() => {
     rebind(el.btnCheck, () => handlers.onCheck());
     rebind(el.btnCall,  () => handlers.onCall());
 
-    el.sliderVert.oninput = () => updateSliderDisplay(state);
-    el.sliderVert.onchange = () => {
-      const target = Number(el.sliderVert.value);
+    el.sliderHoriz.oninput = () => updateSliderDisplay(state);
+    el.sliderHoriz.onchange = () => {
+      const target = Number(el.sliderHoriz.value);
       const hero = state.players[heroIndex];
       const maxTarget = hero.committedThisStreet + hero.stack;
       if (target >= maxTarget) {
@@ -1998,7 +2026,8 @@ const UI = (() => {
 
   function hideActions() {
     el.heroButtons.classList.add('hidden');
-    el.heroActionPanel.classList.add('hidden');
+    el.heroSliderPanel.classList.add('hidden');
+    el.quickPercentList.innerHTML = '';
   }
 
   function updateStats(stats) {
@@ -2137,11 +2166,10 @@ const UI = (() => {
       }
     });
 
-    // Настройки открываются ТОЛЬКО по кнопке ⚙
     el.btnSettings.addEventListener('click', () => UI.openBottomPanel());
     el.panelHandle.addEventListener('click', () => UI.closeBottomPanel());
 
-    // Свайпы по столу: только закрытие панели свайпом вниз по области панели
+    // Свайп вниз по области панели — закрыть
     let touchStartY = null;
     let touchStartX = null;
     const panel = document.getElementById('bottom-panel');
@@ -2157,7 +2185,6 @@ const UI = (() => {
       const deltaY = touchStartY - endY;
       const deltaX = touchStartX - endX;
       touchStartY = null;
-      // Свайп вниз (deltaY < -60) — закрываем; проверка, что это не горизонтальный свайп
       if (deltaY < -60 && Math.abs(deltaY) > Math.abs(deltaX)) {
         UI.closeBottomPanel();
       }
