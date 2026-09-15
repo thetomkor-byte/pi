@@ -740,16 +740,13 @@ html, body {
       </div>
       <div id="seats"></div>
 
-      <!-- Слайдер — над кнопками, слева -->
       <div id="hero-slider-panel" class="hidden">
         <input type="range" id="raise-slider-horiz" min="0" max="100" value="0" />
         <span id="raise-amount-mini">0</span>
       </div>
 
-      <!-- %-кнопки — справа -->
       <div id="quick-percent-list"></div>
 
-      <!-- Fold/Check/Call — внизу слева -->
       <div id="hero-buttons" class="hidden">
         <button id="btn-fold">Fold</button>
         <button id="btn-check">Check</button>
@@ -1649,15 +1646,16 @@ const UI = (() => {
 
   const el = {};
 
+  // Герой — по центру стола снизу
   const SEAT_POSITIONS = [
-    { x: 30, y: 76, side: 'left'  },  // 0 — герой (по центру и выше)
-    { x: 12, y: 62, side: 'left'  },  // 1 — SB
-    { x: 11, y: 34, side: 'left'  },  // 2 — BB
-    { x: 16, y: 12, side: 'left'  },  // 3 — UTG
-    { x: 50, y: 9,  side: 'top'   },  // 4 — UTG1
-    { x: 84, y: 12, side: 'right' },  // 5 — LJ
-    { x: 89, y: 34, side: 'right' },  // 6 — HJ
-    { x: 88, y: 62, side: 'right' }   // 7 — CO
+    { x: 50, y: 78, side: 'bottom' },  // 0 — герой
+    { x: 12, y: 62, side: 'left'   },  // 1 — SB
+    { x: 11, y: 34, side: 'left'   },  // 2 — BB
+    { x: 16, y: 12, side: 'left'   },  // 3 — UTG
+    { x: 50, y: 9,  side: 'top'    },  // 4 — UTG1
+    { x: 84, y: 12, side: 'right'  },  // 5 — LJ
+    { x: 89, y: 34, side: 'right'  },  // 6 — HJ
+    { x: 88, y: 62, side: 'right'  }   // 7 — CO
   ];
 
   const SUIT_CLASS = { s: 'suit-spades', h: 'suit-hearts', d: 'suit-diamonds', c: 'suit-clubs' };
@@ -2169,7 +2167,6 @@ const UI = (() => {
     el.btnSettings.addEventListener('click', () => UI.openBottomPanel());
     el.panelHandle.addEventListener('click', () => UI.closeBottomPanel());
 
-    // Свайп вниз по области панели — закрыть
     let touchStartY = null;
     let touchStartX = null;
     const panel = document.getElementById('bottom-panel');
