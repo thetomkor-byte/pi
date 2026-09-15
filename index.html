@@ -123,7 +123,7 @@ html, body {
 #table-info .sep { color: #3a3530; }
 
 /* ============================
-   КАРТЫ
+   КАРТЫ — цифры и масти по центру
    ============================ */
 .card {
   width: var(--card-w);
@@ -132,8 +132,10 @@ html, body {
   border-radius: 6px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  padding: 3px 4px;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  padding: 2px 3px;
   font-weight: 800;
   font-size: 26px;
   box-shadow:
@@ -141,9 +143,10 @@ html, body {
     inset 0 0 0 1px rgba(0,0,0,.08);
   position: relative;
   flex-shrink: 0;
+  line-height: 1;
 }
 .card .rank { line-height: 1; }
-.card .suit { line-height: 1; align-self: flex-end; font-size: 30px; }
+.card .suit { line-height: 1; font-size: 30px; }
 
 .card.back {
   background:
@@ -185,6 +188,8 @@ html, body {
   z-index: 10;
   pointer-events: none;
 }
+/* Полностью убираем вылетевших игроков */
+.seat.eliminated { display: none; }
 
 .seat .strat-badge {
   position: absolute;
@@ -200,8 +205,11 @@ html, body {
   letter-spacing: .5px;
   white-space: nowrap;
   z-index: 15;
+  transition: opacity .2s;
 }
 .seat .strat-badge.hidden { display: none; }
+/* У сфолдивших — бейдж почти невиден, как и карты */
+.seat.folded .strat-badge { opacity: 0.1; }
 
 .seat .seat-cards {
   display: flex;
@@ -489,6 +497,7 @@ html, body {
   z-index: 100;
   max-height: 70vh;
   overflow-y: auto;
+  touch-action: pan-y;
 }
 #bottom-panel.open { transform: translateY(0); }
 
@@ -1620,14 +1629,14 @@ const UI = (() => {
   const el = {};
 
   const SEAT_POSITIONS = [
-    { x: 36, y: 82, side: 'left'  },
-    { x: 12, y: 62, side: 'left'  },
-    { x: 11, y: 34, side: 'left'  },
-    { x: 16, y: 12, side: 'left'  },
-    { x: 50, y: 9,  side: 'top'   },
-    { x: 84, y: 12, side: 'right' },
-    { x: 89, y: 34, side: 'right' },
-    { x: 88, y: 62, side: 'right' }
+    { x: 36, y: 78, side: 'left'  },  // 0 — герой (выше, чтобы ставка не перекрывалась кнопками)
+    { x: 12, y: 62, side: 'left'  },  // 1 — SB
+    { x: 11, y: 34, side: 'left'  },  // 2 — BB
+    { x: 16, y: 12, side: 'left'  },  // 3 — UTG
+    { x: 50, y: 9,  side: 'top'   },  // 4 — UTG1
+    { x: 84, y: 12, side: 'right' },  // 5 — LJ
+    { x: 89, y: 34, side: 'right' },  // 6 — HJ
+    { x: 88, y: 62, side: 'right' }   // 7 — CO
   ];
 
   const SUIT_CLASS = { s: 'suit-spades', h: 'suit-hearts', d: 'suit-diamonds', c: 'suit-clubs' };
@@ -1717,7 +1726,7 @@ const UI = (() => {
     seat.style.top  = pos.y + '%';
     if (pos.side) seat.classList.add(pos.side);
     if (player.isHero) seat.classList.add('hero');
-    if (player.eliminated) seat.classList.add('folded');
+    if (player.eliminated) seat.classList.add('eliminated');
 
     seat.innerHTML = `
       <div class="strat-badge hidden" data-role="strat"></div>
@@ -1738,11 +1747,17 @@ const UI = (() => {
       const seat = document.getElementById(`seat-${p.id}`);
       if (!seat) continue;
 
+      // Полностью скрываем вылетевших
+      if (p.eliminated) {
+        seat.classList.add('eliminated');
+        continue;
+      }
+
       seat.querySelector('[data-role="pos"]').textContent = p.position || '—';
-      seat.classList.toggle('folded', p.folded || p.eliminated);
+      seat.classList.toggle('folded', p.folded);
 
       const btn = seat.querySelector('[data-role="btn"]');
-      if (p.position === 'BTN' && !p.eliminated) btn.classList.remove('hidden');
+      if (p.position === 'BTN') btn.classList.remove('hidden');
       else btn.classList.add('hidden');
 
       const stratBadge = seat.querySelector('[data-role="strat"]');
@@ -1754,7 +1769,7 @@ const UI = (() => {
       renderSeatCards(p, state, revealAll);
 
       const betEl = seat.querySelector('[data-role="bet"]');
-      if (p.committedThisStreet > 0 && !p.folded && !p.eliminated) {
+      if (p.committedThisStreet > 0 && !p.folded) {
         betEl.textContent = formatChips(p.committedThisStreet, state);
         betEl.classList.remove('hidden');
       } else betEl.classList.add('hidden');
@@ -1801,7 +1816,7 @@ const UI = (() => {
   function updateStacks(state) {
     for (const p of state.players) {
       const seat = document.getElementById(`seat-${p.id}`);
-      if (!seat) continue;
+      if (!seat || p.eliminated) continue;
       seat.querySelector('[data-role="stack"]').textContent = formatChips(p.stack, state);
     }
   }
@@ -1809,7 +1824,7 @@ const UI = (() => {
   function updateActiveHighlight(state) {
     for (const p of state.players) {
       const seat = document.getElementById(`seat-${p.id}`);
-      if (!seat) continue;
+      if (!seat || p.eliminated) continue;
       const isActing = state.actingIndex === p.seatIndex && !state.handOver && !p.folded;
       seat.classList.toggle('active', isActing);
     }
@@ -2122,27 +2137,30 @@ const UI = (() => {
       }
     });
 
-    el.btnSettings.addEventListener('click', () => UI.toggleBottomPanel());
-    el.panelHandle.addEventListener('click', () => UI.toggleBottomPanel());
+    // Настройки открываются ТОЛЬКО по кнопке ⚙
+    el.btnSettings.addEventListener('click', () => UI.openBottomPanel());
+    el.panelHandle.addEventListener('click', () => UI.closeBottomPanel());
 
+    // Свайпы по столу: только закрытие панели свайпом вниз по области панели
     let touchStartY = null;
     let touchStartX = null;
-    const scene = document.getElementById('table-scene');
-    scene.addEventListener('touchstart', (e) => {
+    const panel = document.getElementById('bottom-panel');
+    panel.addEventListener('touchstart', (e) => {
       if (e.touches.length !== 1) return;
       touchStartY = e.touches[0].clientY;
       touchStartX = e.touches[0].clientX;
     }, { passive: true });
-    scene.addEventListener('touchend', (e) => {
+    panel.addEventListener('touchend', (e) => {
       if (touchStartY === null) return;
       const endY = e.changedTouches[0].clientY;
       const endX = e.changedTouches[0].clientX;
       const deltaY = touchStartY - endY;
       const deltaX = touchStartX - endX;
       touchStartY = null;
-      if (Math.abs(deltaY) < 60 || Math.abs(deltaY) < Math.abs(deltaX)) return;
-      if (deltaY > 0) UI.openBottomPanel();
-      else UI.closeBottomPanel();
+      // Свайп вниз (deltaY < -60) — закрываем; проверка, что это не горизонтальный свайп
+      if (deltaY < -60 && Math.abs(deltaY) > Math.abs(deltaX)) {
+        UI.closeBottomPanel();
+      }
     }, { passive: true });
 
     ['set-card-style','set-stack-display','set-blind-growth','set-turn-time','set-show-strategies'].forEach(id => {
