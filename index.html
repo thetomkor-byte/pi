@@ -135,7 +135,7 @@ html, body {
   justify-content: space-between;
   padding: 4px 5px;
   font-weight: 800;
-  font-size: 17px;
+  font-size: 20px;
   box-shadow:
     0 3px 8px rgba(0,0,0,.7),
     inset 0 0 0 1px rgba(0,0,0,.08);
@@ -143,7 +143,7 @@ html, body {
   flex-shrink: 0;
 }
 .card .rank { line-height: 1; }
-.card .suit { line-height: 1; align-self: flex-end; font-size: 18px; }
+.card .suit { line-height: 1; align-self: flex-end; font-size: 22px; }
 
 .card.back {
   background:
@@ -213,20 +213,20 @@ html, body {
 .seat .seat-cards .card {
   --card-w: 46px;
   --card-h: 68px;
-  font-size: 16px;
+  font-size: 18px;
   padding: 3px 4px;
   border-radius: 6px;
 }
-.seat .seat-cards .card .suit { font-size: 18px; }
+.seat .seat-cards .card .suit { font-size: 20px; }
 
 /* Карты героя крупнее */
 .seat.hero .seat-cards { min-height: 88px; }
 .seat.hero .seat-cards .card {
   --card-w: 56px;
   --card-h: 82px;
-  font-size: 20px;
+  font-size: 22px;
 }
-.seat.hero .seat-cards .card .suit { font-size: 22px; }
+.seat.hero .seat-cards .card .suit { font-size: 24px; }
 
 .seat .pos-row {
   display: flex;
@@ -352,8 +352,9 @@ html, body {
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  padding: 22px 3px 6px;
+  padding: 8px 3px 6px;
   position: relative;
+  overflow: visible;
 }
 #raise-slider-vert {
   -webkit-appearance: slider-vertical;
@@ -365,13 +366,14 @@ html, body {
 }
 #raise-amount-mini {
   position: absolute;
-  top: 4px;
+  top: -22px;
   left: 50%;
   transform: translateX(-50%);
   color: var(--gold);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
   white-space: nowrap;
+  text-shadow: 0 1px 3px rgba(0,0,0,.95);
 }
 
 #quick-percent-list {
@@ -646,11 +648,11 @@ html, body {
   .seat { width: 108px; }
   .seat .strat-badge { font-size: 10px; padding: 2px 7px; top: -20px; }
   .seat .seat-cards { min-height: 58px; gap: 3px; }
-  .seat .seat-cards .card { --card-w: 38px; --card-h: 56px; font-size: 14px; padding: 2px 3px; }
-  .seat .seat-cards .card .suit { font-size: 15px; }
+  .seat .seat-cards .card { --card-w: 38px; --card-h: 56px; font-size: 15px; padding: 2px 3px; }
+  .seat .seat-cards .card .suit { font-size: 17px; }
   .seat.hero .seat-cards { min-height: 74px; }
-  .seat.hero .seat-cards .card { --card-w: 48px; --card-h: 70px; font-size: 18px; }
-  .seat.hero .seat-cards .card .suit { font-size: 20px; }
+  .seat.hero .seat-cards .card { --card-w: 48px; --card-h: 70px; font-size: 19px; }
+  .seat.hero .seat-cards .card .suit { font-size: 21px; }
   .seat .pos-name { font-size: 14px; }
   .seat .dealer-chip { width: 18px; height: 18px; font-size: 10px; top: -20px; }
   .seat.left  .dealer-chip,
@@ -664,7 +666,7 @@ html, body {
   #board-cards { min-height: 60px; gap: 5px; }
   #table-info { font-size: 12px; padding: 6px 14px; gap: 8px; }
   #slider-wrap { height: 120px; width: 36px; }
-  #raise-amount-mini { font-size: 11px; }
+  #raise-amount-mini { font-size: 11px; top: -20px; }
   #quick-percent-list button { padding: 5px 9px; font-size: 11px; min-width: 82px; gap: 7px; }
   #quick-percent-list button .value { font-size: 10px; }
   #hero-buttons button { padding: 9px 14px; font-size: 11px; }
@@ -679,9 +681,9 @@ html, body {
 @media (max-width: 420px) {
   .seat { width: 96px; }
   .seat .seat-cards { min-height: 50px; }
-  .seat .seat-cards .card { --card-w: 32px; --card-h: 48px; font-size: 12px; }
+  .seat .seat-cards .card { --card-w: 32px; --card-h: 48px; font-size: 13px; }
   .seat.hero .seat-cards { min-height: 66px; }
-  .seat.hero .seat-cards .card { --card-w: 42px; --card-h: 62px; font-size: 16px; }
+  .seat.hero .seat-cards .card { --card-w: 42px; --card-h: 62px; font-size: 17px; }
   .seat .pos-name { font-size: 12px; }
   .seat .stack { font-size: 11px; }
   .seat .action-badge { font-size: 9px; bottom: -22px; }
@@ -719,9 +721,9 @@ html, body {
       </div>
 
       <div id="hero-buttons" class="hidden">
-        <button id="btn-fold">Фолд</button>
-        <button id="btn-check">Чек</button>
-        <button id="btn-call">Колл</button>
+        <button id="btn-fold">Fold</button>
+        <button id="btn-check">Check</button>
+        <button id="btn-call">Call</button>
       </div>
     </div>
   </div>
@@ -1876,11 +1878,11 @@ const UI = (() => {
     el.btnFold.disabled = false;
     el.btnCheck.disabled = !canCheck;
     el.btnCall.disabled = !canCall;
-    el.btnCall.textContent = canCall ? 'Колл ' + formatChips(toCall, state) : 'Колл';
+    el.btnCall.textContent = canCall ? 'Call ' + formatChips(toCall, state) : 'Call';
 
     if (canRaise) {
       el.heroActionPanel.classList.remove('hidden');
-      renderQuickPercentList(state, hero, toCall);
+      renderQuickRaiseOptions(state, hero, toCall);
       setupVerticalSlider(state, hero);
     } else {
       el.heroActionPanel.classList.add('hidden');
@@ -1889,23 +1891,47 @@ const UI = (() => {
     bindActionHandlers(state, heroIndex, toCall, handlers);
   }
 
-  function renderQuickPercentList(state, hero, toCall) {
+  // Показывает кнопки: BB-пресеты (если префлоп и никто не открывал) или % банка
+  function renderQuickRaiseOptions(state, hero, toCall) {
     el.quickPercentList.innerHTML = '';
     if (hero.stack <= toCall) return;
 
-    const potAfterCall = state.pot + Math.min(toCall, hero.stack);
+    const bb = state.blinds.bb;
     const maxTarget = hero.committedThisStreet + hero.stack;
-    const options = [150, 100, 70, 50, 30];
+    const minTarget = state.currentBet + state.minRaise;
 
-    for (const pct of options) {
-      const raiseBy = Math.round(potAfterCall * pct / 100);
-      let target = Math.min(maxTarget, state.currentBet + raiseBy);
-      const minTarget = state.currentBet + state.minRaise;
+    // Префлоп, никто не рейзил (currentBet == bb), и герой — не BB
+    // (если он BB, то он может чекнуть — но тогда toCall = 0)
+    const isPreflopOpen = state.street === 'preflop' && state.currentBet === bb;
+
+    let options;
+
+    if (isPreflopOpen) {
+      // Кнопки в BB: All-In, 3.5 BB, 3 BB, 2.5 BB, 2 BB (сверху вниз)
+      options = [
+        { label: 'All-In', target: maxTarget },
+        { label: '3.5 BB', target: Math.round(bb * 3.5) },
+        { label: '3 BB',   target: Math.round(bb * 3) },
+        { label: '2.5 BB', target: Math.round(bb * 2.5) },
+        { label: '2 BB',   target: Math.round(bb * 2) }
+      ];
+    } else {
+      // % банка: 150, 100, 70, 50, 30
+      const potAfterCall = state.pot + Math.min(toCall, hero.stack);
+      options = [150, 100, 70, 50, 30].map(pct => ({
+        label: pct + '%',
+        target: Math.min(maxTarget, state.currentBet + Math.round(potAfterCall * pct / 100))
+      }));
+    }
+
+    for (const opt of options) {
+      let target = Math.min(maxTarget, opt.target);
       if (target < minTarget) target = Math.min(minTarget, maxTarget);
+      if (target <= state.currentBet && opt.label !== 'All-In') continue;
       if (target <= state.currentBet) continue;
 
       const btn = document.createElement('button');
-      btn.innerHTML = `<span class="label">${pct}%</span><span class="value">${formatChips(target, state)}</span>`;
+      btn.innerHTML = `<span class="label">${opt.label}</span><span class="value">${formatChips(target, state)}</span>`;
       btn.dataset.target = target;
       el.quickPercentList.appendChild(btn);
     }
