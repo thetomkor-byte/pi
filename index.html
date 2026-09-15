@@ -128,7 +128,6 @@ html, body {
   white-space: nowrap;
   line-height: 1.3;
 }
-/* Текст "через ... раздач" и блайнды по ним — серовато-прозрачные */
 #table-info .info-row.faded {
   opacity: 0.45;
 }
@@ -281,7 +280,7 @@ html, body {
   top: 36px;
   left: auto;
 }
-/* Правые и верхнее места — D слева от карт (сбоку) */
+/* Правые и верхнее — D слева от карт (сбоку) */
 .seat.right .dealer-chip,
 .seat.top .dealer-chip {
   left: -28px;
@@ -290,7 +289,7 @@ html, body {
 }
 /* Герой — D НАД его картами, по центру */
 .seat.hero .dealer-chip {
-  top: -20px;
+  top: -30px;
   left: 50%;
   right: auto;
   transform: translateX(-50%);
@@ -356,18 +355,19 @@ html, body {
 }
 .seat .bet-chips.hidden { display: none; }
 
+/* Слайдер — фон + рамка + пилюля под цифрами */
 #hero-slider-panel {
   position: absolute;
   left: 3%;
   bottom: 12.5%;
-  width: 240px;
+  width: 260px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   background: rgba(20,18,16,.92);
   border: 1px solid #3a3530;
-  border-radius: 6px;
-  padding: 6px 10px;
+  border-radius: 8px;
+  padding: 8px 10px 8px 12px;
   z-index: 45;
 }
 #hero-slider-panel.hidden { display: none; }
@@ -403,59 +403,66 @@ html, body {
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0,0,0,.7);
 }
+/* Цифры слайдера — своя плашка с фоном */
 #raise-amount-mini {
   color: var(--gold);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 800;
   white-space: nowrap;
   text-shadow: 0 1px 3px rgba(0,0,0,.95);
-  min-width: 60px;
-  text-align: right;
+  min-width: 66px;
+  text-align: center;
+  background: rgba(0,0,0,.35);
+  border: 1px solid #3a3530;
+  border-radius: 6px;
+  padding: 4px 8px;
 }
 
+/* %-кнопки — крупнее */
 #quick-percent-list {
   position: absolute;
   right: 3%;
   bottom: 8%;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
   z-index: 45;
 }
 #quick-percent-list button {
   background: rgba(20,18,16,.92);
   border: 1px solid #3a3530;
   color: var(--text);
-  padding: 6px 11px;
-  border-radius: 6px;
-  font-size: 12px;
+  padding: 8px 14px;
+  border-radius: 7px;
+  font-size: 14px;
   font-weight: 800;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 10px;
-  min-width: 94px;
+  gap: 12px;
+  min-width: 108px;
 }
 #quick-percent-list button:hover { background: #2a2520; }
 #quick-percent-list button .label { color: var(--gold); font-weight: 800; }
-#quick-percent-list button .value { color: var(--muted); font-weight: 600; font-size: 11px; }
+#quick-percent-list button .value { color: var(--muted); font-weight: 600; font-size: 12px; }
 
+/* Fold/Check/Call — крупнее */
 #hero-buttons {
   position: absolute;
   left: 3%;
   bottom: 8%;
   display: flex;
-  gap: 5px;
+  gap: 6px;
   z-index: 45;
 }
 #hero-buttons.hidden { display: none; }
 #hero-buttons button {
-  padding: 11px 18px;
+  padding: 13px 22px;
   border: none;
-  border-radius: 8px;
+  border-radius: 9px;
   font-weight: 800;
-  font-size: 13px;
+  font-size: 15px;
   cursor: pointer;
   color: #fff;
   text-transform: uppercase;
@@ -472,17 +479,18 @@ html, body {
 #btn-check { background: linear-gradient(180deg, #2a4a3a, #1a3a2a); }
 #btn-call  { background: linear-gradient(180deg, #3a7bd5, #2a5aa5); }
 
+/* Нижняя строка — кнопки крупнее */
 #bottom-bar {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 56px;
+  height: 62px;
   background: linear-gradient(180deg, rgba(10,10,10,.85), rgba(0,0,0,.98) 30%, rgba(0,0,0,1));
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   z-index: 60;
   padding: 0 12px;
   backdrop-filter: blur(6px);
@@ -491,11 +499,11 @@ html, body {
   background: rgba(20,18,16,.95);
   border: 1px solid #3a3530;
   color: var(--text);
-  height: 38px;
-  min-width: 46px;
-  padding: 0 12px;
-  border-radius: 8px;
-  font-size: 17px;
+  height: 42px;
+  min-width: 52px;
+  padding: 0 14px;
+  border-radius: 9px;
+  font-size: 19px;
   font-weight: 800;
   cursor: pointer;
   display: flex;
@@ -505,10 +513,10 @@ html, body {
 #bottom-bar button:hover { background: #2a2520; }
 #bottom-bar button:disabled { opacity: .35; cursor: not-allowed; }
 #hist-info {
-  font-size: 14px;
+  font-size: 15px;
   color: var(--muted);
   font-weight: 700;
-  padding: 0 8px;
+  padding: 0 10px;
   letter-spacing: .5px;
 }
 #hist-info b { color: var(--gold); }
@@ -607,7 +615,7 @@ html, body {
 
 #timer-bar {
   position: absolute;
-  bottom: 56px;
+  bottom: 62px;
   left: 0;
   right: 0;
   height: 3px;
@@ -633,7 +641,7 @@ html, body {
 
 .start-card {
   text-align: center;
-  padding: 40px 44px;
+  padding: 44px 52px;
   background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
   border: 2px solid #3a3530;
   border-radius: 20px;
@@ -642,25 +650,25 @@ html, body {
 }
 .start-card h1 {
   color: var(--gold);
-  font-size: 26px;
+  font-size: 28px;
   margin-bottom: 12px;
   letter-spacing: 1.5px;
   font-weight: 900;
 }
 .start-card p {
   color: var(--muted);
-  margin-bottom: 26px;
-  font-size: 14px;
+  margin-bottom: 28px;
+  font-size: 15px;
   line-height: 1.5;
 }
 #btn-start {
-  padding: 16px 48px;
+  padding: 18px 56px;
   border: none;
   border-radius: 12px;
   background: linear-gradient(180deg, #ffcb2b, #e0a800);
   color: #1a1a1a;
   font-weight: 900;
-  font-size: 17px;
+  font-size: 19px;
   cursor: pointer;
   letter-spacing: 1.5px;
   text-transform: uppercase;
@@ -685,7 +693,7 @@ html, body {
   .seat.left .dealer-chip { right: -24px; top: 32px; }
   .seat.right .dealer-chip,
   .seat.top .dealer-chip { left: -24px; top: 32px; }
-  .seat.hero .dealer-chip { top: -18px; }
+  .seat.hero .dealer-chip { top: -26px; }
   .seat .stack { font-size: 12px; }
   .seat .action-badge { font-size: 10px; padding: 3px 8px; bottom: -24px; }
   .seat .bet-chips { font-size: 12px; padding: 3px 10px; bottom: -52px; }
@@ -693,16 +701,19 @@ html, body {
   #info-place-row { font-size: 12px; }
   #board-cards { min-height: 60px; gap: 5px; }
   #table-info { font-size: 12px; }
-  #hero-slider-panel { width: 200px; bottom: 13%; }
-  #quick-percent-list button { padding: 5px 9px; font-size: 11px; min-width: 82px; gap: 7px; }
-  #quick-percent-list button .value { font-size: 10px; }
-  #hero-buttons button { padding: 9px 14px; font-size: 11px; }
+  #hero-slider-panel { width: 220px; bottom: 13%; padding: 7px 8px 7px 10px; }
+  #raise-amount-mini { font-size: 12px; min-width: 58px; padding: 3px 7px; }
+  #quick-percent-list button { padding: 7px 11px; font-size: 12px; min-width: 92px; gap: 9px; }
+  #quick-percent-list button .value { font-size: 11px; }
+  #hero-buttons button { padding: 11px 16px; font-size: 13px; }
+  #bottom-bar { height: 56px; }
+  #bottom-bar button { height: 38px; font-size: 17px; padding: 0 12px; min-width: 46px; }
+  #hist-info { font-size: 13px; padding: 0 8px; }
+  #timer-bar { bottom: 56px; }
   #stats-grid { grid-template-columns: repeat(2, 1fr); }
-  .start-card h1 { font-size: 18px; }
-  .start-card p { font-size: 11px; }
-  #btn-start { padding: 12px 28px; font-size: 14px; }
-  #bottom-bar button { height: 34px; font-size: 15px; padding: 0 10px; }
-  #hist-info { font-size: 13px; padding: 0 6px; }
+  .start-card h1 { font-size: 20px; }
+  .start-card p { font-size: 12px; }
+  #btn-start { padding: 14px 36px; font-size: 16px; }
 }
 
 @media (max-width: 420px) {
@@ -715,10 +726,11 @@ html, body {
   .seat .stack { font-size: 11px; }
   .seat .action-badge { font-size: 9px; bottom: -22px; }
   .seat .bet-chips { font-size: 11px; padding: 3px 9px; bottom: -46px; }
-  .seat.hero .dealer-chip { top: -16px; }
-  #quick-percent-list button { min-width: 74px; font-size: 10px; padding: 5px 8px; }
-  #hero-buttons button { padding: 8px 12px; font-size: 10px; }
-  #hero-slider-panel { width: 170px; bottom: 14%; }
+  .seat.hero .dealer-chip { top: -22px; }
+  #quick-percent-list button { min-width: 82px; font-size: 11px; padding: 6px 10px; gap: 8px; }
+  #hero-buttons button { padding: 10px 14px; font-size: 12px; }
+  #hero-slider-panel { width: 190px; bottom: 14%; }
+  #raise-amount-mini { font-size: 11px; min-width: 50px; }
   #pot-display { font-size: 18px; }
   #info-place-row { font-size: 11px; }
   #board-cards { min-height: 54px; gap: 4px; }
