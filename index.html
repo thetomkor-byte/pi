@@ -111,8 +111,8 @@ html, body {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  background: rgba(0,0,0,.55);
-  border: 1px solid #2a2520;
+  background: rgba(0,0,0,.32);
+  border: 1px solid #3a3530;
   border-radius: 6px;
   padding: 8px 18px;
   font-size: 14px;
@@ -220,12 +220,13 @@ html, body {
 .seat .seat-cards .card .suit { font-size: 18px; }
 
 /* Карты героя крупнее */
+.seat.hero .seat-cards { min-height: 88px; }
 .seat.hero .seat-cards .card {
-  --card-w: 52px;
-  --card-h: 76px;
-  font-size: 18px;
+  --card-w: 56px;
+  --card-h: 82px;
+  font-size: 20px;
 }
-.seat.hero .seat-cards .card .suit { font-size: 20px; }
+.seat.hero .seat-cards .card .suit { font-size: 22px; }
 
 .seat .pos-row {
   display: flex;
@@ -350,8 +351,8 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 6px 3px;
+  justify-content: flex-end;
+  padding: 22px 3px 6px;
   position: relative;
 }
 #raise-slider-vert {
@@ -364,7 +365,7 @@ html, body {
 }
 #raise-amount-mini {
   position: absolute;
-  bottom: -16px;
+  top: 4px;
   left: 50%;
   transform: translateX(-50%);
   color: var(--gold);
@@ -647,7 +648,9 @@ html, body {
   .seat .seat-cards { min-height: 58px; gap: 3px; }
   .seat .seat-cards .card { --card-w: 38px; --card-h: 56px; font-size: 14px; padding: 2px 3px; }
   .seat .seat-cards .card .suit { font-size: 15px; }
-  .seat.hero .seat-cards .card { --card-w: 44px; --card-h: 64px; font-size: 16px; }
+  .seat.hero .seat-cards { min-height: 74px; }
+  .seat.hero .seat-cards .card { --card-w: 48px; --card-h: 70px; font-size: 18px; }
+  .seat.hero .seat-cards .card .suit { font-size: 20px; }
   .seat .pos-name { font-size: 14px; }
   .seat .dealer-chip { width: 18px; height: 18px; font-size: 10px; top: -20px; }
   .seat.left  .dealer-chip,
@@ -677,7 +680,8 @@ html, body {
   .seat { width: 96px; }
   .seat .seat-cards { min-height: 50px; }
   .seat .seat-cards .card { --card-w: 32px; --card-h: 48px; font-size: 12px; }
-  .seat.hero .seat-cards .card { --card-w: 38px; --card-h: 56px; font-size: 14px; }
+  .seat.hero .seat-cards { min-height: 66px; }
+  .seat.hero .seat-cards .card { --card-w: 42px; --card-h: 62px; font-size: 16px; }
   .seat .pos-name { font-size: 12px; }
   .seat .stack { font-size: 11px; }
   .seat .action-badge { font-size: 9px; bottom: -22px; }
@@ -701,8 +705,6 @@ html, body {
         <div id="table-info">
           <span><b id="info-blinds">10/20</b></span>
           <span class="sep">·</span>
-          <span>Место <b id="info-place">1/8</b></span>
-          <span class="sep">·</span>
           <span id="info-timer"></span>
         </div>
       </div>
@@ -710,8 +712,8 @@ html, body {
 
       <div id="hero-action-panel" class="hidden">
         <div id="slider-wrap">
-          <input type="range" id="raise-slider-vert" min="0" max="100" value="0" orient="vertical" />
           <div id="raise-amount-mini">0</div>
+          <input type="range" id="raise-slider-vert" min="0" max="100" value="0" orient="vertical" />
         </div>
         <div id="quick-percent-list"></div>
       </div>
@@ -781,7 +783,7 @@ html, body {
     </label>
     <label class="setting">
       <span>Показывать стратегии ботов</span>
-      <input type="checkbox" id="set-show-strategies" />
+      <input type="checkbox" id="set-show-strategies" checked />
     </label>
   </div>
 
@@ -1318,17 +1320,18 @@ const Bots = (() => {
 
   const STRATEGIES = {
     TAG:   { name: 'TAG',   aggression: 0.70, looseness: 0.35, bluff: 0.20, callThreshold: 0.55 },
-    TPAS:  { name: 'TPAS',  aggression: 0.25, looseness: 0.35, bluff: 0.08, callThreshold: 0.50 },
+    TIGHT: { name: 'TIGHT', aggression: 0.25, looseness: 0.35, bluff: 0.08, callThreshold: 0.50 },
     LAG:   { name: 'LAG',   aggression: 0.80, looseness: 0.75, bluff: 0.40, callThreshold: 0.40 },
-    LPAS:  { name: 'LPAS',  aggression: 0.30, looseness: 0.75, bluff: 0.15, callThreshold: 0.35 },
+    LOOSE: { name: 'LOOSE', aggression: 0.30, looseness: 0.75, bluff: 0.15, callThreshold: 0.35 },
+    PHONE: { name: 'PHONE', aggression: 0.10, looseness: 0.85, bluff: 0.02, callThreshold: 0.25 },
     NIT:   { name: 'NIT',   aggression: 0.15, looseness: 0.15, bluff: 0.03, callThreshold: 0.70 },
     MANIAC:{ name: 'MANIAC',aggression: 0.95, looseness: 0.95, bluff: 0.65, callThreshold: 0.25 }
   };
 
   const STRATEGY_WEIGHTS = [
-    { key: 'TAG', weight: 30 }, { key: 'LAG', weight: 28 },
-    { key: 'TPAS', weight: 15 }, { key: 'LPAS', weight: 14 },
-    { key: 'NIT', weight: 8 },  { key: 'MANIAC', weight: 5 }
+    { key: 'TAG', weight: 31 }, { key: 'LAG', weight: 26 },
+    { key: 'TIGHT', weight: 12 }, { key: 'LOOSE', weight: 12 },
+    { key: 'PHONE', weight: 6 }, { key: 'NIT', weight: 8 }, { key: 'MANIAC', weight: 5 }
   ];
 
   const CHARTS = {
@@ -1429,7 +1432,7 @@ const Bots = (() => {
       let key;
       const roll = Engine.cryptoRandomInt(100);
       if (!nitUsed && roll < 8) { key = 'NIT'; nitUsed = true; }
-      else if (!maniacUsed && roll >= 92) { key = 'MANIAC'; maniacUsed = true; }
+      else if (!maniacUsed && roll >= 95) { key = 'MANIAC'; maniacUsed = true; }
       else { key = pickWeighted(pool); }
       result.push(key);
     }
@@ -1609,21 +1612,20 @@ const UI = (() => {
     stackDisplay: 'bb',
     blindGrowth: 'hands',
     turnTime: 0,
-    showStrategies: false
+    showStrategies: true
   };
 
   const el = {};
 
-  // Места: левые сдвинуты внутрь (x ≥ 11), правые внутрь (x ≤ 89), герой правее (x: 32)
   const SEAT_POSITIONS = [
-    { x: 32, y: 78, side: 'left'  },  // 0 — герой
-    { x: 12, y: 60, side: 'left'  },  // 1 — SB
+    { x: 36, y: 82, side: 'left'  },  // 0 — герой
+    { x: 12, y: 62, side: 'left'  },  // 1 — SB
     { x: 11, y: 34, side: 'left'  },  // 2 — BB
     { x: 16, y: 12, side: 'left'  },  // 3 — UTG
     { x: 50, y: 9,  side: 'top'   },  // 4 — UTG1
     { x: 84, y: 12, side: 'right' },  // 5 — LJ
     { x: 89, y: 34, side: 'right' },  // 6 — HJ
-    { x: 88, y: 60, side: 'right' }   // 7 — CO
+    { x: 88, y: 62, side: 'right' }   // 7 — CO
   ];
 
   const SUIT_CLASS = { s: 'suit-spades', h: 'suit-hearts', d: 'suit-diamonds', c: 'suit-clubs' };
@@ -1824,11 +1826,6 @@ const UI = (() => {
     const b = state.blinds || Engine.getBlindLevel(state.levelIndex);
     const anteStr = b.ante > 0 ? ` (${b.ante})` : '';
     el.infoBlinds.textContent = `${b.sb}/${b.bb}${anteStr}`;
-    const alive = state.players.filter(p => !p.eliminated).length;
-    const hero = state.players.find(p => p.isHero);
-    let place = alive;
-    if (hero && hero.eliminated) place = alive + 1;
-    el.infoPlace.textContent = place + '/' + Engine.SEATS;
     if (settings.blindGrowth === 'time') {
       el.infoTimer.textContent = 'по времени';
     } else {
