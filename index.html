@@ -16,6 +16,7 @@
   --accent: #3fa9f5;
   --danger: #d94f3d;
   --ok: #2fb571;
+  --bar-h: clamp(56px, 8vmin, 68px);
 }
 
 html, body {
@@ -40,11 +41,11 @@ html, body {
 }
 
 /* ЕДИНЫЙ LAYOUT: вертикальный стол, центрируется.
-   Ширина стола = min(92vw, 60vh * 9/16), высота = ширина * 16/9. */
+   Стол занимает максимум доступной высоты, ширина — по пропорции 9/16. */
 #table-scene {
   position: absolute;
   top: 0; left: 0; right: 0;
-  bottom: clamp(56px, 8vmin, 68px);
+  bottom: var(--bar-h);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -55,9 +56,9 @@ html, body {
 #poker-table {
   position: relative;
   aspect-ratio: 9 / 16;
-  width: min(92vw, calc((100vh - clamp(56px, 8vmin, 68px)) * 0.92 * 9 / 16));
-  max-height: calc(100vh - clamp(56px, 8vmin, 68px) - clamp(8px, 2vmin, 24px));
-  height: auto;
+  height: calc(100% - clamp(8px, 1.6vmin, 20px));
+  width: auto;
+  max-width: 94vw;
   background:
     radial-gradient(ellipse at 50% 45%, #322c26 0%, #1e1a16 55%, #0f0d0b 100%);
   border: clamp(8px, 1.4vmin, 14px) solid;
@@ -512,7 +513,7 @@ html, body {
   bottom: 0;
   left: 0;
   right: 0;
-  height: clamp(56px, 8vmin, 68px);
+  height: var(--bar-h);
   background: linear-gradient(180deg, rgba(10,10,10,.85), rgba(0,0,0,.98) 30%, rgba(0,0,0,1));
   display: flex;
   align-items: center;
@@ -655,7 +656,7 @@ html, body {
 
 #timer-bar {
   position: absolute;
-  bottom: clamp(56px, 8vmin, 68px);
+  bottom: var(--bar-h);
   left: 0;
   right: 0;
   height: 3px;
