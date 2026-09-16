@@ -19,11 +19,8 @@
   --bar-h: clamp(56px, 8vmin, 68px);
   --board-card-w: clamp(34px, 5.2vmin, 48px);
   --board-card-h: clamp(48px, 7.3vmin, 67px);
-  /* зазор от пунктирной линии стола до кнопок — как у карт мест */
   --edge: clamp(6px, 1.1vmin, 10px);
-  /* фиксированная ширина правого блока %-кнопок */
   --pct-block-w: clamp(88px, 13vmin, 110px);
-  /* внутренний отступ от рамки стола до пунктира */
   --dash-inset: clamp(10px, 2vmin, 18px);
 }
 
@@ -87,7 +84,6 @@ html, body {
   z-index: 2;
 }
 
-/* === ЦЕНТР стола === */
 #board-area {
   position: absolute;
   top: 46%; left: 50%;
@@ -396,7 +392,6 @@ html, body {
 }
 .seat .bet-chips.hidden { display: none; }
 
-/* ==== ЛЕВЫЙ БЛОК: от левого пунктира до левого края %-блока ==== */
 #hero-actions {
   position: absolute;
   left: calc(var(--dash-inset) + var(--edge));
@@ -500,7 +495,6 @@ html, body {
 #btn-check { background: linear-gradient(180deg, #2a4a3a, #14261c); }
 #btn-call  { background: linear-gradient(180deg, #3a7bd5, #1e4a8a); }
 
-/* ==== ПРАВЫЙ БЛОК %-кнопок: фиксированная ширина, прижат к правому пунктиру ==== */
 #quick-percent-list {
   position: absolute;
   right: calc(var(--dash-inset) + var(--edge));
@@ -1673,12 +1667,14 @@ const UI = (() => {
 
   const el = {};
 
+  /* UTG1 (индекс 4) приподнят так, чтобы верхние карты упирались в верхний пунктир.
+     Герой (индекс 0) опущен на 2px ниже (y увеличен). */
   const SEAT_POSITIONS = [
     { x: 50, y: 70, side: 'bottom' },
     { x: 14, y: 56, side: 'left'   },
     { x: 14, y: 32, side: 'left'   },
     { x: 14, y: 10, side: 'left'   },
-    { x: 50, y: 9,  side: 'top'    },
+    { x: 50, y: 4,  side: 'top'    },
     { x: 86, y: 10, side: 'right'  },
     { x: 86, y: 32, side: 'right'  },
     { x: 86, y: 56, side: 'right'  }
