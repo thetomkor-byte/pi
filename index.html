@@ -38,6 +38,9 @@ html, body {
   touch-action: manipulation;
 }
 
+button { cursor: pointer; }
+button:disabled { cursor: default; }
+
 #app {
   position: relative;
   width: 100vw;
@@ -450,7 +453,7 @@ html, body {
   background: rgba(20,18,16,.92);
   border: 1px solid #3a3530;
   border-radius: 10px;
-  padding: clamp(5px, 0.8vmin, 8px) clamp(6px, 0.9vmin, 9px);
+  padding: clamp(4px, 0.7vmin, 7px) clamp(6px, 0.9vmin, 9px);
   z-index: 45;
   backdrop-filter: blur(4px);
   transition: opacity .2s ease;
@@ -466,7 +469,7 @@ html, body {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 0 0 3px 0;
+  padding: 0 0 2px 0;
   border-bottom: 1px solid #2a2520;
   margin-bottom: -1px;
   gap: 0;
@@ -484,32 +487,30 @@ html, body {
   background: transparent;
   border: none;
   color: var(--text);
-  font-size: clamp(11px, 1.4vmin, 13px);
+  font-size: clamp(15px, 2vmin, 18px);
   font-weight: 800;
-  padding: 0 clamp(4px, 0.7vmin, 6px);
+  padding: 0 clamp(8px, 1.3vmin, 11px);
   cursor: pointer;
   line-height: 1;
-  min-width: 26px;
-  min-height: 22px;
-  border-radius: 4px;
+  min-width: 38px;
+  min-height: 32px;
+  border-radius: 5px;
   position: relative;
-  top: -1px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 #hand-nav button:active:not(:disabled) { background: rgba(255,255,255,.06); }
-#hand-nav button:disabled { opacity: .28; cursor: not-allowed; }
+#hand-nav button:disabled { opacity: .28; }
 
 #hand-nav .nav-counter {
   color: var(--gold);
   font-weight: 800;
   text-align: center;
-  font-size: clamp(10px, 1.2vmin, 12px);
+  font-size: clamp(14px, 1.8vmin, 16px);
   letter-spacing: .4px;
   white-space: nowrap;
   position: relative;
-  top: -1px;
   padding: 0 clamp(9px, 1.5vmin, 14px);
 }
 #hand-nav .nav-counter .total { color: var(--muted); }
@@ -521,7 +522,7 @@ html, body {
   color: var(--gold);
   margin-left: clamp(14px, 2vmin, 20px);
 }
-#hn-reset .reset-icon { font-size: clamp(13px, 1.6vmin, 15px); line-height: 1; }
+#hn-reset .reset-icon { font-size: clamp(17px, 2.2vmin, 20px); line-height: 1; }
 
 #hero-slider-row {
   display: flex;
@@ -594,7 +595,6 @@ html, body {
   border-radius: 8px;
   font-weight: 800;
   font-size: clamp(10px, 1.4vmin, 12px);
-  cursor: pointer;
   color: #fff;
   text-transform: uppercase;
   letter-spacing: .3px;
@@ -611,7 +611,7 @@ html, body {
   transform: translateY(2px);
   box-shadow: 0 1px 0 rgba(0,0,0,.5);
 }
-#hero-buttons button:disabled { opacity: .35; cursor: not-allowed; box-shadow: none; }
+#hero-buttons button:disabled { opacity: .35; box-shadow: none; }
 
 #btn-fold  { background: linear-gradient(180deg, #5a5a5a, #3a3a3a); }
 #btn-check { background: linear-gradient(180deg, #2a4a3a, #14261c); }
@@ -641,7 +641,6 @@ html, body {
 }
 #quick-percent-list.inactive button {
   pointer-events: none;
-  cursor: not-allowed;
 }
 #quick-percent-list button {
   background: rgba(20,18,16,.92);
@@ -651,7 +650,6 @@ html, body {
   border-radius: 7px;
   font-size: clamp(10px, 1.3vmin, 12px);
   font-weight: 800;
-  cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -661,7 +659,7 @@ html, body {
   min-height: 32px;
   width: 100%;
 }
-#quick-percent-list button:hover { background: #2a2520; }
+#quick-percent-list button:disabled { opacity: 0.55; }
 #quick-percent-list button .label { color: var(--gold); font-weight: 800; }
 #quick-percent-list button.allin-btn .label { color: var(--allin); }
 #quick-percent-list button .value { color: var(--muted); font-weight: 600; font-size: clamp(9px, 1.2vmin, 11px); }
@@ -825,7 +823,6 @@ html, body {
   color: #1a1a1a;
   font-weight: 900;
   font-size: clamp(15px, 2vmin, 19px);
-  cursor: pointer;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   box-shadow: 0 3px 0 #8a6508, inset 0 1px 0 rgba(255,255,255,.35);
@@ -1768,14 +1765,13 @@ const UI = (() => {
 
   const el = {};
 
-  // Места 3 и 5 выровнены по высоте с местом 4 (y: 9%)
   const SEAT_POSITIONS = [
     { x: 50, y: 70, side: 'bottom' },
     { x: 14, y: 56, side: 'left'   },
     { x: 14, y: 32, side: 'left'   },
-    { x: 14, y: 9,  side: 'left'   },   // UTG выровнен с UTG1
-    { x: 50, y: 9,  side: 'top'    },   // UTG1
-    { x: 86, y: 9,  side: 'right'  },   // LJ выровнен с UTG1
+    { x: 14, y: 9,  side: 'left'   },
+    { x: 50, y: 9,  side: 'top'    },
+    { x: 86, y: 9,  side: 'right'  },
     { x: 86, y: 32, side: 'right'  },
     { x: 86, y: 56, side: 'right'  }
   ];
@@ -2083,11 +2079,10 @@ const UI = (() => {
       el.callAmount.textContent = '';
     }
 
+    renderQuickRaiseOptions(state, hero, toCall, null);
+
     if (canRaise) {
-      renderQuickRaiseOptions(state, hero, toCall, null);
       setupHorizontalSlider(state, hero);
-    } else {
-      renderQuickRaiseOptions(state, hero, toCall, null);
     }
 
     bindActionHandlers(state, heroIndex, toCall, handlers);
@@ -2291,8 +2286,7 @@ const UI = (() => {
     stats: { hands: 0, hit: 0, miss: 0, place: null, streak: 0 },
     waitingForHero: false, active: false,
     heroEntered: false,
-    history: [], viewingIndex: -1, autoNextTimerId: null,
-    quickFrozen: null
+    history: [], viewingIndex: -1, autoNextTimerId: null
   };
 
   const el = {};
@@ -2481,7 +2475,6 @@ const UI = (() => {
     session.state = null;
     session.history = [];
     session.viewingIndex = -1;
-    session.quickFrozen = null;
     session.stats = { hands: 0, hit: 0, miss: 0, place: null, streak: 0 };
     session.waitingForHero = false;
     session.heroEntered = false;
@@ -2501,7 +2494,6 @@ const UI = (() => {
     session.heroEntered = false;
     session.history = [];
     session.viewingIndex = -1;
-    session.quickFrozen = null;
 
     const botStrategies = Bots.assignStrategies(7);
     const players = [{ id: 'hero', name: 'Ты', isHero: true, strategy: null, stack: Engine.STARTING_STACK }];
@@ -2530,7 +2522,6 @@ const UI = (() => {
     Engine.startHand(session.state);
     session.heroEntered = false;
     session.viewingIndex = -1;
-    session.quickFrozen = null;
 
     UI.renderTable(session.state);
     UI.updateBoard(session.state);
@@ -2544,79 +2535,11 @@ const UI = (() => {
     processTurn();
   }
 
-  function snapshotQuickOptions(state, hero, toCall) {
-    const bb = state.blinds.bb;
-    const maxTarget = hero.committedThisStreet + hero.stack;
-    const minTarget = state.currentBet + state.minRaise;
-
-    let variant;
-    if (state.street === 'preflop' && state.currentBet === bb) variant = 'bb';
-    else variant = 'percent';
-
-    let rawOptions;
-    if (variant === 'bb') {
-      rawOptions = [
-        { label: 'ALL-IN', target: maxTarget, allin: true },
-        { label: '3.5 BB', target: Math.round(bb * 3.5) },
-        { label: '3 BB',   target: Math.round(bb * 3) },
-        { label: '2.5 BB', target: Math.round(bb * 2.5) },
-        { label: '2 BB',   target: Math.round(bb * 2) }
-      ];
-    } else {
-      const potAfterCall = state.pot + Math.min(toCall, hero.stack);
-      rawOptions = [
-        { label: 'ALL-IN', target: maxTarget, allin: true },
-        { label: '100%', target: Math.min(maxTarget, state.currentBet + Math.round(potAfterCall * 1.00)) },
-        { label: '70%',  target: Math.min(maxTarget, state.currentBet + Math.round(potAfterCall * 0.70)) },
-        { label: '50%',  target: Math.min(maxTarget, state.currentBet + Math.round(potAfterCall * 0.50)) },
-        { label: '30%',  target: Math.min(maxTarget, state.currentBet + Math.round(potAfterCall * 0.30)) }
-      ];
-    }
-
-    const options = rawOptions.map(opt => {
-      let target = Math.min(maxTarget, opt.target);
-      if (target < minTarget) target = Math.min(minTarget, maxTarget);
-      if (target < state.currentBet) target = state.currentBet;
-      if (target < bb) target = bb;
-      return { label: opt.label, target, allin: !!opt.allin };
-    });
-
-    return { variant, options };
-  }
-
-  function renderQuickFromFrozen() {
-    const frozen = session.quickFrozen;
-    if (!frozen) return false;
-    const state = session.state;
-    if (!state) return false;
-
-    el.quickPercentList.innerHTML = '';
-    const hero = state.players[session.heroIndex];
-    const toCall = Math.max(0, state.currentBet - hero.committedThisStreet);
-    const canRaise = hero.stack > toCall && !hero.folded && !hero.eliminated && hero.stack > 0;
-
-    for (const opt of frozen.options) {
-      const btn = document.createElement('button');
-      if (opt.allin) btn.classList.add('allin-btn');
-      btn.innerHTML = `<span class="label">${opt.label}</span><span class="value">${UI.formatChips(opt.target, state)}</span>`;
-      btn.dataset.target = opt.target;
-      btn.disabled = !canRaise;
-      el.quickPercentList.appendChild(btn);
-    }
-    return true;
-  }
-
   function refreshQuickPercentList() {
     const state = session.state;
     if (!state) return;
     const hero = state.players[session.heroIndex];
     if (!hero) return;
-
-    if (session.quickFrozen) {
-      renderQuickFromFrozen();
-      return;
-    }
-
     const toCall = Math.max(0, state.currentBet - hero.committedThisStreet);
     UI.renderQuickRaiseOptions(state, hero, toCall, null);
   }
@@ -2662,19 +2585,12 @@ const UI = (() => {
 
     if (action.type === 'call' || action.type === 'raise' || action.type === 'allin') session.heroEntered = true;
 
-    // Снимок значений кнопок до применения действия
-    const toCallSnapshot = Math.max(0, state.currentBet - hero.committedThisStreet);
-    const frozenSnapshot = snapshotQuickOptions(state, hero, toCallSnapshot);
-
     const res = Engine.applyAction(state, session.heroIndex, action);
     if (!res.ok) {
       session.waitingForHero = true;
       heroTurn(hero);
       return;
     }
-
-    // Фиксируем снимок — значения кнопок больше не будут меняться до конца раздачи
-    session.quickFrozen = frozenSnapshot;
 
     UI.updateSeats(state);
     UI.updatePot(state);
