@@ -154,7 +154,7 @@ button.disabled,
 #board-cards {
   display: flex;
   gap: clamp(3px, 0.6vmin, 5px);
-  justify-content: flex-start;
+  justify-content: center;
   align-items: center;
   margin-bottom: clamp(4px, 0.8vmin, 10px);
   height: var(--board-card-h);
@@ -567,7 +567,7 @@ button.disabled,
   border: 1px solid #8a6508;
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0,0,0,.7);
-  margin-top: -4px;
+  margin-top: -3px;
   pointer-events: auto;
 }
 #raise-slider-horiz::-moz-range-thumb {
@@ -2272,6 +2272,10 @@ const UI = (() => {
     if (settings.onChange) settings.onChange(settings);
   }
 
+  function clearWinnerHighlights() {
+    document.querySelectorAll('.seat.winner').forEach(s => s.classList.remove('winner'));
+  }
+
   return {
     settings, init, el,
     renderTable, updateSeats, updateBoard, updatePot, updateLevel,
@@ -2283,7 +2287,8 @@ const UI = (() => {
     readSettingsFromUI, applySettingsToUI,
     syncSettingsUI, toggleStackDisplay, toggleShowStrategies,
     createCardElement, formatChips,
-    renderQuickRaiseOptions
+    renderQuickRaiseOptions,
+    clearWinnerHighlights
   };
 
 })();
@@ -2500,6 +2505,7 @@ const UI = (() => {
     UI.setHeroActionsActive(false);
     UI.updateHistoryInfo(0, 0, false);
     UI.updateStats(session.stats);
+    UI.clearWinnerHighlights();
 
     startNewSession();
   }
@@ -2544,6 +2550,7 @@ const UI = (() => {
     session.viewingIndex = -1;
     session.isPaused = false;
 
+    UI.clearWinnerHighlights();
     UI.renderTable(session.state);
     UI.updateBoard(session.state);
     UI.updatePot(session.state);
@@ -2767,7 +2774,7 @@ const UI = (() => {
   }
 
   function highlightWinners(state) {
-    document.querySelectorAll('.seat.winner').forEach(s => s.classList.remove('winner'));
+    UI.clearWinnerHighlights();
     if (!state.showdownResults) return;
     for (const [id, amount] of Object.entries(state.showdownResults.payouts || {})) {
       if (amount <= 0) continue;
@@ -2876,6 +2883,7 @@ const UI = (() => {
         }, 4000);
       }
     } else {
+      UI.clearWinnerHighlights();
       UI.updateBoard(state);
       UI.updateSeats(state);
       UI.updatePot(state);
