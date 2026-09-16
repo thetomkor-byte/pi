@@ -472,7 +472,7 @@ html, body {
 }
 #hero-buttons button {
   flex: 1;
-  padding: clamp(7px, 1.1vmin, 9px) clamp(4px, 0.8vmin, 7px);
+  padding: clamp(4px, 0.8vmin, 6px) clamp(4px, 0.8vmin, 7px);
   border: none;
   border-radius: 8px;
   font-weight: 800;
@@ -484,6 +484,11 @@ html, body {
   box-shadow: 0 3px 0 rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.1);
   touch-action: manipulation;
   min-height: 36px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.05;
 }
 #hero-buttons button:active:not(:disabled) {
   transform: translateY(2px);
@@ -494,6 +499,15 @@ html, body {
 #btn-fold  { background: linear-gradient(180deg, #5a5a5a, #3a3a3a); }
 #btn-check { background: linear-gradient(180deg, #2a4a3a, #14261c); }
 #btn-call  { background: linear-gradient(180deg, #3a7bd5, #1e4a8a); }
+
+/* Разметка двух строк в кнопке Call */
+#btn-call .call-label { font-size: inherit; font-weight: 800; }
+#btn-call .call-amount {
+  font-size: clamp(9px, 1.2vmin, 11px);
+  font-weight: 700;
+  opacity: 0.95;
+  margin-top: 1px;
+}
 
 #quick-percent-list {
   position: absolute;
@@ -768,7 +782,10 @@ html, body {
         <div id="hero-buttons">
           <button id="btn-fold">Fold</button>
           <button id="btn-check">Check</button>
-          <button id="btn-call">Call</button>
+          <button id="btn-call">
+            <span class="call-label">Call</span>
+            <span class="call-amount" id="call-amount">—</span>
+          </button>
         </div>
       </div>
 
@@ -1667,7 +1684,7 @@ const UI = (() => {
 
   const el = {};
 
-  /* UTG1 (индекс 4) → y: 9% (как было). Герой (индекс 0) → y: 70% + 4px ниже. */
+  /* UTG1 (индекс 4) → y: 9%. Герой (индекс 0) → y: 70% + 3px ниже. */
   const SEAT_POSITIONS = [
     { x: 50, y: 70, side: 'bottom' },
     { x: 14, y: 56, side: 'left'   },
@@ -1707,6 +1724,7 @@ const UI = (() => {
     el.btnFold        = document.getElementById('btn-fold');
     el.btnCheck       = document.getElementById('btn-check');
     el.btnCall        = document.getElementById('btn-call');
+    el.callAmount     = document.getElementById('call-amount');
 
     el.timerBar       = document.getElementById('timer-bar');
     el.timerFill      = document.getElementById('timer-fill');
@@ -1766,7 +1784,7 @@ const UI = (() => {
     seat.style.left = pos.x + '%';
     seat.style.top  = pos.y + '%';
     if (player.isHero) {
-      seat.style.transform = 'translate(-50%, calc(-50% + 4px))';
+      seat.style.transform = 'translate(-50%, calc(-50% + 3px))';
     }
     if (pos.side) seat.classList.add(pos.side);
     if (player.isHero) seat.classList.add('hero');
@@ -1948,7 +1966,15 @@ const UI = (() => {
     el.btnFold.disabled = false;
     el.btnCheck.disabled = !canCheck;
     el.btnCall.disabled = !canCall;
-    el.btnCall.textContent = canCall ? 'Call ' + formatChips(toCall, state) : 'Call';
+
+    // Кнопка Call: сверху всегда CALL, снизу сумма в BB
+    if (canCall) {
+      el.callAmount.textContent = formatChips(toCall, state);
+    } else if (canCheck) {
+      el.callAmount.textContent = '';
+    } else {
+      el.callAmount.textContent = '';
+    }
 
     if (canRaise) {
       renderQuickRaiseOptions(state, hero, toCall);
@@ -2050,7 +2076,10 @@ const UI = (() => {
     clone.addEventListener('click', fn);
     if (node.id === 'btn-fold')  el.btnFold  = clone;
     if (node.id === 'btn-check') el.btnCheck = clone;
-    if (node.id === 'btn-call')  el.btnCall  = clone;
+    if (node.id === 'btn-call') {
+      el.btnCall = clone;
+      el.callAmount = clone.querySelector('#call-amount');
+    }
   }
 
   function hideActions() {
