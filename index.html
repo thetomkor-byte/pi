@@ -338,7 +338,7 @@ html, body {
 .seat.right .dealer-chip,
 .seat.top .dealer-chip { left: clamp(-26px, -3.4vmin, -22px); top: 36px; right: auto; }
 .seat.hero .dealer-chip {
-  top: clamp(-29px, -3.7vmin, -23px);
+  top: clamp(-30px, -3.8vmin, -24px);
   left: 50%;
   right: auto;
   transform: translateX(-50%);
@@ -465,11 +465,20 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: clamp(10px, 1.4vmin, 14px);
   width: 100%;
   padding: 0 0 3px 0;
   border-bottom: 1px solid #2a2520;
   margin-bottom: -1px;
+  gap: 0;
+}
+#hand-nav .nav-history {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+#hand-nav .nav-right {
+  display: flex;
+  align-items: center;
 }
 #hand-nav button {
   background: transparent;
@@ -477,14 +486,17 @@ html, body {
   color: var(--text);
   font-size: clamp(11px, 1.4vmin, 13px);
   font-weight: 800;
-  padding: 0 6px;
+  padding: 0 clamp(4px, 0.7vmin, 6px);
   cursor: pointer;
   line-height: 1;
-  min-width: 22px;
-  min-height: 19px;
+  min-width: 26px;
+  min-height: 22px;
   border-radius: 4px;
   position: relative;
   top: -1px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 #hand-nav button:active:not(:disabled) { background: rgba(255,255,255,.06); }
 #hand-nav button:disabled { opacity: .28; cursor: not-allowed; }
@@ -495,15 +507,21 @@ html, body {
   text-align: center;
   font-size: clamp(10px, 1.2vmin, 12px);
   letter-spacing: .4px;
-  flex: 1;
   white-space: nowrap;
   position: relative;
   top: -1px;
+  padding: 0 clamp(9px, 1.5vmin, 14px);
 }
 #hand-nav .nav-counter .total { color: var(--muted); }
 
 #hn-resume { color: var(--ok); }
 #hn-resume:disabled { color: var(--text); }
+
+#hn-reset {
+  color: var(--gold);
+  margin-left: clamp(14px, 2vmin, 20px);
+}
+#hn-reset .reset-icon { font-size: clamp(13px, 1.6vmin, 15px); line-height: 1; }
 
 #hero-slider-row {
   display: flex;
@@ -839,10 +857,15 @@ html, body {
 
       <div id="hero-actions" class="inactive">
         <div id="hand-nav">
-          <button id="hn-prev" title="Назад" disabled>◀</button>
-          <span class="nav-counter"><span id="hn-cur">0</span><span class="total"> / </span><span id="hn-tot">0</span></span>
-          <button id="hn-next" title="Вперёд" disabled>▶</button>
-          <button id="hn-resume" title="Продолжить" disabled>▶▶</button>
+          <div class="nav-history">
+            <button id="hn-prev" title="Назад" disabled>◀</button>
+            <span class="nav-counter"><span id="hn-cur">0</span><span class="total"> / </span><span id="hn-tot">0</span></span>
+            <button id="hn-next" title="Вперёд" disabled>▶</button>
+          </div>
+          <div class="nav-right">
+            <button id="hn-resume" title="Продолжить" disabled>▶▶</button>
+            <button id="hn-reset" title="Заново"><span class="reset-icon">⟲</span></button>
+          </div>
         </div>
         <div id="hero-slider-row">
           <input type="range" id="raise-slider-horiz" min="0" max="100" value="0" />
@@ -1797,6 +1820,7 @@ const UI = (() => {
     el.hnCur          = document.getElementById('hn-cur');
     el.hnTot          = document.getElementById('hn-tot');
     el.hnResume       = document.getElementById('hn-resume');
+    el.hnReset        = document.getElementById('hn-reset');
 
     el.setCardStyle      = document.getElementById('set-card-style');
     el.setStackDisplay   = document.getElementById('set-stack-display');
@@ -1856,8 +1880,7 @@ const UI = (() => {
     seat.style.left = pos.x + '%';
     seat.style.top  = pos.y + '%';
     if (player.isHero) {
-      // Герой поднят ещё на 1px: было calc(-50% - 10px), стало calc(-50% - 11px)
-      seat.style.transform = 'translate(-50%, calc(-50% - 11px))';
+      seat.style.transform = 'translate(-50%, calc(-50% - 12px))';
     }
     if (pos.side) seat.classList.add(pos.side);
     if (player.isHero) seat.classList.add('hero');
@@ -2061,16 +2084,16 @@ const UI = (() => {
     }
 
     if (canRaise) {
-      renderQuickRaiseOptions(state, hero, toCall);
+      renderQuickRaiseOptions(state, hero, toCall, null);
       setupHorizontalSlider(state, hero);
     } else {
-      renderQuickRaiseOptions(state, hero, toCall);
+      renderQuickRaiseOptions(state, hero, toCall, null);
     }
 
     bindActionHandlers(state, heroIndex, toCall, handlers);
   }
 
-  function renderQuickRaiseOptions(state, hero, toCall) {
+  function renderQuickRaiseOptions(state, hero, toCall, forceVariant) {
     el.quickPercentList.innerHTML = '';
     if (!hero) return;
 
@@ -2079,11 +2102,15 @@ const UI = (() => {
     const minTarget = state.currentBet + state.minRaise;
     const canRaise = hero.stack > toCall && !hero.folded && !hero.eliminated && hero.stack > 0;
 
-    const isPreflopOpen = state.street === 'preflop' && state.currentBet === bb;
+    let variant = forceVariant;
+    if (!variant) {
+      if (state.street === 'preflop' && state.currentBet === bb) variant = 'bb';
+      else variant = 'percent';
+    }
 
     let options;
 
-    if (state.street === 'preflop') {
+    if (variant === 'bb') {
       options = [
         { label: 'ALL-IN', target: maxTarget, allin: true },
         { label: '3.5 BB', target: Math.round(bb * 3.5) },
@@ -2264,7 +2291,8 @@ const UI = (() => {
     stats: { hands: 0, hit: 0, miss: 0, place: null, streak: 0 },
     waitingForHero: false, active: false,
     heroEntered: false,
-    history: [], viewingIndex: -1, autoNextTimerId: null
+    history: [], viewingIndex: -1, autoNextTimerId: null,
+    quickFrozen: null
   };
 
   const el = {};
@@ -2286,6 +2314,7 @@ const UI = (() => {
     el.hnPrev         = document.getElementById('hn-prev');
     el.hnNext         = document.getElementById('hn-next');
     el.hnResume       = document.getElementById('hn-resume');
+    el.hnReset        = document.getElementById('hn-reset');
     el.swipeCenter    = document.getElementById('swipe-center');
     el.seats          = document.getElementById('seats');
   }
@@ -2376,6 +2405,7 @@ const UI = (() => {
     el.hnPrev.addEventListener('click', () => navigateHistory(-1));
     el.hnNext.addEventListener('click', () => navigateHistory(1));
     el.hnResume.addEventListener('click', () => resumeGame());
+    el.hnReset.addEventListener('click', () => restartSession());
 
     bindSeatInteractions();
   }
@@ -2445,6 +2475,24 @@ const UI = (() => {
     }
   }
 
+  function restartSession() {
+    clearTimeout(session.autoNextTimerId);
+    session.active = false;
+    session.state = null;
+    session.history = [];
+    session.viewingIndex = -1;
+    session.quickFrozen = null;
+    session.stats = { hands: 0, hit: 0, miss: 0, place: null, streak: 0 };
+    session.waitingForHero = false;
+    session.heroEntered = false;
+
+    UI.setHeroActionsActive(false);
+    UI.updateHistoryInfo(0, 0, false);
+    UI.updateStats(session.stats);
+
+    startNewSession();
+  }
+
   function startNewSession() {
     clearTimeout(session.autoNextTimerId);
     session.active = true;
@@ -2453,6 +2501,7 @@ const UI = (() => {
     session.heroEntered = false;
     session.history = [];
     session.viewingIndex = -1;
+    session.quickFrozen = null;
 
     const botStrategies = Bots.assignStrategies(7);
     const players = [{ id: 'hero', name: 'Ты', isHero: true, strategy: null, stack: Engine.STARTING_STACK }];
@@ -2481,6 +2530,7 @@ const UI = (() => {
     Engine.startHand(session.state);
     session.heroEntered = false;
     session.viewingIndex = -1;
+    session.quickFrozen = null;
 
     UI.renderTable(session.state);
     UI.updateBoard(session.state);
@@ -2494,13 +2544,81 @@ const UI = (() => {
     processTurn();
   }
 
+  function snapshotQuickOptions(state, hero, toCall) {
+    const bb = state.blinds.bb;
+    const maxTarget = hero.committedThisStreet + hero.stack;
+    const minTarget = state.currentBet + state.minRaise;
+
+    let variant;
+    if (state.street === 'preflop' && state.currentBet === bb) variant = 'bb';
+    else variant = 'percent';
+
+    let rawOptions;
+    if (variant === 'bb') {
+      rawOptions = [
+        { label: 'ALL-IN', target: maxTarget, allin: true },
+        { label: '3.5 BB', target: Math.round(bb * 3.5) },
+        { label: '3 BB',   target: Math.round(bb * 3) },
+        { label: '2.5 BB', target: Math.round(bb * 2.5) },
+        { label: '2 BB',   target: Math.round(bb * 2) }
+      ];
+    } else {
+      const potAfterCall = state.pot + Math.min(toCall, hero.stack);
+      rawOptions = [
+        { label: 'ALL-IN', target: maxTarget, allin: true },
+        { label: '100%', target: Math.min(maxTarget, state.currentBet + Math.round(potAfterCall * 1.00)) },
+        { label: '70%',  target: Math.min(maxTarget, state.currentBet + Math.round(potAfterCall * 0.70)) },
+        { label: '50%',  target: Math.min(maxTarget, state.currentBet + Math.round(potAfterCall * 0.50)) },
+        { label: '30%',  target: Math.min(maxTarget, state.currentBet + Math.round(potAfterCall * 0.30)) }
+      ];
+    }
+
+    const options = rawOptions.map(opt => {
+      let target = Math.min(maxTarget, opt.target);
+      if (target < minTarget) target = Math.min(minTarget, maxTarget);
+      if (target < state.currentBet) target = state.currentBet;
+      if (target < bb) target = bb;
+      return { label: opt.label, target, allin: !!opt.allin };
+    });
+
+    return { variant, options };
+  }
+
+  function renderQuickFromFrozen() {
+    const frozen = session.quickFrozen;
+    if (!frozen) return false;
+    const state = session.state;
+    if (!state) return false;
+
+    el.quickPercentList.innerHTML = '';
+    const hero = state.players[session.heroIndex];
+    const toCall = Math.max(0, state.currentBet - hero.committedThisStreet);
+    const canRaise = hero.stack > toCall && !hero.folded && !hero.eliminated && hero.stack > 0;
+
+    for (const opt of frozen.options) {
+      const btn = document.createElement('button');
+      if (opt.allin) btn.classList.add('allin-btn');
+      btn.innerHTML = `<span class="label">${opt.label}</span><span class="value">${UI.formatChips(opt.target, state)}</span>`;
+      btn.dataset.target = opt.target;
+      btn.disabled = !canRaise;
+      el.quickPercentList.appendChild(btn);
+    }
+    return true;
+  }
+
   function refreshQuickPercentList() {
     const state = session.state;
     if (!state) return;
     const hero = state.players[session.heroIndex];
     if (!hero) return;
+
+    if (session.quickFrozen) {
+      renderQuickFromFrozen();
+      return;
+    }
+
     const toCall = Math.max(0, state.currentBet - hero.committedThisStreet);
-    UI.renderQuickRaiseOptions(state, hero, toCall);
+    UI.renderQuickRaiseOptions(state, hero, toCall, null);
   }
 
   function processTurn() {
@@ -2541,13 +2659,23 @@ const UI = (() => {
     UI.setHeroActionsActive(false);
     const state = session.state;
     const hero = state.players[session.heroIndex];
+
     if (action.type === 'call' || action.type === 'raise' || action.type === 'allin') session.heroEntered = true;
+
+    // Снимок значений кнопок до применения действия
+    const toCallSnapshot = Math.max(0, state.currentBet - hero.committedThisStreet);
+    const frozenSnapshot = snapshotQuickOptions(state, hero, toCallSnapshot);
+
     const res = Engine.applyAction(state, session.heroIndex, action);
     if (!res.ok) {
       session.waitingForHero = true;
       heroTurn(hero);
       return;
     }
+
+    // Фиксируем снимок — значения кнопок больше не будут меняться до конца раздачи
+    session.quickFrozen = frozenSnapshot;
+
     UI.updateSeats(state);
     UI.updatePot(state);
     advanceOrFinish();
