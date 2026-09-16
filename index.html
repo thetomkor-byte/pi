@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <title>Poker Simulator</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -17,7 +17,8 @@
   --danger: #d94f3d;
   --ok: #2fb571;
   --allin: #e63946;
-  --bar-h: clamp(56px, 8vmin, 68px);
+  /* Запас снизу для Safari-панели с адресом */
+  --safari-pad: calc(env(safe-area-inset-bottom, 0px) + 8px);
   --board-card-w: clamp(34px, 5.2vmin, 48px);
   --board-card-h: clamp(48px, 7.3vmin, 67px);
   --edge: clamp(6px, 1.1vmin, 10px);
@@ -46,16 +47,15 @@ html, body {
     radial-gradient(ellipse at 50% 50%, #12100e 0%, #0a0a0a 70%, #050505 100%);
 }
 
+/* Стол занимает всю высоту, минус запас для Safari */
 #table-scene {
   position: absolute;
   top: 0; left: 0; right: 0;
-  bottom: var(--bar-h);
+  bottom: var(--safari-pad);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform .28s ease;
 }
-#table-scene.shifted-down { transform: translateY(clamp(-160px, -18vmin, -120px)); }
 
 #poker-table {
   position: relative;
@@ -100,7 +100,7 @@ html, body {
   gap: 0;
 }
 
-/* Слой для свайпов — только в середине стола, прозрачный */
+/* Слой для свайпов — только в середине стола */
 #swipe-center {
   position: absolute;
   left: 50%;
@@ -429,43 +429,58 @@ html, body {
 }
 .seat .bet-chips.hidden { display: none; }
 
-/* ===== КОМПАКТНЫЙ БЛОК ПЕРЕЛИСТЫВАНИЯ РАЗДАЧ (слева над слайдером) ===== */
+/* ===== КОМПАКТНЫЙ БЛОК ПЕРЕЛИСТЫВАНИЯ (две строки, слева над слайдером) ===== */
 #hand-nav {
   position: absolute;
   left: calc(var(--dash-inset) + var(--edge));
-  bottom: calc(var(--dash-inset) + var(--edge) + clamp(120px, 18vmin, 160px));
+  bottom: calc(var(--dash-inset) + var(--edge) + clamp(130px, 19vmin, 170px));
   display: flex;
-  align-items: center;
-  gap: 4px;
-  background: rgba(20,18,16,.85);
+  flex-direction: column;
+  gap: 6px;
+  background: rgba(20,18,16,.88);
   border: 1px solid #3a3530;
-  border-radius: 6px;
-  padding: 2px 4px;
+  border-radius: 8px;
+  padding: 6px 8px;
   z-index: 46;
   backdrop-filter: blur(3px);
-  font-size: 10px;
 }
 #hand-nav.hidden { display: none; }
+
+#hand-nav .nav-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
 #hand-nav button {
   background: transparent;
   border: none;
   color: var(--text);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 800;
-  padding: 1px 4px;
+  padding: 2px 6px;
   cursor: pointer;
   line-height: 1;
+  min-width: 22px;
+  min-height: 22px;
 }
-#hand-nav button:disabled { opacity: .3; cursor: not-allowed; }
+#hand-nav button:disabled { opacity: .28; cursor: not-allowed; }
+
 #hand-nav .nav-counter {
   color: var(--gold);
   font-weight: 800;
-  min-width: 32px;
+  min-width: 44px;
   text-align: center;
-  font-size: 10px;
-  letter-spacing: .3px;
+  font-size: 12px;
+  letter-spacing: .4px;
 }
 #hand-nav .nav-counter .total { color: var(--muted); }
+
+#hn-stop { color: #ff8a7a; font-size: 14px; }
+#hn-stop:disabled { color: var(--text); }
+#hn-resume { color: var(--ok); font-size: 13px; }
+#hn-resume:disabled { color: var(--text); }
 
 #hero-actions {
   position: absolute;
@@ -618,55 +633,17 @@ html, body {
 #quick-percent-list button.allin-btn .label { color: var(--allin); }
 #quick-percent-list button .value { color: var(--muted); font-weight: 600; font-size: clamp(9px, 1.2vmin, 11px); }
 
-#bottom-bar {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: var(--bar-h);
-  background: linear-gradient(180deg, rgba(10,10,10,.85), rgba(0,0,0,.98) 30%, rgba(0,0,0,1));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(6px, 1vmin, 10px);
-  z-index: 60;
-  padding: 0 clamp(8px, 1.5vmin, 12px);
-  backdrop-filter: blur(6px);
-}
-#bottom-bar button {
-  background: rgba(20,18,16,.95);
-  border: 1px solid #3a3530;
-  color: var(--text);
-  height: clamp(40px, 5.5vmin, 48px);
-  min-width: clamp(44px, 5.2vmin, 52px);
-  padding: 0 clamp(10px, 1.6vmin, 14px);
-  border-radius: 9px;
-  font-size: clamp(16px, 2.2vmin, 19px);
-  font-weight: 800;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  touch-action: manipulation;
-}
-#bottom-bar button:hover { background: #2a2520; }
-#bottom-bar button:disabled { opacity: .35; cursor: not-allowed; }
-
-#btn-new      { font-size: clamp(16px, 2.2vmin, 19px); }
-#btn-pause    { font-size: clamp(16px, 2.2vmin, 19px); }
-#btn-settings { font-size: clamp(20px, 2.8vmin, 24px); min-width: clamp(48px, 5.6vmin, 56px); }
-
 /* ===== НИЖНЯЯ ПАНЕЛЬ — только НАСТРОЙКИ ===== */
 #bottom-panel {
   position: absolute;
   bottom: 0; left: 0; right: 0;
   background: linear-gradient(0deg, #0d0d0d 0%, #1a1a1a 100%);
   border-top: 1px solid #2a2520;
-  padding: 24px 20px 80px;
-  transform: translateY(100%);
+  padding: 24px 20px calc(80px + var(--safari-pad));
+  transform: translateY(110%);
   transition: transform .28s ease;
   z-index: 100;
-  max-height: 70vh;
+  max-height: 72vh;
   overflow-y: auto;
   touch-action: pan-y;
   scrollbar-width: none;
@@ -715,8 +692,8 @@ html, body {
   top: 0; left: 0; right: 0;
   background: linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%);
   border-bottom: 1px solid #2a2520;
-  padding: 24px 20px 20px;
-  transform: translateY(-100%);
+  padding: calc(20px + env(safe-area-inset-top, 0px)) 20px 20px;
+  transform: translateY(-110%);
   transition: transform .28s ease;
   z-index: 100;
   max-height: 55vh;
@@ -765,47 +742,15 @@ html, body {
 .stat-card .value.ok { color: var(--ok); }
 .stat-card .value.danger { color: var(--danger); }
 
-#panel-handle {
+/* ===== Оверлей для закрытия тапом ===== */
+#tap-close {
   position: absolute;
-  top: 6px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60px;
-  height: 5px;
-  background: #3a3530;
-  border-radius: 3px;
-  cursor: pointer;
-  z-index: 110;
+  inset: 0;
+  z-index: 90;
+  background: transparent;
+  display: none;
 }
-#panel-handle:hover { background: #5a5550; }
-
-#top-panel-handle {
-  position: absolute;
-  bottom: 6px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60px;
-  height: 5px;
-  background: #3a3530;
-  border-radius: 3px;
-  cursor: pointer;
-  z-index: 110;
-}
-
-#timer-bar {
-  position: absolute;
-  bottom: var(--bar-h);
-  left: 0;
-  right: 0;
-  height: 3px;
-  z-index: 55;
-}
-#timer-bar.hidden { display: none; }
-#timer-fill {
-  height: 100%;
-  width: 100%;
-  background: var(--gold);
-}
+#tap-close.active { display: block; }
 
 #start-overlay {
   position: absolute;
@@ -880,11 +825,16 @@ html, body {
       </div>
       <div id="seats"></div>
 
-      <div id="hand-nav" class="hidden">
-        <button id="hn-prev" title="Назад">◀</button>
-        <span class="nav-counter"><span id="hn-cur">0</span><span class="total"> / </span><span id="hn-tot">0</span></span>
-        <button id="hn-next" title="Вперёд">▶</button>
-        <button id="hn-resume" title="Продолжить" class="hidden">▶▶</button>
+      <div id="hand-nav">
+        <div class="nav-row">
+          <button id="hn-prev" title="Назад">◀</button>
+          <span class="nav-counter"><span id="hn-cur">0</span><span class="total"> / </span><span id="hn-tot">0</span></span>
+          <button id="hn-next" title="Вперёд">▶</button>
+        </div>
+        <div class="nav-row">
+          <button id="hn-stop" title="Стоп → новая сессия">⏹</button>
+          <button id="hn-resume" title="Продолжить" disabled>▶▶</button>
+        </div>
       </div>
 
       <div id="hero-actions" class="hidden">
@@ -906,18 +856,10 @@ html, body {
     </div>
   </div>
 
-  <div id="timer-bar" class="hidden"><div id="timer-fill"></div></div>
-
-  <div id="bottom-bar">
-    <button id="btn-new" title="Новая сессия">↻</button>
-    <button id="btn-pause" title="Пауза">⏸</button>
-    <button id="btn-settings" title="Настройки">⚙</button>
-  </div>
+  <div id="tap-close"></div>
 
   <!-- Панель настроек (снизу) -->
   <div id="bottom-panel">
-    <div id="panel-handle"></div>
-
     <h3>Настройки</h3>
     <label class="setting">
       <span>Стиль карт</span>
@@ -936,8 +878,8 @@ html, body {
     <label class="setting">
       <span>Рост блайндов</span>
       <select id="set-blind-growth">
-        <option value="hands">Каждые 10 раздач</option>
-        <option value="time">Каждые 5 минут</option>
+        <option value="10">Каждые 10 раздач</option>
+        <option value="5">Каждые 5 раздач</option>
       </select>
     </label>
     <label class="setting">
@@ -956,8 +898,6 @@ html, body {
 
   <!-- Панель статистики (сверху) -->
   <div id="top-panel">
-    <div id="top-panel-handle"></div>
-
     <h3>Статистика сессии</h3>
     <div id="stats-grid">
       <div class="stat-card"><div class="label">Точность</div><div class="value gold" id="stat-accuracy">—</div></div>
@@ -1792,7 +1732,7 @@ const UI = (() => {
   const settings = {
     cardStyle: '4color',
     stackDisplay: 'bb',
-    blindGrowth: 'hands',
+    blindGrowthHands: 10,
     turnTime: 0,
     showStrategies: false
   };
@@ -1840,11 +1780,9 @@ const UI = (() => {
     el.btnCall        = document.getElementById('btn-call');
     el.callAmount     = document.getElementById('call-amount');
 
-    el.timerBar       = document.getElementById('timer-bar');
-    el.timerFill      = document.getElementById('timer-fill');
-
     el.bottomPanel    = document.getElementById('bottom-panel');
     el.topPanel       = document.getElementById('top-panel');
+    el.tapClose       = document.getElementById('tap-close');
     el.tableScene     = document.getElementById('table-scene');
 
     el.handNav        = document.getElementById('hand-nav');
@@ -1852,6 +1790,7 @@ const UI = (() => {
     el.hnNext         = document.getElementById('hn-next');
     el.hnCur          = document.getElementById('hn-cur');
     el.hnTot          = document.getElementById('hn-tot');
+    el.hnStop         = document.getElementById('hn-stop');
     el.hnResume       = document.getElementById('hn-resume');
 
     el.setCardStyle      = document.getElementById('set-card-style');
@@ -1862,27 +1801,38 @@ const UI = (() => {
 
     el.startOverlay   = document.getElementById('start-overlay');
     el.btnStart       = document.getElementById('btn-start');
-    el.btnPause       = document.getElementById('btn-pause');
-    el.btnNew         = document.getElementById('btn-new');
-    el.btnSettings    = document.getElementById('btn-settings');
 
     applyCardStyle();
     applySettingsToUI();
   }
 
+  function updateOverlayState() {
+    const anyOpen = el.bottomPanel.classList.contains('open') || el.topPanel.classList.contains('open');
+    el.tapClose.classList.toggle('active', anyOpen);
+  }
+
   function openBottomPanel() {
+    el.topPanel.classList.remove('open');
     el.bottomPanel.classList.add('open');
-    el.tableScene.classList.add('shifted-down');
+    updateOverlayState();
   }
   function closeBottomPanel() {
     el.bottomPanel.classList.remove('open');
-    el.tableScene.classList.remove('shifted-down');
+    updateOverlayState();
   }
   function openTopPanel() {
+    el.bottomPanel.classList.remove('open');
     el.topPanel.classList.add('open');
+    updateOverlayState();
   }
   function closeTopPanel() {
     el.topPanel.classList.remove('open');
+    updateOverlayState();
+  }
+  function closeAllPanels() {
+    el.bottomPanel.classList.remove('open');
+    el.topPanel.classList.remove('open');
+    updateOverlayState();
   }
 
   function renderTable(state) {
@@ -2034,17 +1984,13 @@ const UI = (() => {
     const anteStr = b.ante > 0 ? '   Анте: ' + b.ante : '';
     el.infoBlindsRow.textContent = `Блайнды: ${b.sb}/${b.bb}${anteStr}`;
 
-    if (settings.blindGrowth === 'time') {
-      el.infoTimerRow.textContent = 'по времени';
-      el.infoNextBlinds.textContent = '';
-    } else {
-      const left = 10 - (state.handsAtLevel || 0);
-      el.infoTimerRow.textContent = `через ${left} раздач`;
-      const nextIdx = Math.min(state.levelIndex + 1, Engine.BLIND_LEVELS.length - 1);
-      const next = Engine.BLIND_LEVELS[nextIdx];
-      const nextAnte = next.ante > 0 ? ` (${next.ante})` : '';
-      el.infoNextBlinds.textContent = `${next.sb}/${next.bb}${nextAnte}`;
-    }
+    const period = settings.blindGrowthHands || 10;
+    const left = period - (state.handsAtLevel || 0);
+    el.infoTimerRow.textContent = `через ${left} раздач`;
+    const nextIdx = Math.min(state.levelIndex + 1, Engine.BLIND_LEVELS.length - 1);
+    const next = Engine.BLIND_LEVELS[nextIdx];
+    const nextAnte = next.ante > 0 ? ` (${next.ante})` : '';
+    el.infoNextBlinds.textContent = `${next.sb}/${next.bb}${nextAnte}`;
 
     const alive = state.players.filter(p => !p.eliminated).length;
     const hero = state.players.find(p => p.isHero);
@@ -2237,50 +2183,33 @@ const UI = (() => {
     el.statsPlace.textContent = stats.place ? `${stats.place}/${Engine.SEATS}` : '—';
   }
 
-  function startTimer(seconds, onExpire) {
-    if (!seconds || seconds <= 0) { el.timerBar.classList.add('hidden'); return; }
-    el.timerBar.classList.remove('hidden');
-    el.timerFill.style.width = '100%';
-    const startTime = performance.now();
-    const totalMs = seconds * 1000;
-    cancelAnimationFrame(el._timerRaf);
-    function tick(now) {
-      const remain = Math.max(0, totalMs - (now - startTime));
-      el.timerFill.style.width = (remain / totalMs * 100) + '%';
-      if (remain <= 0) { onExpire(); return; }
-      el._timerRaf = requestAnimationFrame(tick);
-    }
-    el._timerRaf = requestAnimationFrame(tick);
-  }
-  function stopTimer() {
-    cancelAnimationFrame(el._timerRaf);
-    el.timerBar.classList.add('hidden');
-  }
-
   function updateHistoryInfo(current, total, isViewingPast) {
     el.hnCur.textContent = current;
     el.hnTot.textContent = total;
-    el.hnPrev.disabled = current <= 1;
-    el.hnNext.disabled = current >= total;
-    el.hnResume.classList.toggle('hidden', !isViewingPast);
-    // Показываем блок только если есть история
-    el.handNav.classList.toggle('hidden', total === 0);
+    // Всегда показывается, кнопки серые при отсутствии истории
+    el.handNav.classList.remove('hidden');
+    el.hnPrev.disabled = !(total > 0 && current > 1);
+    el.hnNext.disabled = !(total > 0 && current < total);
+    // ▶▶ активна только когда листаем историю назад
+    el.hnResume.disabled = !isViewingPast;
+    // ⏹ всегда активна (при идущей сессии)
+    el.hnStop.disabled = false;
   }
 
   function applySettingsToUI() {
     el.setCardStyle.value      = settings.cardStyle;
     el.setStackDisplay.value   = settings.stackDisplay;
-    el.setBlindGrowth.value    = settings.blindGrowth;
+    el.setBlindGrowth.value    = String(settings.blindGrowthHands);
     el.setTurnTime.value       = String(settings.turnTime);
     el.setShowStrategies.checked = settings.showStrategies;
   }
 
   function readSettingsFromUI() {
-    settings.cardStyle      = el.setCardStyle.value;
-    settings.stackDisplay   = el.setStackDisplay.value;
-    settings.blindGrowth    = el.setBlindGrowth.value;
-    settings.turnTime       = Number(el.setTurnTime.value);
-    settings.showStrategies = el.setShowStrategies.checked;
+    settings.cardStyle         = el.setCardStyle.value;
+    settings.stackDisplay      = el.setStackDisplay.value;
+    settings.blindGrowthHands  = Number(el.setBlindGrowth.value);
+    settings.turnTime          = Number(el.setTurnTime.value);
+    settings.showStrategies    = el.setShowStrategies.checked;
     applyCardStyle();
     if (settings.onChange) settings.onChange(settings);
   }
@@ -2290,8 +2219,8 @@ const UI = (() => {
     renderTable, updateSeats, updateBoard, updatePot, updateLevel,
     updateStacks, updateActiveHighlight,
     showActions, hideActions,
-    updateStats, startTimer, stopTimer,
-    openBottomPanel, closeBottomPanel, openTopPanel, closeTopPanel,
+    updateStats,
+    openBottomPanel, closeBottomPanel, openTopPanel, closeTopPanel, closeAllPanels,
     updateHistoryInfo,
     readSettingsFromUI, applySettingsToUI,
     createCardElement, formatChips
@@ -2309,8 +2238,8 @@ const UI = (() => {
   const session = {
     state: null, heroIndex: 0,
     stats: { hands: 0, hit: 0, miss: 0, place: null, streak: 0 },
-    waitingForHero: false, active: false, paused: false,
-    heroEntered: false, blindTimerId: null,
+    waitingForHero: false, active: false,
+    heroEntered: false,
     history: [], viewingIndex: -1, autoNextTimerId: null
   };
 
@@ -2326,15 +2255,12 @@ const UI = (() => {
   function cacheDom() {
     el.btnStart       = document.getElementById('btn-start');
     el.startOverlay   = document.getElementById('start-overlay');
-    el.btnPause       = document.getElementById('btn-pause');
-    el.btnNew         = document.getElementById('btn-new');
-    el.btnSettings    = document.getElementById('btn-settings');
-    el.panelHandle    = document.getElementById('panel-handle');
-    el.topPanelHandle = document.getElementById('top-panel-handle');
     el.bottomPanel    = document.getElementById('bottom-panel');
     el.topPanel       = document.getElementById('top-panel');
+    el.tapClose       = document.getElementById('tap-close');
     el.hnPrev         = document.getElementById('hn-prev');
     el.hnNext         = document.getElementById('hn-next');
+    el.hnStop         = document.getElementById('hn-stop');
     el.hnResume       = document.getElementById('hn-resume');
     el.swipeCenter    = document.getElementById('swipe-center');
   }
@@ -2344,32 +2270,6 @@ const UI = (() => {
       el.startOverlay.classList.add('hidden');
       startNewSession();
     });
-
-    el.btnPause.addEventListener('click', () => {
-      if (!session.active) return;
-      if (!session.paused) {
-        session.paused = true;
-        el.btnPause.textContent = '▶';
-        UI.hideActions();
-        UI.stopTimer();
-      } else {
-        session.paused = false;
-        el.btnPause.textContent = '⏸';
-        processTurn();
-      }
-    });
-
-    el.btnNew.addEventListener('click', () => {
-      if (confirm('Начать новую сессию?')) {
-        UI.closeBottomPanel();
-        UI.closeTopPanel();
-        startNewSession();
-      }
-    });
-
-    el.btnSettings.addEventListener('click', () => UI.openBottomPanel());
-    el.panelHandle.addEventListener('click', () => UI.closeBottomPanel());
-    el.topPanelHandle.addEventListener('click', () => UI.closeTopPanel());
 
     // === Свайпы в середине стола ===
     let startX = 0, startY = 0, tracking = false;
@@ -2387,19 +2287,17 @@ const UI = (() => {
       const dx = endX - startX;
       const dy = endY - startY;
       const minDist = 40;
-      // Отсекаем короткие и горизонтальные
       if (Math.abs(dy) < minDist) return;
       if (Math.abs(dx) > Math.abs(dy)) return;
       if (dy < 0) {
-        // свайп вверх → настройки снизу
-        UI.closeTopPanel();
         UI.openBottomPanel();
       } else {
-        // свайп вниз → статистика сверху
-        UI.closeBottomPanel();
         UI.openTopPanel();
       }
     }, { passive: true });
+
+    // === Тап по оверлею — закрывает открытую панель ===
+    el.tapClose.addEventListener('click', () => UI.closeAllPanels());
 
     // === Свайпы по нижней панели вниз — закрытие ===
     let bpStartY = 0, bpTracking = false;
@@ -2434,26 +2332,28 @@ const UI = (() => {
     ['set-card-style','set-stack-display','set-blind-growth','set-turn-time','set-show-strategies'].forEach(id => {
       document.getElementById(id).addEventListener('change', () => {
         UI.readSettingsFromUI();
-        if (session.state) UI.updateSeats(session.state);
+        if (session.state) UI.updateLevel(session.state);
       });
     });
 
     el.hnPrev.addEventListener('click', () => navigateHistory(-1));
     el.hnNext.addEventListener('click', () => navigateHistory(1));
     el.hnResume.addEventListener('click', () => resumeGame());
+    el.hnStop.addEventListener('click', () => {
+      if (confirm('Остановить игру и начать новую сессию?')) {
+        startNewSession();
+      }
+    });
   }
 
   function startNewSession() {
-    stopBlindTimer();
     clearTimeout(session.autoNextTimerId);
     session.active = true;
-    session.paused = false;
     session.stats = { hands: 0, hit: 0, miss: 0, place: null, streak: 0 };
     session.waitingForHero = false;
     session.heroEntered = false;
     session.history = [];
     session.viewingIndex = -1;
-    el.btnPause.textContent = '⏸';
 
     const botStrategies = Bots.assignStrategies(7);
     const players = [{ id: 'hero', name: 'Ты', isHero: true, strategy: null, stack: Engine.STARTING_STACK }];
@@ -2469,7 +2369,6 @@ const UI = (() => {
     UI.updateStats(session.stats);
     UI.updateHistoryInfo(0, 0, false);
 
-    restartBlindTimer();
     startHand();
   }
 
@@ -2495,7 +2394,6 @@ const UI = (() => {
 
   function processTurn() {
     const state = session.state;
-    if (session.paused) return;
     if (state.handOver) { finishHand(); return; }
 
     const idx = state.actingIndex;
@@ -2515,7 +2413,6 @@ const UI = (() => {
 
   function heroTurn(hero) {
     const state = session.state;
-    const toCall = Math.max(0, state.currentBet - hero.committedThisStreet);
     UI.showActions(state, session.heroIndex, {
       onFold:  () => heroAct({ type: 'fold' }),
       onCheck: () => heroAct({ type: 'check' }),
@@ -2523,19 +2420,11 @@ const UI = (() => {
       onRaise: (amount) => heroAct({ type: 'raise', amount }),
       onAllIn: () => heroAct({ type: 'allin' })
     });
-    UI.stopTimer();
-    if (UI.settings.turnTime > 0) {
-      UI.startTimer(UI.settings.turnTime, () => {
-        if (toCall === 0) heroAct({ type: 'check' });
-        else heroAct({ type: 'fold' });
-      });
-    }
   }
 
   function heroAct(action) {
     if (!session.waitingForHero) return;
     session.waitingForHero = false;
-    UI.stopTimer();
     UI.hideActions();
     const state = session.state;
     const hero = state.players[session.heroIndex];
@@ -2559,7 +2448,7 @@ const UI = (() => {
     const state = session.state;
     const delay = 400 + Engine.cryptoRandomInt(500);
     setTimeout(() => {
-      if (state.handOver || !session.active || session.paused) return;
+      if (state.handOver || !session.active) return;
       const ctx = buildBotContext(bot, idx);
       const decision = Bots.decide(ctx);
       const toCall = Math.max(0, state.currentBet - bot.committedThisStreet);
@@ -2614,7 +2503,6 @@ const UI = (() => {
 
   function advanceOrFinish() {
     const state = session.state;
-    if (session.paused) return;
     if (state.handOver) { finishHand(); return; }
 
     if (Engine.isBettingRoundComplete(state)) {
@@ -2671,16 +2559,16 @@ const UI = (() => {
 
     clearTimeout(session.autoNextTimerId);
     session.autoNextTimerId = setTimeout(() => {
-      if (!session.active || session.paused) return;
+      if (!session.active) return;
       if (session.viewingIndex >= 0) return;
 
-      if (UI.settings.blindGrowth === 'hands') {
-        state.handsAtLevel++;
-        if (state.handsAtLevel >= 10) {
-          state.handsAtLevel = 0;
-          state.levelIndex = Math.min(state.levelIndex + 1, Engine.BLIND_LEVELS.length - 1);
-        }
+      const period = UI.settings.blindGrowthHands || 10;
+      state.handsAtLevel++;
+      if (state.handsAtLevel >= period) {
+        state.handsAtLevel = 0;
+        state.levelIndex = Math.min(state.levelIndex + 1, Engine.BLIND_LEVELS.length - 1);
       }
+
       const heroP = state.players[session.heroIndex];
       if (heroP.eliminated || heroP.stack <= 0) { endSession('Герой вылетел'); return; }
       const alive = state.players.filter(p => !p.eliminated);
@@ -2777,9 +2665,7 @@ const UI = (() => {
 
   function endSession(title) {
     session.active = false;
-    stopBlindTimer();
     clearTimeout(session.autoNextTimerId);
-    UI.stopTimer();
     UI.hideActions();
     const alive = session.state.players.filter(p => !p.eliminated).length;
     const heroAlive = !session.state.players[session.heroIndex].eliminated;
@@ -2790,22 +2676,6 @@ const UI = (() => {
           '\nТочность: ' + (session.stats.hands > 0 ? Math.round(session.stats.hit / (session.stats.hit + session.stats.miss) * 100) : 0) + '%');
     el.startOverlay.classList.remove('hidden');
     el.btnStart.textContent = 'Начать заново';
-  }
-
-  function restartBlindTimer() {
-    stopBlindTimer();
-    if (UI.settings.blindGrowth !== 'time') return;
-    session.blindTimerId = setInterval(() => {
-      if (!session.active || session.paused) return;
-      const state = session.state;
-      state.levelIndex = Math.min(state.levelIndex + 1, Engine.BLIND_LEVELS.length - 1);
-      state.handsAtLevel = 0;
-      UI.updateLevel(state);
-    }, 5 * 60 * 1000);
-  }
-
-  function stopBlindTimer() {
-    if (session.blindTimerId) { clearInterval(session.blindTimerId); session.blindTimerId = null; }
   }
 
 })();
