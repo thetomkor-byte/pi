@@ -17,7 +17,8 @@
   --danger: #d94f3d;
   --ok: #2fb571;
   --bar-h: clamp(56px, 8vmin, 68px);
-  --side-x: 14%;
+  --board-card-w: clamp(40px, 6vmin, 56px);
+  --board-card-h: clamp(56px, 8.4vmin, 78px);
 }
 
 html, body {
@@ -124,18 +125,20 @@ html, body {
 #board-cards {
   display: flex;
   gap: clamp(4px, 0.8vmin, 7px);
-  justify-content: center;
-  margin-bottom: clamp(6px, 1vmin, 12px);
-  height: clamp(42px, 6.3vmin, 60px);
+  justify-content: flex-start;
   align-items: center;
+  margin-bottom: clamp(6px, 1vmin, 12px);
+  height: var(--board-card-h);
+  width: calc(var(--board-card-w) * 5 + clamp(4px, 0.8vmin, 7px) * 4);
+  max-width: 100%;
 }
 #board-cards .card {
-  --card-w: clamp(30px, 4.5vmin, 42px);
-  --card-h: clamp(42px, 6.3vmin, 60px);
-  font-size: clamp(20px, 3vmin, 28px);
-  padding: 1px 3px;
+  --card-w: var(--board-card-w);
+  --card-h: var(--board-card-h);
+  font-size: clamp(24px, 3.8vmin, 36px);
+  padding: 1px 4px;
 }
-#board-cards .card .suit { font-size: clamp(24px, 3.6vmin, 34px); }
+#board-cards .card .suit { font-size: clamp(28px, 4.4vmin, 42px); }
 
 #table-info {
   display: flex;
@@ -824,7 +827,7 @@ html, body {
     </label>
     <label class="setting">
       <span>Показывать стратегии ботов</span>
-      <input type="checkbox" id="set-show-strategies" checked />
+      <input type="checkbox" id="set-show-strategies" />
     </label>
   </div>
 
@@ -1653,13 +1656,11 @@ const UI = (() => {
     stackDisplay: 'bb',
     blindGrowth: 'hands',
     turnTime: 0,
-    showStrategies: true
+    showStrategies: false
   };
 
   const el = {};
 
-  /* Левые места выровнены по одной вертикали (x: 14).
-     Правые — по одной вертикали (x: 86). Центр (герой, UTG1) — x: 50. */
   const SEAT_POSITIONS = [
     { x: 50, y: 74, side: 'bottom' },
     { x: 14, y: 58, side: 'left'   },
@@ -2206,6 +2207,7 @@ const UI = (() => {
     ['set-card-style','set-stack-display','set-blind-growth','set-turn-time','set-show-strategies'].forEach(id => {
       document.getElementById(id).addEventListener('change', () => {
         UI.readSettingsFromUI();
+        UI.updateSeats(session.state || { players: [] });
       });
     });
 
