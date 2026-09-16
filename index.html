@@ -429,7 +429,6 @@ html, body {
 }
 .seat .bet-chips.hidden { display: none; }
 
-/* ===== БЛОК ДЕЙСТВИЙ ГЕРОЯ ===== */
 #hero-actions {
   position: absolute;
   left: calc(var(--dash-inset) + var(--edge));
@@ -639,7 +638,6 @@ html, body {
 #quick-percent-list button.allin-btn .label { color: var(--allin); }
 #quick-percent-list button .value { color: var(--muted); font-weight: 600; font-size: clamp(9px, 1.2vmin, 11px); }
 
-/* ===== НИЖНЯЯ ПАНЕЛЬ ===== */
 #bottom-panel {
   position: absolute;
   bottom: 0; left: 0; right: 0;
@@ -692,7 +690,6 @@ html, body {
   accent-color: var(--gold);
 }
 
-/* ===== ВЕРХНЯЯ ПАНЕЛЬ ===== */
 #top-panel {
   position: absolute;
   top: 0; left: 0; right: 0;
@@ -1191,7 +1188,9 @@ const Engine = (() => {
         const pay = Math.min(toCall, p.stack);
         p.stack -= pay; p.committedThisStreet += pay;
         p.committedTotal += pay; state.pot += pay;
-        p.hasActedThisStreet = true; p.lastAction = 'call';
+        p.hasActedThisStreet = true;
+        // Если после колла стек пуст — это фактически ALL-IN
+        p.lastAction = (p.stack === 0) ? 'allin' : 'call';
         p.acted = true;
         if (p.stack === 0) p.allIn = true;
         break;
@@ -1211,7 +1210,9 @@ const Engine = (() => {
         for (const other of state.players) {
           if (other !== p && !other.folded && !other.eliminated && !other.allIn) other.hasActedThisStreet = false;
         }
-        p.hasActedThisStreet = true; p.lastAction = 'raise';
+        p.hasActedThisStreet = true;
+        // Если после рейза стек пуст — это фактически ALL-IN
+        p.lastAction = (p.stack === 0) ? 'allin' : 'raise';
         p.acted = true;
         if (p.stack === 0) p.allIn = true;
         break;
@@ -1846,8 +1847,8 @@ const UI = (() => {
     seat.style.left = pos.x + '%';
     seat.style.top  = pos.y + '%';
     if (player.isHero) {
-      // Герой поднят ещё на 4px: было calc(-50% - 1px), стало calc(-50% - 5px)
-      seat.style.transform = 'translate(-50%, calc(-50% - 5px))';
+      // Герой поднят ещё на 4px: было calc(-50% - 5px), стало calc(-50% - 9px)
+      seat.style.transform = 'translate(-50%, calc(-50% - 9px))';
     }
     if (pos.side) seat.classList.add(pos.side);
     if (player.isHero) seat.classList.add('hero');
@@ -1913,7 +1914,7 @@ const UI = (() => {
       return;
     }
     const map = { fold:'FOLD', check:'CHECK', call:'CALL', raise:'RAISE', allin:'ALL-IN' };
-    // ALL-IN получает отдельный красный класс, RAISE — золотой
+    // ALL-IN получает отдельный красный класс
     const cls = { fold:'fold', check:'check', call:'call', raise:'raise', allin:'allin' };
     badge.textContent = map[p.lastAction] || p.lastAction.toUpperCase();
     badge.className = 'action-badge ' + (cls[p.lastAction] || '');
