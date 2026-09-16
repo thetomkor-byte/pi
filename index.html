@@ -428,7 +428,7 @@ html, body {
 }
 .seat .bet-chips.hidden { display: none; }
 
-/* ===== БЛОК ДЕЙСТВИЙ ГЕРОЯ: строка истории + слайдер + кнопки ===== */
+/* ===== БЛОК ДЕЙСТВИЙ ГЕРОЯ: всегда видим, меняется только активность ===== */
 #hero-actions {
   position: absolute;
   left: calc(var(--dash-inset) + var(--edge));
@@ -443,15 +443,22 @@ html, body {
   padding: clamp(5px, 0.8vmin, 8px) clamp(6px, 0.9vmin, 9px);
   z-index: 45;
   backdrop-filter: blur(4px);
+  transition: opacity .2s ease;
 }
-#hero-actions.hidden { display: none; }
+#hero-actions.inactive {
+  opacity: 0.55;
+}
+#hero-actions.inactive #hero-slider-row,
+#hero-actions.inactive #hero-buttons {
+  pointer-events: none;
+}
 
 /* Строка истории раздач — внутри общего блока */
 #hand-nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: clamp(4px, 0.7vmin, 8px);
+  gap: clamp(10px, 1.4vmin, 14px);
   width: 100%;
   padding-bottom: clamp(3px, 0.5vmin, 5px);
   border-bottom: 1px solid #2a2520;
@@ -460,13 +467,13 @@ html, body {
   background: transparent;
   border: none;
   color: var(--text);
-  font-size: clamp(11px, 1.4vmin, 13px);
+  font-size: clamp(12px, 1.6vmin, 15px);
   font-weight: 800;
-  padding: 2px 6px;
+  padding: 3px 8px;
   cursor: pointer;
   line-height: 1;
-  min-width: 20px;
-  min-height: 20px;
+  min-width: 24px;
+  min-height: 24px;
   border-radius: 4px;
 }
 #hand-nav button:active:not(:disabled) { background: rgba(255,255,255,.06); }
@@ -476,7 +483,7 @@ html, body {
   color: var(--gold);
   font-weight: 800;
   text-align: center;
-  font-size: clamp(10px, 1.3vmin, 12px);
+  font-size: clamp(11px, 1.4vmin, 13px);
   letter-spacing: .4px;
   flex: 1;
   white-space: nowrap;
@@ -596,6 +603,11 @@ html, body {
   flex-direction: column;
   gap: clamp(3px, 0.5vmin, 5px);
   z-index: 45;
+  transition: opacity .2s ease;
+}
+#quick-percent-list.inactive {
+  opacity: 0.55;
+  pointer-events: none;
 }
 #quick-percent-list button {
   background: rgba(20,18,16,.92);
@@ -811,11 +823,11 @@ html, body {
       </div>
       <div id="seats"></div>
 
-      <div id="hero-actions" class="hidden">
+      <div id="hero-actions" class="inactive">
         <div id="hand-nav">
-          <button id="hn-prev" title="Назад">◀</button>
+          <button id="hn-prev" title="Назад" disabled>◀</button>
           <span class="nav-counter"><span id="hn-cur">0</span><span class="total"> / </span><span id="hn-tot">0</span></span>
-          <button id="hn-next" title="Вперёд">▶</button>
+          <button id="hn-next" title="Вперёд" disabled>▶</button>
           <button id="hn-resume" title="Продолжить" disabled>▶▶</button>
         </div>
         <div id="hero-slider-row">
@@ -823,16 +835,16 @@ html, body {
           <span id="raise-amount-mini">0</span>
         </div>
         <div id="hero-buttons">
-          <button id="btn-fold">Fold</button>
-          <button id="btn-check">Check</button>
-          <button id="btn-call">
+          <button id="btn-fold" disabled>Fold</button>
+          <button id="btn-check" disabled>Check</button>
+          <button id="btn-call" disabled>
             <span class="call-label">Call</span>
             <span class="call-amount" id="call-amount">—</span>
           </button>
         </div>
       </div>
 
-      <div id="quick-percent-list"></div>
+      <div id="quick-percent-list" class="inactive"></div>
     </div>
   </div>
 
@@ -1763,7 +1775,6 @@ const UI = (() => {
     el.tapClose       = document.getElementById('tap-close');
     el.tableScene     = document.getElementById('table-scene');
 
-    el.handNav        = document.getElementById('hand-nav');
     el.hnPrev         = document.getElementById('hn-prev');
     el.hnNext         = document.getElementById('hn-next');
     el.hnCur          = document.getElementById('hn-cur');
@@ -2007,6 +2018,12 @@ const UI = (() => {
     return amount.toLocaleString('ru-RU');
   }
 
+  /* Активирует кнопки слайдера и Fold/Check/Call. Строку истории не трогает. */
+  function setHeroActionsActive(active) {
+    el.heroActions.classList.toggle('inactive', !active);
+    el.quickPercentList.classList.toggle('inactive', !active);
+  }
+
   function showActions(state, heroIndex, handlers) {
     const hero = state.players[heroIndex];
     const toCall = Math.max(0, state.currentBet - hero.committedThisStreet);
@@ -2014,7 +2031,8 @@ const UI = (() => {
     const canCall  = toCall > 0 && toCall < hero.stack;
     const canRaise = hero.stack > toCall;
 
-    el.heroActions.classList.remove('hidden');
+    setHeroActionsActive(true);
+
     el.btnFold.disabled = false;
     el.btnCheck.disabled = !canCheck;
     el.btnCall.disabled = !canCall;
@@ -2143,11 +2161,6 @@ const UI = (() => {
     }
   }
 
-  function hideActions() {
-    el.heroActions.classList.add('hidden');
-    el.quickPercentList.innerHTML = '';
-  }
-
   function updateStats(stats) {
     el.statsHit.textContent = stats.hit;
     el.statsMiss.textContent = stats.miss;
@@ -2160,11 +2173,15 @@ const UI = (() => {
     el.statsPlace.textContent = stats.place ? `${stats.place}/${Engine.SEATS}` : '—';
   }
 
+  /* Обновляет строку истории. Если total === 0 — всё серое. */
   function updateHistoryInfo(current, total, isViewingPast) {
     el.hnCur.textContent = current;
     el.hnTot.textContent = total;
-    el.hnPrev.disabled = !(total > 0 && current > 1);
-    el.hnNext.disabled = !(total > 0 && current < total);
+    // ◀ активна только если листаем историю и есть шаг назад
+    el.hnPrev.disabled = !(total > 0 && isViewingPast && current > 1);
+    // ▶ активна только если листаем историю и есть шаг вперёд
+    el.hnNext.disabled = !(total > 0 && isViewingPast && current < total);
+    // ▶▶ активна только если листаем историю
     el.hnResume.disabled = !isViewingPast;
   }
 
@@ -2190,7 +2207,7 @@ const UI = (() => {
     settings, init, el,
     renderTable, updateSeats, updateBoard, updatePot, updateLevel,
     updateStacks, updateActiveHighlight,
-    showActions, hideActions,
+    showActions, setHeroActionsActive,
     updateStats,
     openBottomPanel, closeBottomPanel, openTopPanel, closeTopPanel, closeAllPanels,
     updateHistoryInfo,
@@ -2256,7 +2273,6 @@ const UI = (() => {
       startNewSession();
     });
 
-    // === Свайпы в середине стола ===
     let startX = 0, startY = 0, tracking = false;
     el.swipeCenter.addEventListener('touchstart', (e) => {
       if (e.touches.length !== 1) return;
@@ -2365,7 +2381,7 @@ const UI = (() => {
     UI.updatePot(session.state);
     UI.updateSeats(session.state);
     UI.updateLevel(session.state);
-    UI.updateHistoryInfo(session.state.handNumber, session.state.handNumber, false);
+    UI.updateHistoryInfo(session.state.handNumber, session.history.length, false);
     processTurn();
   }
 
@@ -2383,7 +2399,7 @@ const UI = (() => {
       heroTurn(player);
     } else {
       session.waitingForHero = false;
-      UI.hideActions();
+      UI.setHeroActionsActive(false);
       botTurn(player, idx);
     }
   }
@@ -2402,7 +2418,7 @@ const UI = (() => {
   function heroAct(action) {
     if (!session.waitingForHero) return;
     session.waitingForHero = false;
-    UI.hideActions();
+    UI.setHeroActionsActive(false);
     const state = session.state;
     const hero = state.players[session.heroIndex];
     if (action.type === 'call' || action.type === 'raise' || action.type === 'allin') session.heroEntered = true;
@@ -2528,7 +2544,7 @@ const UI = (() => {
     UI.updateSeats(state, true);
     UI.updatePot(state);
     UI.updateActiveHighlight(state);
-    UI.hideActions();
+    UI.setHeroActionsActive(false);
     UI.updateHistoryInfo(session.history.length, session.history.length, false);
 
     highlightWinners(state);
@@ -2615,7 +2631,7 @@ const UI = (() => {
     UI.updatePot(snap);
     UI.updateLevel(snap);
     UI.updateActiveHighlight({ actingIndex: -1, handOver: true, players: snap.players });
-    UI.hideActions();
+    UI.setHeroActionsActive(false);
     highlightWinners(snap);
     UI.updateHistoryInfo(session.viewingIndex + 1, session.history.length, true);
   }
@@ -2629,6 +2645,7 @@ const UI = (() => {
       UI.updatePot(state);
       UI.updateLevel(state);
       highlightWinners(state);
+      UI.setHeroActionsActive(false);
     } else {
       UI.updateBoard(state);
       UI.updateSeats(state);
@@ -2636,6 +2653,7 @@ const UI = (() => {
       UI.updateLevel(state);
       UI.updateActiveHighlight(state);
       if (session.waitingForHero) heroTurn(state.players[session.heroIndex]);
+      else UI.setHeroActionsActive(false);
     }
     UI.updateHistoryInfo(session.history.length, session.history.length, false);
   }
@@ -2643,7 +2661,7 @@ const UI = (() => {
   function endSession(title) {
     session.active = false;
     clearTimeout(session.autoNextTimerId);
-    UI.hideActions();
+    UI.setHeroActionsActive(false);
     const alive = session.state.players.filter(p => !p.eliminated).length;
     const heroAlive = !session.state.players[session.heroIndex].eliminated;
     session.stats.place = heroAlive ? alive : (alive + 1);
