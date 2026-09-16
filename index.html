@@ -280,26 +280,27 @@ button.disabled,
   pointer-events: auto;
   touch-action: manipulation;
 }
-/* Единый размер карт ботов — как в рубашке, во всех состояниях */
+
+/* Карты ботов — всегда размер как при фолде: clamp(32..44) × 0.9 */
 .seat .seat-cards .card {
-  --card-w: clamp(32px, 4.6vmin, 44px);
-  --card-h: clamp(45px, 6.5vmin, 62px);
-  font-size: clamp(20px, 3vmin, 30px);
+  --card-w: clamp(28.8px, 4.14vmin, 39.6px);
+  --card-h: clamp(40.5px, 5.85vmin, 55.8px);
+  font-size: clamp(18px, 2.7vmin, 27px);
   padding: 1px 3px;
   border-radius: clamp(4px, 0.6vmin, 6px);
 }
-.seat .seat-cards .card .suit { font-size: clamp(24px, 3.6vmin, 36px); }
+.seat .seat-cards .card .suit { font-size: clamp(21.6px, 3.24vmin, 32.4px); }
 
-/* Единый размер карт героя — как у сфолженного */
+/* Карты героя — всегда размер как у его сфолженных: clamp(42..54) × 0.9 и clamp(59..76) × 0.9 */
 .seat.hero .seat-cards .card {
-  --card-w: clamp(42px, 6.2vmin, 54px);
-  --card-h: clamp(59px, 8.7vmin, 76px);
-  font-size: clamp(24px, 3.8vmin, 34px);
+  --card-w: clamp(37.8px, 5.58vmin, 48.6px);
+  --card-h: clamp(53.1px, 7.83vmin, 68.4px);
+  font-size: clamp(21.6px, 3.42vmin, 30.6px);
   box-shadow:
     0 0 0 1.5px rgba(255,203,43,.55),
     0 3px 10px rgba(0,0,0,.75);
 }
-.seat.hero .seat-cards .card .suit { font-size: clamp(28px, 4.4vmin, 40px); }
+.seat.hero .seat-cards .card .suit { font-size: clamp(25.2px, 3.96vmin, 36px); }
 
 .seat .pos-row {
   display: flex;
