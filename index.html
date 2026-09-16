@@ -48,7 +48,6 @@ html, body {
     radial-gradient(ellipse at 50% 50%, #12100e 0%, #0a0a0a 70%, #050505 100%);
 }
 
-/* Стол занимает всю высоту, учитывая Safari-панель через dvh */
 #table-scene {
   position: absolute;
   top: 0; left: 0; right: 0;
@@ -429,60 +428,7 @@ html, body {
 }
 .seat .bet-chips.hidden { display: none; }
 
-/* ===== КОМПАКТНЫЙ БЛОК ПЕРЕЛИСТЫВАНИЯ (одна строка над слайдером) ===== */
-/* Левый край = левому краю #hero-actions */
-/* Правый край = 2px от левого края #quick-percent-list */
-/* Низ = 2px над верхним краем #hero-actions */
-#hand-nav {
-  position: absolute;
-  left: calc(var(--dash-inset) + var(--edge));
-  right: calc(var(--dash-inset) + var(--edge) + var(--pct-block-w) + 2px);
-  /* #hero-actions прижат к bottom: calc(dash-inset + edge - 1px).
-     Высота #hero-actions ~ clamp(56px, 9vmin, 76px). Ставим на 2px выше. */
-  bottom: calc(var(--dash-inset) + var(--edge) + clamp(58px, 9.2vmin, 78px) + 2px);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: clamp(6px, 1vmin, 12px);
-  background: rgba(20,18,16,.88);
-  border: 1px solid #3a3530;
-  border-radius: 8px;
-  padding: 6px 10px;
-  z-index: 46;
-  backdrop-filter: blur(3px);
-}
-#hand-nav.hidden { display: none; }
-
-#hand-nav button {
-  background: transparent;
-  border: none;
-  color: var(--text);
-  font-size: 14px;
-  font-weight: 800;
-  padding: 4px 8px;
-  cursor: pointer;
-  line-height: 1;
-  min-width: 26px;
-  min-height: 26px;
-  border-radius: 6px;
-}
-#hand-nav button:active:not(:disabled) { background: rgba(255,255,255,.06); }
-#hand-nav button:disabled { opacity: .28; cursor: not-allowed; }
-
-#hand-nav .nav-counter {
-  color: var(--gold);
-  font-weight: 800;
-  text-align: center;
-  font-size: 12px;
-  letter-spacing: .4px;
-  flex: 1;
-  white-space: nowrap;
-}
-#hand-nav .nav-counter .total { color: var(--muted); }
-
-#hn-resume { color: var(--ok); font-size: 13px; }
-#hn-resume:disabled { color: var(--text); }
-
+/* ===== БЛОК ДЕЙСТВИЙ ГЕРОЯ: строка истории + слайдер + кнопки ===== */
 #hero-actions {
   position: absolute;
   left: calc(var(--dash-inset) + var(--edge));
@@ -490,7 +436,7 @@ html, body {
   bottom: calc(var(--dash-inset) + var(--edge) - 1px);
   display: flex;
   flex-direction: column;
-  gap: clamp(4px, 0.7vmin, 6px);
+  gap: clamp(3px, 0.5vmin, 5px);
   background: rgba(20,18,16,.92);
   border: 1px solid #3a3530;
   border-radius: 10px;
@@ -499,6 +445,46 @@ html, body {
   backdrop-filter: blur(4px);
 }
 #hero-actions.hidden { display: none; }
+
+/* Строка истории раздач — внутри общего блока */
+#hand-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(4px, 0.7vmin, 8px);
+  width: 100%;
+  padding-bottom: clamp(3px, 0.5vmin, 5px);
+  border-bottom: 1px solid #2a2520;
+}
+#hand-nav button {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: clamp(11px, 1.4vmin, 13px);
+  font-weight: 800;
+  padding: 2px 6px;
+  cursor: pointer;
+  line-height: 1;
+  min-width: 20px;
+  min-height: 20px;
+  border-radius: 4px;
+}
+#hand-nav button:active:not(:disabled) { background: rgba(255,255,255,.06); }
+#hand-nav button:disabled { opacity: .28; cursor: not-allowed; }
+
+#hand-nav .nav-counter {
+  color: var(--gold);
+  font-weight: 800;
+  text-align: center;
+  font-size: clamp(10px, 1.3vmin, 12px);
+  letter-spacing: .4px;
+  flex: 1;
+  white-space: nowrap;
+}
+#hand-nav .nav-counter .total { color: var(--muted); }
+
+#hn-resume { color: var(--ok); }
+#hn-resume:disabled { color: var(--text); }
 
 #hero-slider-row {
   display: flex;
@@ -825,14 +811,13 @@ html, body {
       </div>
       <div id="seats"></div>
 
-      <div id="hand-nav">
-        <button id="hn-prev" title="Назад">◀</button>
-        <span class="nav-counter"><span id="hn-cur">0</span><span class="total"> / </span><span id="hn-tot">0</span></span>
-        <button id="hn-next" title="Вперёд">▶</button>
-        <button id="hn-resume" title="Продолжить" disabled>▶▶</button>
-      </div>
-
       <div id="hero-actions" class="hidden">
+        <div id="hand-nav">
+          <button id="hn-prev" title="Назад">◀</button>
+          <span class="nav-counter"><span id="hn-cur">0</span><span class="total"> / </span><span id="hn-tot">0</span></span>
+          <button id="hn-next" title="Вперёд">▶</button>
+          <button id="hn-resume" title="Продолжить" disabled>▶▶</button>
+        </div>
         <div id="hero-slider-row">
           <input type="range" id="raise-slider-horiz" min="0" max="100" value="0" />
           <span id="raise-amount-mini">0</span>
@@ -2253,7 +2238,6 @@ const UI = (() => {
   }
 
   function bindDoubleTapGuard() {
-    // Запрещаем zoom при двойном тапе в пределах #poker-table
     let lastTapTime = 0;
     const table = document.getElementById('poker-table');
     if (!table) return;
@@ -2299,7 +2283,6 @@ const UI = (() => {
 
     el.tapClose.addEventListener('click', () => UI.closeAllPanels());
 
-    // === Свайпы по нижней панели вниз ===
     let bpStartY = 0, bpTracking = false;
     el.bottomPanel.addEventListener('touchstart', (e) => {
       if (e.touches.length !== 1) return;
@@ -2314,7 +2297,6 @@ const UI = (() => {
       if (dy > 60) UI.closeBottomPanel();
     }, { passive: true });
 
-    // === Свайпы по верхней панели вверх ===
     let tpStartY = 0, tpTracking = false;
     el.topPanel.addEventListener('touchstart', (e) => {
       if (e.touches.length !== 1) return;
