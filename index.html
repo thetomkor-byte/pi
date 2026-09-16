@@ -266,6 +266,9 @@ html, body {
   justify-content: center;
   min-height: 0;
   margin-bottom: clamp(3px, 0.6vmin, 5px);
+  position: relative;
+  pointer-events: auto;
+  touch-action: manipulation;
 }
 .seat .seat-cards .card {
   --card-w: clamp(32px, 4.6vmin, 44px);
@@ -335,7 +338,7 @@ html, body {
 .seat.right .dealer-chip,
 .seat.top .dealer-chip { left: clamp(-26px, -3.4vmin, -22px); top: 36px; right: auto; }
 .seat.hero .dealer-chip {
-  top: clamp(-28px, -3.6vmin, -22px);
+  top: clamp(-29px, -3.7vmin, -23px);
   left: 50%;
   right: auto;
   transform: translateX(-50%);
@@ -346,6 +349,13 @@ html, body {
   font-weight: 700;
   font-size: clamp(12px, 1.6vmin, 14px);
   text-shadow: 0 1px 3px rgba(0,0,0,.95);
+  position: relative;
+  display: inline-block;
+  padding: 6px 10px;
+  margin: -6px -10px;
+  pointer-events: auto;
+  touch-action: manipulation;
+  border-radius: 4px;
 }
 
 .seat.active .seat-cards .card {
@@ -1846,8 +1856,8 @@ const UI = (() => {
     seat.style.left = pos.x + '%';
     seat.style.top  = pos.y + '%';
     if (player.isHero) {
-      // Герой поднят ещё на 1px: было calc(-50% - 9px), стало calc(-50% - 10px)
-      seat.style.transform = 'translate(-50%, calc(-50% - 10px))';
+      // Герой поднят ещё на 1px: было calc(-50% - 10px), стало calc(-50% - 11px)
+      seat.style.transform = 'translate(-50%, calc(-50% - 11px))';
     }
     if (pos.side) seat.classList.add(pos.side);
     if (player.isHero) seat.classList.add('hero');
@@ -2054,7 +2064,7 @@ const UI = (() => {
       renderQuickRaiseOptions(state, hero, toCall);
       setupHorizontalSlider(state, hero);
     } else {
-      el.quickPercentList.innerHTML = '';
+      renderQuickRaiseOptions(state, hero, toCall);
     }
 
     bindActionHandlers(state, heroIndex, toCall, handlers);
@@ -2062,17 +2072,18 @@ const UI = (() => {
 
   function renderQuickRaiseOptions(state, hero, toCall) {
     el.quickPercentList.innerHTML = '';
-    if (hero.stack <= toCall) return;
+    if (!hero) return;
 
     const bb = state.blinds.bb;
     const maxTarget = hero.committedThisStreet + hero.stack;
     const minTarget = state.currentBet + state.minRaise;
+    const canRaise = hero.stack > toCall && !hero.folded && !hero.eliminated && hero.stack > 0;
 
     const isPreflopOpen = state.street === 'preflop' && state.currentBet === bb;
 
     let options;
 
-    if (isPreflopOpen) {
+    if (state.street === 'preflop') {
       options = [
         { label: 'ALL-IN', target: maxTarget, allin: true },
         { label: '3.5 BB', target: Math.round(bb * 3.5) },
@@ -2094,13 +2105,14 @@ const UI = (() => {
     for (const opt of options) {
       let target = Math.min(maxTarget, opt.target);
       if (target < minTarget) target = Math.min(minTarget, maxTarget);
-      if (target <= state.currentBet && opt.label !== 'ALL-IN') continue;
-      if (target <= state.currentBet) continue;
+      if (target < state.currentBet) target = state.currentBet;
+      if (target < bb) target = bb;
 
       const btn = document.createElement('button');
       if (opt.allin) btn.classList.add('allin-btn');
       btn.innerHTML = `<span class="label">${opt.label}</span><span class="value">${formatChips(target, state)}</span>`;
       btn.dataset.target = target;
+      btn.disabled = !canRaise;
       el.quickPercentList.appendChild(btn);
     }
   }
@@ -2207,6 +2219,23 @@ const UI = (() => {
     if (settings.onChange) settings.onChange(settings);
   }
 
+  function syncSettingsUI() {
+    el.setStackDisplay.value     = settings.stackDisplay;
+    el.setShowStrategies.checked = settings.showStrategies;
+  }
+
+  function toggleStackDisplay() {
+    settings.stackDisplay = (settings.stackDisplay === 'bb') ? 'chips' : 'bb';
+    syncSettingsUI();
+    if (settings.onChange) settings.onChange(settings);
+  }
+
+  function toggleShowStrategies() {
+    settings.showStrategies = !settings.showStrategies;
+    syncSettingsUI();
+    if (settings.onChange) settings.onChange(settings);
+  }
+
   return {
     settings, init, el,
     renderTable, updateSeats, updateBoard, updatePot, updateLevel,
@@ -2216,7 +2245,9 @@ const UI = (() => {
     openBottomPanel, closeBottomPanel, openTopPanel, closeTopPanel, closeAllPanels,
     updateHistoryInfo,
     readSettingsFromUI, applySettingsToUI,
-    createCardElement, formatChips
+    syncSettingsUI, toggleStackDisplay, toggleShowStrategies,
+    createCardElement, formatChips,
+    renderQuickRaiseOptions
   };
 
 })();
@@ -2256,6 +2287,7 @@ const UI = (() => {
     el.hnNext         = document.getElementById('hn-next');
     el.hnResume       = document.getElementById('hn-resume');
     el.swipeCenter    = document.getElementById('swipe-center');
+    el.seats          = document.getElementById('seats');
   }
 
   function bindDoubleTapGuard() {
@@ -2334,13 +2366,83 @@ const UI = (() => {
     ['set-card-style','set-stack-display','set-blind-growth','set-turn-time','set-show-strategies'].forEach(id => {
       document.getElementById(id).addEventListener('change', () => {
         UI.readSettingsFromUI();
-        if (session.state) UI.updateLevel(session.state);
+        if (session.state) {
+          UI.updateLevel(session.state);
+          UI.updateSeats(session.state, session.state.handOver);
+        }
       });
     });
 
     el.hnPrev.addEventListener('click', () => navigateHistory(-1));
     el.hnNext.addEventListener('click', () => navigateHistory(1));
     el.hnResume.addEventListener('click', () => resumeGame());
+
+    bindSeatInteractions();
+  }
+
+  function bindSeatInteractions() {
+    if (!el.seats) return;
+
+    el.seats.addEventListener('touchend', (e) => {
+      const stackEl = e.target.closest('.stack');
+      const cardsEl = e.target.closest('.seat-cards');
+      const now = Date.now();
+
+      if (stackEl) {
+        const last = stackEl._lastTap || 0;
+        if (now - last < 300) {
+          stackEl._lastTap = 0;
+          e.preventDefault();
+          e.stopPropagation();
+          handleStackDoubleTap();
+          return;
+        }
+        stackEl._lastTap = now;
+        return;
+      }
+
+      if (cardsEl) {
+        const last = cardsEl._lastTap || 0;
+        if (now - last < 300) {
+          cardsEl._lastTap = 0;
+          e.preventDefault();
+          e.stopPropagation();
+          handleCardsDoubleTap();
+          return;
+        }
+        cardsEl._lastTap = now;
+        return;
+      }
+    }, { passive: false });
+  }
+
+  function handleStackDoubleTap() {
+    UI.toggleStackDisplay();
+    if (session.state) {
+      const state = session.state;
+      const showAll = state.handOver || session.viewingIndex >= 0;
+      if (session.viewingIndex >= 0) {
+        UI.updateSeats(session.history[session.viewingIndex], true);
+        UI.updatePot(session.history[session.viewingIndex]);
+      } else {
+        UI.updateSeats(state, showAll);
+        UI.updatePot(state);
+      }
+      UI.updateLevel(session.viewingIndex >= 0 ? session.history[session.viewingIndex] : state);
+    }
+  }
+
+  function handleCardsDoubleTap() {
+    UI.toggleShowStrategies();
+    if (session.state) {
+      const state = session.state;
+      const showAll = state.handOver || session.viewingIndex >= 0;
+      if (session.viewingIndex >= 0) {
+        UI.updateSeats(session.history[session.viewingIndex], true);
+      } else {
+        UI.updateSeats(state, showAll);
+      }
+    }
   }
 
   function startNewSession() {
@@ -2386,7 +2488,19 @@ const UI = (() => {
     UI.updateSeats(session.state);
     UI.updateLevel(session.state);
     UI.updateHistoryInfo(session.state.handNumber, session.history.length, false);
+
+    refreshQuickPercentList();
+    UI.setHeroActionsActive(false);
     processTurn();
+  }
+
+  function refreshQuickPercentList() {
+    const state = session.state;
+    if (!state) return;
+    const hero = state.players[session.heroIndex];
+    if (!hero) return;
+    const toCall = Math.max(0, state.currentBet - hero.committedThisStreet);
+    UI.renderQuickRaiseOptions(state, hero, toCall);
   }
 
   function processTurn() {
@@ -2398,12 +2512,14 @@ const UI = (() => {
     if (!player || player.folded || player.eliminated || player.allIn) { advanceOrFinish(); return; }
 
     UI.updateActiveHighlight(state);
+
     if (player.isHero) {
       session.waitingForHero = true;
       heroTurn(player);
     } else {
       session.waitingForHero = false;
       UI.setHeroActionsActive(false);
+      refreshQuickPercentList();
       botTurn(player, idx);
     }
   }
@@ -2473,6 +2589,7 @@ const UI = (() => {
       UI.updateSeats(state);
       UI.updatePot(state);
       UI.updateActiveHighlight(state);
+      refreshQuickPercentList();
       advanceOrFinish();
     }, delay);
   }
@@ -2506,6 +2623,7 @@ const UI = (() => {
       const res = Engine.endBettingRound(state);
       UI.updateBoard(state);
       UI.updatePot(state);
+      refreshQuickPercentList();
       if (res.done) { finishHand(); return; }
       UI.updateSeats(state);
       UI.updateActiveHighlight(state);
@@ -2518,6 +2636,7 @@ const UI = (() => {
       const res = Engine.endBettingRound(state);
       UI.updateBoard(state);
       UI.updatePot(state);
+      refreshQuickPercentList();
       if (res.done) { finishHand(); return; }
       UI.updateSeats(state);
       processTurn();
@@ -2549,6 +2668,7 @@ const UI = (() => {
     UI.updatePot(state);
     UI.updateActiveHighlight(state);
     UI.setHeroActionsActive(false);
+    refreshQuickPercentList();
     UI.updateHistoryInfo(session.history.length, session.history.length, false);
 
     highlightWinners(state);
@@ -2650,12 +2770,14 @@ const UI = (() => {
       UI.updateLevel(state);
       highlightWinners(state);
       UI.setHeroActionsActive(false);
+      refreshQuickPercentList();
     } else {
       UI.updateBoard(state);
       UI.updateSeats(state);
       UI.updatePot(state);
       UI.updateLevel(state);
       UI.updateActiveHighlight(state);
+      refreshQuickPercentList();
       if (session.waitingForHero) heroTurn(state.players[session.heroIndex]);
       else UI.setHeroActionsActive(false);
     }
