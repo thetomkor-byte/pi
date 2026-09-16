@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>Poker Intuition Trainer</title>
+<title>Poker Simulator</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
@@ -40,8 +40,6 @@ html, body {
     radial-gradient(ellipse at 50% 50%, #12100e 0%, #0a0a0a 70%, #050505 100%);
 }
 
-/* ЕДИНЫЙ LAYOUT: вертикальный стол, центрируется.
-   Стол занимает максимум доступной высоты, ширина — по пропорции 9/16. */
 #table-scene {
   position: absolute;
   top: 0; left: 0; right: 0;
@@ -80,6 +78,7 @@ html, body {
   pointer-events: none;
 }
 
+/* === ЦЕНТР СТОЛА: три фиксированных блока === */
 #board-area {
   position: absolute;
   top: 48%; left: 50%;
@@ -87,7 +86,21 @@ html, body {
   text-align: center;
   pointer-events: none;
   z-index: 5;
-  width: 90%;
+  width: 92%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+/* ВЕРХНИЙ блок: Место + Банк */
+#top-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(2px, 0.4vmin, 4px);
+  margin-bottom: clamp(6px, 1vmin, 12px);
+  width: 100%;
 }
 
 #info-place-row {
@@ -96,7 +109,6 @@ html, body {
   font-weight: 700;
   text-shadow: 0 1px 4px rgba(0,0,0,.95);
   letter-spacing: .3px;
-  margin-bottom: clamp(4px, 0.8vmin, 8px);
   white-space: nowrap;
   opacity: 0.7;
 }
@@ -105,17 +117,19 @@ html, body {
   color: var(--gold);
   font-weight: 800;
   font-size: clamp(16px, 2.4vmin, 24px);
-  margin-bottom: clamp(6px, 1vmin, 12px);
   text-shadow: 0 2px 8px rgba(0,0,0,.95), 0 0 18px rgba(255,203,43,.25);
   letter-spacing: .3px;
+  white-space: nowrap;
 }
 
+/* СРЕДНИЙ блок: карты борда — зарезервированное место фиксированной высоты */
 #board-cards {
   display: flex;
   gap: clamp(4px, 0.8vmin, 7px);
   justify-content: center;
   margin-bottom: clamp(6px, 1vmin, 12px);
-  min-height: 0;
+  height: clamp(42px, 6.3vmin, 60px);
+  align-items: center;
 }
 #board-cards .card {
   --card-w: clamp(30px, 4.5vmin, 42px);
@@ -125,6 +139,7 @@ html, body {
 }
 #board-cards .card .suit { font-size: clamp(18px, 2.8vmin, 26px); }
 
+/* НИЖНИЙ блок: Блайнды / через N раздач / следующие блайнды */
 #table-info {
   display: flex;
   flex-direction: column;
@@ -135,6 +150,7 @@ html, body {
   font-weight: 700;
   text-shadow: 0 1px 4px rgba(0,0,0,.95);
   letter-spacing: .3px;
+  width: 100%;
 }
 #table-info .info-row {
   white-space: nowrap;
@@ -371,9 +387,6 @@ html, body {
 }
 .seat .bet-chips.hidden { display: none; }
 
-/* ============================
-   ОБЩИЙ КОНТЕЙНЕР ДЛЯ СЛАЙДЕРА И КНОПОК
-   ============================ */
 #hero-actions {
   position: absolute;
   left: 2.5%;
@@ -728,8 +741,10 @@ html, body {
   <div id="table-scene">
     <div id="poker-table">
       <div id="board-area">
-        <div id="info-place-row">Место: 1/8</div>
-        <div id="pot-display">Банк: 0</div>
+        <div id="top-info">
+          <div id="info-place-row">Место: 1/8</div>
+          <div id="pot-display">Банк: 0</div>
+        </div>
         <div id="board-cards"></div>
         <div id="table-info">
           <div class="info-row" id="info-blinds-row">Блайнды: 10/20</div>
@@ -818,7 +833,7 @@ html, body {
 
   <div id="start-overlay">
     <div class="start-card">
-      <h1><span class="spade">♠</span> Poker Intuition Trainer</h1>
+      <h1><span class="spade">♠</span> Poker Simulator</h1>
       <p>Тренируй интуицию: выиграешь ты на вскрытии или нет.</p>
       <button id="btn-start">Начать игру</button>
     </div>
