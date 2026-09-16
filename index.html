@@ -17,8 +17,7 @@
   --danger: #d94f3d;
   --ok: #2fb571;
   --allin: #e63946;
-  /* Запас снизу для Safari-панели с адресом */
-  --safari-pad: calc(env(safe-area-inset-bottom, 0px) + 8px);
+  --safari-pad: env(safe-area-inset-bottom, 0px);
   --board-card-w: clamp(34px, 5.2vmin, 48px);
   --board-card-h: clamp(48px, 7.3vmin, 67px);
   --edge: clamp(6px, 1.1vmin, 10px);
@@ -36,18 +35,20 @@ html, body {
   user-select: none;
   -webkit-user-select: none;
   overscroll-behavior: none;
+  touch-action: manipulation;
 }
 
 #app {
   position: relative;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   background:
     radial-gradient(ellipse at 50% 50%, #12100e 0%, #0a0a0a 70%, #050505 100%);
 }
 
-/* Стол занимает всю высоту, минус запас для Safari */
+/* Стол занимает всю высоту, учитывая Safari-панель через dvh */
 #table-scene {
   position: absolute;
   top: 0; left: 0; right: 0;
@@ -100,7 +101,6 @@ html, body {
   gap: 0;
 }
 
-/* Слой для свайпов — только в середине стола */
 #swipe-center {
   position: absolute;
   left: 50%;
@@ -429,56 +429,57 @@ html, body {
 }
 .seat .bet-chips.hidden { display: none; }
 
-/* ===== КОМПАКТНЫЙ БЛОК ПЕРЕЛИСТЫВАНИЯ (две строки, слева над слайдером) ===== */
+/* ===== КОМПАКТНЫЙ БЛОК ПЕРЕЛИСТЫВАНИЯ (одна строка над слайдером) ===== */
+/* Левый край = левому краю #hero-actions */
+/* Правый край = 2px от левого края #quick-percent-list */
+/* Низ = 2px над верхним краем #hero-actions */
 #hand-nav {
   position: absolute;
   left: calc(var(--dash-inset) + var(--edge));
-  bottom: calc(var(--dash-inset) + var(--edge) + clamp(130px, 19vmin, 170px));
+  right: calc(var(--dash-inset) + var(--edge) + var(--pct-block-w) + 2px);
+  /* #hero-actions прижат к bottom: calc(dash-inset + edge - 1px).
+     Высота #hero-actions ~ clamp(56px, 9vmin, 76px). Ставим на 2px выше. */
+  bottom: calc(var(--dash-inset) + var(--edge) + clamp(58px, 9.2vmin, 78px) + 2px);
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(6px, 1vmin, 12px);
   background: rgba(20,18,16,.88);
   border: 1px solid #3a3530;
   border-radius: 8px;
-  padding: 6px 8px;
+  padding: 6px 10px;
   z-index: 46;
   backdrop-filter: blur(3px);
 }
 #hand-nav.hidden { display: none; }
 
-#hand-nav .nav-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-
 #hand-nav button {
   background: transparent;
   border: none;
   color: var(--text);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 800;
-  padding: 2px 6px;
+  padding: 4px 8px;
   cursor: pointer;
   line-height: 1;
-  min-width: 22px;
-  min-height: 22px;
+  min-width: 26px;
+  min-height: 26px;
+  border-radius: 6px;
 }
+#hand-nav button:active:not(:disabled) { background: rgba(255,255,255,.06); }
 #hand-nav button:disabled { opacity: .28; cursor: not-allowed; }
 
 #hand-nav .nav-counter {
   color: var(--gold);
   font-weight: 800;
-  min-width: 44px;
   text-align: center;
   font-size: 12px;
   letter-spacing: .4px;
+  flex: 1;
+  white-space: nowrap;
 }
 #hand-nav .nav-counter .total { color: var(--muted); }
 
-#hn-stop { color: #ff8a7a; font-size: 14px; }
-#hn-stop:disabled { color: var(--text); }
 #hn-resume { color: var(--ok); font-size: 13px; }
 #hn-resume:disabled { color: var(--text); }
 
@@ -639,7 +640,7 @@ html, body {
   bottom: 0; left: 0; right: 0;
   background: linear-gradient(0deg, #0d0d0d 0%, #1a1a1a 100%);
   border-top: 1px solid #2a2520;
-  padding: 24px 20px calc(80px + var(--safari-pad));
+  padding: 24px 20px calc(30px + var(--safari-pad));
   transform: translateY(110%);
   transition: transform .28s ease;
   z-index: 100;
@@ -742,7 +743,6 @@ html, body {
 .stat-card .value.ok { color: var(--ok); }
 .stat-card .value.danger { color: var(--danger); }
 
-/* ===== Оверлей для закрытия тапом ===== */
 #tap-close {
   position: absolute;
   inset: 0;
@@ -826,15 +826,10 @@ html, body {
       <div id="seats"></div>
 
       <div id="hand-nav">
-        <div class="nav-row">
-          <button id="hn-prev" title="Назад">◀</button>
-          <span class="nav-counter"><span id="hn-cur">0</span><span class="total"> / </span><span id="hn-tot">0</span></span>
-          <button id="hn-next" title="Вперёд">▶</button>
-        </div>
-        <div class="nav-row">
-          <button id="hn-stop" title="Стоп → новая сессия">⏹</button>
-          <button id="hn-resume" title="Продолжить" disabled>▶▶</button>
-        </div>
+        <button id="hn-prev" title="Назад">◀</button>
+        <span class="nav-counter"><span id="hn-cur">0</span><span class="total"> / </span><span id="hn-tot">0</span></span>
+        <button id="hn-next" title="Вперёд">▶</button>
+        <button id="hn-resume" title="Продолжить" disabled>▶▶</button>
       </div>
 
       <div id="hero-actions" class="hidden">
@@ -858,7 +853,6 @@ html, body {
 
   <div id="tap-close"></div>
 
-  <!-- Панель настроек (снизу) -->
   <div id="bottom-panel">
     <h3>Настройки</h3>
     <label class="setting">
@@ -896,7 +890,6 @@ html, body {
     </label>
   </div>
 
-  <!-- Панель статистики (сверху) -->
   <div id="top-panel">
     <h3>Статистика сессии</h3>
     <div id="stats-grid">
@@ -1790,7 +1783,6 @@ const UI = (() => {
     el.hnNext         = document.getElementById('hn-next');
     el.hnCur          = document.getElementById('hn-cur');
     el.hnTot          = document.getElementById('hn-tot');
-    el.hnStop         = document.getElementById('hn-stop');
     el.hnResume       = document.getElementById('hn-resume');
 
     el.setCardStyle      = document.getElementById('set-card-style');
@@ -2186,14 +2178,9 @@ const UI = (() => {
   function updateHistoryInfo(current, total, isViewingPast) {
     el.hnCur.textContent = current;
     el.hnTot.textContent = total;
-    // Всегда показывается, кнопки серые при отсутствии истории
-    el.handNav.classList.remove('hidden');
     el.hnPrev.disabled = !(total > 0 && current > 1);
     el.hnNext.disabled = !(total > 0 && current < total);
-    // ▶▶ активна только когда листаем историю назад
     el.hnResume.disabled = !isViewingPast;
-    // ⏹ всегда активна (при идущей сессии)
-    el.hnStop.disabled = false;
   }
 
   function applySettingsToUI() {
@@ -2250,6 +2237,7 @@ const UI = (() => {
     cacheDom();
     bindGlobalHandlers();
     UI.applySettingsToUI();
+    bindDoubleTapGuard();
   });
 
   function cacheDom() {
@@ -2260,9 +2248,22 @@ const UI = (() => {
     el.tapClose       = document.getElementById('tap-close');
     el.hnPrev         = document.getElementById('hn-prev');
     el.hnNext         = document.getElementById('hn-next');
-    el.hnStop         = document.getElementById('hn-stop');
     el.hnResume       = document.getElementById('hn-resume');
     el.swipeCenter    = document.getElementById('swipe-center');
+  }
+
+  function bindDoubleTapGuard() {
+    // Запрещаем zoom при двойном тапе в пределах #poker-table
+    let lastTapTime = 0;
+    const table = document.getElementById('poker-table');
+    if (!table) return;
+    table.addEventListener('touchend', (e) => {
+      const now = Date.now();
+      if (now - lastTapTime < 300) {
+        e.preventDefault();
+      }
+      lastTapTime = now;
+    }, { passive: false });
   }
 
   function bindGlobalHandlers() {
@@ -2296,10 +2297,9 @@ const UI = (() => {
       }
     }, { passive: true });
 
-    // === Тап по оверлею — закрывает открытую панель ===
     el.tapClose.addEventListener('click', () => UI.closeAllPanels());
 
-    // === Свайпы по нижней панели вниз — закрытие ===
+    // === Свайпы по нижней панели вниз ===
     let bpStartY = 0, bpTracking = false;
     el.bottomPanel.addEventListener('touchstart', (e) => {
       if (e.touches.length !== 1) return;
@@ -2314,7 +2314,7 @@ const UI = (() => {
       if (dy > 60) UI.closeBottomPanel();
     }, { passive: true });
 
-    // === Свайпы по верхней панели вверх — закрытие ===
+    // === Свайпы по верхней панели вверх ===
     let tpStartY = 0, tpTracking = false;
     el.topPanel.addEventListener('touchstart', (e) => {
       if (e.touches.length !== 1) return;
@@ -2339,11 +2339,6 @@ const UI = (() => {
     el.hnPrev.addEventListener('click', () => navigateHistory(-1));
     el.hnNext.addEventListener('click', () => navigateHistory(1));
     el.hnResume.addEventListener('click', () => resumeGame());
-    el.hnStop.addEventListener('click', () => {
-      if (confirm('Остановить игру и начать новую сессию?')) {
-        startNewSession();
-      }
-    });
   }
 
   function startNewSession() {
