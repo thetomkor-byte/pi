@@ -23,6 +23,7 @@
   --edge: clamp(6px, 1.1vmin, 10px);
   --pct-block-w: clamp(88px, 13vmin, 110px);
   --dash-inset: clamp(10px, 2vmin, 18px);
+  --small-text: clamp(11px, 1.4vmin, 13px);
 }
 
 html, body {
@@ -38,7 +39,6 @@ html, body {
   touch-action: manipulation;
 }
 
-/* Курсор по умолчанию — только для активных элементов */
 button { cursor: pointer; }
 button:disabled { cursor: default; }
 button:disabled,
@@ -460,7 +460,7 @@ button.disabled,
   background: rgba(20,18,16,.92);
   border: 1px solid #3a3530;
   border-radius: 10px;
-  padding: clamp(4px, 0.7vmin, 7px) clamp(6px, 0.9vmin, 9px);
+  padding: clamp(3px, 0.5vmin, 5px) clamp(6px, 0.9vmin, 9px);
   z-index: 45;
   backdrop-filter: blur(4px);
   transition: opacity .2s ease;
@@ -495,12 +495,12 @@ button.disabled,
   background: transparent;
   border: none;
   color: var(--text);
-  font-size: clamp(15px, 2vmin, 18px);
+  font-size: clamp(13px, 1.7vmin, 16px);
   font-weight: 800;
-  padding: 0 clamp(6px, 1vmin, 9px);
+  padding: 0 clamp(5px, 0.8vmin, 7px);
   line-height: 1;
-  min-width: 36px;
-  min-height: 28px;
+  min-width: 32px;
+  min-height: 22px;
   border-radius: 5px;
   position: relative;
   display: inline-flex;
@@ -514,8 +514,8 @@ button.disabled,
   color: var(--gold);
   font-weight: 800;
   text-align: center;
-  font-size: clamp(10px, 1.2vmin, 12px);
-  letter-spacing: .4px;
+  font-size: var(--small-text);
+  letter-spacing: .3px;
   white-space: nowrap;
   position: relative;
   padding: 0 clamp(9px, 1.5vmin, 14px);
@@ -528,9 +528,9 @@ button.disabled,
 #hn-reset {
   color: var(--gold);
   margin-left: clamp(14px, 2vmin, 20px);
-  font-size: clamp(17px, 2.2vmin, 20px);
+  font-size: clamp(15px, 2vmin, 18px);
 }
-#hn-reset .reset-icon { font-size: clamp(18px, 2.4vmin, 22px); line-height: 1; }
+#hn-reset .reset-icon { font-size: clamp(16px, 2.1vmin, 19px); line-height: 1; }
 
 #hero-slider-row {
   display: flex;
@@ -578,7 +578,7 @@ button.disabled,
 }
 #raise-amount-mini {
   color: var(--gold);
-  font-size: clamp(11px, 1.4vmin, 13px);
+  font-size: var(--small-text);
   font-weight: 800;
   white-space: nowrap;
   text-shadow: 0 1px 3px rgba(0,0,0,.95);
