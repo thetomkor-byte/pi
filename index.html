@@ -100,6 +100,20 @@ html, body {
   gap: 0;
 }
 
+/* Слой для свайпов — только в середине стола, прозрачный */
+#swipe-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 66%;
+  height: 40%;
+  z-index: 4;
+  touch-action: pan-y;
+  pointer-events: auto;
+  background: transparent;
+}
+
 #top-info {
   display: flex;
   flex-direction: column;
@@ -342,7 +356,6 @@ html, body {
 }
 .seat.folded { opacity: .35; }
 
-/* Победитель — умеренное свечение, чуть сильнее активного */
 .seat.winner .seat-cards .card {
   box-shadow:
     0 0 0 1.5px rgba(255,203,43,.85),
@@ -374,7 +387,6 @@ html, body {
 .seat .action-badge.check { color: #7ae5a0; border-color: #255a35; }
 .seat .action-badge.hidden { display: none; }
 
-/* Бейдж WINNER — умеренное свечение, тот же размер, что action-badge */
 .seat .winner-badge {
   position: absolute;
   left: 50%;
@@ -417,6 +429,44 @@ html, body {
 }
 .seat .bet-chips.hidden { display: none; }
 
+/* ===== КОМПАКТНЫЙ БЛОК ПЕРЕЛИСТЫВАНИЯ РАЗДАЧ (слева над слайдером) ===== */
+#hand-nav {
+  position: absolute;
+  left: calc(var(--dash-inset) + var(--edge));
+  bottom: calc(var(--dash-inset) + var(--edge) + clamp(120px, 18vmin, 160px));
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(20,18,16,.85);
+  border: 1px solid #3a3530;
+  border-radius: 6px;
+  padding: 2px 4px;
+  z-index: 46;
+  backdrop-filter: blur(3px);
+  font-size: 10px;
+}
+#hand-nav.hidden { display: none; }
+#hand-nav button {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 1px 4px;
+  cursor: pointer;
+  line-height: 1;
+}
+#hand-nav button:disabled { opacity: .3; cursor: not-allowed; }
+#hand-nav .nav-counter {
+  color: var(--gold);
+  font-weight: 800;
+  min-width: 32px;
+  text-align: center;
+  font-size: 10px;
+  letter-spacing: .3px;
+}
+#hand-nav .nav-counter .total { color: var(--muted); }
+
 #hero-actions {
   position: absolute;
   left: calc(var(--dash-inset) + var(--edge));
@@ -458,19 +508,19 @@ html, body {
 #raise-slider-horiz::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, #fff6d0, #ffcb2b 60%, #b8860b);
   border: 1px solid #8a6508;
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0,0,0,.7);
-  margin-top: -8px;
+  margin-top: -6px;
   pointer-events: auto;
 }
 #raise-slider-horiz::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, #fff6d0, #ffcb2b 60%, #b8860b);
   border: 1px solid #8a6508;
@@ -604,31 +654,19 @@ html, body {
 
 #btn-new      { font-size: clamp(16px, 2.2vmin, 19px); }
 #btn-pause    { font-size: clamp(16px, 2.2vmin, 19px); }
-#btn-prev     { font-size: clamp(14px, 1.9vmin, 17px); min-width: clamp(38px, 4.6vmin, 46px); }
-#btn-next     { font-size: clamp(14px, 1.9vmin, 17px); min-width: clamp(38px, 4.6vmin, 46px); }
-#btn-resume   { font-size: clamp(14px, 1.9vmin, 17px); }
 #btn-settings { font-size: clamp(20px, 2.8vmin, 24px); min-width: clamp(48px, 5.6vmin, 56px); }
 
-#hist-info {
-  font-size: clamp(12px, 1.7vmin, 15px);
-  color: var(--muted);
-  font-weight: 700;
-  padding: 0 clamp(6px, 1vmin, 10px);
-  letter-spacing: .5px;
-}
-#hist-info b { color: var(--gold); }
-#hist-info .sep { color: #6a6a6a; }
-
+/* ===== НИЖНЯЯ ПАНЕЛЬ — только НАСТРОЙКИ ===== */
 #bottom-panel {
   position: absolute;
   bottom: 0; left: 0; right: 0;
   background: linear-gradient(0deg, #0d0d0d 0%, #1a1a1a 100%);
   border-top: 1px solid #2a2520;
-  padding: 20px 20px 80px;
+  padding: 24px 20px 80px;
   transform: translateY(100%);
   transition: transform .28s ease;
   z-index: 100;
-  max-height: 75vh;
+  max-height: 70vh;
   overflow-y: auto;
   touch-action: pan-y;
   scrollbar-width: none;
@@ -644,35 +682,6 @@ html, body {
   margin-bottom: 12px;
   font-weight: 800;
 }
-
-#stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-bottom: 20px;
-}
-.stat-card {
-  background: #1a1a1a;
-  border: 1px solid #2a2520;
-  border-radius: 8px;
-  padding: 10px 8px;
-  text-align: center;
-}
-.stat-card .label {
-  color: var(--muted);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: .5px;
-  margin-bottom: 3px;
-}
-.stat-card .value {
-  color: var(--text);
-  font-weight: 800;
-  font-size: 16px;
-}
-.stat-card .value.gold { color: var(--gold); }
-.stat-card .value.ok { color: var(--ok); }
-.stat-card .value.danger { color: var(--danger); }
 
 .setting {
   display: flex;
@@ -700,6 +709,62 @@ html, body {
   accent-color: var(--gold);
 }
 
+/* ===== ВЕРХНЯЯ ПАНЕЛЬ — только СТАТИСТИКА ===== */
+#top-panel {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  background: linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%);
+  border-bottom: 1px solid #2a2520;
+  padding: 24px 20px 20px;
+  transform: translateY(-100%);
+  transition: transform .28s ease;
+  z-index: 100;
+  max-height: 55vh;
+  overflow-y: auto;
+  touch-action: pan-y;
+  scrollbar-width: none;
+}
+#top-panel::-webkit-scrollbar { display: none; }
+#top-panel.open { transform: translateY(0); }
+
+#top-panel h3 {
+  color: var(--gold);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+  font-weight: 800;
+}
+
+#stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.stat-card {
+  background: #1a1a1a;
+  border: 1px solid #2a2520;
+  border-radius: 8px;
+  padding: 10px 8px;
+  text-align: center;
+}
+.stat-card .label {
+  color: var(--muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin-bottom: 3px;
+}
+.stat-card .value {
+  color: var(--text);
+  font-weight: 800;
+  font-size: 16px;
+}
+.stat-card .value.gold { color: var(--gold); }
+.stat-card .value.ok { color: var(--ok); }
+.stat-card .value.danger { color: var(--danger); }
+
 #panel-handle {
   position: absolute;
   top: 6px;
@@ -713,6 +778,19 @@ html, body {
   z-index: 110;
 }
 #panel-handle:hover { background: #5a5550; }
+
+#top-panel-handle {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 5px;
+  background: #3a3530;
+  border-radius: 3px;
+  cursor: pointer;
+  z-index: 110;
+}
 
 #timer-bar {
   position: absolute;
@@ -787,6 +865,7 @@ html, body {
 
   <div id="table-scene">
     <div id="poker-table">
+      <div id="swipe-center"></div>
       <div id="board-area">
         <div id="top-info">
           <div id="info-place-row">Место: 1/8</div>
@@ -800,6 +879,13 @@ html, body {
         </div>
       </div>
       <div id="seats"></div>
+
+      <div id="hand-nav" class="hidden">
+        <button id="hn-prev" title="Назад">◀</button>
+        <span class="nav-counter"><span id="hn-cur">0</span><span class="total"> / </span><span id="hn-tot">0</span></span>
+        <button id="hn-next" title="Вперёд">▶</button>
+        <button id="hn-resume" title="Продолжить" class="hidden">▶▶</button>
+      </div>
 
       <div id="hero-actions" class="hidden">
         <div id="hero-slider-row">
@@ -825,25 +911,12 @@ html, body {
   <div id="bottom-bar">
     <button id="btn-new" title="Новая сессия">↻</button>
     <button id="btn-pause" title="Пауза">⏸</button>
-    <button id="btn-prev" title="Назад">◀</button>
-    <div id="hist-info"><b id="hist-num">0</b> <span class="sep">/</span> <b id="hist-total">0</b></div>
-    <button id="btn-next" title="Вперёд">▶</button>
-    <button id="btn-resume" title="Продолжить" class="hidden">▶▶</button>
     <button id="btn-settings" title="Настройки">⚙</button>
   </div>
 
+  <!-- Панель настроек (снизу) -->
   <div id="bottom-panel">
     <div id="panel-handle"></div>
-
-    <h3>Статистика сессии</h3>
-    <div id="stats-grid">
-      <div class="stat-card"><div class="label">Точность</div><div class="value gold" id="stat-accuracy">—</div></div>
-      <div class="stat-card"><div class="label">✅ Совпало</div><div class="value ok" id="stat-hit">0</div></div>
-      <div class="stat-card"><div class="label">❌ Не совпало</div><div class="value danger" id="stat-miss">0</div></div>
-      <div class="stat-card"><div class="label">Раздач</div><div class="value" id="stat-hands">0</div></div>
-      <div class="stat-card"><div class="label">Серия</div><div class="value" id="stat-streak">0</div></div>
-      <div class="stat-card"><div class="label">Место</div><div class="value" id="stat-place">—</div></div>
-    </div>
 
     <h3>Настройки</h3>
     <label class="setting">
@@ -879,6 +952,21 @@ html, body {
       <span>Показывать стратегии ботов</span>
       <input type="checkbox" id="set-show-strategies" />
     </label>
+  </div>
+
+  <!-- Панель статистики (сверху) -->
+  <div id="top-panel">
+    <div id="top-panel-handle"></div>
+
+    <h3>Статистика сессии</h3>
+    <div id="stats-grid">
+      <div class="stat-card"><div class="label">Точность</div><div class="value gold" id="stat-accuracy">—</div></div>
+      <div class="stat-card"><div class="label">✅ Совпало</div><div class="value ok" id="stat-hit">0</div></div>
+      <div class="stat-card"><div class="label">❌ Не совпало</div><div class="value danger" id="stat-miss">0</div></div>
+      <div class="stat-card"><div class="label">Раздач</div><div class="value" id="stat-hands">0</div></div>
+      <div class="stat-card"><div class="label">Серия</div><div class="value" id="stat-streak">0</div></div>
+      <div class="stat-card"><div class="label">Место</div><div class="value" id="stat-place">—</div></div>
+    </div>
   </div>
 
   <div id="start-overlay">
@@ -1756,8 +1844,15 @@ const UI = (() => {
     el.timerFill      = document.getElementById('timer-fill');
 
     el.bottomPanel    = document.getElementById('bottom-panel');
-    el.panelHandle    = document.getElementById('panel-handle');
+    el.topPanel       = document.getElementById('top-panel');
     el.tableScene     = document.getElementById('table-scene');
+
+    el.handNav        = document.getElementById('hand-nav');
+    el.hnPrev         = document.getElementById('hn-prev');
+    el.hnNext         = document.getElementById('hn-next');
+    el.hnCur          = document.getElementById('hn-cur');
+    el.hnTot          = document.getElementById('hn-tot');
+    el.hnResume       = document.getElementById('hn-resume');
 
     el.setCardStyle      = document.getElementById('set-card-style');
     el.setStackDisplay   = document.getElementById('set-stack-display');
@@ -1771,12 +1866,6 @@ const UI = (() => {
     el.btnNew         = document.getElementById('btn-new');
     el.btnSettings    = document.getElementById('btn-settings');
 
-    el.histNum        = document.getElementById('hist-num');
-    el.histTotal      = document.getElementById('hist-total');
-    el.btnPrev        = document.getElementById('btn-prev');
-    el.btnNext        = document.getElementById('btn-next');
-    el.btnResume      = document.getElementById('btn-resume');
-
     applyCardStyle();
     applySettingsToUI();
   }
@@ -1789,9 +1878,11 @@ const UI = (() => {
     el.bottomPanel.classList.remove('open');
     el.tableScene.classList.remove('shifted-down');
   }
-  function toggleBottomPanel() {
-    if (el.bottomPanel.classList.contains('open')) closeBottomPanel();
-    else openBottomPanel();
+  function openTopPanel() {
+    el.topPanel.classList.add('open');
+  }
+  function closeTopPanel() {
+    el.topPanel.classList.remove('open');
   }
 
   function renderTable(state) {
@@ -2167,11 +2258,13 @@ const UI = (() => {
   }
 
   function updateHistoryInfo(current, total, isViewingPast) {
-    el.histNum.textContent = current;
-    el.histTotal.textContent = total;
-    el.btnPrev.disabled = current <= 1;
-    el.btnNext.disabled = current >= total;
-    el.btnResume.classList.toggle('hidden', !isViewingPast);
+    el.hnCur.textContent = current;
+    el.hnTot.textContent = total;
+    el.hnPrev.disabled = current <= 1;
+    el.hnNext.disabled = current >= total;
+    el.hnResume.classList.toggle('hidden', !isViewingPast);
+    // Показываем блок только если есть история
+    el.handNav.classList.toggle('hidden', total === 0);
   }
 
   function applySettingsToUI() {
@@ -2198,7 +2291,7 @@ const UI = (() => {
     updateStacks, updateActiveHighlight,
     showActions, hideActions,
     updateStats, startTimer, stopTimer,
-    openBottomPanel, closeBottomPanel, toggleBottomPanel,
+    openBottomPanel, closeBottomPanel, openTopPanel, closeTopPanel,
     updateHistoryInfo,
     readSettingsFromUI, applySettingsToUI,
     createCardElement, formatChips
@@ -2237,10 +2330,13 @@ const UI = (() => {
     el.btnNew         = document.getElementById('btn-new');
     el.btnSettings    = document.getElementById('btn-settings');
     el.panelHandle    = document.getElementById('panel-handle');
-    el.btnPrev        = document.getElementById('btn-prev');
-    el.btnNext        = document.getElementById('btn-next');
-    el.btnResume      = document.getElementById('btn-resume');
+    el.topPanelHandle = document.getElementById('top-panel-handle');
     el.bottomPanel    = document.getElementById('bottom-panel');
+    el.topPanel       = document.getElementById('top-panel');
+    el.hnPrev         = document.getElementById('hn-prev');
+    el.hnNext         = document.getElementById('hn-next');
+    el.hnResume       = document.getElementById('hn-resume');
+    el.swipeCenter    = document.getElementById('swipe-center');
   }
 
   function bindGlobalHandlers() {
@@ -2266,31 +2362,73 @@ const UI = (() => {
     el.btnNew.addEventListener('click', () => {
       if (confirm('Начать новую сессию?')) {
         UI.closeBottomPanel();
+        UI.closeTopPanel();
         startNewSession();
       }
     });
 
     el.btnSettings.addEventListener('click', () => UI.openBottomPanel());
     el.panelHandle.addEventListener('click', () => UI.closeBottomPanel());
+    el.topPanelHandle.addEventListener('click', () => UI.closeTopPanel());
 
-    let touchStartY = null;
-    let touchStartX = null;
-    const panel = document.getElementById('bottom-panel');
-    panel.addEventListener('touchstart', (e) => {
+    // === Свайпы в середине стола ===
+    let startX = 0, startY = 0, tracking = false;
+    el.swipeCenter.addEventListener('touchstart', (e) => {
       if (e.touches.length !== 1) return;
-      touchStartY = e.touches[0].clientY;
-      touchStartX = e.touches[0].clientX;
+      tracking = true;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
     }, { passive: true });
-    panel.addEventListener('touchend', (e) => {
-      if (touchStartY === null) return;
-      const endY = e.changedTouches[0].clientY;
+    el.swipeCenter.addEventListener('touchend', (e) => {
+      if (!tracking) return;
+      tracking = false;
       const endX = e.changedTouches[0].clientX;
-      const deltaY = touchStartY - endY;
-      const deltaX = touchStartX - endX;
-      touchStartY = null;
-      if (deltaY < -60 && Math.abs(deltaY) > Math.abs(deltaX)) {
+      const endY = e.changedTouches[0].clientY;
+      const dx = endX - startX;
+      const dy = endY - startY;
+      const minDist = 40;
+      // Отсекаем короткие и горизонтальные
+      if (Math.abs(dy) < minDist) return;
+      if (Math.abs(dx) > Math.abs(dy)) return;
+      if (dy < 0) {
+        // свайп вверх → настройки снизу
+        UI.closeTopPanel();
+        UI.openBottomPanel();
+      } else {
+        // свайп вниз → статистика сверху
         UI.closeBottomPanel();
+        UI.openTopPanel();
       }
+    }, { passive: true });
+
+    // === Свайпы по нижней панели вниз — закрытие ===
+    let bpStartY = 0, bpTracking = false;
+    el.bottomPanel.addEventListener('touchstart', (e) => {
+      if (e.touches.length !== 1) return;
+      bpTracking = true;
+      bpStartY = e.touches[0].clientY;
+    }, { passive: true });
+    el.bottomPanel.addEventListener('touchend', (e) => {
+      if (!bpTracking) return;
+      bpTracking = false;
+      const endY = e.changedTouches[0].clientY;
+      const dy = endY - bpStartY;
+      if (dy > 60) UI.closeBottomPanel();
+    }, { passive: true });
+
+    // === Свайпы по верхней панели вверх — закрытие ===
+    let tpStartY = 0, tpTracking = false;
+    el.topPanel.addEventListener('touchstart', (e) => {
+      if (e.touches.length !== 1) return;
+      tpTracking = true;
+      tpStartY = e.touches[0].clientY;
+    }, { passive: true });
+    el.topPanel.addEventListener('touchend', (e) => {
+      if (!tpTracking) return;
+      tpTracking = false;
+      const endY = e.changedTouches[0].clientY;
+      const dy = endY - tpStartY;
+      if (dy < -60) UI.closeTopPanel();
     }, { passive: true });
 
     ['set-card-style','set-stack-display','set-blind-growth','set-turn-time','set-show-strategies'].forEach(id => {
@@ -2300,9 +2438,9 @@ const UI = (() => {
       });
     });
 
-    el.btnPrev.addEventListener('click', () => navigateHistory(-1));
-    el.btnNext.addEventListener('click', () => navigateHistory(1));
-    el.btnResume.addEventListener('click', () => resumeGame());
+    el.hnPrev.addEventListener('click', () => navigateHistory(-1));
+    el.hnNext.addEventListener('click', () => navigateHistory(1));
+    el.hnResume.addEventListener('click', () => resumeGame());
   }
 
   function startNewSession() {
