@@ -567,7 +567,7 @@ button.disabled,
   border: 1px solid #8a6508;
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0,0,0,.7);
-  margin-top: -3px;
+  margin-top: -4px;
   pointer-events: auto;
 }
 #raise-slider-horiz::-moz-range-thumb {
@@ -622,7 +622,11 @@ button.disabled,
   transform: translateY(2px);
   box-shadow: 0 1px 0 rgba(0,0,0,.5);
 }
-#hero-buttons button:disabled { opacity: .35; box-shadow: none; }
+#hero-buttons button:disabled {
+  opacity: .28;
+  box-shadow: none;
+  filter: grayscale(0.5) brightness(0.55);
+}
 
 #btn-fold  { background: linear-gradient(180deg, #5a5a5a, #3a3a3a); }
 #btn-check { background: linear-gradient(180deg, #2a4a3a, #14261c); }
@@ -2082,7 +2086,6 @@ const UI = (() => {
 
     setHeroActionsActive(true);
 
-    // Fold: активна только когда нельзя чекнуть (есть что коллировать)
     el.btnFold.disabled = canCheck;
     el.btnCheck.disabled = !canCheck;
     el.btnCall.disabled = !canCall;
