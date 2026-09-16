@@ -1667,14 +1667,13 @@ const UI = (() => {
 
   const el = {};
 
-  /* UTG1 (индекс 4) приподнят так, чтобы верхние карты упирались в верхний пунктир.
-     Герой (индекс 0) опущен на 2px ниже (y увеличен). */
+  /* UTG1 (индекс 4) → y: 8%. Герой (индекс 0) → y: 70% + 3px ниже. */
   const SEAT_POSITIONS = [
     { x: 50, y: 70, side: 'bottom' },
     { x: 14, y: 56, side: 'left'   },
     { x: 14, y: 32, side: 'left'   },
     { x: 14, y: 10, side: 'left'   },
-    { x: 50, y: 4,  side: 'top'    },
+    { x: 50, y: 8,  side: 'top'    },
     { x: 86, y: 10, side: 'right'  },
     { x: 86, y: 32, side: 'right'  },
     { x: 86, y: 56, side: 'right'  }
@@ -1766,6 +1765,9 @@ const UI = (() => {
     seat.id = `seat-${player.id}`;
     seat.style.left = pos.x + '%';
     seat.style.top  = pos.y + '%';
+    if (player.isHero) {
+      seat.style.transform = 'translate(-50%, calc(-50% + 3px))';
+    }
     if (pos.side) seat.classList.add(pos.side);
     if (player.isHero) seat.classList.add('hero');
     if (player.eliminated) seat.classList.add('eliminated');
