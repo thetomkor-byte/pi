@@ -481,6 +481,8 @@ button.disabled,
   margin-bottom: -1px;
   gap: 0;
   min-height: 0;
+  position: relative;
+  top: -1px;
 }
 #hand-nav .nav-history {
   display: flex;
@@ -518,7 +520,9 @@ button.disabled,
   letter-spacing: .3px;
   white-space: nowrap;
   position: relative;
-  padding: 0 clamp(9px, 1.5vmin, 14px);
+  padding: 0 clamp(6px, 1vmin, 10px);
+  min-width: clamp(54px, 7vmin, 70px);
+  display: inline-block;
 }
 #hand-nav .nav-counter .total { color: var(--muted); }
 
