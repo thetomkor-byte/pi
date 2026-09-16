@@ -428,7 +428,7 @@ html, body {
 }
 .seat .bet-chips.hidden { display: none; }
 
-/* ===== БЛОК ДЕЙСТВИЙ ГЕРОЯ: всегда видим, меняется только активность ===== */
+/* ===== БЛОК ДЕЙСТВИЙ ГЕРОЯ: всегда видим ===== */
 #hero-actions {
   position: absolute;
   left: calc(var(--dash-inset) + var(--edge));
@@ -445,35 +445,35 @@ html, body {
   backdrop-filter: blur(4px);
   transition: opacity .2s ease;
 }
-#hero-actions.inactive {
-  opacity: 0.55;
-}
+/* Затемнение только у слайдера и кнопок Fold/Check/Call, но НЕ у строки истории */
 #hero-actions.inactive #hero-slider-row,
 #hero-actions.inactive #hero-buttons {
+  opacity: 0.55;
   pointer-events: none;
 }
 
-/* Строка истории раздач — внутри общего блока */
+/* ===== Строка истории раздач — внутри общего блока, компактная ===== */
 #hand-nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: clamp(10px, 1.4vmin, 14px);
   width: 100%;
-  padding-bottom: clamp(3px, 0.5vmin, 5px);
+  padding: 0 0 2px 0;
   border-bottom: 1px solid #2a2520;
+  margin-bottom: -1px;
 }
 #hand-nav button {
   background: transparent;
   border: none;
   color: var(--text);
-  font-size: clamp(12px, 1.6vmin, 15px);
+  font-size: clamp(11px, 1.4vmin, 13px);
   font-weight: 800;
-  padding: 3px 8px;
+  padding: 0 6px;
   cursor: pointer;
   line-height: 1;
-  min-width: 24px;
-  min-height: 24px;
+  min-width: 22px;
+  min-height: 18px;
   border-radius: 4px;
 }
 #hand-nav button:active:not(:disabled) { background: rgba(255,255,255,.06); }
@@ -483,7 +483,7 @@ html, body {
   color: var(--gold);
   font-weight: 800;
   text-align: center;
-  font-size: clamp(11px, 1.4vmin, 13px);
+  font-size: clamp(10px, 1.2vmin, 12px);
   letter-spacing: .4px;
   flex: 1;
   white-space: nowrap;
@@ -514,22 +514,23 @@ html, body {
   touch-action: manipulation;
   pointer-events: auto;
 }
+/* Кружок 14px, дорожка 5px. Центрирование: margin-top = (5 - 14)/2 = -4.5px */
 #raise-slider-horiz::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, #fff6d0, #ffcb2b 60%, #b8860b);
   border: 1px solid #8a6508;
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0,0,0,.7);
-  margin-top: -6px;
+  margin-top: -4.5px;
   pointer-events: auto;
 }
 #raise-slider-horiz::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, #fff6d0, #ffcb2b 60%, #b8860b);
   border: 1px solid #8a6508;
@@ -2018,7 +2019,7 @@ const UI = (() => {
     return amount.toLocaleString('ru-RU');
   }
 
-  /* Активирует кнопки слайдера и Fold/Check/Call. Строку истории не трогает. */
+  /* Активирует слайдер и Fold/Check/Call. Строку истории НЕ трогает. */
   function setHeroActionsActive(active) {
     el.heroActions.classList.toggle('inactive', !active);
     el.quickPercentList.classList.toggle('inactive', !active);
@@ -2173,15 +2174,12 @@ const UI = (() => {
     el.statsPlace.textContent = stats.place ? `${stats.place}/${Engine.SEATS}` : '—';
   }
 
-  /* Обновляет строку истории. Если total === 0 — всё серое. */
+  /* Обновляет строку истории. Логика: ◀/▶/▶▶ активны только когда листаем историю. */
   function updateHistoryInfo(current, total, isViewingPast) {
     el.hnCur.textContent = current;
     el.hnTot.textContent = total;
-    // ◀ активна только если листаем историю и есть шаг назад
     el.hnPrev.disabled = !(total > 0 && isViewingPast && current > 1);
-    // ▶ активна только если листаем историю и есть шаг вперёд
     el.hnNext.disabled = !(total > 0 && isViewingPast && current < total);
-    // ▶▶ активна только если листаем историю
     el.hnResume.disabled = !isViewingPast;
   }
 
