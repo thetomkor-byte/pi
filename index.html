@@ -482,7 +482,6 @@ button.disabled,
   gap: 0;
   min-height: 0;
   position: relative;
-  top: -1px;
 }
 #hand-nav .nav-history {
   display: flex;
@@ -505,6 +504,7 @@ button.disabled,
   min-height: 22px;
   border-radius: 5px;
   position: relative;
+  top: -2px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -520,6 +520,7 @@ button.disabled,
   letter-spacing: .3px;
   white-space: nowrap;
   position: relative;
+  top: -2px;
   padding: 0 clamp(6px, 1vmin, 10px);
   min-width: clamp(54px, 7vmin, 70px);
   display: inline-block;
@@ -2300,7 +2301,9 @@ const UI = (() => {
     stats: { hands: 0, hit: 0, miss: 0, place: null, streak: 0 },
     waitingForHero: false, active: false,
     heroEntered: false,
-    history: [], viewingIndex: -1, autoNextTimerId: null
+    history: [], viewingIndex: -1, autoNextTimerId: null,
+    botTimerId: null,
+    isPaused: false
   };
 
   const el = {};
@@ -2485,6 +2488,7 @@ const UI = (() => {
 
   function restartSession() {
     clearTimeout(session.autoNextTimerId);
+    clearTimeout(session.botTimerId);
     session.active = false;
     session.state = null;
     session.history = [];
@@ -2492,6 +2496,7 @@ const UI = (() => {
     session.stats = { hands: 0, hit: 0, miss: 0, place: null, streak: 0 };
     session.waitingForHero = false;
     session.heroEntered = false;
+    session.isPaused = false;
 
     UI.setHeroActionsActive(false);
     UI.updateHistoryInfo(0, 0, false);
@@ -2502,12 +2507,14 @@ const UI = (() => {
 
   function startNewSession() {
     clearTimeout(session.autoNextTimerId);
+    clearTimeout(session.botTimerId);
     session.active = true;
     session.stats = { hands: 0, hit: 0, miss: 0, place: null, streak: 0 };
     session.waitingForHero = false;
     session.heroEntered = false;
     session.history = [];
     session.viewingIndex = -1;
+    session.isPaused = false;
 
     const botStrategies = Bots.assignStrategies(7);
     const players = [{ id: 'hero', name: 'Ты', isHero: true, strategy: null, stack: Engine.STARTING_STACK }];
@@ -2536,6 +2543,7 @@ const UI = (() => {
     Engine.startHand(session.state);
     session.heroEntered = false;
     session.viewingIndex = -1;
+    session.isPaused = false;
 
     UI.renderTable(session.state);
     UI.updateBoard(session.state);
@@ -2559,7 +2567,9 @@ const UI = (() => {
   }
 
   function processTurn() {
+    if (session.isPaused) return;
     const state = session.state;
+    if (!state) return;
     if (state.handOver) { finishHand(); return; }
 
     const idx = state.actingIndex;
@@ -2618,7 +2628,9 @@ const UI = (() => {
   function botTurn(bot, idx) {
     const state = session.state;
     const delay = 400 + Engine.cryptoRandomInt(500);
-    setTimeout(() => {
+    clearTimeout(session.botTimerId);
+    session.botTimerId = setTimeout(() => {
+      if (session.isPaused) return;
       if (state.handOver || !session.active) return;
       const ctx = buildBotContext(bot, idx);
       const decision = Bots.decide(ctx);
@@ -2674,6 +2686,7 @@ const UI = (() => {
   }
 
   function advanceOrFinish() {
+    if (session.isPaused) return;
     const state = session.state;
     if (state.handOver) { finishHand(); return; }
 
@@ -2706,6 +2719,7 @@ const UI = (() => {
   }
 
   function finishHand() {
+    if (session.isPaused) return;
     const state = session.state;
     Engine.finalizeHand(state);
 
@@ -2736,6 +2750,7 @@ const UI = (() => {
     session.autoNextTimerId = setTimeout(() => {
       if (!session.active) return;
       if (session.viewingIndex >= 0) return;
+      if (session.isPaused) return;
 
       const period = UI.settings.blindGrowthHands || 10;
       state.handsAtLevel++;
@@ -2795,10 +2810,21 @@ const UI = (() => {
     UI.updateSeats(state);
   }
 
+  function pauseGame() {
+    if (session.isPaused) return;
+    session.isPaused = true;
+    clearTimeout(session.botTimerId);
+    clearTimeout(session.autoNextTimerId);
+    session.botTimerId = null;
+    session.autoNextTimerId = null;
+    UI.setHeroActionsActive(false);
+  }
+
   function navigateHistory(delta) {
     if (session.history.length === 0) return;
     if (session.viewingIndex < 0) {
       session.viewingIndex = session.history.length - 1;
+      pauseGame();
     } else {
       session.viewingIndex = Math.max(0, Math.min(session.history.length - 1, session.viewingIndex + delta));
     }
@@ -2820,6 +2846,7 @@ const UI = (() => {
 
   function resumeGame() {
     session.viewingIndex = -1;
+    session.isPaused = false;
     const state = session.state;
     if (state.handOver) {
       UI.updateBoard(state);
@@ -2829,6 +2856,26 @@ const UI = (() => {
       highlightWinners(state);
       UI.setHeroActionsActive(false);
       refreshQuickPercentList();
+      if (session.autoNextTimerId === null) {
+        session.autoNextTimerId = setTimeout(() => {
+          if (!session.active) return;
+          if (session.viewingIndex >= 0) return;
+          if (session.isPaused) return;
+
+          const period = UI.settings.blindGrowthHands || 10;
+          state.handsAtLevel++;
+          if (state.handsAtLevel >= period) {
+            state.handsAtLevel = 0;
+            state.levelIndex = Math.min(state.levelIndex + 1, Engine.BLIND_LEVELS.length - 1);
+          }
+
+          const heroP = state.players[session.heroIndex];
+          if (heroP.eliminated || heroP.stack <= 0) { endSession('Герой вылетел'); return; }
+          const alive = state.players.filter(p => !p.eliminated);
+          if (alive.length <= 1) { endSession('Турнир выигран!'); return; }
+          startHand();
+        }, 4000);
+      }
     } else {
       UI.updateBoard(state);
       UI.updateSeats(state);
@@ -2836,8 +2883,12 @@ const UI = (() => {
       UI.updateLevel(state);
       UI.updateActiveHighlight(state);
       refreshQuickPercentList();
-      if (session.waitingForHero) heroTurn(state.players[session.heroIndex]);
-      else UI.setHeroActionsActive(false);
+      if (session.waitingForHero) {
+        heroTurn(state.players[session.heroIndex]);
+      } else {
+        UI.setHeroActionsActive(false);
+        processTurn();
+      }
     }
     UI.updateHistoryInfo(session.history.length, session.history.length, false);
   }
@@ -2845,6 +2896,7 @@ const UI = (() => {
   function endSession(title) {
     session.active = false;
     clearTimeout(session.autoNextTimerId);
+    clearTimeout(session.botTimerId);
     UI.setHeroActionsActive(false);
     const alive = session.state.players.filter(p => !p.eliminated).length;
     const heroAlive = !session.state.players[session.heroIndex].eliminated;
