@@ -24,10 +24,6 @@
   --pct-block-w: clamp(88px, 13vmin, 110px);
   --dash-inset: clamp(10px, 2vmin, 18px);
   --small-text: clamp(11px, 1.4vmin, 13px);
-  --seat-card-w: clamp(36px, 5vmin, 48px);
-  --seat-card-h: clamp(50px, 7vmin, 67px);
-  --hero-card-w: clamp(42px, 6vmin, 56px);
-  --hero-card-h: clamp(58px, 8.2vmin, 78px);
 }
 
 html, body {
@@ -284,10 +280,10 @@ button.disabled,
   pointer-events: auto;
   touch-action: manipulation;
 }
-/* Единый размер карт ботов — тот же, что в рубашке */
+/* Единый размер карт ботов — как в рубашке, во всех состояниях */
 .seat .seat-cards .card {
-  --card-w: var(--seat-card-w);
-  --card-h: var(--seat-card-h);
+  --card-w: clamp(32px, 4.6vmin, 44px);
+  --card-h: clamp(45px, 6.5vmin, 62px);
   font-size: clamp(20px, 3vmin, 30px);
   padding: 1px 3px;
   border-radius: clamp(4px, 0.6vmin, 6px);
@@ -296,21 +292,14 @@ button.disabled,
 
 /* Единый размер карт героя — как у сфолженного */
 .seat.hero .seat-cards .card {
-  --card-w: var(--hero-card-w);
-  --card-h: var(--hero-card-h);
-  font-size: clamp(22px, 3.4vmin, 30px);
-}
-.seat.hero .seat-cards .card .suit { font-size: clamp(26px, 4vmin, 36px); }
-
-/* Золотая окантовка карт героя — только когда ход героя */
-.seat.hero.active .seat-cards .card {
+  --card-w: clamp(42px, 6.2vmin, 54px);
+  --card-h: clamp(59px, 8.7vmin, 76px);
+  font-size: clamp(24px, 3.8vmin, 34px);
   box-shadow:
     0 0 0 1.5px rgba(255,203,43,.55),
     0 3px 10px rgba(0,0,0,.75);
 }
-.seat.hero:not(.active) .seat-cards .card {
-  box-shadow: 0 3px 8px rgba(0,0,0,.7);
-}
+.seat.hero .seat-cards .card .suit { font-size: clamp(28px, 4.4vmin, 40px); }
 
 .seat .pos-row {
   display: flex;
@@ -575,7 +564,7 @@ button.disabled,
   border: 1px solid #8a6508;
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0,0,0,.7);
-  margin-top: -7px;
+  margin-top: -6px;
   pointer-events: auto;
 }
 #raise-slider-horiz::-moz-range-thumb {
