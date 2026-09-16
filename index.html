@@ -285,7 +285,6 @@ html, body {
   margin-bottom: 3px;
   position: relative;
 }
-/* Все позиции — золотые, как у героя */
 .seat .pos-name {
   font-weight: 900;
   font-size: clamp(12px, 1.8vmin, 16px);
@@ -342,8 +341,13 @@ html, body {
     0 3px 8px rgba(0,0,0,.7);
 }
 .seat.folded { opacity: .35; }
+
+/* Победитель — статичное усиленное свечение, без анимации */
 .seat.winner .seat-cards .card {
-  box-shadow: 0 0 18px rgba(255,203,43,.95), 0 3px 8px rgba(0,0,0,.7);
+  box-shadow:
+    0 0 0 2px rgba(255,203,43,.9),
+    0 0 22px 5px rgba(255,203,43,.75),
+    0 3px 8px rgba(0,0,0,.7);
 }
 
 .seat .action-badge {
@@ -369,6 +373,31 @@ html, body {
 .seat .action-badge.raise { color: var(--gold); border-color: #5a4a1a; }
 .seat .action-badge.check { color: #7ae5a0; border-color: #255a35; }
 .seat .action-badge.hidden { display: none; }
+
+/* Бейдж WINNER — статичное свечение, тот же размер, что action-badge */
+.seat .winner-badge {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, #ffd54a, #e0a800);
+  color: #1a1a1a;
+  font-size: clamp(9px, 1.2vmin, 11px);
+  font-weight: 900;
+  padding: 4px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+  border: 1px solid #8a6508;
+  z-index: 23;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  bottom: clamp(-54px, -6.6vmin, -48px);
+  top: auto;
+  box-shadow:
+    0 0 14px 4px rgba(255,203,43,.85),
+    0 0 26px 8px rgba(255,203,43,.45),
+    0 2px 6px rgba(0,0,0,.8);
+}
+.seat .winner-badge.hidden { display: none; }
 
 .seat .bet-chips {
   position: absolute;
@@ -425,6 +454,7 @@ html, body {
   accent-color: var(--gold);
   min-width: 60px;
   touch-action: manipulation;
+  pointer-events: auto;
 }
 #raise-slider-horiz::-webkit-slider-thumb {
   -webkit-appearance: none;
@@ -437,6 +467,7 @@ html, body {
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0,0,0,.7);
   margin-top: -8px;
+  pointer-events: auto;
 }
 #raise-slider-horiz::-moz-range-thumb {
   width: 20px;
@@ -1681,7 +1712,6 @@ const UI = (() => {
 
   const el = {};
 
-  /* UTG1 (индекс 4) → y: 9%. Герой (индекс 0) → y: 70% + 3px ниже. */
   const SEAT_POSITIONS = [
     { x: 50, y: 70, side: 'bottom' },
     { x: 14, y: 56, side: 'left'   },
@@ -1796,6 +1826,7 @@ const UI = (() => {
       </div>
       <div class="stack" data-role="stack"></div>
       <div class="action-badge hidden" data-role="action"></div>
+      <div class="winner-badge hidden" data-role="winner">WINNER</div>
       <div class="bet-chips hidden" data-role="bet"></div>
     `;
     return seat;
@@ -1827,12 +1858,13 @@ const UI = (() => {
       renderSeatCards(p, state, revealAll);
 
       const betEl = seat.querySelector('[data-role="bet"]');
-      if (p.committedThisStreet > 0 && !p.folded) {
+      if (p.committedThisStreet > 0 && !p.folded && !state.handOver) {
         betEl.textContent = formatChips(p.committedThisStreet, state);
         betEl.classList.remove('hidden');
       } else betEl.classList.add('hidden');
 
       renderActionBadge(p, seat);
+      renderWinnerBadge(p, seat, state);
     }
     updateStacks(state);
     updateActiveHighlight(state);
@@ -1844,10 +1876,20 @@ const UI = (() => {
       badge.classList.add('hidden');
       return;
     }
-    const map = { fold:'Фолд', check:'Чек', call:'Колл', raise:'Рейз', allin:'Олл-ин' };
+    const map = { fold:'FOLD', check:'CHECK', call:'CALL', raise:'RAISE', allin:'ALL-IN' };
     const cls = { fold:'fold', check:'check', call:'call', raise:'raise', allin:'raise' };
-    badge.textContent = map[p.lastAction] || p.lastAction;
+    badge.textContent = map[p.lastAction] || p.lastAction.toUpperCase();
     badge.className = 'action-badge ' + (cls[p.lastAction] || '');
+  }
+
+  function renderWinnerBadge(p, seat, state) {
+    const badge = seat.querySelector('[data-role="winner"]');
+    if (!badge) return;
+    if (state.handOver && state.showdownResults && state.showdownResults.payouts && (state.showdownResults.payouts[p.id] || 0) > 0) {
+      badge.classList.remove('hidden');
+    } else {
+      badge.classList.add('hidden');
+    }
   }
 
   function renderSeatCards(player, state, revealAll) {
@@ -1964,7 +2006,6 @@ const UI = (() => {
     el.btnCheck.disabled = !canCheck;
     el.btnCall.disabled = !canCall;
 
-    // Кнопка Call: сверху всегда CALL, снизу сумма в BB
     if (canCall) {
       el.callAmount.textContent = formatChips(toCall, state);
     } else {
@@ -1995,7 +2036,7 @@ const UI = (() => {
 
     if (isPreflopOpen) {
       options = [
-        { label: 'All-In', target: maxTarget, allin: true },
+        { label: 'ALL-IN', target: maxTarget, allin: true },
         { label: '3.5 BB', target: Math.round(bb * 3.5) },
         { label: '3 BB',   target: Math.round(bb * 3) },
         { label: '2.5 BB', target: Math.round(bb * 2.5) },
@@ -2004,7 +2045,7 @@ const UI = (() => {
     } else {
       const potAfterCall = state.pot + Math.min(toCall, hero.stack);
       options = [
-        { label: 'All-In', target: maxTarget, allin: true },
+        { label: 'ALL-IN', target: maxTarget, allin: true },
         { label: '100%', target: Math.min(maxTarget, state.currentBet + Math.round(potAfterCall * 1.00)) },
         { label: '70%',  target: Math.min(maxTarget, state.currentBet + Math.round(potAfterCall * 0.70)) },
         { label: '50%',  target: Math.min(maxTarget, state.currentBet + Math.round(potAfterCall * 0.50)) },
@@ -2015,7 +2056,7 @@ const UI = (() => {
     for (const opt of options) {
       let target = Math.min(maxTarget, opt.target);
       if (target < minTarget) target = Math.min(minTarget, maxTarget);
-      if (target <= state.currentBet && opt.label !== 'All-In') continue;
+      if (target <= state.currentBet && opt.label !== 'ALL-IN') continue;
       if (target <= state.currentBet) continue;
 
       const btn = document.createElement('button');
@@ -2027,19 +2068,27 @@ const UI = (() => {
   }
 
   function setupHorizontalSlider(state, hero) {
+    const slider = document.getElementById('raise-slider-horiz');
+    el.sliderHoriz = slider;
+
     const minTarget = state.currentBet + state.minRaise;
     const maxTarget = hero.committedThisStreet + hero.stack;
     const realMin = Math.min(minTarget, maxTarget);
     const realMax = maxTarget;
-    el.sliderHoriz.min   = realMin;
-    el.sliderHoriz.max   = realMax;
-    el.sliderHoriz.step  = state.blinds.bb >= 100 ? 10 : 1;
-    el.sliderHoriz.value = realMin;
+
+    slider.min   = realMin;
+    slider.max   = realMax;
+    slider.step  = state.blinds.bb >= 100 ? 10 : 1;
+    slider.value = realMin;
+
     updateSliderDisplay(state);
   }
 
   function updateSliderDisplay(state) {
-    el.raiseAmountMini.textContent = formatChips(Number(el.sliderHoriz.value), state);
+    const slider = document.getElementById('raise-slider-horiz');
+    el.sliderHoriz = slider;
+    el.raiseAmountMini = document.getElementById('raise-amount-mini');
+    el.raiseAmountMini.textContent = formatChips(Number(slider.value), state);
   }
 
   function bindActionHandlers(state, heroIndex, toCall, handlers) {
@@ -2047,9 +2096,12 @@ const UI = (() => {
     rebind(el.btnCheck, () => handlers.onCheck());
     rebind(el.btnCall,  () => handlers.onCall());
 
-    el.sliderHoriz.oninput = () => updateSliderDisplay(state);
-    el.sliderHoriz.onchange = () => {
-      const target = Number(el.sliderHoriz.value);
+    const slider = document.getElementById('raise-slider-horiz');
+    el.sliderHoriz = slider;
+
+    slider.oninput = () => updateSliderDisplay(state);
+    slider.onchange = () => {
+      const target = Number(slider.value);
       const hero = state.players[heroIndex];
       const maxTarget = hero.committedThisStreet + hero.stack;
       if (target >= maxTarget) {
