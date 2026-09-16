@@ -38,8 +38,15 @@ html, body {
   touch-action: manipulation;
 }
 
+/* Курсор по умолчанию — только для активных элементов */
 button { cursor: pointer; }
 button:disabled { cursor: default; }
+button:disabled,
+button.disabled,
+#quick-percent-list.inactive button,
+#hero-actions.inactive button {
+  cursor: default;
+}
 
 #app {
   position: relative;
@@ -469,10 +476,11 @@ button:disabled { cursor: default; }
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 0 0 2px 0;
+  padding: 1px 0;
   border-bottom: 1px solid #2a2520;
   margin-bottom: -1px;
   gap: 0;
+  min-height: 0;
 }
 #hand-nav .nav-history {
   display: flex;
@@ -489,11 +497,10 @@ button:disabled { cursor: default; }
   color: var(--text);
   font-size: clamp(15px, 2vmin, 18px);
   font-weight: 800;
-  padding: 0 clamp(8px, 1.3vmin, 11px);
-  cursor: pointer;
+  padding: 0 clamp(6px, 1vmin, 9px);
   line-height: 1;
-  min-width: 38px;
-  min-height: 32px;
+  min-width: 36px;
+  min-height: 28px;
   border-radius: 5px;
   position: relative;
   display: inline-flex;
@@ -507,7 +514,7 @@ button:disabled { cursor: default; }
   color: var(--gold);
   font-weight: 800;
   text-align: center;
-  font-size: clamp(14px, 1.8vmin, 16px);
+  font-size: clamp(10px, 1.2vmin, 12px);
   letter-spacing: .4px;
   white-space: nowrap;
   position: relative;
@@ -521,8 +528,9 @@ button:disabled { cursor: default; }
 #hn-reset {
   color: var(--gold);
   margin-left: clamp(14px, 2vmin, 20px);
+  font-size: clamp(17px, 2.2vmin, 20px);
 }
-#hn-reset .reset-icon { font-size: clamp(17px, 2.2vmin, 20px); line-height: 1; }
+#hn-reset .reset-icon { font-size: clamp(18px, 2.4vmin, 22px); line-height: 1; }
 
 #hero-slider-row {
   display: flex;
@@ -709,11 +717,13 @@ button:disabled { cursor: default; }
   font-size: 13px;
   font-weight: 600;
   min-height: 40px;
+  cursor: pointer;
 }
 .setting input[type="checkbox"] {
   width: 22px;
   height: 22px;
   accent-color: var(--gold);
+  cursor: pointer;
 }
 
 #top-panel {
