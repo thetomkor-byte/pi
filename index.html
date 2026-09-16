@@ -465,10 +465,8 @@ button.disabled,
   backdrop-filter: blur(4px);
   transition: opacity .2s ease;
 }
-#hero-actions.inactive #hero-slider-row,
-#hero-actions.inactive #hero-buttons {
+#hero-actions.inactive {
   opacity: 0.55;
-  pointer-events: none;
 }
 
 #hand-nav {
@@ -569,7 +567,7 @@ button.disabled,
   border: 1px solid #8a6508;
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0,0,0,.7);
-  margin-top: -5px;
+  margin-top: -4px;
   pointer-events: auto;
 }
 #raise-slider-horiz::-moz-range-thumb {
@@ -2084,7 +2082,8 @@ const UI = (() => {
 
     setHeroActionsActive(true);
 
-    el.btnFold.disabled = false;
+    // Fold: активна только когда нельзя чекнуть (есть что коллировать)
+    el.btnFold.disabled = canCheck;
     el.btnCheck.disabled = !canCheck;
     el.btnCall.disabled = !canCall;
 
