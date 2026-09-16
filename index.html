@@ -16,8 +16,6 @@
   --accent: #3fa9f5;
   --danger: #d94f3d;
   --ok: #2fb571;
-  --card-w: 48px;
-  --card-h: 70px;
 }
 
 html, body {
@@ -28,6 +26,8 @@ html, body {
   font-size: 14px;
   overflow: hidden;
   user-select: none;
+  -webkit-user-select: none;
+  overscroll-behavior: none;
 }
 
 #app {
@@ -35,30 +35,34 @@ html, body {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 50%, #12100e 0%, #0a0a0a 70%, #050505 100%);
 }
 
+/* ЕДИНЫЙ LAYOUT: вертикальный стол, центрируется.
+   Ширина стола = min(92vw, 60vh * 9/16), высота = ширина * 16/9. */
 #table-scene {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 62px;
+  top: 0; left: 0; right: 0;
+  bottom: clamp(56px, 8vmin, 68px);
   display: flex;
-  align-items: stretch;
+  align-items: center;
   justify-content: center;
   transition: transform .28s ease;
 }
-#table-scene.shifted-down { transform: translateY(-140px); }
+#table-scene.shifted-down { transform: translateY(clamp(-160px, -18vmin, -120px)); }
 
 #poker-table {
   position: relative;
-  width: 100%;
-  height: 100%;
+  aspect-ratio: 9 / 16;
+  width: min(92vw, calc((100vh - clamp(56px, 8vmin, 68px)) * 0.92 * 9 / 16));
+  max-height: calc(100vh - clamp(56px, 8vmin, 68px) - clamp(8px, 2vmin, 24px));
+  height: auto;
   background:
     radial-gradient(ellipse at 50% 45%, #322c26 0%, #1e1a16 55%, #0f0d0b 100%);
-  border: 14px solid;
+  border: clamp(8px, 1.4vmin, 14px) solid;
   border-image: linear-gradient(180deg, #6b4622 0%, #3d2512 40%, #2a1a0c 100%) 1;
-  border-radius: 46px;
+  border-radius: clamp(28px, 4vmin, 46px);
   box-shadow:
     0 0 0 3px #1a0f05,
     0 0 60px rgba(0,0,0,.95),
@@ -69,9 +73,9 @@ html, body {
 #poker-table::before {
   content: "";
   position: absolute;
-  inset: 18px;
-  border: 1px dashed rgba(255,255,255,.06);
-  border-radius: 30px;
+  inset: clamp(10px, 2vmin, 18px);
+  border: 1px dashed rgba(255,255,255,.09);
+  border-radius: clamp(20px, 3vmin, 30px);
   pointer-events: none;
 }
 
@@ -82,49 +86,50 @@ html, body {
   text-align: center;
   pointer-events: none;
   z-index: 5;
+  width: 90%;
 }
 
 #info-place-row {
-  font-size: 14px;
+  font-size: clamp(11px, 1.4vmin, 14px);
   color: var(--text);
   font-weight: 700;
   text-shadow: 0 1px 4px rgba(0,0,0,.95);
   letter-spacing: .3px;
-  margin-bottom: 8px;
+  margin-bottom: clamp(4px, 0.8vmin, 8px);
   white-space: nowrap;
-  opacity: 0.45;
+  opacity: 0.7;
 }
 
 #pot-display {
   color: var(--gold);
   font-weight: 800;
-  font-size: 24px;
-  margin-bottom: 12px;
-  text-shadow: 0 2px 8px rgba(0,0,0,.95);
+  font-size: clamp(16px, 2.4vmin, 24px);
+  margin-bottom: clamp(6px, 1vmin, 12px);
+  text-shadow: 0 2px 8px rgba(0,0,0,.95), 0 0 18px rgba(255,203,43,.25);
   letter-spacing: .3px;
 }
 
 #board-cards {
   display: flex;
-  gap: 7px;
+  gap: clamp(4px, 0.8vmin, 7px);
   justify-content: center;
-  margin-bottom: 12px;
-  min-height: 60px;
+  margin-bottom: clamp(6px, 1vmin, 12px);
+  min-height: 0;
 }
 #board-cards .card {
-  --card-w: 42px;
-  --card-h: 60px;
-  font-size: 22px;
+  --card-w: clamp(30px, 4.5vmin, 42px);
+  --card-h: clamp(42px, 6.3vmin, 60px);
+  font-size: clamp(16px, 2.4vmin, 22px);
   padding: 2px 3px;
 }
-#board-cards .card .suit { font-size: 26px; }
+#board-cards .card .suit { font-size: clamp(18px, 2.8vmin, 26px); }
 
 #table-info {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  font-size: 14px;
+  font-size: clamp(11px, 1.4vmin, 14px);
   color: var(--text);
   font-weight: 700;
   text-shadow: 0 1px 4px rgba(0,0,0,.95);
@@ -140,7 +145,7 @@ html, body {
   width: var(--card-w);
   height: var(--card-h);
   background: #fafafa;
-  border-radius: 6px;
+  border-radius: clamp(4px, 0.6vmin, 7px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -148,7 +153,7 @@ html, body {
   gap: 1px;
   padding: 2px 3px;
   font-weight: 800;
-  font-size: 26px;
+  font-size: clamp(16px, 2.4vmin, 26px);
   box-shadow:
     0 3px 8px rgba(0,0,0,.7),
     inset 0 0 0 1px rgba(0,0,0,.08);
@@ -157,7 +162,7 @@ html, body {
   line-height: 1;
 }
 .card .rank { line-height: 1; }
-.card .suit { line-height: 1; font-size: 30px; }
+.card .suit { line-height: 1; font-size: clamp(18px, 2.8vmin, 30px); }
 
 .card.back {
   background:
@@ -170,9 +175,11 @@ html, body {
   content: "";
   position: absolute;
   inset: 5px;
-  border: 1px solid rgba(255,203,43,.25);
-  border-radius: 3px;
-  background: radial-gradient(circle at center, rgba(255,203,43,.15) 0%, transparent 60%);
+  border: 1px solid rgba(255,203,43,.28);
+  border-radius: clamp(2px, 0.4vmin, 3px);
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255,203,43,.22) 0%, transparent 55%),
+    radial-gradient(circle at center, rgba(255,203,43,.15) 0%, transparent 60%);
 }
 
 .style-4color .suit-spades   { color: #1a1a1a; }
@@ -189,7 +196,7 @@ html, body {
 
 .seat {
   position: absolute;
-  width: 120px;
+  width: clamp(76px, 11.5%, 130px);
   transform: translate(-50%, -50%);
   text-align: center;
   font-size: 14px;
@@ -200,12 +207,12 @@ html, body {
 
 .seat .strat-badge {
   position: absolute;
-  top: -22px;
+  top: clamp(-22px, -3vmin, -18px);
   left: 50%;
   transform: translateX(-50%);
   background: #2a4a8a;
   color: #fff;
-  font-size: 11px;
+  font-size: clamp(9px, 1.2vmin, 11px);
   font-weight: 800;
   padding: 3px 8px;
   border-radius: 4px;
@@ -215,31 +222,38 @@ html, body {
   transition: opacity .2s;
 }
 .seat .strat-badge.hidden { display: none; }
-.seat.folded .strat-badge { opacity: 0.1; }
+.seat.folded .strat-badge { opacity: 0.35; }
 
 .seat .seat-cards {
   display: flex;
-  gap: 4px;
+  gap: clamp(2px, 0.5vmin, 4px);
   justify-content: center;
-  min-height: 72px;
-  margin-bottom: 5px;
+  min-height: 0;
+  margin-bottom: clamp(3px, 0.6vmin, 5px);
 }
 .seat .seat-cards .card {
-  --card-w: 46px;
-  --card-h: 68px;
-  font-size: 24px;
+  --card-w: clamp(34px, 5vmin, 46px);
+  --card-h: clamp(48px, 7.1vmin, 68px);
+  font-size: clamp(17px, 2.6vmin, 24px);
   padding: 2px 3px;
-  border-radius: 6px;
+  border-radius: clamp(4px, 0.6vmin, 6px);
 }
-.seat .seat-cards .card .suit { font-size: 28px; }
+.seat .seat-cards .card .suit { font-size: clamp(20px, 3vmin, 28px); }
 
-.seat.hero .seat-cards { min-height: 88px; }
 .seat.hero .seat-cards .card {
-  --card-w: 56px;
-  --card-h: 82px;
-  font-size: 30px;
+  --card-w: clamp(44px, 6.5vmin, 56px);
+  --card-h: clamp(62px, 9.1vmin, 82px);
+  font-size: clamp(20px, 3.2vmin, 30px);
+  box-shadow:
+    0 0 0 1.5px rgba(255,203,43,.55),
+    0 3px 10px rgba(0,0,0,.75);
 }
-.seat.hero .seat-cards .card .suit { font-size: 34px; }
+.seat.hero .seat-cards .card .suit { font-size: clamp(24px, 3.8vmin, 34px); }
+
+.seat.folded .seat-cards .card {
+  transform: scale(0.9);
+  box-shadow: 0 3px 8px rgba(0,0,0,.7);
+}
 
 .seat .pos-row {
   display: flex;
@@ -250,22 +264,30 @@ html, body {
 }
 .seat .pos-name {
   font-weight: 900;
-  font-size: 16px;
-  color: var(--gold);
+  font-size: clamp(12px, 1.8vmin, 16px);
+  color: var(--text);
   letter-spacing: .5px;
   text-shadow: 0 1px 3px rgba(0,0,0,.95);
   position: relative;
   display: inline-block;
   padding: 0 2px;
 }
+.seat.hero .pos-name,
+.seat.active .pos-name {
+  color: var(--gold);
+}
+.seat.active .pos-name {
+  color: #fff;
+  text-shadow: 0 0 10px var(--gold), 0 1px 3px rgba(0,0,0,.95);
+}
 
 .seat .dealer-chip {
   position: absolute;
-  width: 20px;
-  height: 20px;
+  width: clamp(16px, 2.2vmin, 20px);
+  height: clamp(16px, 2.2vmin, 20px);
   background: radial-gradient(circle at 35% 35%, #fff6d0, #ffcb2b 60%, #b8860b);
   color: #1a1a1a;
-  font-size: 11px;
+  font-size: clamp(9px, 1.2vmin, 11px);
   font-weight: 900;
   border-radius: 50%;
   display: flex;
@@ -277,11 +299,11 @@ html, body {
 }
 .seat .dealer-chip.hidden { display: none; }
 
-.seat.left .dealer-chip { right: -28px; top: 36px; left: auto; }
+.seat.left .dealer-chip { right: clamp(-26px, -3.4vmin, -22px); top: 36px; left: auto; }
 .seat.right .dealer-chip,
-.seat.top .dealer-chip { left: -28px; top: 36px; right: auto; }
+.seat.top .dealer-chip { left: clamp(-26px, -3.4vmin, -22px); top: 36px; right: auto; }
 .seat.hero .dealer-chip {
-  top: -30px;
+  top: clamp(-28px, -3.6vmin, -22px);
   left: 50%;
   right: auto;
   transform: translateX(-50%);
@@ -290,13 +312,14 @@ html, body {
 .seat .stack {
   color: var(--text);
   font-weight: 700;
-  font-size: 13px;
+  font-size: clamp(12px, 1.6vmin, 14px);
   text-shadow: 0 1px 3px rgba(0,0,0,.95);
 }
 
-.seat.active .pos-name { color: #fff; text-shadow: 0 0 10px var(--gold); }
 .seat.active .seat-cards .card {
-  box-shadow: 0 0 12px rgba(255,203,43,.7), 0 3px 8px rgba(0,0,0,.7);
+  box-shadow:
+    0 0 12px rgba(255,203,43,.7),
+    0 3px 8px rgba(0,0,0,.7);
 }
 .seat.folded { opacity: .35; }
 .seat.winner .seat-cards .card {
@@ -310,7 +333,7 @@ html, body {
   transform: translateX(-50%);
   background: rgba(0,0,0,.9);
   color: var(--text);
-  font-size: 11px;
+  font-size: clamp(9px, 1.2vmin, 11px);
   font-weight: 800;
   padding: 4px 10px;
   border-radius: 4px;
@@ -319,7 +342,7 @@ html, body {
   z-index: 22;
   text-transform: uppercase;
   letter-spacing: .5px;
-  bottom: -28px;
+  bottom: clamp(-26px, -3.2vmin, -22px);
   top: auto;
 }
 .seat .action-badge.fold  { color: #ff8a7a; border-color: #5a2a25; }
@@ -332,9 +355,9 @@ html, body {
   position: absolute;
   background: linear-gradient(180deg, #ffcb2b, #e0a800);
   color: #1a1a1a;
-  font-size: 13px;
+  font-size: clamp(11px, 1.5vmin, 13px);
   font-weight: 900;
-  padding: 4px 12px;
+  padding: clamp(3px, 0.5vmin, 4px) clamp(9px, 1.4vmin, 12px);
   border-radius: 12px;
   white-space: nowrap;
   box-shadow: 0 2px 6px rgba(0,0,0,.8);
@@ -342,7 +365,7 @@ html, body {
   z-index: 21;
   left: 50%;
   transform: translateX(-50%);
-  bottom: -62px;
+  bottom: clamp(-54px, -6.6vmin, -48px);
   top: auto;
 }
 .seat .bet-chips.hidden { display: none; }
@@ -352,53 +375,56 @@ html, body {
    ============================ */
 #hero-actions {
   position: absolute;
-  left: 3%;
-  bottom: 4.5%;
-  width: 270px;
+  left: 2.5%;
+  bottom: 3.5%;
+  width: clamp(200px, 32vmin, 280px);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: clamp(5px, 0.9vmin, 8px);
   background: rgba(20,18,16,.92);
   border: 1px solid #3a3530;
   border-radius: 10px;
-  padding: 8px 10px;
+  padding: clamp(6px, 1vmin, 10px) clamp(7px, 1.1vmin, 10px);
   z-index: 45;
+  backdrop-filter: blur(4px);
 }
 #hero-actions.hidden { display: none; }
 
-/* Строка слайдера */
 #hero-slider-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: clamp(6px, 1vmin, 10px);
   width: 100%;
+  padding: 6px 0;
 }
 #raise-slider-horiz {
   flex: 1;
   -webkit-appearance: none;
   appearance: none;
   height: 6px;
-  background: rgba(0,0,0,.5);
-  border: 1px solid #3a3530;
+  background: #4a4540;
+  border: 1px solid #2a2520;
   border-radius: 4px;
   outline: none;
   accent-color: var(--gold);
   min-width: 60px;
+  touch-action: manipulation;
 }
 #raise-slider-horiz::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, #fff6d0, #ffcb2b 60%, #b8860b);
   border: 1px solid #8a6508;
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0,0,0,.7);
+  margin-top: -9px;
 }
 #raise-slider-horiz::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, #fff6d0, #ffcb2b 60%, #b8860b);
   border: 1px solid #8a6508;
@@ -407,37 +433,38 @@ html, body {
 }
 #raise-amount-mini {
   color: var(--gold);
-  font-size: 14px;
+  font-size: clamp(12px, 1.5vmin, 14px);
   font-weight: 800;
   white-space: nowrap;
   text-shadow: 0 1px 3px rgba(0,0,0,.95);
-  min-width: 62px;
+  min-width: clamp(52px, 7vmin, 68px);
   text-align: center;
   background: rgba(0,0,0,.35);
   border: 1px solid #3a3530;
   border-radius: 6px;
-  padding: 4px 8px;
+  padding: clamp(3px, 0.5vmin, 5px) clamp(6px, 0.9vmin, 9px);
   flex-shrink: 0;
 }
 
-/* Кнопки Fold/Check/Call — внутри общего контейнера */
 #hero-buttons {
   display: flex;
-  gap: 5px;
+  gap: clamp(4px, 0.7vmin, 6px);
   width: 100%;
 }
 #hero-buttons button {
   flex: 1;
-  padding: 11px 8px;
+  padding: clamp(10px, 1.6vmin, 13px) clamp(5px, 0.9vmin, 8px);
   border: none;
   border-radius: 8px;
   font-weight: 800;
-  font-size: 13px;
+  font-size: clamp(11px, 1.5vmin, 13px);
   cursor: pointer;
   color: #fff;
   text-transform: uppercase;
   letter-spacing: .3px;
   box-shadow: 0 3px 0 rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.1);
+  touch-action: manipulation;
+  min-height: 44px;
 }
 #hero-buttons button:active:not(:disabled) {
   transform: translateY(2px);
@@ -446,92 +473,106 @@ html, body {
 #hero-buttons button:disabled { opacity: .35; cursor: not-allowed; box-shadow: none; }
 
 #btn-fold  { background: linear-gradient(180deg, #5a5a5a, #3a3a3a); }
-#btn-check { background: linear-gradient(180deg, #2a4a3a, #1a3a2a); }
-#btn-call  { background: linear-gradient(180deg, #3a7bd5, #2a5aa5); }
+#btn-check { background: linear-gradient(180deg, #2a4a3a, #14261c); }
+#btn-call  { background: linear-gradient(180deg, #3a7bd5, #1e4a8a); }
 
-/* %-кнопки — справа, на том же уровне, что и Fold/Check/Call */
 #quick-percent-list {
   position: absolute;
-  right: 3%;
-  bottom: 4.5%;
+  right: 2.5%;
+  bottom: 3.5%;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: clamp(4px, 0.7vmin, 6px);
   z-index: 45;
 }
 #quick-percent-list button {
   background: rgba(20,18,16,.92);
   border: 1px solid #3a3530;
   color: var(--text);
-  padding: 8px 14px;
+  padding: clamp(8px, 1.2vmin, 10px) clamp(10px, 1.5vmin, 14px);
   border-radius: 7px;
-  font-size: 14px;
+  font-size: clamp(12px, 1.5vmin, 14px);
   font-weight: 800;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
-  min-width: 108px;
+  gap: clamp(8px, 1.2vmin, 12px);
+  min-width: clamp(96px, 14vmin, 118px);
+  white-space: nowrap;
+  touch-action: manipulation;
+  min-height: 40px;
 }
 #quick-percent-list button:hover { background: #2a2520; }
 #quick-percent-list button .label { color: var(--gold); font-weight: 800; }
-#quick-percent-list button .value { color: var(--muted); font-weight: 600; font-size: 12px; }
+#quick-percent-list button .value { color: var(--muted); font-weight: 600; font-size: clamp(10px, 1.3vmin, 12px); }
 
 #bottom-bar {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 62px;
+  height: clamp(56px, 8vmin, 68px);
   background: linear-gradient(180deg, rgba(10,10,10,.85), rgba(0,0,0,.98) 30%, rgba(0,0,0,1));
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: clamp(6px, 1vmin, 10px);
   z-index: 60;
-  padding: 0 12px;
+  padding: 0 clamp(8px, 1.5vmin, 12px);
   backdrop-filter: blur(6px);
 }
 #bottom-bar button {
   background: rgba(20,18,16,.95);
   border: 1px solid #3a3530;
   color: var(--text);
-  height: 42px;
-  min-width: 52px;
-  padding: 0 14px;
+  height: clamp(40px, 5.5vmin, 48px);
+  min-width: clamp(44px, 5.2vmin, 52px);
+  padding: 0 clamp(10px, 1.6vmin, 14px);
   border-radius: 9px;
-  font-size: 19px;
+  font-size: clamp(16px, 2.2vmin, 19px);
   font-weight: 800;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  touch-action: manipulation;
 }
 #bottom-bar button:hover { background: #2a2520; }
 #bottom-bar button:disabled { opacity: .35; cursor: not-allowed; }
+
+#btn-new      { font-size: clamp(16px, 2.2vmin, 19px); }
+#btn-pause    { font-size: clamp(16px, 2.2vmin, 19px); }
+#btn-prev     { font-size: clamp(14px, 1.9vmin, 17px); min-width: clamp(38px, 4.6vmin, 46px); }
+#btn-next     { font-size: clamp(14px, 1.9vmin, 17px); min-width: clamp(38px, 4.6vmin, 46px); }
+#btn-resume   { font-size: clamp(14px, 1.9vmin, 17px); }
+#btn-settings { font-size: clamp(20px, 2.8vmin, 24px); min-width: clamp(48px, 5.6vmin, 56px); }
+
 #hist-info {
-  font-size: 15px;
+  font-size: clamp(12px, 1.7vmin, 15px);
   color: var(--muted);
   font-weight: 700;
-  padding: 0 10px;
+  padding: 0 clamp(6px, 1vmin, 10px);
   letter-spacing: .5px;
 }
 #hist-info b { color: var(--gold); }
+#hist-info .sep { color: #6a6a6a; }
 
 #bottom-panel {
   position: absolute;
   bottom: 0; left: 0; right: 0;
   background: linear-gradient(0deg, #0d0d0d 0%, #1a1a1a 100%);
   border-top: 1px solid #2a2520;
-  padding: 20px 20px 70px;
+  padding: 20px 20px 80px;
   transform: translateY(100%);
   transition: transform .28s ease;
   z-index: 100;
-  max-height: 70vh;
+  max-height: 75vh;
   overflow-y: auto;
   touch-action: pan-y;
+  scrollbar-width: none;
 }
+#bottom-panel::-webkit-scrollbar { display: none; }
 #bottom-panel.open { transform: translateY(0); }
 
 #bottom-panel h3 {
@@ -590,10 +631,11 @@ html, body {
   padding: 6px 10px;
   font-size: 13px;
   font-weight: 600;
+  min-height: 40px;
 }
 .setting input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   accent-color: var(--gold);
 }
 
@@ -613,7 +655,7 @@ html, body {
 
 #timer-bar {
   position: absolute;
-  bottom: 62px;
+  bottom: clamp(56px, 8vmin, 68px);
   left: 0;
   right: 0;
   height: 3px;
@@ -634,12 +676,13 @@ html, body {
   justify-content: center;
   align-items: center;
   z-index: 200;
+  padding: 20px;
 }
 #start-overlay.hidden { display: none; }
 
 .start-card {
   text-align: center;
-  padding: 44px 52px;
+  padding: clamp(28px, 5vmin, 44px) clamp(24px, 5vmin, 52px);
   background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
   border: 2px solid #3a3530;
   border-radius: 20px;
@@ -648,97 +691,34 @@ html, body {
 }
 .start-card h1 {
   color: var(--gold);
-  font-size: 28px;
+  font-size: clamp(20px, 3vmin, 28px);
   margin-bottom: 12px;
   letter-spacing: 1.5px;
   font-weight: 900;
 }
+.start-card h1 .spade { color: var(--gold); }
 .start-card p {
   color: var(--muted);
   margin-bottom: 28px;
-  font-size: 15px;
+  font-size: clamp(12px, 1.8vmin, 15px);
   line-height: 1.5;
 }
 #btn-start {
-  padding: 18px 56px;
+  padding: clamp(14px, 2vmin, 18px) clamp(36px, 5vmin, 56px);
   border: none;
   border-radius: 12px;
   background: linear-gradient(180deg, #ffcb2b, #e0a800);
   color: #1a1a1a;
   font-weight: 900;
-  font-size: 19px;
+  font-size: clamp(15px, 2vmin, 19px);
   cursor: pointer;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  box-shadow: 0 4px 0 #8a6508, inset 0 1px 0 rgba(255,255,255,.3);
+  box-shadow: 0 3px 0 #8a6508, inset 0 1px 0 rgba(255,255,255,.35);
+  touch-action: manipulation;
+  min-height: 52px;
 }
-#btn-start:active { transform: translateY(2px); box-shadow: 0 2px 0 #8a6508; }
-
-@media (max-width: 720px) {
-  :root { --card-w: 42px; --card-h: 60px; }
-  #poker-table { border-radius: 30px; border-width: 10px; }
-  #poker-table::before { inset: 14px; border-radius: 22px; }
-  .seat { width: 100px; }
-  .seat .strat-badge { font-size: 10px; padding: 2px 7px; top: -20px; }
-  .seat .seat-cards { min-height: 58px; gap: 3px; }
-  .seat .seat-cards .card { --card-w: 38px; --card-h: 56px; font-size: 19px; padding: 2px 3px; }
-  .seat .seat-cards .card .suit { font-size: 23px; }
-  .seat.hero .seat-cards { min-height: 74px; }
-  .seat.hero .seat-cards .card { --card-w: 48px; --card-h: 70px; font-size: 24px; }
-  .seat.hero .seat-cards .card .suit { font-size: 28px; }
-  .seat .pos-name { font-size: 14px; }
-  .seat .dealer-chip { width: 18px; height: 18px; font-size: 10px; }
-  .seat.left .dealer-chip { right: -24px; top: 32px; }
-  .seat.right .dealer-chip,
-  .seat.top .dealer-chip { left: -24px; top: 32px; }
-  .seat.hero .dealer-chip { top: -26px; }
-  .seat .stack { font-size: 12px; }
-  .seat .action-badge { font-size: 10px; padding: 3px 8px; bottom: -24px; }
-  .seat .bet-chips { font-size: 12px; padding: 3px 10px; bottom: -52px; }
-  #pot-display { font-size: 20px; }
-  #info-place-row { font-size: 12px; }
-  #board-cards { min-height: 52px; gap: 5px; }
-  #board-cards .card { --card-w: 38px; --card-h: 52px; font-size: 19px; }
-  #board-cards .card .suit { font-size: 22px; }
-  #table-info { font-size: 12px; }
-  #hero-actions { width: 230px; bottom: 5%; padding: 7px 8px; }
-  #raise-amount-mini { font-size: 12px; min-width: 54px; padding: 3px 7px; }
-  #hero-buttons button { padding: 9px 6px; font-size: 11px; }
-  #quick-percent-list button { padding: 7px 11px; font-size: 12px; min-width: 92px; gap: 9px; }
-  #quick-percent-list button .value { font-size: 11px; }
-  #bottom-bar { height: 56px; }
-  #bottom-bar button { height: 38px; font-size: 17px; padding: 0 12px; min-width: 46px; }
-  #hist-info { font-size: 13px; padding: 0 8px; }
-  #timer-bar { bottom: 56px; }
-  #table-scene { bottom: 56px; }
-  #stats-grid { grid-template-columns: repeat(2, 1fr); }
-  .start-card h1 { font-size: 20px; }
-  .start-card p { font-size: 12px; }
-  #btn-start { padding: 14px 36px; font-size: 16px; }
-}
-
-@media (max-width: 420px) {
-  .seat { width: 90px; }
-  .seat .seat-cards { min-height: 50px; }
-  .seat .seat-cards .card { --card-w: 32px; --card-h: 48px; font-size: 17px; }
-  .seat.hero .seat-cards { min-height: 66px; }
-  .seat.hero .seat-cards .card { --card-w: 42px; --card-h: 62px; font-size: 22px; }
-  .seat .pos-name { font-size: 12px; }
-  .seat .stack { font-size: 11px; }
-  .seat .action-badge { font-size: 9px; bottom: -22px; }
-  .seat .bet-chips { font-size: 11px; padding: 3px 9px; bottom: -46px; }
-  .seat.hero .dealer-chip { top: -22px; }
-  #quick-percent-list button { min-width: 82px; font-size: 11px; padding: 6px 10px; gap: 8px; }
-  #hero-actions { width: 200px; bottom: 5.5%; }
-  #hero-buttons button { padding: 8px 5px; font-size: 10px; }
-  #raise-amount-mini { font-size: 11px; min-width: 48px; }
-  #pot-display { font-size: 18px; }
-  #info-place-row { font-size: 11px; }
-  #board-cards { min-height: 48px; gap: 4px; }
-  #board-cards .card { --card-w: 34px; --card-h: 46px; font-size: 17px; }
-  #board-cards .card .suit { font-size: 20px; }
-  #table-info { font-size: 11px; }
-}
+#btn-start:active { transform: translateY(2px); box-shadow: 0 1px 0 #8a6508; }
 </style>
 </head>
 <body>
@@ -758,7 +738,6 @@ html, body {
       </div>
       <div id="seats"></div>
 
-      <!-- Единый контейнер: слайдер + кнопки -->
       <div id="hero-actions" class="hidden">
         <div id="hero-slider-row">
           <input type="range" id="raise-slider-horiz" min="0" max="100" value="0" />
@@ -781,7 +760,7 @@ html, body {
     <button id="btn-new" title="Новая сессия">↻</button>
     <button id="btn-pause" title="Пауза">⏸</button>
     <button id="btn-prev" title="Назад">◀</button>
-    <div id="hist-info"><b id="hist-num">0</b> / <b id="hist-total">0</b></div>
+    <div id="hist-info"><b id="hist-num">0</b> <span class="sep">/</span> <b id="hist-total">0</b></div>
     <button id="btn-next" title="Вперёд">▶</button>
     <button id="btn-resume" title="Продолжить" class="hidden">▶▶</button>
     <button id="btn-settings" title="Настройки">⚙</button>
@@ -838,7 +817,7 @@ html, body {
 
   <div id="start-overlay">
     <div class="start-card">
-      <h1>♠ Poker Intuition Trainer</h1>
+      <h1><span class="spade">♠</span> Poker Intuition Trainer</h1>
       <p>Тренируй интуицию: выиграешь ты на вскрытии или нет.</p>
       <button id="btn-start">Начать игру</button>
     </div>
@@ -1666,17 +1645,15 @@ const UI = (() => {
 
   const el = {};
 
-  // Позиции: левые сдвинуты правее, правые — левее (всё ближе к центру).
-  // UTG1 и герой по центру x:50.
   const SEAT_POSITIONS = [
-    { x: 50, y: 74, side: 'bottom' },  // 0 — герой
-    { x: 16, y: 58, side: 'left'   },  // 1 — SB
-    { x: 15, y: 34, side: 'left'   },  // 2 — BB
-    { x: 19, y: 10, side: 'left'   },  // 3 — UTG
-    { x: 50, y: 9,  side: 'top'    },  // 4 — UTG1
-    { x: 81, y: 10, side: 'right'  },  // 5 — LJ   (зерк. UTG)
-    { x: 85, y: 34, side: 'right'  },  // 6 — HJ   (зерк. BB)
-    { x: 84, y: 58, side: 'right'  }   // 7 — CO   (зерк. SB)
+    { x: 50, y: 74, side: 'bottom' },
+    { x: 16, y: 58, side: 'left'   },
+    { x: 15, y: 34, side: 'left'   },
+    { x: 19, y: 10, side: 'left'   },
+    { x: 50, y: 9,  side: 'top'    },
+    { x: 81, y: 10, side: 'right'  },
+    { x: 85, y: 34, side: 'right'  },
+    { x: 84, y: 58, side: 'right'  }
   ];
 
   const SUIT_CLASS = { s: 'suit-spades', h: 'suit-hearts', d: 'suit-diamonds', c: 'suit-clubs' };
