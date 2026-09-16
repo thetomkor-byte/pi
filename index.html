@@ -1189,7 +1189,6 @@ const Engine = (() => {
         p.stack -= pay; p.committedThisStreet += pay;
         p.committedTotal += pay; state.pot += pay;
         p.hasActedThisStreet = true;
-        // Если после колла стек пуст — это фактически ALL-IN
         p.lastAction = (p.stack === 0) ? 'allin' : 'call';
         p.acted = true;
         if (p.stack === 0) p.allIn = true;
@@ -1211,7 +1210,6 @@ const Engine = (() => {
           if (other !== p && !other.folded && !other.eliminated && !other.allIn) other.hasActedThisStreet = false;
         }
         p.hasActedThisStreet = true;
-        // Если после рейза стек пуст — это фактически ALL-IN
         p.lastAction = (p.stack === 0) ? 'allin' : 'raise';
         p.acted = true;
         if (p.stack === 0) p.allIn = true;
@@ -1737,13 +1735,14 @@ const UI = (() => {
 
   const el = {};
 
+  // Места 3 и 5 выровнены по высоте с местом 4 (y: 9%)
   const SEAT_POSITIONS = [
     { x: 50, y: 70, side: 'bottom' },
     { x: 14, y: 56, side: 'left'   },
     { x: 14, y: 32, side: 'left'   },
-    { x: 14, y: 10, side: 'left'   },
-    { x: 50, y: 9,  side: 'top'    },
-    { x: 86, y: 10, side: 'right'  },
+    { x: 14, y: 9,  side: 'left'   },   // UTG выровнен с UTG1
+    { x: 50, y: 9,  side: 'top'    },   // UTG1
+    { x: 86, y: 9,  side: 'right'  },   // LJ выровнен с UTG1
     { x: 86, y: 32, side: 'right'  },
     { x: 86, y: 56, side: 'right'  }
   ];
@@ -1847,8 +1846,8 @@ const UI = (() => {
     seat.style.left = pos.x + '%';
     seat.style.top  = pos.y + '%';
     if (player.isHero) {
-      // Герой поднят ещё на 4px: было calc(-50% - 5px), стало calc(-50% - 9px)
-      seat.style.transform = 'translate(-50%, calc(-50% - 9px))';
+      // Герой поднят ещё на 1px: было calc(-50% - 9px), стало calc(-50% - 10px)
+      seat.style.transform = 'translate(-50%, calc(-50% - 10px))';
     }
     if (pos.side) seat.classList.add(pos.side);
     if (player.isHero) seat.classList.add('hero');
@@ -1914,7 +1913,6 @@ const UI = (() => {
       return;
     }
     const map = { fold:'FOLD', check:'CHECK', call:'CALL', raise:'RAISE', allin:'ALL-IN' };
-    // ALL-IN получает отдельный красный класс
     const cls = { fold:'fold', check:'check', call:'call', raise:'raise', allin:'allin' };
     badge.textContent = map[p.lastAction] || p.lastAction.toUpperCase();
     badge.className = 'action-badge ' + (cls[p.lastAction] || '');
