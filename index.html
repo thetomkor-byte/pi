@@ -19,10 +19,12 @@
   --bar-h: clamp(56px, 8vmin, 68px);
   --board-card-w: clamp(34px, 5.2vmin, 48px);
   --board-card-h: clamp(48px, 7.3vmin, 67px);
-  /* отступ от пунктирной границы стола до кнопок/мест по бокам */
-  --side-inset: clamp(20px, 3vmin, 32px);
-  /* отступ от нижней пунктирной границы до кнопок */
-  --bottom-inset: clamp(14px, 2.2vmin, 22px);
+  /* зазор от пунктирной линии стола до кнопок — как у карт мест */
+  --edge: clamp(6px, 1.1vmin, 10px);
+  /* фиксированная ширина правого блока %-кнопок */
+  --pct-block-w: clamp(88px, 13vmin, 110px);
+  /* внутренний отступ от рамки стола до пунктира */
+  --dash-inset: clamp(10px, 2vmin, 18px);
 }
 
 html, body {
@@ -75,21 +77,20 @@ html, body {
   overflow: hidden;
 }
 
-/* Пунктирная граница. Координаты кнопок/мест считаются от этой границы. */
 #poker-table::before {
   content: "";
   position: absolute;
-  inset: clamp(10px, 2vmin, 18px);
+  inset: var(--dash-inset);
   border: 1px dashed rgba(255,255,255,.09);
   border-radius: clamp(20px, 3vmin, 30px);
   pointer-events: none;
   z-index: 2;
 }
 
-/* === ЦЕНТР: три блока (верх-инфо / борд / низ-инфо), приподняты как единое целое === */
+/* === ЦЕНТР стола === */
 #board-area {
   position: absolute;
-  top: 44%; left: 50%;
+  top: 46%; left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
   pointer-events: none;
@@ -395,19 +396,19 @@ html, body {
 }
 .seat .bet-chips.hidden { display: none; }
 
-/* ==== ЛЕВЫЙ БЛОК КНОПОК: прижат к левой и нижней пунктирной границе ==== */
+/* ==== ЛЕВЫЙ БЛОК: от левого пунктира до левого края %-блока ==== */
 #hero-actions {
   position: absolute;
-  left: var(--side-inset);
-  bottom: var(--bottom-inset);
-  width: clamp(180px, 28vmin, 260px);
+  left: calc(var(--dash-inset) + var(--edge));
+  right: calc(var(--dash-inset) + var(--edge) + var(--pct-block-w) + var(--edge));
+  bottom: calc(var(--dash-inset) + var(--edge) - 1px);
   display: flex;
   flex-direction: column;
-  gap: clamp(5px, 0.9vmin, 8px);
+  gap: clamp(4px, 0.7vmin, 6px);
   background: rgba(20,18,16,.92);
   border: 1px solid #3a3530;
   border-radius: 10px;
-  padding: clamp(6px, 1vmin, 10px) clamp(7px, 1.1vmin, 10px);
+  padding: clamp(5px, 0.8vmin, 8px) clamp(6px, 0.9vmin, 9px);
   z-index: 45;
   backdrop-filter: blur(4px);
 }
@@ -418,13 +419,13 @@ html, body {
   align-items: center;
   gap: clamp(6px, 1vmin, 10px);
   width: 100%;
-  padding: 6px 0;
+  padding: 3px 0;
 }
 #raise-slider-horiz {
   flex: 1;
   -webkit-appearance: none;
   appearance: none;
-  height: 6px;
+  height: 5px;
   background: #4a4540;
   border: 1px solid #2a2520;
   border-radius: 4px;
@@ -436,8 +437,8 @@ html, body {
 #raise-slider-horiz::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, #fff6d0, #ffcb2b 60%, #b8860b);
   border: 1px solid #8a6508;
@@ -446,8 +447,8 @@ html, body {
   margin-top: -8px;
 }
 #raise-slider-horiz::-moz-range-thumb {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, #fff6d0, #ffcb2b 60%, #b8860b);
   border: 1px solid #8a6508;
@@ -460,12 +461,12 @@ html, body {
   font-weight: 800;
   white-space: nowrap;
   text-shadow: 0 1px 3px rgba(0,0,0,.95);
-  min-width: clamp(48px, 6.4vmin, 64px);
+  min-width: clamp(44px, 6vmin, 60px);
   text-align: center;
   background: rgba(0,0,0,.35);
   border: 1px solid #3a3530;
   border-radius: 6px;
-  padding: clamp(3px, 0.5vmin, 5px) clamp(6px, 0.9vmin, 9px);
+  padding: 2px clamp(5px, 0.8vmin, 8px);
   flex-shrink: 0;
 }
 
@@ -476,7 +477,7 @@ html, body {
 }
 #hero-buttons button {
   flex: 1;
-  padding: clamp(9px, 1.4vmin, 12px) clamp(4px, 0.8vmin, 7px);
+  padding: clamp(7px, 1.1vmin, 9px) clamp(4px, 0.8vmin, 7px);
   border: none;
   border-radius: 8px;
   font-weight: 800;
@@ -487,7 +488,7 @@ html, body {
   letter-spacing: .3px;
   box-shadow: 0 3px 0 rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.1);
   touch-action: manipulation;
-  min-height: 42px;
+  min-height: 36px;
 }
 #hero-buttons button:active:not(:disabled) {
   transform: translateY(2px);
@@ -499,33 +500,34 @@ html, body {
 #btn-check { background: linear-gradient(180deg, #2a4a3a, #14261c); }
 #btn-call  { background: linear-gradient(180deg, #3a7bd5, #1e4a8a); }
 
-/* ==== ПРАВЫЙ БЛОК %-КНОПОК: прижат к правой и нижней пунктирной границе ==== */
+/* ==== ПРАВЫЙ БЛОК %-кнопок: фиксированная ширина, прижат к правому пунктиру ==== */
 #quick-percent-list {
   position: absolute;
-  right: var(--side-inset);
-  bottom: var(--bottom-inset);
+  right: calc(var(--dash-inset) + var(--edge));
+  bottom: calc(var(--dash-inset) + var(--edge) - 1px);
+  width: var(--pct-block-w);
   display: flex;
   flex-direction: column;
-  gap: clamp(4px, 0.7vmin, 6px);
+  gap: clamp(3px, 0.5vmin, 5px);
   z-index: 45;
 }
 #quick-percent-list button {
   background: rgba(20,18,16,.92);
   border: 1px solid #3a3530;
   color: var(--text);
-  padding: clamp(7px, 1vmin, 9px) clamp(9px, 1.3vmin, 12px);
+  padding: clamp(5px, 0.8vmin, 7px) clamp(8px, 1.1vmin, 10px);
   border-radius: 7px;
-  font-size: clamp(11px, 1.4vmin, 13px);
+  font-size: clamp(10px, 1.3vmin, 12px);
   font-weight: 800;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: clamp(6px, 1vmin, 10px);
-  min-width: clamp(88px, 13vmin, 110px);
+  gap: clamp(4px, 0.7vmin, 8px);
   white-space: nowrap;
   touch-action: manipulation;
-  min-height: 38px;
+  min-height: 32px;
+  width: 100%;
 }
 #quick-percent-list button:hover { background: #2a2520; }
 #quick-percent-list button .label { color: var(--gold); font-weight: 800; }
@@ -1671,8 +1673,6 @@ const UI = (() => {
 
   const el = {};
 
-  /* Позиции: левые по одной вертикали (x:14), правые по одной (x:86),
-     UTG1 и герой по центру (x:50). Герой приподнят (y:70). */
   const SEAT_POSITIONS = [
     { x: 50, y: 70, side: 'bottom' },
     { x: 14, y: 56, side: 'left'   },
@@ -1984,10 +1984,13 @@ const UI = (() => {
       ];
     } else {
       const potAfterCall = state.pot + Math.min(toCall, hero.stack);
-      options = [150, 100, 70, 50, 30].map(pct => ({
-        label: pct + '%',
-        target: Math.min(maxTarget, state.currentBet + Math.round(potAfterCall * pct / 100))
-      }));
+      options = [
+        { label: 'All-In', target: maxTarget },
+        { label: '100%', target: Math.min(maxTarget, state.currentBet + Math.round(potAfterCall * 1.00)) },
+        { label: '70%',  target: Math.min(maxTarget, state.currentBet + Math.round(potAfterCall * 0.70)) },
+        { label: '50%',  target: Math.min(maxTarget, state.currentBet + Math.round(potAfterCall * 0.50)) },
+        { label: '30%',  target: Math.min(maxTarget, state.currentBet + Math.round(potAfterCall * 0.30)) }
+      ];
     }
 
     for (const opt of options) {
