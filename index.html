@@ -17,6 +17,7 @@
   --danger: #d94f3d;
   --ok: #2fb571;
   --bar-h: clamp(56px, 8vmin, 68px);
+  --side-x: 14%;
 }
 
 html, body {
@@ -78,7 +79,6 @@ html, body {
   pointer-events: none;
 }
 
-/* === ЦЕНТР СТОЛА: три фиксированных блока === */
 #board-area {
   position: absolute;
   top: 48%; left: 50%;
@@ -93,7 +93,6 @@ html, body {
   gap: 0;
 }
 
-/* ВЕРХНИЙ блок: Место + Банк */
 #top-info {
   display: flex;
   flex-direction: column;
@@ -122,7 +121,6 @@ html, body {
   white-space: nowrap;
 }
 
-/* СРЕДНИЙ блок: карты борда — зарезервированное место фиксированной высоты */
 #board-cards {
   display: flex;
   gap: clamp(4px, 0.8vmin, 7px);
@@ -134,12 +132,11 @@ html, body {
 #board-cards .card {
   --card-w: clamp(30px, 4.5vmin, 42px);
   --card-h: clamp(42px, 6.3vmin, 60px);
-  font-size: clamp(16px, 2.4vmin, 22px);
-  padding: 2px 3px;
+  font-size: clamp(20px, 3vmin, 28px);
+  padding: 1px 3px;
 }
-#board-cards .card .suit { font-size: clamp(18px, 2.8vmin, 26px); }
+#board-cards .card .suit { font-size: clamp(24px, 3.6vmin, 34px); }
 
-/* НИЖНИЙ блок: Блайнды / через N раздач / следующие блайнды */
 #table-info {
   display: flex;
   flex-direction: column;
@@ -167,10 +164,10 @@ html, body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1px;
-  padding: 2px 3px;
+  gap: 0;
+  padding: 1px 3px;
   font-weight: 800;
-  font-size: clamp(16px, 2.4vmin, 26px);
+  font-size: clamp(20px, 3vmin, 30px);
   box-shadow:
     0 3px 8px rgba(0,0,0,.7),
     inset 0 0 0 1px rgba(0,0,0,.08);
@@ -179,7 +176,7 @@ html, body {
   line-height: 1;
 }
 .card .rank { line-height: 1; }
-.card .suit { line-height: 1; font-size: clamp(18px, 2.8vmin, 30px); }
+.card .suit { line-height: 1; font-size: clamp(24px, 3.6vmin, 36px); }
 
 .card.back {
   background:
@@ -251,21 +248,21 @@ html, body {
 .seat .seat-cards .card {
   --card-w: clamp(34px, 5vmin, 46px);
   --card-h: clamp(48px, 7.1vmin, 68px);
-  font-size: clamp(17px, 2.6vmin, 24px);
-  padding: 2px 3px;
+  font-size: clamp(22px, 3.4vmin, 32px);
+  padding: 1px 3px;
   border-radius: clamp(4px, 0.6vmin, 6px);
 }
-.seat .seat-cards .card .suit { font-size: clamp(20px, 3vmin, 28px); }
+.seat .seat-cards .card .suit { font-size: clamp(26px, 4vmin, 38px); }
 
 .seat.hero .seat-cards .card {
   --card-w: clamp(44px, 6.5vmin, 56px);
   --card-h: clamp(62px, 9.1vmin, 82px);
-  font-size: clamp(20px, 3.2vmin, 30px);
+  font-size: clamp(26px, 4.2vmin, 38px);
   box-shadow:
     0 0 0 1.5px rgba(255,203,43,.55),
     0 3px 10px rgba(0,0,0,.75);
 }
-.seat.hero .seat-cards .card .suit { font-size: clamp(24px, 3.8vmin, 34px); }
+.seat.hero .seat-cards .card .suit { font-size: clamp(32px, 5vmin, 46px); }
 
 .seat.folded .seat-cards .card {
   transform: scale(0.9);
@@ -1661,15 +1658,17 @@ const UI = (() => {
 
   const el = {};
 
+  /* Левые места выровнены по одной вертикали (x: 14).
+     Правые — по одной вертикали (x: 86). Центр (герой, UTG1) — x: 50. */
   const SEAT_POSITIONS = [
     { x: 50, y: 74, side: 'bottom' },
-    { x: 16, y: 58, side: 'left'   },
-    { x: 15, y: 34, side: 'left'   },
-    { x: 19, y: 10, side: 'left'   },
+    { x: 14, y: 58, side: 'left'   },
+    { x: 14, y: 34, side: 'left'   },
+    { x: 14, y: 10, side: 'left'   },
     { x: 50, y: 9,  side: 'top'    },
-    { x: 81, y: 10, side: 'right'  },
-    { x: 85, y: 34, side: 'right'  },
-    { x: 84, y: 58, side: 'right'  }
+    { x: 86, y: 10, side: 'right'  },
+    { x: 86, y: 34, side: 'right'  },
+    { x: 86, y: 58, side: 'right'  }
   ];
 
   const SUIT_CLASS = { s: 'suit-spades', h: 'suit-hearts', d: 'suit-diamonds', c: 'suit-clubs' };
