@@ -384,6 +384,7 @@ html, body {
 .seat .action-badge.call  { color: #7ab8ff; border-color: #25445a; }
 .seat .action-badge.raise { color: var(--gold); border-color: #5a4a1a; }
 .seat .action-badge.check { color: #7ae5a0; border-color: #255a35; }
+.seat .action-badge.allin { color: var(--allin); border-color: #5a2028; }
 .seat .action-badge.hidden { display: none; }
 
 .seat .winner-badge {
@@ -451,14 +452,13 @@ html, body {
   pointer-events: none;
 }
 
-/* ===== Строка истории раздач — внутри общего блока, компактная ===== */
 #hand-nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: clamp(10px, 1.4vmin, 14px);
   width: 100%;
-  padding: 0 0 3px 0;   /* +1px по сравнению с прошлой версией */
+  padding: 0 0 3px 0;
   border-bottom: 1px solid #2a2520;
   margin-bottom: -1px;
 }
@@ -472,10 +472,10 @@ html, body {
   cursor: pointer;
   line-height: 1;
   min-width: 22px;
-  min-height: 19px;     /* +1px */
+  min-height: 19px;
   border-radius: 4px;
   position: relative;
-  top: -1px;             /* кнопки на 1px выше */
+  top: -1px;
 }
 #hand-nav button:active:not(:disabled) { background: rgba(255,255,255,.06); }
 #hand-nav button:disabled { opacity: .28; cursor: not-allowed; }
@@ -489,7 +489,7 @@ html, body {
   flex: 1;
   white-space: nowrap;
   position: relative;
-  top: -1px;             /* счётчик тоже на 1px выше, чтобы не «прыгал» */
+  top: -1px;
 }
 #hand-nav .nav-counter .total { color: var(--muted); }
 
@@ -507,7 +507,7 @@ html, body {
   flex: 1;
   -webkit-appearance: none;
   appearance: none;
-  height: 4px;                      /* дорожка 4px */
+  height: 4px;
   background: #4a4540;
   border: 1px solid #2a2520;
   border-radius: 4px;
@@ -518,7 +518,6 @@ html, body {
   pointer-events: auto;
   vertical-align: middle;
 }
-/* thumb 14px, дорожка 4px → margin-top = (4-14)/2 = -5px, точное центрирование */
 #raise-slider-horiz::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
@@ -599,7 +598,6 @@ html, body {
   margin-top: 1px;
 }
 
-/* %-кнопки — не исчезают, просто становятся неактивными */
 #quick-percent-list {
   position: absolute;
   right: calc(var(--dash-inset) + var(--edge));
@@ -1848,8 +1846,8 @@ const UI = (() => {
     seat.style.left = pos.x + '%';
     seat.style.top  = pos.y + '%';
     if (player.isHero) {
-      // Герой поднят на 4px выше: было calc(-50% + 3px), стало calc(-50% - 1px)
-      seat.style.transform = 'translate(-50%, calc(-50% - 1px))';
+      // Герой поднят ещё на 4px: было calc(-50% - 1px), стало calc(-50% - 5px)
+      seat.style.transform = 'translate(-50%, calc(-50% - 5px))';
     }
     if (pos.side) seat.classList.add(pos.side);
     if (player.isHero) seat.classList.add('hero');
@@ -1915,7 +1913,8 @@ const UI = (() => {
       return;
     }
     const map = { fold:'FOLD', check:'CHECK', call:'CALL', raise:'RAISE', allin:'ALL-IN' };
-    const cls = { fold:'fold', check:'check', call:'call', raise:'raise', allin:'raise' };
+    // ALL-IN получает отдельный красный класс, RAISE — золотой
+    const cls = { fold:'fold', check:'check', call:'call', raise:'raise', allin:'allin' };
     badge.textContent = map[p.lastAction] || p.lastAction.toUpperCase();
     badge.className = 'action-badge ' + (cls[p.lastAction] || '');
   }
@@ -2182,18 +2181,12 @@ const UI = (() => {
     el.statsPlace.textContent = stats.place ? `${stats.place}/${Engine.SEATS}` : '—';
   }
 
-  /* Новая логика:
-     - ◀/▶ активны, если есть история и есть шаг в нужную сторону
-     - ▶▶ активна, если мы сейчас в истории (можно «вернуться к текущей») */
   function updateHistoryInfo(current, total, isViewingPast) {
     el.hnCur.textContent = current;
     el.hnTot.textContent = total;
     const hasHistory = total > 0;
-    // ◀ — есть история и есть куда назад
     el.hnPrev.disabled = !(hasHistory && current > 1);
-    // ▶ — есть история и есть куда вперёд
     el.hnNext.disabled = !(hasHistory && current < total);
-    // ▶▶ — только когда листаем историю
     el.hnResume.disabled = !isViewingPast;
   }
 
