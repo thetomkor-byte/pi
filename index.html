@@ -525,7 +525,7 @@ button.disabled,
 #hero-actions.inactive #hero-buttons button {
   opacity: 0.5;
   filter: grayscale(0.6) brightness(0.5);
-  box-shadow: none;
+  box-shadow: 0 3px 0 transparent, inset 0 1px 0 rgba(255,255,255,.1);
 }
 
 #hand-nav {
@@ -677,10 +677,11 @@ button.disabled,
   align-items: center;
   justify-content: center;
   line-height: 1.05;
+  transition: transform .08s ease;
 }
 #hero-buttons button:active:not(:disabled) {
-  transform: translateY(2px);
-  box-shadow: 0 1px 0 rgba(0,0,0,.5);
+  transform: scale(0.96);
+  box-shadow: 0 0 0 rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.1);
 }
 #hero-buttons button:disabled {
   opacity: .28;
