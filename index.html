@@ -1908,21 +1908,41 @@ const UI = (() => {
     if (player.isHero) seat.classList.add('hero');
     if (player.eliminated) seat.classList.add('eliminated');
 
-    seat.innerHTML = `
-      <div class="strat-badge hidden" data-role="strat"></div>
-      <div class="dealer-chip hidden" data-role="btn">D</div>
-      <div class="seat-cards" data-role="cards"></div>
-      <div class="pos-row">
-        <span class="pos-name" data-role="pos">—</span>
-      </div>
-      <div class="stack-wrap">
-        <span class="stack" data-role="stack"></span>
-        <span class="delta-text hidden" data-role="delta"></span>
-      </div>
-      <div class="action-badge hidden" data-role="action"></div>
-      <div class="winner-badge hidden" data-role="winner">WIN</div>
-      <div class="bet-chips hidden" data-role="bet"></div>
-    `;
+    if (player.isHero || pos.side === 'top') {
+      // Hero и UTG1 — дельта справа от стека (как было)
+      seat.innerHTML = `
+        <div class="strat-badge hidden" data-role="strat"></div>
+        <div class="dealer-chip hidden" data-role="btn">D</div>
+        <div class="seat-cards" data-role="cards"></div>
+        <div class="pos-row">
+          <span class="pos-name" data-role="pos">—</span>
+        </div>
+        <div class="stack-wrap">
+          <span class="stack" data-role="stack"></span>
+          <span class="delta-text hidden" data-role="delta"></span>
+        </div>
+        <div class="action-badge hidden" data-role="action"></div>
+        <div class="winner-badge hidden" data-role="winner">WIN</div>
+        <div class="bet-chips hidden" data-role="bet"></div>
+      `;
+    } else {
+      // Боковые места (left / right) — дельта в строке позиции
+      seat.innerHTML = `
+        <div class="strat-badge hidden" data-role="strat"></div>
+        <div class="dealer-chip hidden" data-role="btn">D</div>
+        <div class="seat-cards" data-role="cards"></div>
+        <div class="pos-row">
+          <span class="pos-name" data-role="pos">—</span>
+          <span class="delta-text hidden" data-role="delta"></span>
+        </div>
+        <div class="stack-wrap">
+          <span class="stack" data-role="stack"></span>
+        </div>
+        <div class="action-badge hidden" data-role="action"></div>
+        <div class="winner-badge hidden" data-role="winner">WIN</div>
+        <div class="bet-chips hidden" data-role="bet"></div>
+      `;
+    }
     return seat;
   }
 
@@ -2070,7 +2090,8 @@ const UI = (() => {
     for (const p of state.players) {
       const seat = document.getElementById(`seat-${p.id}`);
       if (!seat || p.eliminated) continue;
-      seat.querySelector('[data-role="stack"]').textContent = formatChips(p.stack, state);
+      const stackEl = seat.querySelector('[data-role="stack"]');
+      if (stackEl) stackEl.textContent = formatChips(p.stack, state);
     }
   }
 
