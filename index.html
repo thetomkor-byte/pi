@@ -359,8 +359,6 @@ button.disabled,
 
 .seat .delta-text {
   position: absolute;
-  top: 50%;
-  transform: translateY(calc(-50% - 1px));
   font-size: clamp(11px, 1.4vmin, 13px);
   font-weight: 500;
   white-space: nowrap;
@@ -372,24 +370,35 @@ button.disabled,
 .seat .delta-text.positive { color: #4ae08a; }
 .seat .delta-text.negative { color: #e05a4a; }
 
-/* Боковые — по центру стека, вплотную к стеку */
-.seat.left .delta-text { left: 100%; margin-left: 0px; }
-.seat.right .delta-text { right: 100%; margin-right: 0px; }
-.seat.bottom .delta-text { left: 100%; margin-left: 0px; }
+/* Боковые — напротив названия позиции, по центру строки позиции */
+.seat.left .delta-text {
+  left: 100%;
+  margin-left: 1px;
+  top: 50%;
+  transform: translateY(calc(-50% - 1px));
+}
+.seat.right .delta-text {
+  right: 100%;
+  margin-right: 1px;
+  top: 50%;
+  transform: translateY(calc(-50% - 1px));
+}
 
-/* UTG1 (top) и герой — на линии названия позиции, вплотную справа */
-.seat.top .delta-text,
+/* UTG1 (top) — напротив стека, по центру строки стека */
+.seat.top .delta-text {
+  left: 100%;
+  margin-left: 0px;
+  top: 50%;
+  transform: translateY(calc(-50% - 1px));
+}
+
+/* Герой — напротив названия позиции (как было) */
 .seat.hero .delta-text {
   top: auto;
   transform: translateY(-1px);
   left: 100%;
   margin-left: 0px;
   bottom: auto;
-}
-.seat.top .delta-text {
-  top: calc(-1 * clamp(16px, 2.2vmin, 22px));
-}
-.seat.hero .delta-text {
   top: calc(-1 * clamp(16px, 2.2vmin, 22px));
 }
 
@@ -584,13 +593,18 @@ button.disabled,
   color: var(--gold);
   font-size: clamp(15px, 2vmin, 18px);
 }
-#hn-reset .reset-icon { font-size: clamp(16px, 2.1vmin, 19px); line-height: 1; }
+#hn-reset .reset-icon { font-size: clamp(15px, 2vmin, 18px); line-height: 1; }
 
 #hn-settings {
   color: var(--gold);
   font-size: clamp(15px, 2vmin, 18px);
 }
-#hn-settings .settings-icon { font-size: clamp(16px, 2.1vmin, 19px); line-height: 1; }
+#hn-settings .settings-icon {
+  font-size: clamp(15px, 2vmin, 18px);
+  line-height: 1;
+  font-variant-emoji: text;
+  font-family: "Segoe UI Symbol", "Apple Symbols", system-ui, sans-serif;
+}
 
 #hero-slider-row {
   display: flex;
@@ -891,7 +905,7 @@ button.disabled,
           <div class="nav-right">
             <button id="hn-resume" title="Продолжить" disabled>▶▶</button>
             <button id="hn-reset" title="Заново"><span class="reset-icon">⟲</span></button>
-            <button id="hn-settings" title="Настройки"><span class="settings-icon">⚙</span></button>
+            <button id="hn-settings" title="Настройки"><span class="settings-icon">⚙︎</span></button>
           </div>
         </div>
         <div id="hero-slider-row">
