@@ -372,13 +372,13 @@ button.disabled,
   border-radius: 4px;
 }
 
-/* Текст +N BB / -N BB рядом со стеком — абсолютное позиционирование, не сдвигает стек */
+/* Текст +N BB / -N BB рядом со стеком */
 .seat .delta-text {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
   font-size: clamp(11px, 1.4vmin, 13px);
-  font-weight: 800;
+  font-weight: 500;
   white-space: nowrap;
   text-shadow: 0 1px 3px rgba(0,0,0,.95);
   pointer-events: none;
@@ -388,14 +388,11 @@ button.disabled,
 .seat .delta-text.positive { color: #4ae08a; }
 .seat .delta-text.negative { color: #e05a4a; }
 
-/* У левых мест текст справа от стека */
-.seat.left .delta-text { left: 100%; margin-left: 6px; }
-/* У правых мест текст слева от стека */
-.seat.right .delta-text { right: 100%; margin-right: 6px; }
-/* У героя и top/bottom текст справа */
+.seat.left .delta-text { left: 100%; margin-left: 3px; }
+.seat.right .delta-text { right: 100%; margin-right: 3px; }
 .seat.hero .delta-text,
 .seat.top .delta-text,
-.seat.bottom .delta-text { left: 100%; margin-left: 6px; }
+.seat.bottom .delta-text { left: 100%; margin-left: 3px; }
 
 .seat.active .seat-cards .card {
   box-shadow:
@@ -2071,13 +2068,11 @@ const UI = (() => {
     const reachedShowdown = Object.prototype.hasOwnProperty.call(scores, p.id) && scores[p.id] != null;
 
     if (payout > 0) {
-      // Победитель — показываем сумму, которую он забрал из банка
       deltaEl.textContent = '+' + formatChips(payout, state);
       deltaEl.classList.remove('hidden');
       deltaEl.classList.add('positive');
       deltaEl.classList.remove('negative');
     } else if (reachedShowdown && committed > 0) {
-      // Проигравший на вскрытии — показываем, сколько он вложил
       deltaEl.textContent = '−' + formatChips(committed, state);
       deltaEl.classList.remove('hidden');
       deltaEl.classList.add('negative');
@@ -2916,6 +2911,7 @@ const UI = (() => {
     return {
       handNumber: state.handNumber,
       levelIndex: state.levelIndex,
+      handOver: state.handOver,
       board: state.board.map(c => ({ ...c })),
       pot: state.pot,
       buttonIndex: state.buttonIndex,
