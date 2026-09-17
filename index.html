@@ -26,13 +26,11 @@
   --small-text: clamp(11px, 1.4vmin, 13px);
   --icon-font: "Segoe UI Symbol", "Apple Symbols", "Symbola", system-ui, sans-serif;
 
-  /* Кнопки истории раздач — динамические размеры */
   --nav-btn: clamp(32px, 4.4vmin, 38px);
   --nav-icon-size: clamp(16px, 2.4vmin, 19px);
   --nav-gap: clamp(1px, 0.5vmin, 4px);
   --nav-counter-w: clamp(44px, 6.2vmin, 54px);
   --nav-counter-size: clamp(12px, 1.6vmin, 14px);
-  --nav-block-pad: 0px;
 }
 
 html, body {
@@ -379,7 +377,6 @@ button.disabled,
 .seat .delta-text.positive { color: #4ae08a; }
 .seat .delta-text.negative { color: #e05a4a; }
 
-/* Боковые — напротив названия позиции, по центру строки позиции */
 .seat.left .delta-text {
   left: 100%;
   margin-left: 1px;
@@ -392,16 +389,12 @@ button.disabled,
   top: 50%;
   transform: translateY(calc(-50% - 1px));
 }
-
-/* UTG1 (top) — напротив стека, по центру строки стека */
 .seat.top .delta-text {
   left: 100%;
   margin-left: 0px;
   top: 50%;
   transform: translateY(calc(-50% - 1px));
 }
-
-/* Герой — напротив названия позиции (как было) */
 .seat.hero .delta-text {
   top: auto;
   transform: translateY(-1px);
@@ -540,25 +533,22 @@ button.disabled,
 #hand-nav {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
   width: 100%;
   padding: 0;
   border-bottom: 1px solid #2a2520;
   margin-bottom: 0;
-  gap: var(--nav-gap);
+  gap: 0;
   min-height: 0;
   position: relative;
   line-height: 1;
+  transform: translateY(2px);
 }
 #hand-nav .nav-history {
   display: flex;
   align-items: center;
   gap: var(--nav-gap);
-}
-#hand-nav .nav-right {
-  display: flex;
-  align-items: center;
-  gap: var(--nav-gap);
+  flex-shrink: 0;
 }
 #hand-nav button {
   background: transparent;
@@ -908,11 +898,9 @@ button.disabled,
             <span class="nav-counter"><span id="hn-cur">0</span><span class="total"> / </span><span id="hn-tot">0</span></span>
             <button id="hn-next" title="Вперёд" disabled>▶︎</button>
           </div>
-          <div class="nav-right">
-            <button id="hn-resume" title="Продолжить" disabled>▶︎▶︎</button>
-            <button id="hn-reset" title="Заново"><span class="reset-icon">⟲︎</span></button>
-            <button id="hn-settings" title="Настройки"><span class="settings-icon">⚙︎</span></button>
-          </div>
+          <button id="hn-resume" title="Продолжить" disabled>▶︎▶︎</button>
+          <button id="hn-reset" title="Заново"><span class="reset-icon">⟲︎</span></button>
+          <button id="hn-settings" title="Настройки"><span class="settings-icon">⚙︎</span></button>
         </div>
         <div id="hero-slider-row">
           <input type="range" id="raise-slider-horiz" min="0" max="100" value="0" />
