@@ -132,16 +132,6 @@ button.disabled,
   width: 100%;
 }
 
-#info-place-row {
-  font-size: clamp(11px, 1.4vmin, 14px);
-  color: var(--text);
-  font-weight: 700;
-  text-shadow: 0 1px 4px rgba(0,0,0,.95);
-  letter-spacing: .3px;
-  white-space: nowrap;
-  opacity: 0.7;
-}
-
 #pot-display {
   color: var(--gold);
   font-weight: 800;
@@ -370,7 +360,7 @@ button.disabled,
 .seat .delta-text {
   position: absolute;
   top: 50%;
-  transform: translateY(-50%);
+  transform: translateY(calc(-50% - 1px));
   font-size: clamp(11px, 1.4vmin, 13px);
   font-weight: 500;
   white-space: nowrap;
@@ -391,7 +381,7 @@ button.disabled,
 .seat.top .delta-text,
 .seat.hero .delta-text {
   top: auto;
-  transform: none;
+  transform: translateY(-1px);
   left: 100%;
   margin-left: 0px;
   bottom: auto;
@@ -594,13 +584,13 @@ button.disabled,
   color: var(--gold);
   font-size: clamp(15px, 2vmin, 18px);
 }
-#hn-reset .reset-icon { font-size: clamp(14px, 1.9vmin, 17px); line-height: 1; }
+#hn-reset .reset-icon { font-size: clamp(16px, 2.1vmin, 19px); line-height: 1; }
 
 #hn-settings {
   color: var(--gold);
   font-size: clamp(15px, 2vmin, 18px);
 }
-#hn-settings .settings-icon { font-size: clamp(13px, 1.75vmin, 15px); line-height: 1; }
+#hn-settings .settings-icon { font-size: clamp(16px, 2.1vmin, 19px); line-height: 1; }
 
 #hero-slider-row {
   display: flex;
@@ -880,7 +870,6 @@ button.disabled,
       <div id="swipe-center"></div>
       <div id="board-area">
         <div id="top-info">
-          <div id="info-place-row">Место: 1/8</div>
           <div id="pot-display">Банк: 0</div>
         </div>
         <div id="board-cards"></div>
@@ -937,8 +926,8 @@ button.disabled,
     <label class="setting">
       <span>Стеки</span>
       <select id="set-stack-display">
-        <option value="bb">В BB</option>
-        <option value="chips">В фишках</option>
+        <option value="bb">BB</option>
+        <option value="chips">Фишки</option>
       </select>
     </label>
     <label class="setting">
@@ -952,8 +941,8 @@ button.disabled,
       <span>Время на ход</span>
       <select id="set-turn-time">
         <option value="0">Без времени</option>
+        <option value="5">5 секунд</option>
         <option value="10">10 секунд</option>
-        <option value="20">20 секунд</option>
       </select>
     </label>
     <label class="setting">
@@ -1827,7 +1816,6 @@ const UI = (() => {
     el.seats          = document.getElementById('seats');
     el.boardCards     = document.getElementById('board-cards');
     el.potDisplay     = document.getElementById('pot-display');
-    el.infoPlaceRow   = document.getElementById('info-place-row');
     el.infoBlindsRow  = document.getElementById('info-blinds-row');
     el.infoTimerRow   = document.getElementById('info-timer-row');
     el.infoNextBlinds = document.getElementById('info-next-blinds-row');
@@ -1957,7 +1945,7 @@ const UI = (() => {
         betEl.classList.remove('hidden');
       } else betEl.classList.add('hidden');
 
-      renderActionBadge(p, seat, state);
+      renderActionBadge(p, seat);
       renderWinnerBadge(p, seat, state);
       renderDelta(p, seat, state);
     }
@@ -1965,7 +1953,7 @@ const UI = (() => {
     updateActiveHighlight(state);
   }
 
-  function renderActionBadge(p, seat, state) {
+  function renderActionBadge(p, seat) {
     const badge = seat.querySelector('[data-role="action"]');
     if (!p.lastAction || p.eliminated || p.lastAction === 'sb' || p.lastAction === 'bb') {
       badge.classList.add('hidden');
@@ -2126,12 +2114,6 @@ const UI = (() => {
     const next = Engine.BLIND_LEVELS[nextIdx];
     const nextAnte = next.ante > 0 ? ` (${next.ante})` : '';
     el.infoNextBlinds.textContent = `${next.sb}/${next.bb}${nextAnte}`;
-
-    const alive = state.players.filter(p => !p.eliminated).length;
-    const hero = state.players.find(p => p.isHero);
-    let place = alive;
-    if (hero && hero.eliminated) place = alive + 1;
-    el.infoPlaceRow.textContent = 'Место: ' + place + '/' + Engine.SEATS;
   }
 
   function createCardElement(card) {
@@ -2434,7 +2416,7 @@ const UI = (() => {
     el.hnResume       = document.getElementById('hn-resume');
     el.hnReset        = document.getElementById('hn-reset');
     el.hnSettings     = document.getElementById('hn-settings');
-    el.swipeCenter    = document.getElementById('swipe-center');
+    el.app            = document.getElementById('app');
     el.seats          = document.getElementById('seats');
   }
 
@@ -2451,6 +2433,15 @@ const UI = (() => {
     }, { passive: false });
   }
 
+  function isInteractiveTarget(target) {
+    if (!target) return false;
+    return !!(target.closest('button') ||
+              target.closest('input') ||
+              target.closest('select') ||
+              target.closest('#bottom-panel') ||
+              target.closest('#start-overlay'));
+  }
+
   function bindGlobalHandlers() {
     el.btnStart.addEventListener('click', () => {
       el.startOverlay.classList.add('hidden');
@@ -2458,20 +2449,21 @@ const UI = (() => {
     });
 
     let startX = 0, startY = 0, tracking = false;
-    el.swipeCenter.addEventListener('touchstart', (e) => {
+    el.app.addEventListener('touchstart', (e) => {
       if (e.touches.length !== 1) return;
+      if (isInteractiveTarget(e.target)) { tracking = false; return; }
       tracking = true;
       startX = e.touches[0].clientX;
       startY = e.touches[0].clientY;
     }, { passive: true });
-    el.swipeCenter.addEventListener('touchend', (e) => {
+    el.app.addEventListener('touchend', (e) => {
       if (!tracking) return;
       tracking = false;
       const endX = e.changedTouches[0].clientX;
       const endY = e.changedTouches[0].clientY;
       const dx = endX - startX;
       const dy = endY - startY;
-      const minDist = 40;
+      const minDist = 50;
       if (Math.abs(dy) < minDist) return;
       if (Math.abs(dx) > Math.abs(dy)) return;
       if (dy < 0) {
