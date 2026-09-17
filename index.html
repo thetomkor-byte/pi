@@ -363,11 +363,8 @@ button.disabled,
   text-shadow: 0 1px 3px rgba(0,0,0,.95);
   position: relative;
   display: inline-block;
-  padding: 6px 10px;
-  margin: -6px -10px;
   pointer-events: auto;
   touch-action: manipulation;
-  border-radius: 4px;
 }
 
 .seat .delta-text {
@@ -385,18 +382,18 @@ button.disabled,
 .seat .delta-text.positive { color: #4ae08a; }
 .seat .delta-text.negative { color: #e05a4a; }
 
-/* Боковые — строго по центру стека, плотно к стеку */
+/* Боковые — по центру стека, вплотную к стеку */
 .seat.left .delta-text { left: 100%; margin-left: 0px; }
 .seat.right .delta-text { right: 100%; margin-right: 0px; }
 .seat.bottom .delta-text { left: 100%; margin-left: 0px; }
 
-/* UTG1 (top) и герой — на линии названия позиции, справа от него */
+/* UTG1 (top) и герой — на линии названия позиции, вплотную справа */
 .seat.top .delta-text,
 .seat.hero .delta-text {
   top: auto;
   transform: none;
   left: 100%;
-  margin-left: 6px;
+  margin-left: 0px;
   bottom: auto;
 }
 .seat.top .delta-text {
@@ -475,23 +472,6 @@ button.disabled,
   border: 1px solid #4a2a20;
   box-shadow: 0 2px 6px rgba(0,0,0,.8);
 }
-
-.seat .last-action-text {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  color: #d8d0c0;
-  font-size: clamp(8px, 1.05vmin, 10px);
-  font-weight: 700;
-  white-space: nowrap;
-  z-index: 23;
-  letter-spacing: .6px;
-  text-transform: uppercase;
-  text-shadow: 0 1px 3px rgba(0,0,0,.95);
-  bottom: clamp(-68px, -8.2vmin, -60px);
-  top: auto;
-}
-.seat .last-action-text.hidden { display: none; }
 
 .seat .bet-chips {
   position: absolute;
@@ -614,13 +594,13 @@ button.disabled,
   color: var(--gold);
   font-size: clamp(15px, 2vmin, 18px);
 }
-#hn-reset .reset-icon { font-size: clamp(16px, 2.1vmin, 19px); line-height: 1; }
+#hn-reset .reset-icon { font-size: clamp(14px, 1.9vmin, 17px); line-height: 1; }
 
 #hn-settings {
   color: var(--gold);
   font-size: clamp(15px, 2vmin, 18px);
 }
-#hn-settings .settings-icon { font-size: clamp(16px, 2.1vmin, 19px); line-height: 1; }
+#hn-settings .settings-icon { font-size: clamp(13px, 1.75vmin, 15px); line-height: 1; }
 
 #hero-slider-row {
   display: flex;
@@ -1941,7 +1921,6 @@ const UI = (() => {
       </div>
       <div class="action-badge hidden" data-role="action"></div>
       <div class="winner-badge hidden" data-role="winner">WIN</div>
-      <div class="last-action-text hidden" data-role="lastaction"></div>
       <div class="bet-chips hidden" data-role="bet"></div>
     `;
     return seat;
@@ -1978,16 +1957,15 @@ const UI = (() => {
         betEl.classList.remove('hidden');
       } else betEl.classList.add('hidden');
 
-      renderActionBadge(p, seat);
+      renderActionBadge(p, seat, state);
       renderWinnerBadge(p, seat, state);
       renderDelta(p, seat, state);
-      renderLastActionText(p, seat, state);
     }
     updateStacks(state);
     updateActiveHighlight(state);
   }
 
-  function renderActionBadge(p, seat) {
+  function renderActionBadge(p, seat, state) {
     const badge = seat.querySelector('[data-role="action"]');
     if (!p.lastAction || p.eliminated || p.lastAction === 'sb' || p.lastAction === 'bb') {
       badge.classList.add('hidden');
@@ -2025,34 +2003,6 @@ const UI = (() => {
     } else {
       badge.classList.add('hidden');
     }
-  }
-
-  function renderLastActionText(p, seat, state) {
-    const elText = seat.querySelector('[data-role="lastaction"]');
-    if (!elText) return;
-
-    if (!state.handOver || !state.showdownResults) {
-      elText.classList.add('hidden');
-      return;
-    }
-
-    const payouts = state.showdownResults.payouts || {};
-    const payout = payouts[p.id] || 0;
-    const committed = p.committedTotal || 0;
-    const hasBadge = (payout > 0) || (committed > 0);
-    if (!hasBadge) {
-      elText.classList.add('hidden');
-      return;
-    }
-
-    const action = p.lastAction;
-    const map = { fold:'FOLD', check:'CHECK', call:'CALL', raise:'RAISE', allin:'ALL-IN', sb:'SB', bb:'BB' };
-    if (!action || !map[action]) {
-      elText.classList.add('hidden');
-      return;
-    }
-    elText.textContent = map[action];
-    elText.classList.remove('hidden');
   }
 
   function renderDelta(p, seat, state) {
