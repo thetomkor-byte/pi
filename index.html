@@ -584,7 +584,7 @@ button.disabled,
   border: 1px solid #8a6508;
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0,0,0,.7);
-  margin-top: -3px;
+  margin-top: -2px;
   pointer-events: auto;
 }
 #raise-slider-horiz::-moz-range-thumb {
@@ -2102,8 +2102,8 @@ const UI = (() => {
     const slider = document.getElementById('raise-slider-horiz');
     if (!slider) return;
     slider.value = slider.min;
-    const state = session.state;
-    if (state) updateSliderDisplay(state);
+    const mini = document.getElementById('raise-amount-mini');
+    if (mini) mini.textContent = '0';
   }
 
   function showActions(state, heroIndex, handlers) {
