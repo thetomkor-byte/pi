@@ -1899,6 +1899,8 @@ const UI = (() => {
     seat.style.top  = pos.y + '%';
     if (player.isHero) {
       seat.style.transform = 'translate(-50%, calc(-50% - 16px))';
+    } else if (player.seatIndex === 2 || player.seatIndex === 7) {
+      seat.style.transform = 'translate(-50%, calc(-50% + 4px))';
     } else {
       seat.style.transform = 'translate(-50%, calc(-50% + 2px))';
     }
