@@ -1104,6 +1104,7 @@ const Engine = (() => {
       players, deck: [], board: [], pot: 0, currentBet: 0, minRaise: 0,
       street: 'preflop', actingIndex: 0, lastAggressorIndex: null,
       actionLog: [], handOver: false, showdownResults: null,
+      finalStreet: null,
       blinds: { sb: 10, bb: 20, ante: 0 },
       _deckIdx: 0
     };
@@ -1318,6 +1319,7 @@ const Engine = (() => {
 
   function finalizeHand(state) {
     const lastStreet = state.street;
+    state.finalStreet = lastStreet;
     while (state.board.length < 5) {
       if (state.board.length === 0) dealBoard(state, 3);
       else dealBoard(state, 1);
@@ -1326,7 +1328,6 @@ const Engine = (() => {
       if (p.eliminated) { p.revealed = false; continue; }
       p.revealed = !p.folded || p.acted;
     }
-    state.finalStreet = lastStreet;
   }
 
   function showdown(state) {
@@ -1401,6 +1402,7 @@ const Engine = (() => {
   function startHand(state) {
     state.board = []; state.pot = 0; state.currentBet = 0; state.minRaise = 0;
     state.actionLog = []; state.handOver = false; state.showdownResults = null;
+    state.finalStreet = null;
 
     for (const p of state.players) {
       p.folded = p.eliminated; p.allIn = false;
@@ -2012,21 +2014,14 @@ const UI = (() => {
 
     let show;
     if (settings.showAllHands) {
-      // Опция "Карты игроков открыты" — все карты всех игроков всегда видны
       show = true;
     } else if (state.handOver) {
-      // Раздача завершена
       if (settings.showAllShowdown) {
-        // "Показывать карты всех на вскрытии" — показываем всех, кроме сбросивших без вложения
-        show = !player.folded || (player.committedTotal > 0);
-        // Проще: показываем всех, кто не eliminated
         show = true;
       } else {
-        // По умолчанию: только те, кто вложил в банк
         show = (player.committedTotal > 0) || player.isHero || player.revealed;
       }
     } else {
-      // Раздача идёт
       show = revealAll || player.isHero || player.revealed;
     }
 
@@ -2062,38 +2057,30 @@ const UI = (() => {
 
   function updateBoard(state) {
     el.boardCards.innerHTML = '';
-    const fullBoardCount = 5;
     const actualCount = state.board.length;
     const finalStreet = state.finalStreet;
 
-    // Если раздача завершена, показываем все 5 карт,
-    // но те, что не были в игре (улицы после finalStreet) — затемнены
-    for (let i = 0; i < actualCount; i++) {
-      el.boardCards.appendChild(createCardElement(state.board[i]));
+    // Определяем, сколько карт было в игре
+    let liveCount;
+    if (!state.handOver || !finalStreet) {
+      liveCount = actualCount;
+    } else {
+      switch (finalStreet) {
+        case 'preflop': liveCount = 0; break;
+        case 'flop':    liveCount = 3; break;
+        case 'turn':    liveCount = 4; break;
+        case 'river':   liveCount = 5; break;
+        default:        liveCount = actualCount;
+      }
     }
 
-    // Дорисовываем недостающие карты как "затемнённые" заглушки — просто пустые слоты
-    // (без отображения карт, которых не было)
-    // Но по правилу: карты терна/ривера должны быть затемнены так же как карты сфолженных.
-    // Значит, если раздача закончилась на флопе, показываем 3 яркие + 2 затемнённые "пустышки"
-    // Если на тёрне — 4 яркие + 1 затемнённая
-    // Если на ривере — 5 ярких
-
-    if (state.handOver && finalStreet && finalStreet !== 'river') {
-      // Раздача завершилась раньше ривера — рисуем затемнённые слоты для карт, которых не было
-      let cardsToDim = 0;
-      if (finalStreet === 'preflop') cardsToDim = 5;
-      else if (finalStreet === 'flop') cardsToDim = 2;
-      else if (finalStreet === 'turn') cardsToDim = 1;
-
-      for (let i = 0; i < cardsToDim; i++) {
-        const c = document.createElement('div');
-        c.className = 'card';
-        c.style.opacity = '0.2';
-        c.style.background = '#2a2a2a';
-        c.style.border = '1px dashed #3a3530';
-        el.boardCards.appendChild(c);
+    for (let i = 0; i < actualCount; i++) {
+      const c = createCardElement(state.board[i]);
+      if (state.handOver && i >= liveCount) {
+        // Карта доиграна после завершения раздачи — затемняем
+        c.style.opacity = '0.35';
       }
+      el.boardCards.appendChild(c);
     }
   }
 
@@ -2489,6 +2476,7 @@ const UI = (() => {
         if (session.state) {
           UI.updateLevel(session.state);
           UI.updateSeats(session.state, session.state.handOver);
+          UI.updateBoard(session.state);
         }
       });
     });
@@ -2559,7 +2547,6 @@ const UI = (() => {
   }
 
   function handleCardsDoubleTap() {
-    // Двойной тап по картам ботов — переключает стратегии
     UI.toggleShowStrategies();
     if (session.state) {
       const state = session.state;
@@ -2573,7 +2560,6 @@ const UI = (() => {
   }
 
   function handleHeroCardsDoubleTap() {
-    // Двойной тап по картам героя — переключает "видеть все карты"
     UI.toggleShowAllHands();
     if (session.state) {
       const state = session.state;
@@ -2825,8 +2811,6 @@ const UI = (() => {
     if (session.isPaused) return;
     const state = session.state;
     Engine.finalizeHand(state);
-
-    const hero = state.players[session.heroIndex];
 
     session.history.push(snapshotState(state));
     if (session.history.length > 30) session.history.shift();
