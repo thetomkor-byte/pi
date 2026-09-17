@@ -25,8 +25,9 @@
   --dash-inset: clamp(10px, 2vmin, 18px);
   --small-text: clamp(11px, 1.4vmin, 13px);
   --icon-font: "Segoe UI Symbol", "Apple Symbols", "Symbola", system-ui, sans-serif;
-  --nav-icon-size: clamp(16px, 2.2vmin, 20px);
-  --nav-gap: clamp(12px, 2vmin, 20px);
+  --nav-icon-size: clamp(15px, 2vmin, 18px);
+  --nav-gap: clamp(8px, 1.4vmin, 14px);
+  --nav-btn-min: 30px;
 }
 
 html, body {
@@ -509,7 +510,6 @@ button.disabled,
   z-index: 45;
   backdrop-filter: blur(4px);
   transition: opacity .2s ease;
-  overflow: hidden;
 }
 #hero-actions.inactive {
   opacity: 0.4;
@@ -560,10 +560,10 @@ button.disabled,
   color: var(--text);
   font-size: var(--nav-icon-size);
   font-weight: 800;
-  padding: 0 clamp(4px, 0.7vmin, 6px);
+  padding: 0 clamp(3px, 0.5vmin, 5px);
   line-height: 1;
-  min-width: 34px;
-  min-height: 28px;
+  min-width: var(--nav-btn-min);
+  min-height: 26px;
   border-radius: 6px;
   position: relative;
   top: -2px;
@@ -575,12 +575,6 @@ button.disabled,
 }
 #hand-nav button:active:not(:disabled) { background: rgba(255,255,255,.06); }
 #hand-nav button:disabled { opacity: .28; }
-
-#hand-nav .nav-history #hn-prev,
-#hand-nav .nav-history #hn-next {
-  min-width: 34px;
-  min-height: 28px;
-}
 
 /* Расстояние между правой кнопкой истории ▶ и ▶▶ — такое же, как внутри nav-right */
 #hand-nav .nav-history #hn-next {
@@ -596,8 +590,8 @@ button.disabled,
   white-space: nowrap;
   position: relative;
   top: -2px;
-  padding: 0 clamp(6px, 1vmin, 10px);
-  min-width: clamp(54px, 7vmin, 70px);
+  padding: 0 clamp(4px, 0.7vmin, 8px);
+  min-width: clamp(46px, 6vmin, 62px);
   display: inline-block;
   font-family: "Inter", "Segoe UI", system-ui, sans-serif;
 }
