@@ -281,17 +281,17 @@ button.disabled,
   touch-action: manipulation;
 }
 
-/* Карты ботов — всегда размер как при фолде: clamp(32..44) × 0.9 */
+/* Карты ботов — размер 32-44 */
 .seat .seat-cards .card {
-  --card-w: clamp(28.8px, 4.14vmin, 39.6px);
-  --card-h: clamp(40.5px, 5.85vmin, 55.8px);
-  font-size: clamp(18px, 2.7vmin, 27px);
+  --card-w: clamp(32px, 4.6vmin, 44px);
+  --card-h: clamp(45px, 6.5vmin, 62px);
+  font-size: clamp(20px, 3vmin, 30px);
   padding: 1px 3px;
   border-radius: clamp(4px, 0.6vmin, 6px);
 }
-.seat .seat-cards .card .suit { font-size: clamp(21.6px, 3.24vmin, 32.4px); }
+.seat .seat-cards .card .suit { font-size: clamp(24px, 3.6vmin, 36px); }
 
-/* Карты героя — всегда размер как у его сфолженных: clamp(42..54) × 0.9 и clamp(59..76) × 0.9 */
+/* Карты героя — всегда размер как у его сфолженных */
 .seat.hero .seat-cards .card {
   --card-w: clamp(37.8px, 5.58vmin, 48.6px);
   --card-h: clamp(53.1px, 7.83vmin, 68.4px);
@@ -464,7 +464,26 @@ button.disabled,
   transition: opacity .2s ease;
 }
 #hero-actions.inactive {
-  opacity: 0.55;
+  opacity: 0.4;
+}
+
+/* Слайдер и его части — усиливаем затемнение внутри inactive */
+#hero-actions.inactive #raise-slider-horiz {
+  filter: brightness(0.7);
+}
+#hero-actions.inactive #raise-amount-mini {
+  opacity: 0.65;
+  color: #6a5a1a;
+}
+#hero-actions.inactive #raise-slider-horiz::-webkit-slider-thumb {
+  filter: brightness(0.7);
+}
+
+/* Кнопки Fold/Check/Call — усиливаем затемнение при inactive */
+#hero-actions.inactive #hero-buttons button {
+  opacity: 0.5;
+  filter: grayscale(0.6) brightness(0.5);
+  box-shadow: none;
 }
 
 #hand-nav {
@@ -565,7 +584,7 @@ button.disabled,
   border: 1px solid #8a6508;
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0,0,0,.7);
-  margin-top: -4px;
+  margin-top: -3px;
   pointer-events: auto;
 }
 #raise-slider-horiz::-moz-range-thumb {
@@ -2079,6 +2098,14 @@ const UI = (() => {
     el.quickPercentList.classList.toggle('inactive', !active);
   }
 
+  function resetSliderToStart() {
+    const slider = document.getElementById('raise-slider-horiz');
+    if (!slider) return;
+    slider.value = slider.min;
+    const state = session.state;
+    if (state) updateSliderDisplay(state);
+  }
+
   function showActions(state, heroIndex, handlers) {
     const hero = state.players[heroIndex];
     const toCall = Math.max(0, state.currentBet - hero.committedThisStreet);
@@ -2293,7 +2320,8 @@ const UI = (() => {
     syncSettingsUI, toggleStackDisplay, toggleShowStrategies,
     createCardElement, formatChips,
     renderQuickRaiseOptions,
-    clearWinnerHighlights
+    clearWinnerHighlights,
+    resetSliderToStart
   };
 
 })();
@@ -2563,6 +2591,7 @@ const UI = (() => {
     UI.updateLevel(session.state);
     UI.updateHistoryInfo(session.state.handNumber, session.history.length, false);
 
+    UI.resetSliderToStart();
     refreshQuickPercentList();
     UI.setHeroActionsActive(false);
     processTurn();
@@ -2595,6 +2624,7 @@ const UI = (() => {
     } else {
       session.waitingForHero = false;
       UI.setHeroActionsActive(false);
+      UI.resetSliderToStart();
       refreshQuickPercentList();
       botTurn(player, idx);
     }
@@ -2615,6 +2645,7 @@ const UI = (() => {
     if (!session.waitingForHero) return;
     session.waitingForHero = false;
     UI.setHeroActionsActive(false);
+    UI.resetSliderToStart();
     const state = session.state;
     const hero = state.players[session.heroIndex];
 
@@ -2751,6 +2782,7 @@ const UI = (() => {
     UI.updatePot(state);
     UI.updateActiveHighlight(state);
     UI.setHeroActionsActive(false);
+    UI.resetSliderToStart();
     refreshQuickPercentList();
     UI.updateHistoryInfo(session.history.length, session.history.length, false);
 
@@ -2894,6 +2926,7 @@ const UI = (() => {
       UI.updatePot(state);
       UI.updateLevel(state);
       UI.updateActiveHighlight(state);
+      UI.resetSliderToStart();
       refreshQuickPercentList();
       if (session.waitingForHero) {
         heroTurn(state.players[session.heroIndex]);
