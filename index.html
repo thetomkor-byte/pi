@@ -504,7 +504,7 @@ button.disabled,
   background: rgba(20,18,16,.92);
   border: 1px solid #3a3530;
   border-radius: 10px;
-  padding: 1px clamp(6px, 0.9vmin, 9px) clamp(3px, 0.5vmin, 5px);
+  padding: 0 clamp(6px, 0.9vmin, 9px) clamp(3px, 0.5vmin, 5px);
   z-index: 45;
   transition: opacity .2s ease;
 }
@@ -536,13 +536,13 @@ button.disabled,
   width: 100%;
   padding: 0;
   border-bottom: 1px solid #2a2520;
-  margin-top: -1px;
+  margin-top: 0;
   margin-bottom: 0;
   gap: 0;
   min-height: 0;
   position: relative;
   line-height: 1;
-  transform: translateY(2px);
+  top: 2px;
 }
 #hand-nav .nav-history {
   display: flex;
