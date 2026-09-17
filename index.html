@@ -24,6 +24,7 @@
   --pct-block-w: clamp(88px, 13vmin, 110px);
   --dash-inset: clamp(10px, 2vmin, 18px);
   --small-text: clamp(11px, 1.4vmin, 13px);
+  --icon-font: "Segoe UI Symbol", "Apple Symbols", "Symbola", system-ui, sans-serif;
 }
 
 html, body {
@@ -567,6 +568,8 @@ button.disabled,
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  font-family: var(--icon-font);
+  font-variant-emoji: text;
 }
 #hand-nav button:active:not(:disabled) { background: rgba(255,255,255,.06); }
 #hand-nav button:disabled { opacity: .28; }
@@ -583,6 +586,7 @@ button.disabled,
   padding: 0 clamp(6px, 1vmin, 10px);
   min-width: clamp(54px, 7vmin, 70px);
   display: inline-block;
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
 }
 #hand-nav .nav-counter .total { color: var(--muted); }
 
@@ -590,15 +594,10 @@ button.disabled,
 #hn-resume:disabled { color: var(--text); }
 
 #hn-reset { color: var(--gold); }
-#hn-reset .reset-icon { font-size: inherit; line-height: 1; }
+#hn-reset .reset-icon { font-size: inherit; line-height: 1; font-family: var(--icon-font); font-variant-emoji: text; }
 
 #hn-settings { color: var(--gold); }
-#hn-settings .settings-icon {
-  font-size: inherit;
-  line-height: 1;
-  font-variant-emoji: text;
-  font-family: "Segoe UI Symbol", "Apple Symbols", system-ui, sans-serif;
-}
+#hn-settings .settings-icon { font-size: inherit; line-height: 1; font-family: var(--icon-font); font-variant-emoji: text; }
 
 #hero-slider-row {
   display: flex;
@@ -892,13 +891,13 @@ button.disabled,
       <div id="hero-actions" class="inactive">
         <div id="hand-nav">
           <div class="nav-history">
-            <button id="hn-prev" title="Назад" disabled>◀</button>
+            <button id="hn-prev" title="Назад" disabled>◀︎</button>
             <span class="nav-counter"><span id="hn-cur">0</span><span class="total"> / </span><span id="hn-tot">0</span></span>
-            <button id="hn-next" title="Вперёд" disabled>▶</button>
+            <button id="hn-next" title="Вперёд" disabled>▶︎</button>
           </div>
           <div class="nav-right">
-            <button id="hn-resume" title="Продолжить" disabled>▶▶</button>
-            <button id="hn-reset" title="Заново"><span class="reset-icon">⟲</span></button>
+            <button id="hn-resume" title="Продолжить" disabled>▶︎▶︎</button>
+            <button id="hn-reset" title="Заново"><span class="reset-icon">⟲︎</span></button>
             <button id="hn-settings" title="Настройки"><span class="settings-icon">⚙︎</span></button>
           </div>
         </div>
