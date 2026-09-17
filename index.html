@@ -352,6 +352,12 @@ button.disabled,
   transform: translateX(-50%);
 }
 
+.seat .stack-wrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 .seat .stack {
   color: var(--text);
   font-weight: 700;
@@ -365,6 +371,31 @@ button.disabled,
   touch-action: manipulation;
   border-radius: 4px;
 }
+
+/* Текст +N BB / -N BB рядом со стеком — абсолютное позиционирование, не сдвигает стек */
+.seat .delta-text {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: clamp(11px, 1.4vmin, 13px);
+  font-weight: 800;
+  white-space: nowrap;
+  text-shadow: 0 1px 3px rgba(0,0,0,.95);
+  pointer-events: none;
+  z-index: 20;
+}
+.seat .delta-text.hidden { display: none; }
+.seat .delta-text.positive { color: #4ae08a; }
+.seat .delta-text.negative { color: #e05a4a; }
+
+/* У левых мест текст справа от стека */
+.seat.left .delta-text { left: 100%; margin-left: 6px; }
+/* У правых мест текст слева от стека */
+.seat.right .delta-text { right: 100%; margin-right: 6px; }
+/* У героя и top/bottom текст справа */
+.seat.hero .delta-text,
+.seat.top .delta-text,
+.seat.bottom .delta-text { left: 100%; margin-left: 6px; }
 
 .seat.active .seat-cards .card {
   box-shadow:
@@ -409,24 +440,32 @@ button.disabled,
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  background: linear-gradient(180deg, #ffd54a, #e0a800);
   color: #1a1a1a;
   font-size: clamp(9px, 1.2vmin, 11px);
   font-weight: 900;
   padding: 4px 10px;
   border-radius: 4px;
   white-space: nowrap;
-  border: 1px solid #8a6508;
   z-index: 23;
   text-transform: uppercase;
   letter-spacing: .8px;
   bottom: clamp(-54px, -6.6vmin, -48px);
   top: auto;
+}
+.seat .winner-badge.hidden { display: none; }
+.seat .winner-badge.win {
+  background: linear-gradient(180deg, #ffd54a, #e0a800);
+  border: 1px solid #8a6508;
   box-shadow:
     0 0 8px 2px rgba(255,203,43,.7),
     0 2px 6px rgba(0,0,0,.8);
 }
-.seat .winner-badge.hidden { display: none; }
+.seat .winner-badge.loss {
+  background: linear-gradient(180deg, #b5674f, #6b3a2a);
+  color: #f5e0d8;
+  border: 1px solid #4a2a20;
+  box-shadow: 0 2px 6px rgba(0,0,0,.8);
+}
 
 .seat .bet-chips {
   position: absolute;
@@ -467,7 +506,6 @@ button.disabled,
   opacity: 0.4;
 }
 
-/* Слайдер и его части — усиливаем затемнение внутри inactive */
 #hero-actions.inactive #raise-slider-horiz {
   filter: brightness(0.7);
 }
@@ -479,7 +517,6 @@ button.disabled,
   filter: brightness(0.7);
 }
 
-/* Кнопки Fold/Check/Call — усиливаем затемнение при inactive */
 #hero-actions.inactive #hero-buttons button {
   opacity: 0.5;
   filter: grayscale(0.6) brightness(0.5);
@@ -1927,9 +1964,12 @@ const UI = (() => {
       <div class="pos-row">
         <span class="pos-name" data-role="pos">—</span>
       </div>
-      <div class="stack" data-role="stack"></div>
+      <div class="stack-wrap">
+        <span class="stack" data-role="stack"></span>
+        <span class="delta-text hidden" data-role="delta"></span>
+      </div>
       <div class="action-badge hidden" data-role="action"></div>
-      <div class="winner-badge hidden" data-role="winner">WINNER</div>
+      <div class="winner-badge hidden" data-role="winner">WIN</div>
       <div class="bet-chips hidden" data-role="bet"></div>
     `;
     return seat;
@@ -1968,6 +2008,7 @@ const UI = (() => {
 
       renderActionBadge(p, seat);
       renderWinnerBadge(p, seat, state);
+      renderDelta(p, seat, state);
     }
     updateStacks(state);
     updateActiveHighlight(state);
@@ -1988,10 +2029,61 @@ const UI = (() => {
   function renderWinnerBadge(p, seat, state) {
     const badge = seat.querySelector('[data-role="winner"]');
     if (!badge) return;
-    if (state.handOver && state.showdownResults && state.showdownResults.payouts && (state.showdownResults.payouts[p.id] || 0) > 0) {
+
+    if (!state.handOver || !state.showdownResults) {
+      badge.classList.add('hidden');
+      return;
+    }
+
+    const payouts = state.showdownResults.payouts || {};
+    const scores = state.showdownResults.scores || {};
+    const payout = payouts[p.id] || 0;
+    const reachedShowdown = Object.prototype.hasOwnProperty.call(scores, p.id) && scores[p.id] != null;
+
+    if (payout > 0) {
+      badge.textContent = 'WIN';
       badge.classList.remove('hidden');
+      badge.classList.add('win');
+      badge.classList.remove('loss');
+    } else if (reachedShowdown) {
+      badge.textContent = 'LOSS';
+      badge.classList.remove('hidden');
+      badge.classList.add('loss');
+      badge.classList.remove('win');
     } else {
       badge.classList.add('hidden');
+    }
+  }
+
+  function renderDelta(p, seat, state) {
+    const deltaEl = seat.querySelector('[data-role="delta"]');
+    if (!deltaEl) return;
+
+    if (!state.handOver || !state.showdownResults) {
+      deltaEl.classList.add('hidden');
+      return;
+    }
+
+    const payouts = state.showdownResults.payouts || {};
+    const scores = state.showdownResults.scores || {};
+    const payout = payouts[p.id] || 0;
+    const committed = p.committedTotal || 0;
+    const reachedShowdown = Object.prototype.hasOwnProperty.call(scores, p.id) && scores[p.id] != null;
+
+    if (payout > 0) {
+      // Победитель — показываем сумму, которую он забрал из банка
+      deltaEl.textContent = '+' + formatChips(payout, state);
+      deltaEl.classList.remove('hidden');
+      deltaEl.classList.add('positive');
+      deltaEl.classList.remove('negative');
+    } else if (reachedShowdown && committed > 0) {
+      // Проигравший на вскрытии — показываем, сколько он вложил
+      deltaEl.textContent = '−' + formatChips(committed, state);
+      deltaEl.classList.remove('hidden');
+      deltaEl.classList.add('negative');
+      deltaEl.classList.remove('positive');
+    } else {
+      deltaEl.classList.add('hidden');
     }
   }
 
