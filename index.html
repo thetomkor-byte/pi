@@ -385,11 +385,25 @@ button.disabled,
 .seat .delta-text.positive { color: #4ae08a; }
 .seat .delta-text.negative { color: #e05a4a; }
 
-.seat.left .delta-text { left: 100%; margin-left: 3px; }
-.seat.right .delta-text { right: 100%; margin-right: 3px; }
-.seat.hero .delta-text,
+.seat.left .delta-text { left: 100%; margin-left: 1px; }
+.seat.right .delta-text { right: 100%; margin-right: 1px; }
+.seat.bottom .delta-text { left: 100%; margin-left: 1px; }
+
 .seat.top .delta-text,
-.seat.bottom .delta-text { left: 100%; margin-left: 3px; }
+.seat.hero .delta-text {
+  top: auto;
+  transform: none;
+  left: 100%;
+  margin-left: 6px;
+  bottom: auto;
+}
+
+.seat.top .delta-text {
+  top: calc(-1 * clamp(24px, 3.2vmin, 30px));
+}
+.seat.hero .delta-text {
+  top: calc(-1 * clamp(24px, 3.2vmin, 30px));
+}
 
 .seat.active .seat-cards .card {
   box-shadow:
@@ -537,6 +551,7 @@ button.disabled,
 #hand-nav .nav-right {
   display: flex;
   align-items: center;
+  gap: clamp(16px, 2.4vmin, 24px);
 }
 #hand-nav button {
   background: transparent;
@@ -578,10 +593,15 @@ button.disabled,
 
 #hn-reset {
   color: var(--gold);
-  margin-left: clamp(14px, 2vmin, 20px);
   font-size: clamp(15px, 2vmin, 18px);
 }
 #hn-reset .reset-icon { font-size: clamp(16px, 2.1vmin, 19px); line-height: 1; }
+
+#hn-settings {
+  color: var(--gold);
+  font-size: clamp(15px, 2vmin, 18px);
+}
+#hn-settings .settings-icon { font-size: clamp(16px, 2.1vmin, 19px); line-height: 1; }
 
 #hero-slider-row {
   display: flex;
@@ -876,6 +896,7 @@ button.disabled,
           <div class="nav-right">
             <button id="hn-resume" title="Продолжить" disabled>▶▶</button>
             <button id="hn-reset" title="Заново"><span class="reset-icon">⟲</span></button>
+            <button id="hn-settings" title="Настройки"><span class="settings-icon">⚙</span></button>
           </div>
         </div>
         <div id="hero-slider-row">
@@ -1824,6 +1845,7 @@ const UI = (() => {
     el.hnTot          = document.getElementById('hn-tot');
     el.hnResume       = document.getElementById('hn-resume');
     el.hnReset        = document.getElementById('hn-reset');
+    el.hnSettings     = document.getElementById('hn-settings');
 
     el.setCardStyle      = document.getElementById('set-card-style');
     el.setStackDisplay   = document.getElementById('set-stack-display');
@@ -2060,7 +2082,6 @@ const UI = (() => {
     const actualCount = state.board.length;
     const finalStreet = state.finalStreet;
 
-    // Определяем, сколько карт было в игре
     let liveCount;
     if (!state.handOver || !finalStreet) {
       liveCount = actualCount;
@@ -2077,7 +2098,6 @@ const UI = (() => {
     for (let i = 0; i < actualCount; i++) {
       const c = createCardElement(state.board[i]);
       if (state.handOver && i >= liveCount) {
-        // Карта доиграна после завершения раздачи — затемняем
         c.style.opacity = '0.35';
       }
       el.boardCards.appendChild(c);
@@ -2407,6 +2427,7 @@ const UI = (() => {
     el.hnNext         = document.getElementById('hn-next');
     el.hnResume       = document.getElementById('hn-resume');
     el.hnReset        = document.getElementById('hn-reset');
+    el.hnSettings     = document.getElementById('hn-settings');
     el.swipeCenter    = document.getElementById('swipe-center');
     el.seats          = document.getElementById('seats');
   }
@@ -2485,6 +2506,7 @@ const UI = (() => {
     el.hnNext.addEventListener('click', () => navigateHistory(1));
     el.hnResume.addEventListener('click', () => resumeGame());
     el.hnReset.addEventListener('click', () => restartSession());
+    el.hnSettings.addEventListener('click', () => UI.openBottomPanel());
 
     bindSeatInteractions();
   }
