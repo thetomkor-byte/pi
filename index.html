@@ -24,7 +24,6 @@
   --pct-block-w: clamp(88px, 13vmin, 110px);
   --dash-inset: clamp(10px, 2vmin, 18px);
   --small-text: clamp(11px, 1.4vmin, 13px);
-  --icon-font: "Segoe UI Symbol", "Apple Symbols", "Symbola", system-ui, sans-serif;
 
   --nav-btn: clamp(32px, 4.4vmin, 38px);
   --nav-icon-size: clamp(16px, 2.4vmin, 19px);
@@ -504,7 +503,7 @@ button.disabled,
   background: rgba(20,18,16,.92);
   border: 1px solid #3a3530;
   border-radius: 10px;
-  padding: 0 clamp(6px, 0.9vmin, 9px) clamp(3px, 0.5vmin, 5px);
+  padding: 1px clamp(6px, 0.9vmin, 9px) clamp(3px, 0.5vmin, 5px);
   z-index: 45;
   transition: opacity .2s ease;
 }
@@ -534,15 +533,14 @@ button.disabled,
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 0;
+  padding: 1px 0;
   border-bottom: 1px solid #2a2520;
-  margin-top: 0;
-  margin-bottom: 0;
+  margin-bottom: -1px;
   gap: 0;
   min-height: 0;
   position: relative;
   line-height: 1;
-  top: 2px;
+  transform: translateY(2px);
 }
 #hand-nav .nav-history {
   display: flex;
@@ -564,12 +562,10 @@ button.disabled,
   min-height: var(--nav-btn);
   border-radius: 6px;
   position: relative;
-  top: 2px;
+  top: -2px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--icon-font);
-  font-variant-emoji: text;
   flex-shrink: 0;
 }
 #hand-nav button:active:not(:disabled) { background: rgba(255,255,255,.06); }
@@ -583,7 +579,7 @@ button.disabled,
   letter-spacing: .3px;
   white-space: nowrap;
   position: relative;
-  top: 0;
+  top: -2px;
   padding: 0;
   width: var(--nav-counter-w);
   display: inline-block;
@@ -597,10 +593,7 @@ button.disabled,
 #hn-resume:disabled { color: var(--text); }
 
 #hn-reset { color: var(--gold); }
-#hn-reset .reset-icon { font-size: inherit; line-height: 1; font-family: var(--icon-font); font-variant-emoji: text; }
-
 #hn-settings { color: var(--gold); }
-#hn-settings .settings-icon { font-size: inherit; line-height: 1; font-family: var(--icon-font); font-variant-emoji: text; }
 
 #hero-slider-row {
   display: flex;
@@ -899,8 +892,8 @@ button.disabled,
             <button id="hn-next" title="Вперёд" disabled>▶︎</button>
           </div>
           <button id="hn-resume" title="Продолжить" disabled>▶︎▶︎</button>
-          <button id="hn-reset" title="Заново"><span class="reset-icon">⟲︎</span></button>
-          <button id="hn-settings" title="Настройки"><span class="settings-icon">⚙︎</span></button>
+          <button id="hn-reset" title="Заново">⟲︎</button>
+          <button id="hn-settings" title="Настройки">⚙︎</button>
         </div>
         <div id="hero-slider-row">
           <input type="range" id="raise-slider-horiz" min="0" max="100" value="0" />
