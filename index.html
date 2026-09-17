@@ -281,7 +281,6 @@ button.disabled,
   touch-action: manipulation;
 }
 
-/* Карты ботов — размер 32-44 */
 .seat .seat-cards .card {
   --card-w: clamp(32px, 4.6vmin, 44px);
   --card-h: clamp(45px, 6.5vmin, 62px);
@@ -291,7 +290,6 @@ button.disabled,
 }
 .seat .seat-cards .card .suit { font-size: clamp(24px, 3.6vmin, 36px); }
 
-/* Карты героя — всегда размер как у его сфолженных */
 .seat.hero .seat-cards .card {
   --card-w: clamp(37.8px, 5.58vmin, 48.6px);
   --card-h: clamp(53.1px, 7.83vmin, 68.4px);
@@ -372,7 +370,6 @@ button.disabled,
   border-radius: 4px;
 }
 
-/* Текст +N BB / -N BB рядом со стеком */
 .seat .delta-text {
   position: absolute;
   top: 50%;
@@ -788,61 +785,6 @@ button.disabled,
   cursor: pointer;
 }
 
-#top-panel {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  background: linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%);
-  border-bottom: 1px solid #2a2520;
-  padding: calc(20px + env(safe-area-inset-top, 0px)) 20px 20px;
-  transform: translateY(-110%);
-  transition: transform .28s ease;
-  z-index: 100;
-  max-height: 55vh;
-  overflow-y: auto;
-  touch-action: pan-y;
-  scrollbar-width: none;
-}
-#top-panel::-webkit-scrollbar { display: none; }
-#top-panel.open { transform: translateY(0); }
-
-#top-panel h3 {
-  color: var(--gold);
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 12px;
-  font-weight: 800;
-}
-
-#stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-bottom: 6px;
-}
-.stat-card {
-  background: #1a1a1a;
-  border: 1px solid #2a2520;
-  border-radius: 8px;
-  padding: 10px 8px;
-  text-align: center;
-}
-.stat-card .label {
-  color: var(--muted);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: .5px;
-  margin-bottom: 3px;
-}
-.stat-card .value {
-  color: var(--text);
-  font-weight: 800;
-  font-size: 16px;
-}
-.stat-card .value.gold { color: var(--gold); }
-.stat-card .value.ok { color: var(--ok); }
-.stat-card .value.danger { color: var(--danger); }
-
 #tap-close {
   position: absolute;
   inset: 0;
@@ -991,18 +933,14 @@ button.disabled,
       <span>Показывать стратегии ботов</span>
       <input type="checkbox" id="set-show-strategies" />
     </label>
-  </div>
-
-  <div id="top-panel">
-    <h3>Статистика сессии</h3>
-    <div id="stats-grid">
-      <div class="stat-card"><div class="label">Точность</div><div class="value gold" id="stat-accuracy">—</div></div>
-      <div class="stat-card"><div class="label">✅ Совпало</div><div class="value ok" id="stat-hit">0</div></div>
-      <div class="stat-card"><div class="label">❌ Не совпало</div><div class="value danger" id="stat-miss">0</div></div>
-      <div class="stat-card"><div class="label">Раздач</div><div class="value" id="stat-hands">0</div></div>
-      <div class="stat-card"><div class="label">Серия</div><div class="value" id="stat-streak">0</div></div>
-      <div class="stat-card"><div class="label">Место</div><div class="value" id="stat-place">—</div></div>
-    </div>
+    <label class="setting">
+      <span>Карты игроков открыты</span>
+      <input type="checkbox" id="set-show-all-hands" />
+    </label>
+    <label class="setting">
+      <span>На вскрытии показывать карты всех</span>
+      <input type="checkbox" id="set-show-all-showdown" />
+    </label>
   </div>
 
   <div id="start-overlay">
@@ -1379,6 +1317,7 @@ const Engine = (() => {
   }
 
   function finalizeHand(state) {
+    const lastStreet = state.street;
     while (state.board.length < 5) {
       if (state.board.length === 0) dealBoard(state, 3);
       else dealBoard(state, 1);
@@ -1387,6 +1326,7 @@ const Engine = (() => {
       if (p.eliminated) { p.revealed = false; continue; }
       p.revealed = !p.folded || p.acted;
     }
+    state.finalStreet = lastStreet;
   }
 
   function showdown(state) {
@@ -1832,7 +1772,9 @@ const UI = (() => {
     stackDisplay: 'bb',
     blindGrowthHands: 10,
     turnTime: 0,
-    showStrategies: false
+    showStrategies: false,
+    showAllHands: false,
+    showAllShowdown: false
   };
 
   const el = {};
@@ -1861,13 +1803,6 @@ const UI = (() => {
     el.infoTimerRow   = document.getElementById('info-timer-row');
     el.infoNextBlinds = document.getElementById('info-next-blinds-row');
 
-    el.statsAccuracy  = document.getElementById('stat-accuracy');
-    el.statsHit       = document.getElementById('stat-hit');
-    el.statsMiss      = document.getElementById('stat-miss');
-    el.statsHands     = document.getElementById('stat-hands');
-    el.statsStreak    = document.getElementById('stat-streak');
-    el.statsPlace     = document.getElementById('stat-place');
-
     el.heroActions    = document.getElementById('hero-actions');
     el.heroButtons    = document.getElementById('hero-buttons');
     el.sliderHoriz    = document.getElementById('raise-slider-horiz');
@@ -1879,9 +1814,7 @@ const UI = (() => {
     el.callAmount     = document.getElementById('call-amount');
 
     el.bottomPanel    = document.getElementById('bottom-panel');
-    el.topPanel       = document.getElementById('top-panel');
     el.tapClose       = document.getElementById('tap-close');
-    el.tableScene     = document.getElementById('table-scene');
 
     el.hnPrev         = document.getElementById('hn-prev');
     el.hnNext         = document.getElementById('hn-next');
@@ -1895,6 +1828,8 @@ const UI = (() => {
     el.setBlindGrowth    = document.getElementById('set-blind-growth');
     el.setTurnTime       = document.getElementById('set-turn-time');
     el.setShowStrategies = document.getElementById('set-show-strategies');
+    el.setShowAllHands   = document.getElementById('set-show-all-hands');
+    el.setShowAllShowdown = document.getElementById('set-show-all-showdown');
 
     el.startOverlay   = document.getElementById('start-overlay');
     el.btnStart       = document.getElementById('btn-start');
@@ -1904,12 +1839,11 @@ const UI = (() => {
   }
 
   function updateOverlayState() {
-    const anyOpen = el.bottomPanel.classList.contains('open') || el.topPanel.classList.contains('open');
+    const anyOpen = el.bottomPanel.classList.contains('open');
     el.tapClose.classList.toggle('active', anyOpen);
   }
 
   function openBottomPanel() {
-    el.topPanel.classList.remove('open');
     el.bottomPanel.classList.add('open');
     updateOverlayState();
   }
@@ -1917,18 +1851,8 @@ const UI = (() => {
     el.bottomPanel.classList.remove('open');
     updateOverlayState();
   }
-  function openTopPanel() {
-    el.bottomPanel.classList.remove('open');
-    el.topPanel.classList.add('open');
-    updateOverlayState();
-  }
-  function closeTopPanel() {
-    el.topPanel.classList.remove('open');
-    updateOverlayState();
-  }
   function closeAllPanels() {
     el.bottomPanel.classList.remove('open');
-    el.topPanel.classList.remove('open');
     updateOverlayState();
   }
 
@@ -2033,16 +1957,15 @@ const UI = (() => {
     }
 
     const payouts = state.showdownResults.payouts || {};
-    const scores = state.showdownResults.scores || {};
     const payout = payouts[p.id] || 0;
-    const reachedShowdown = Object.prototype.hasOwnProperty.call(scores, p.id) && scores[p.id] != null;
+    const committed = p.committedTotal || 0;
 
     if (payout > 0) {
       badge.textContent = 'WIN';
       badge.classList.remove('hidden');
       badge.classList.add('win');
       badge.classList.remove('loss');
-    } else if (reachedShowdown) {
+    } else if (committed > 0) {
       badge.textContent = 'LOSS';
       badge.classList.remove('hidden');
       badge.classList.add('loss');
@@ -2062,17 +1985,15 @@ const UI = (() => {
     }
 
     const payouts = state.showdownResults.payouts || {};
-    const scores = state.showdownResults.scores || {};
     const payout = payouts[p.id] || 0;
     const committed = p.committedTotal || 0;
-    const reachedShowdown = Object.prototype.hasOwnProperty.call(scores, p.id) && scores[p.id] != null;
 
     if (payout > 0) {
       deltaEl.textContent = '+' + formatChips(payout, state);
       deltaEl.classList.remove('hidden');
       deltaEl.classList.add('positive');
       deltaEl.classList.remove('negative');
-    } else if (reachedShowdown && committed > 0) {
+    } else if (committed > 0) {
       deltaEl.textContent = '−' + formatChips(committed, state);
       deltaEl.classList.remove('hidden');
       deltaEl.classList.add('negative');
@@ -2089,7 +2010,26 @@ const UI = (() => {
     cardsEl.innerHTML = '';
     if (player.eliminated || player.holeCards.length === 0) return;
 
-    const show = revealAll || player.isHero || player.revealed;
+    let show;
+    if (settings.showAllHands) {
+      // Опция "Карты игроков открыты" — все карты всех игроков всегда видны
+      show = true;
+    } else if (state.handOver) {
+      // Раздача завершена
+      if (settings.showAllShowdown) {
+        // "Показывать карты всех на вскрытии" — показываем всех, кроме сбросивших без вложения
+        show = !player.folded || (player.committedTotal > 0);
+        // Проще: показываем всех, кто не eliminated
+        show = true;
+      } else {
+        // По умолчанию: только те, кто вложил в банк
+        show = (player.committedTotal > 0) || player.isHero || player.revealed;
+      }
+    } else {
+      // Раздача идёт
+      show = revealAll || player.isHero || player.revealed;
+    }
+
     if (show) {
       for (const c of player.holeCards) cardsEl.appendChild(createCardElement(c));
     } else if (!player.folded) {
@@ -2122,7 +2062,39 @@ const UI = (() => {
 
   function updateBoard(state) {
     el.boardCards.innerHTML = '';
-    for (const c of state.board) el.boardCards.appendChild(createCardElement(c));
+    const fullBoardCount = 5;
+    const actualCount = state.board.length;
+    const finalStreet = state.finalStreet;
+
+    // Если раздача завершена, показываем все 5 карт,
+    // но те, что не были в игре (улицы после finalStreet) — затемнены
+    for (let i = 0; i < actualCount; i++) {
+      el.boardCards.appendChild(createCardElement(state.board[i]));
+    }
+
+    // Дорисовываем недостающие карты как "затемнённые" заглушки — просто пустые слоты
+    // (без отображения карт, которых не было)
+    // Но по правилу: карты терна/ривера должны быть затемнены так же как карты сфолженных.
+    // Значит, если раздача закончилась на флопе, показываем 3 яркие + 2 затемнённые "пустышки"
+    // Если на тёрне — 4 яркие + 1 затемнённая
+    // Если на ривере — 5 ярких
+
+    if (state.handOver && finalStreet && finalStreet !== 'river') {
+      // Раздача завершилась раньше ривера — рисуем затемнённые слоты для карт, которых не было
+      let cardsToDim = 0;
+      if (finalStreet === 'preflop') cardsToDim = 5;
+      else if (finalStreet === 'flop') cardsToDim = 2;
+      else if (finalStreet === 'turn') cardsToDim = 1;
+
+      for (let i = 0; i < cardsToDim; i++) {
+        const c = document.createElement('div');
+        c.className = 'card';
+        c.style.opacity = '0.2';
+        c.style.background = '#2a2a2a';
+        c.style.border = '1px dashed #3a3530';
+        el.boardCards.appendChild(c);
+      }
+    }
   }
 
   function updatePot(state) {
@@ -2335,18 +2307,6 @@ const UI = (() => {
     }
   }
 
-  function updateStats(stats) {
-    el.statsHit.textContent = stats.hit;
-    el.statsMiss.textContent = stats.miss;
-    el.statsHands.textContent = stats.hands;
-    el.statsStreak.textContent = stats.streak || 0;
-    if (stats.hands > 0) {
-      const acc = Math.round(stats.hit / (stats.hit + stats.miss) * 100);
-      el.statsAccuracy.textContent = (isNaN(acc) ? 0 : acc) + '%';
-    } else el.statsAccuracy.textContent = '—';
-    el.statsPlace.textContent = stats.place ? `${stats.place}/${Engine.SEATS}` : '—';
-  }
-
   function updateHistoryInfo(current, total, isViewingPast) {
     el.hnCur.textContent = current;
     el.hnTot.textContent = total;
@@ -2362,6 +2322,8 @@ const UI = (() => {
     el.setBlindGrowth.value    = String(settings.blindGrowthHands);
     el.setTurnTime.value       = String(settings.turnTime);
     el.setShowStrategies.checked = settings.showStrategies;
+    el.setShowAllHands.checked   = settings.showAllHands;
+    el.setShowAllShowdown.checked = settings.showAllShowdown;
   }
 
   function readSettingsFromUI() {
@@ -2370,13 +2332,17 @@ const UI = (() => {
     settings.blindGrowthHands  = Number(el.setBlindGrowth.value);
     settings.turnTime          = Number(el.setTurnTime.value);
     settings.showStrategies    = el.setShowStrategies.checked;
+    settings.showAllHands      = el.setShowAllHands.checked;
+    settings.showAllShowdown   = el.setShowAllShowdown.checked;
     applyCardStyle();
     if (settings.onChange) settings.onChange(settings);
   }
 
   function syncSettingsUI() {
-    el.setStackDisplay.value     = settings.stackDisplay;
-    el.setShowStrategies.checked = settings.showStrategies;
+    el.setStackDisplay.value       = settings.stackDisplay;
+    el.setShowStrategies.checked   = settings.showStrategies;
+    el.setShowAllHands.checked     = settings.showAllHands;
+    el.setShowAllShowdown.checked  = settings.showAllShowdown;
   }
 
   function toggleStackDisplay() {
@@ -2391,6 +2357,12 @@ const UI = (() => {
     if (settings.onChange) settings.onChange(settings);
   }
 
+  function toggleShowAllHands() {
+    settings.showAllHands = !settings.showAllHands;
+    syncSettingsUI();
+    if (settings.onChange) settings.onChange(settings);
+  }
+
   function clearWinnerHighlights() {
     document.querySelectorAll('.seat.winner').forEach(s => s.classList.remove('winner'));
   }
@@ -2400,11 +2372,10 @@ const UI = (() => {
     renderTable, updateSeats, updateBoard, updatePot, updateLevel,
     updateStacks, updateActiveHighlight,
     showActions, setHeroActionsActive,
-    updateStats,
-    openBottomPanel, closeBottomPanel, openTopPanel, closeTopPanel, closeAllPanels,
+    openBottomPanel, closeBottomPanel, closeAllPanels,
     updateHistoryInfo,
     readSettingsFromUI, applySettingsToUI,
-    syncSettingsUI, toggleStackDisplay, toggleShowStrategies,
+    syncSettingsUI, toggleStackDisplay, toggleShowStrategies, toggleShowAllHands,
     createCardElement, formatChips,
     renderQuickRaiseOptions,
     clearWinnerHighlights,
@@ -2444,7 +2415,6 @@ const UI = (() => {
     el.btnStart       = document.getElementById('btn-start');
     el.startOverlay   = document.getElementById('start-overlay');
     el.bottomPanel    = document.getElementById('bottom-panel');
-    el.topPanel       = document.getElementById('top-panel');
     el.tapClose       = document.getElementById('tap-close');
     el.hnPrev         = document.getElementById('hn-prev');
     el.hnNext         = document.getElementById('hn-next');
@@ -2492,8 +2462,6 @@ const UI = (() => {
       if (Math.abs(dx) > Math.abs(dy)) return;
       if (dy < 0) {
         UI.openBottomPanel();
-      } else {
-        UI.openTopPanel();
       }
     }, { passive: true });
 
@@ -2513,22 +2481,10 @@ const UI = (() => {
       if (dy > 60) UI.closeBottomPanel();
     }, { passive: true });
 
-    let tpStartY = 0, tpTracking = false;
-    el.topPanel.addEventListener('touchstart', (e) => {
-      if (e.touches.length !== 1) return;
-      tpTracking = true;
-      tpStartY = e.touches[0].clientY;
-    }, { passive: true });
-    el.topPanel.addEventListener('touchend', (e) => {
-      if (!tpTracking) return;
-      tpTracking = false;
-      const endY = e.changedTouches[0].clientY;
-      const dy = endY - tpStartY;
-      if (dy < -60) UI.closeTopPanel();
-    }, { passive: true });
-
-    ['set-card-style','set-stack-display','set-blind-growth','set-turn-time','set-show-strategies'].forEach(id => {
-      document.getElementById(id).addEventListener('change', () => {
+    ['set-card-style','set-stack-display','set-blind-growth','set-turn-time','set-show-strategies','set-show-all-hands','set-show-all-showdown'].forEach(id => {
+      const node = document.getElementById(id);
+      if (!node) return;
+      node.addEventListener('change', () => {
         UI.readSettingsFromUI();
         if (session.state) {
           UI.updateLevel(session.state);
@@ -2567,12 +2523,17 @@ const UI = (() => {
       }
 
       if (cardsEl) {
+        const isHeroSeat = !!cardsEl.closest('.seat.hero');
         const last = cardsEl._lastTap || 0;
         if (now - last < 300) {
           cardsEl._lastTap = 0;
           e.preventDefault();
           e.stopPropagation();
-          handleCardsDoubleTap();
+          if (isHeroSeat) {
+            handleHeroCardsDoubleTap();
+          } else {
+            handleCardsDoubleTap();
+          }
           return;
         }
         cardsEl._lastTap = now;
@@ -2598,7 +2559,22 @@ const UI = (() => {
   }
 
   function handleCardsDoubleTap() {
+    // Двойной тап по картам ботов — переключает стратегии
     UI.toggleShowStrategies();
+    if (session.state) {
+      const state = session.state;
+      const showAll = state.handOver || session.viewingIndex >= 0;
+      if (session.viewingIndex >= 0) {
+        UI.updateSeats(session.history[session.viewingIndex], true);
+      } else {
+        UI.updateSeats(state, showAll);
+      }
+    }
+  }
+
+  function handleHeroCardsDoubleTap() {
+    // Двойной тап по картам героя — переключает "видеть все карты"
+    UI.toggleShowAllHands();
     if (session.state) {
       const state = session.state;
       const showAll = state.handOver || session.viewingIndex >= 0;
@@ -2624,7 +2600,6 @@ const UI = (() => {
 
     UI.setHeroActionsActive(false);
     UI.updateHistoryInfo(0, 0, false);
-    UI.updateStats(session.stats);
     UI.clearWinnerHighlights();
 
     startNewSession();
@@ -2652,7 +2627,6 @@ const UI = (() => {
     session.state.buttonIndex = 7;
 
     UI.renderTable(session.state);
-    UI.updateStats(session.stats);
     UI.updateHistoryInfo(0, 0, false);
 
     startHand();
@@ -2853,13 +2827,6 @@ const UI = (() => {
     Engine.finalizeHand(state);
 
     const hero = state.players[session.heroIndex];
-    const heroWon = didHeroWin(state, hero);
-    const isHit = session.heroEntered === heroWon;
-
-    if (isHit) { session.stats.hit++; session.stats.streak = (session.stats.streak || 0) + 1; }
-    else { session.stats.miss++; session.stats.streak = 0; }
-    session.stats.hands++;
-    UI.updateStats(session.stats);
 
     session.history.push(snapshotState(state));
     if (session.history.length > 30) session.history.shift();
@@ -2894,7 +2861,7 @@ const UI = (() => {
       const alive = state.players.filter(p => !p.eliminated);
       if (alive.length <= 1) { endSession('Турнир выигран!'); return; }
       startHand();
-    }, 4000);
+    }, 7000);
   }
 
   function highlightWinners(state) {
@@ -2912,6 +2879,7 @@ const UI = (() => {
       handNumber: state.handNumber,
       levelIndex: state.levelIndex,
       handOver: state.handOver,
+      finalStreet: state.finalStreet,
       board: state.board.map(c => ({ ...c })),
       pot: state.pot,
       buttonIndex: state.buttonIndex,
@@ -2926,11 +2894,6 @@ const UI = (() => {
       })),
       showdownResults: state.showdownResults
     };
-  }
-
-  function didHeroWin(state, hero) {
-    if (!state.showdownResults) return false;
-    return ((state.showdownResults.payouts || {})[hero.id] || 0) > 0;
   }
 
   function checkEliminations() {
@@ -3005,7 +2968,7 @@ const UI = (() => {
           const alive = state.players.filter(p => !p.eliminated);
           if (alive.length <= 1) { endSession('Турнир выигран!'); return; }
           startHand();
-        }, 4000);
+        }, 7000);
       }
     } else {
       UI.clearWinnerHighlights();
@@ -3034,10 +2997,8 @@ const UI = (() => {
     const alive = session.state.players.filter(p => !p.eliminated).length;
     const heroAlive = !session.state.players[session.heroIndex].eliminated;
     session.stats.place = heroAlive ? alive : (alive + 1);
-    UI.updateStats(session.stats);
     alert(title + '\nМесто: ' + session.stats.place + '/' + Engine.SEATS +
-          '\nРаздач: ' + session.stats.hands +
-          '\nТочность: ' + (session.stats.hands > 0 ? Math.round(session.stats.hit / (session.stats.hit + session.stats.miss) * 100) : 0) + '%');
+          '\nРаздач: ' + session.stats.hands);
     el.startOverlay.classList.remove('hidden');
     el.btnStart.textContent = 'Начать заново';
   }
