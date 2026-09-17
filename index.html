@@ -385,10 +385,12 @@ button.disabled,
 .seat .delta-text.positive { color: #4ae08a; }
 .seat .delta-text.negative { color: #e05a4a; }
 
+/* Боковые — строго по центру стека, прижаты к стеку */
 .seat.left .delta-text { left: 100%; margin-left: 1px; }
 .seat.right .delta-text { right: 100%; margin-right: 1px; }
 .seat.bottom .delta-text { left: 100%; margin-left: 1px; }
 
+/* UTG1 (top) и герой — на линии названия позиции, справа от него */
 .seat.top .delta-text,
 .seat.hero .delta-text {
   top: auto;
@@ -397,12 +399,11 @@ button.disabled,
   margin-left: 6px;
   bottom: auto;
 }
-
 .seat.top .delta-text {
-  top: calc(-1 * clamp(26px, 3.4vmin, 32px));
+  top: calc(-1 * clamp(22px, 3.0vmin, 28px));
 }
 .seat.hero .delta-text {
-  top: calc(-1 * clamp(26px, 3.4vmin, 32px));
+  top: calc(-1 * clamp(22px, 3.0vmin, 28px));
 }
 
 .seat.active .seat-cards .card {
@@ -509,6 +510,7 @@ button.disabled,
   z-index: 45;
   backdrop-filter: blur(4px);
   transition: opacity .2s ease;
+  overflow: hidden;
 }
 #hero-actions.inactive {
   opacity: 0.4;
@@ -551,7 +553,7 @@ button.disabled,
 #hand-nav .nav-right {
   display: flex;
   align-items: center;
-  gap: clamp(16px, 2.4vmin, 24px);
+  gap: clamp(10px, 1.6vmin, 16px);
 }
 #hand-nav button {
   background: transparent;
@@ -559,9 +561,9 @@ button.disabled,
   color: var(--text);
   font-size: clamp(13px, 1.7vmin, 16px);
   font-weight: 800;
-  padding: 0 clamp(5px, 0.8vmin, 7px);
+  padding: 0 clamp(4px, 0.7vmin, 6px);
   line-height: 1;
-  min-width: 32px;
+  min-width: 28px;
   min-height: 22px;
   border-radius: 5px;
   position: relative;
