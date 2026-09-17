@@ -506,7 +506,6 @@ button.disabled,
   border-radius: 10px;
   padding: 1px clamp(6px, 0.9vmin, 9px) clamp(3px, 0.5vmin, 5px);
   z-index: 45;
-  backdrop-filter: blur(4px);
   transition: opacity .2s ease;
 }
 #hero-actions.inactive {
@@ -3013,7 +3012,6 @@ const UI = (() => {
     alert(title + '\nМесто: ' + session.stats.place + '/' + Engine.SEATS +
           '\nРаздач: ' + session.stats.hands);
     el.startOverlay.classList.remove('hidden');
-    el.el?.btnStart ? (el.btnStart.textContent = 'Начать заново') : null;
     el.btnStart.textContent = 'Начать заново';
   }
 
