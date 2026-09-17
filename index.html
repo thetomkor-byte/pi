@@ -25,9 +25,25 @@
   --dash-inset: clamp(10px, 2vmin, 18px);
   --small-text: clamp(11px, 1.4vmin, 13px);
   --icon-font: "Segoe UI Symbol", "Apple Symbols", "Symbola", system-ui, sans-serif;
-  --nav-icon-size: clamp(15px, 2vmin, 18px);
-  --nav-gap: clamp(8px, 1.4vmin, 14px);
-  --nav-btn-min: 30px;
+}
+
+/* Мобильные (по умолчанию) — фиксированные размеры кнопок истории */
+:root {
+  --nav-btn: 36px;
+  --nav-icon-size: 18px;
+  --nav-gap: 10px;
+  --nav-counter-w: 56px;
+  --nav-counter-size: 13px;
+}
+
+@media (min-width: 641px) {
+  :root {
+    --nav-btn: 32px;
+    --nav-icon-size: 16px;
+    --nav-gap: 14px;
+    --nav-counter-w: 64px;
+    --nav-counter-size: 14px;
+  }
 }
 
 html, body {
@@ -560,10 +576,12 @@ button.disabled,
   color: var(--text);
   font-size: var(--nav-icon-size);
   font-weight: 800;
-  padding: 0 clamp(3px, 0.5vmin, 5px);
+  padding: 0;
   line-height: 1;
-  min-width: var(--nav-btn-min);
-  min-height: 26px;
+  width: var(--nav-btn);
+  height: var(--nav-btn);
+  min-width: var(--nav-btn);
+  min-height: var(--nav-btn);
   border-radius: 6px;
   position: relative;
   top: -2px;
@@ -572,6 +590,7 @@ button.disabled,
   justify-content: center;
   font-family: var(--icon-font);
   font-variant-emoji: text;
+  flex-shrink: 0;
 }
 #hand-nav button:active:not(:disabled) { background: rgba(255,255,255,.06); }
 #hand-nav button:disabled { opacity: .28; }
@@ -585,15 +604,16 @@ button.disabled,
   color: var(--gold);
   font-weight: 800;
   text-align: center;
-  font-size: clamp(12px, 1.6vmin, 14px);
+  font-size: var(--nav-counter-size);
   letter-spacing: .3px;
   white-space: nowrap;
   position: relative;
   top: -2px;
-  padding: 0 clamp(4px, 0.7vmin, 8px);
-  min-width: clamp(46px, 6vmin, 62px);
+  padding: 0;
+  width: var(--nav-counter-w);
   display: inline-block;
   font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+  flex-shrink: 0;
 }
 #hand-nav .nav-counter .total { color: var(--muted); }
 
