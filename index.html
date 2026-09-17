@@ -32,7 +32,7 @@
   --nav-gap: clamp(1px, 0.5vmin, 4px);
   --nav-counter-w: clamp(44px, 6.2vmin, 54px);
   --nav-counter-size: clamp(12px, 1.6vmin, 14px);
-  --nav-block-pad: clamp(1px, 0.4vmin, 3px);
+  --nav-block-pad: 0px;
 }
 
 html, body {
@@ -511,7 +511,7 @@ button.disabled,
   background: rgba(20,18,16,.92);
   border: 1px solid #3a3530;
   border-radius: 10px;
-  padding: clamp(3px, 0.5vmin, 5px) clamp(6px, 0.9vmin, 9px);
+  padding: 1px clamp(6px, 0.9vmin, 9px) clamp(3px, 0.5vmin, 5px);
   z-index: 45;
   backdrop-filter: blur(4px);
   transition: opacity .2s ease;
@@ -542,12 +542,13 @@ button.disabled,
   align-items: center;
   justify-content: flex-start;
   width: 100%;
-  padding: var(--nav-block-pad) 0;
+  padding: 0;
   border-bottom: 1px solid #2a2520;
-  margin-bottom: -1px;
+  margin-bottom: 0;
   gap: var(--nav-gap);
   min-height: 0;
   position: relative;
+  line-height: 1;
 }
 #hand-nav .nav-history {
   display: flex;
@@ -573,7 +574,7 @@ button.disabled,
   min-height: var(--nav-btn);
   border-radius: 6px;
   position: relative;
-  top: -2px;
+  top: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -592,12 +593,13 @@ button.disabled,
   letter-spacing: .3px;
   white-space: nowrap;
   position: relative;
-  top: -2px;
+  top: 0;
   padding: 0;
   width: var(--nav-counter-w);
   display: inline-block;
   font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   flex-shrink: 0;
+  line-height: 1;
 }
 #hand-nav .nav-counter .total { color: var(--muted); }
 
