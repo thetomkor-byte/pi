@@ -25,25 +25,14 @@
   --dash-inset: clamp(10px, 2vmin, 18px);
   --small-text: clamp(11px, 1.4vmin, 13px);
   --icon-font: "Segoe UI Symbol", "Apple Symbols", "Symbola", system-ui, sans-serif;
-}
 
-/* Мобильные (по умолчанию) — фиксированные размеры кнопок истории */
-:root {
-  --nav-btn: 36px;
-  --nav-icon-size: 18px;
-  --nav-gap: 10px;
-  --nav-counter-w: 56px;
-  --nav-counter-size: 13px;
-}
-
-@media (min-width: 641px) {
-  :root {
-    --nav-btn: 32px;
-    --nav-icon-size: 16px;
-    --nav-gap: 14px;
-    --nav-counter-w: 64px;
-    --nav-counter-size: 14px;
-  }
+  /* Кнопки истории раздач — динамические размеры */
+  --nav-btn: clamp(32px, 4.4vmin, 38px);
+  --nav-icon-size: clamp(16px, 2.4vmin, 19px);
+  --nav-gap: clamp(1px, 0.5vmin, 4px);
+  --nav-counter-w: clamp(44px, 6.2vmin, 54px);
+  --nav-counter-size: clamp(12px, 1.6vmin, 14px);
+  --nav-block-pad: clamp(1px, 0.4vmin, 3px);
 }
 
 html, body {
@@ -551,19 +540,19 @@ button.disabled,
 #hand-nav {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   width: 100%;
-  padding: 1px 0;
+  padding: var(--nav-block-pad) 0;
   border-bottom: 1px solid #2a2520;
   margin-bottom: -1px;
-  gap: 0;
+  gap: var(--nav-gap);
   min-height: 0;
   position: relative;
 }
 #hand-nav .nav-history {
   display: flex;
   align-items: center;
-  gap: 0;
+  gap: var(--nav-gap);
 }
 #hand-nav .nav-right {
   display: flex;
@@ -594,11 +583,6 @@ button.disabled,
 }
 #hand-nav button:active:not(:disabled) { background: rgba(255,255,255,.06); }
 #hand-nav button:disabled { opacity: .28; }
-
-/* Расстояние между правой кнопкой истории ▶ и ▶▶ — такое же, как внутри nav-right */
-#hand-nav .nav-history #hn-next {
-  margin-right: var(--nav-gap);
-}
 
 #hand-nav .nav-counter {
   color: var(--gold);
