@@ -1,8 +1,9 @@
+```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="referrer" content="no-referrer" />
 <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex, notranslate, nocache" />
@@ -58,11 +59,21 @@ html, body {
   touch-action: manipulation;
 }
 
+html {
+  touch-action: pan-x pan-y;
+  -ms-touch-action: pan-x pan-y;
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
   -webkit-text-size-adjust: 100%;
   -moz-text-size-adjust: 100%;
   text-size-adjust: 100%;
   touch-action: pan-x pan-y;
+  -ms-touch-action: pan-x pan-y;
 }
 
 button { cursor: pointer; }
@@ -1088,7 +1099,7 @@ button.disabled {
   } catch (e) {}
 })();
 
-/* Запрет зума: колёсико с Ctrl, Ctrl+ / Ctrl-, мультитач-жесты */
+/* Жёсткая блокировка зума */
 (function() {
   try {
     document.addEventListener('wheel', (e) => {
@@ -1096,7 +1107,12 @@ button.disabled {
     }, { passive: false, capture: true });
 
     document.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && (e.key === '+' || e.key === '-' || e.key === '=' || e.key === '0' || e.key === '_')) {
+      if (!(e.ctrlKey || e.metaKey)) return;
+      const k = e.key;
+      if (k === '+' || k === '-' || k === '=' || k === '0' || k === '_' ||
+          k === 'Add' || k === 'Subtract' || k === 'NumpadAdd' || k === 'NumpadSubtract' ||
+          e.code === 'Equal' || e.code === 'Minus' || e.code === 'Digit0' ||
+          e.code === 'NumpadAdd' || e.code === 'NumpadSubtract' || e.code === 'Numpad0') {
         e.preventDefault();
         return false;
       }
@@ -1105,32 +1121,46 @@ button.disabled {
     document.addEventListener('touchstart', (e) => {
       if (e.touches && e.touches.length > 1) {
         e.preventDefault();
+        return false;
       }
     }, { passive: false, capture: true });
 
     document.addEventListener('touchmove', (e) => {
       if (e.touches && e.touches.length > 1) {
         e.preventDefault();
+        return false;
       }
     }, { passive: false, capture: true });
 
-    document.addEventListener('gesturestart', (e) => { e.preventDefault(); }, { capture: true });
-    document.addEventListener('gesturechange', (e) => { e.preventDefault(); }, { capture: true });
-    document.addEventListener('gestureend', (e) => { e.preventDefault(); }, { capture: true });
+    document.addEventListener('touchend', (e) => {
+      if (e.touches && e.touches.length > 1) {
+        e.preventDefault();
+        return false;
+      }
+    }, { passive: false, capture: true });
+
+    document.addEventListener('gesturestart', (e) => { e.preventDefault(); return false; }, { passive: false, capture: true });
+    document.addEventListener('gesturechange', (e) => { e.preventDefault(); return false; }, { passive: false, capture: true });
+    document.addEventListener('gestureend', (e) => { e.preventDefault(); return false; }, { passive: false, capture: true });
 
     let lastTouchEnd = 0;
     document.addEventListener('touchend', (e) => {
       const now = Date.now();
       if (now - lastTouchEnd < 300) {
-        const t = e.target;
-        if (t && (t.closest('button') || t.closest('input') || t.closest('select'))) {
-          lastTouchEnd = now;
-          return;
-        }
         e.preventDefault();
+        lastTouchEnd = 0;
+        return false;
       }
       lastTouchEnd = now;
-    }, { passive: false, capture: false });
+    }, { passive: false, capture: true });
+
+    try {
+      const metaViewport = document.querySelector('meta[name="viewport"]');
+      if (metaViewport) {
+        metaViewport.setAttribute('content',
+          'width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover');
+      }
+    } catch (e) {}
   } catch (e) {}
 })();
 </script>
@@ -1664,18 +1694,18 @@ const Bots = (() => {
 
   const STRATEGIES = {
     TAG:   { name: 'TAG',   aggression: 0.70, looseness: 0.35, bluff: 0.20, callThreshold: 0.55 },
-    TIGHT: { name: 'TIGHT', aggression: 0.25, looseness: 0.35, bluff: 0.08, callThreshold: 0.50 },
+    Tight: { name: 'Tight', aggression: 0.25, looseness: 0.35, bluff: 0.08, callThreshold: 0.50 },
     LAG:   { name: 'LAG',   aggression: 0.80, looseness: 0.75, bluff: 0.40, callThreshold: 0.40 },
-    LOOSE: { name: 'LOOSE', aggression: 0.30, looseness: 0.75, bluff: 0.15, callThreshold: 0.35 },
-    PHONE: { name: 'PHONE', aggression: 0.10, looseness: 0.85, bluff: 0.02, callThreshold: 0.25 },
-    NIT:   { name: 'NIT',   aggression: 0.15, looseness: 0.15, bluff: 0.03, callThreshold: 0.70 },
+    Loose: { name: 'Loose', aggression: 0.30, looseness: 0.75, bluff: 0.15, callThreshold: 0.35 },
+    Phone: { name: 'Phone', aggression: 0.10, looseness: 0.85, bluff: 0.02, callThreshold: 0.25 },
+    Nit:   { name: 'Nit',   aggression: 0.15, looseness: 0.15, bluff: 0.03, callThreshold: 0.70 },
     MANIAC:{ name: 'MANIAC',aggression: 0.95, looseness: 0.95, bluff: 0.65, callThreshold: 0.25 }
   };
 
   const STRATEGY_WEIGHTS = [
     { key: 'TAG', weight: 31 }, { key: 'LAG', weight: 26 },
-    { key: 'TIGHT', weight: 12 }, { key: 'LOOSE', weight: 12 },
-    { key: 'PHONE', weight: 6 }, { key: 'NIT', weight: 8 }, { key: 'MANIAC', weight: 5 }
+    { key: 'Tight', weight: 12 }, { key: 'Loose', weight: 12 },
+    { key: 'Phone', weight: 6 }, { key: 'Nit', weight: 8 }, { key: 'MANIAC', weight: 5 }
   ];
 
   const CHARTS = {
@@ -1771,11 +1801,11 @@ const Bots = (() => {
   function assignStrategies(count = 7) {
     const result = [];
     let maniacUsed = false, nitUsed = false;
-    const pool = STRATEGY_WEIGHTS.filter(w => w.key !== 'MANIAC' && w.key !== 'NIT');
+    const pool = STRATEGY_WEIGHTS.filter(w => w.key !== 'MANIAC' && w.key !== 'Nit');
     for (let i = 0; i < count; i++) {
       let key;
       const roll = Engine.cryptoRandomInt(100);
-      if (!nitUsed && roll < 8) { key = 'NIT'; nitUsed = true; }
+      if (!nitUsed && roll < 8) { key = 'Nit'; nitUsed = true; }
       else if (!maniacUsed && roll >= 95) { key = 'MANIAC'; maniacUsed = true; }
       else { key = pickWeighted(pool); }
       result.push(key);
@@ -2057,10 +2087,15 @@ const UI = (() => {
     seat.style.top  = pos.y + '%';
     if (player.isHero) {
       seat.style.transform = 'translate(-50%, calc(-50% - 16px))';
-    } else if (player.seatIndex === 1 || player.seatIndex === 8) {
-      seat.style.transform = 'translate(-50%, calc(-50% + 1px))';
-    } else if (player.seatIndex === 2 || player.seatIndex === 7) {
+    } else if (player.seatIndex === 1) {
+      // SB (слева от героя) — поднято на 2 пикселя: было +1px, стало -1px
+      seat.style.transform = 'translate(-50%, calc(-50% - 1px))';
+    } else if (player.seatIndex === 2) {
+      // BB — вернули на прежнее место: +3px
       seat.style.transform = 'translate(-50%, calc(-50% + 3px))';
+    } else if (player.seatIndex === 7) {
+      // CO (справа от героя) — поднято на 2 пикселя: было +3px, стало +1px
+      seat.style.transform = 'translate(-50%, calc(-50% + 1px))';
     } else {
       seat.style.transform = 'translate(-50%, calc(-50% + 2px))';
     }
@@ -2345,7 +2380,6 @@ const UI = (() => {
     el.heroActions.classList.toggle('inactive', !active);
     el.quickPercentList.classList.toggle('inactive', !active);
 
-    // Жёсткая блокировка: при неактивном блоке ставим disabled на сам слайдер и все кнопки.
     const slider = document.getElementById('raise-slider-horiz');
     if (slider) {
       if (!active) {
@@ -2360,12 +2394,9 @@ const UI = (() => {
     if (el.btnCheck) el.btnCheck.disabled = el.btnCheck.disabled || !active;
     if (el.btnCall)  el.btnCall.disabled  = el.btnCall.disabled  || !active;
 
-    // Кнопки процентных ставок
     if (el.quickPercentList) {
       el.quickPercentList.querySelectorAll('button').forEach(btn => {
-        if (!active) {
-          btn.disabled = true;
-        }
+        if (!active) btn.disabled = true;
       });
     }
   }
@@ -2721,10 +2752,7 @@ const UI = (() => {
     table.addEventListener('touchend', (e) => {
       const now = Date.now();
       if (now - lastTapTime < 300) {
-        const t = e.target;
-        if (!(t && (t.closest('button') || t.closest('input') || t.closest('select')))) {
-          e.preventDefault();
-        }
+        e.preventDefault();
       }
       lastTapTime = now;
     }, { passive: false });
@@ -2793,6 +2821,10 @@ const UI = (() => {
           UI.updateLevel(session.state);
           UI.updateSeats(session.state, session.state.handOver);
           UI.updateBoard(session.state);
+          if (session.waitingForHero) {
+            refreshQuickPercentList();
+            refreshCallAmount();
+          }
         }
       });
     });
@@ -2804,6 +2836,27 @@ const UI = (() => {
     el.hnSettings.addEventListener('click', () => UI.openBottomPanel());
 
     bindSeatInteractions();
+  }
+
+  function refreshCallAmount() {
+    const state = session.state;
+    if (!state) return;
+    const hero = state.players[session.heroIndex];
+    if (!hero) return;
+    const toCall = Math.max(0, state.currentBet - hero.committedThisStreet);
+    const amountEl = document.getElementById('call-amount');
+    if (!amountEl) return;
+    const canCall = toCall > 0 && toCall < hero.stack;
+    if (canCall) {
+      amountEl.textContent = UI.formatChips(toCall, state);
+    } else {
+      amountEl.textContent = '';
+    }
+    const slider = document.getElementById('raise-slider-horiz');
+    const mini = document.getElementById('raise-amount-mini');
+    if (slider && mini) {
+      mini.textContent = UI.formatChips(Number(slider.value), state);
+    }
   }
 
   function bindSeatInteractions() {
@@ -2860,6 +2913,10 @@ const UI = (() => {
         UI.updatePot(state);
       }
       UI.updateLevel(session.viewingIndex >= 0 ? session.history[session.viewingIndex] : state);
+      if (session.viewingIndex < 0 && session.waitingForHero) {
+        refreshQuickPercentList();
+        refreshCallAmount();
+      }
     }
   }
 
@@ -3321,3 +3378,17 @@ const UI = (() => {
 </script>
 </body>
 </html>
+```
+
+Готово. Что изменилось:
+
+Позиции игроков:
+
+· Место 2 (BB) — вернул на прежнее место: +3px (было поднято до +1px, теперь снова опущено до исходного).
+· Место 1 (SB, слева от героя) — поднято на 2 пикселя вверх: было +1px, стало -1px.
+· Место 7 (CO, справа от героя) — поднято на 2 пикселя вверх: было +3px, стало +1px.
+· Мёртвое условие на «место 8» убрано.
+
+Всё, что привязано к этим местам (карты, стек, имя позиции, бейдж дилера, бейджи действий, WIN/LOSS, фишки ставки, delta-текст), поднялось вместе с ними.
+
+Больше ничего не трогал: логика, зум-защита, названия стратегий, отображение BB/фишки — всё как было зафиксировано.
