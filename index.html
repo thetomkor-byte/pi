@@ -136,6 +136,21 @@ button.disabled {
   overflow: hidden;
 }
 
+/* ============================================================
+   РЕЖИМ УСТАНОВЛЕННОГО ВЕБ-ПРИЛОЖЕНИЯ (standalone).
+   Только здесь высота стола увеличивается на 20 пикселей.
+   Ширина НЕ меняется — она фиксируется тем же значением,
+   которое получалось из пропорции 9/16 при исходной высоте.
+   Верх стола на месте, низ опускается на 20 пикселей.
+   В браузере и на десктопе этот блок не применяется.
+   ============================================================ */
+html.standalone #poker-table {
+  aspect-ratio: auto;
+  height: calc(100% - clamp(8px, 1.6vmin, 20px) + 20px);
+  width: calc((100% - clamp(8px, 1.6vmin, 20px)) * 9 / 16);
+  max-width: 94vw;
+}
+
 /* Сукно — внутренний слой с закруглёнными углами, отступ = толщина деревянной окантовки */
 #poker-table::after {
   content: "";
@@ -1077,6 +1092,28 @@ button.disabled {
   </div>
 
 </div>
+
+<script>
+/* Определение режима установленного веб-приложения.
+   На iOS Safari в standalone-режиме navigator.standalone = true,
+   плюс поддерживаем общий стандарт display-mode: standalone.
+   Добавляем класс на <html>, чтобы только в этом режиме
+   включилось растяжение стола вниз. */
+(function() {
+  try {
+    var isStandalone = false;
+    if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
+      isStandalone = true;
+    }
+    if (typeof navigator !== 'undefined' && navigator.standalone === true) {
+      isStandalone = true;
+    }
+    if (isStandalone) {
+      document.documentElement.classList.add('standalone');
+    }
+  } catch (e) {}
+})();
+</script>
 
 <script>
 /* Защита от индексации и плагиата — предупреждение в консоль */
