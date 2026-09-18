@@ -613,7 +613,7 @@ button.disabled,
   outline: none;
   accent-color: var(--gold);
   min-width: 60px;
-  touch-action: manipulation;
+  touch-action: none;
   pointer-events: auto;
   vertical-align: middle;
 }
@@ -629,6 +629,7 @@ button.disabled,
   box-shadow: 0 2px 4px rgba(0,0,0,.7);
   margin-top: -2px;
   pointer-events: auto;
+  transition: transform .08s ease, filter .08s ease;
 }
 #raise-slider-horiz::-moz-range-thumb {
   width: 16px;
@@ -638,7 +639,17 @@ button.disabled,
   border: 1px solid #8a6508;
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0,0,0,.7);
+  transition: transform .08s ease, filter .08s ease;
 }
+#raise-slider-horiz.pressed::-webkit-slider-thumb {
+  transform: scale(0.85);
+  filter: brightness(1.35);
+}
+#raise-slider-horiz.pressed::-moz-range-thumb {
+  transform: scale(0.85);
+  filter: brightness(1.35);
+}
+
 #raise-amount-mini {
   color: var(--gold);
   font-size: var(--small-text);
@@ -1900,7 +1911,7 @@ const UI = (() => {
     if (player.isHero) {
       seat.style.transform = 'translate(-50%, calc(-50% - 16px))';
     } else if (player.seatIndex === 2 || player.seatIndex === 7) {
-      seat.style.transform = 'translate(-50%, calc(-50% + 4px))';
+      seat.style.transform = 'translate(-50%, calc(-50% + 3px))';
     } else {
       seat.style.transform = 'translate(-50%, calc(-50% + 2px))';
     }
@@ -2304,8 +2315,47 @@ const UI = (() => {
     const slider = document.getElementById('raise-slider-horiz');
     el.sliderHoriz = slider;
 
-    slider.oninput = () => updateSliderDisplay(state);
-    slider.onchange = () => {
+    // Следим за "зажатием" кружка. Если палец/курсор был нажал не на кружок — игнорируем.
+    // pointerdown: определяем, попал ли тап по кружку. Если нет — отменяем стандартное поведение (перескок).
+    let pressedOnThumb = false;
+    let sliderDragging = false;
+
+    function isPointOnThumb(clientX) {
+      const rect = slider.getBoundingClientRect();
+      const min = Number(slider.min);
+      const max = Number(slider.max);
+      const val = Number(slider.value);
+      if (max <= min) return false;
+      // ширина дорожки (без учёта кружка — приблизительно)
+      const thumbW = 16; // из CSS
+      const trackW = rect.width - thumbW;
+      const ratio = (val - min) / (max - min);
+      const thumbCenter = rect.left + thumbW / 2 + ratio * trackW;
+      // Допуск на палец — половина кружка + запас
+      return Math.abs(clientX - thumbCenter) <= thumbW * 0.9;
+    }
+
+    slider.onpointerdown = (e) => {
+      e.stopPropagation();
+      if (slider.disabled) return;
+      pressedOnThumb = isPointOnThumb(e.clientX);
+      if (!pressedOnThumb) {
+        // тап по дорожке — не даём слайдеру перескочить
+        e.preventDefault();
+        return;
+      }
+      sliderDragging = true;
+      slider.classList.add('pressed');
+    };
+
+    slider.onpointerup = (e) => {
+      e.stopPropagation();
+      if (!pressedOnThumb) { pressedOnThumb = false; return; }
+      slider.classList.remove('pressed');
+      pressedOnThumb = false;
+      if (!sliderDragging) return;
+      sliderDragging = false;
+      // Ставка отправляется только здесь — после отпускания
       const target = Number(slider.value);
       const hero = state.players[heroIndex];
       const maxTarget = hero.committedThisStreet + hero.stack;
@@ -2313,6 +2363,28 @@ const UI = (() => {
         handlers.onAllIn();
       } else {
         handlers.onRaise(target);
+      }
+    };
+
+    slider.onpointercancel = () => {
+      slider.classList.remove('pressed');
+      pressedOnThumb = false;
+      sliderDragging = false;
+    };
+
+    // Подавляем click после перетаскивания, чтобы не было двойных действий
+    slider.onclick = (e) => { e.preventDefault(); e.stopPropagation(); };
+
+    // Обновление цифры рядом со слайдером при перемещении кружка
+    slider.oninput = () => updateSliderDisplay(state);
+
+    // Запрет на реакцию тапа по дорожке (fallback для браузеров без pointer events)
+    slider.ontouchstart = (e) => {
+      if (slider.disabled) return;
+      const t = e.touches && e.touches[0];
+      if (!t) return;
+      if (!isPointOnThumb(t.clientX)) {
+        e.preventDefault();
       }
     };
 
