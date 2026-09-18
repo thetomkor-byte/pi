@@ -3,6 +3,19 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="referrer" content="no-referrer" />
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex, notranslate, nocache" />
+<meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex" />
+<meta name="google" content="notranslate" />
+<meta name="bingbot" content="noindex, nofollow, noarchive" />
+<meta name="yandex" content="noindex, nofollow, noarchive" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="format-detection" content="telephone=no,date=no,address=no,email=no" />
+<meta name="theme-color" content="#0a0a0a" />
+<meta name="copyright" content="All rights reserved" />
+<meta name="author" content="" />
 <title>Poker Simulator</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -41,8 +54,16 @@ html, body {
   overflow: hidden;
   user-select: none;
   -webkit-user-select: none;
+  -webkit-touch-callout: none;
   overscroll-behavior: none;
   touch-action: manipulation;
+}
+
+body {
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  touch-action: pan-x pan-y;
 }
 
 button { cursor: pointer; }
@@ -1017,6 +1038,99 @@ button.disabled,
   </div>
 
 </div>
+
+<script>
+/* Защита от индексации и плагиата — предупреждение в консоль */
+(function() {
+  try {
+    console.log('%cSTOP!', 'color:#e63946;font-size:48px;font-weight:900;text-shadow:2px 2px 0 #000;');
+    console.log('%cЭтот код защищён авторским правом.', 'color:#ffcb2b;font-size:16px;font-weight:700;');
+    console.log('%cКопирование, распространение и использование без разрешения автора запрещено.', 'color:#ffcb2b;font-size:14px;');
+    console.log('%c© Все права защищены.', 'color:#8a8a8a;font-size:12px;');
+  } catch (e) {}
+})();
+
+/* Блокировка контекстного меню, выделения, копирования */
+(function() {
+  try {
+    document.addEventListener('contextmenu', (e) => { e.preventDefault(); return false; }, { capture: true });
+    document.addEventListener('selectstart', (e) => { e.preventDefault(); return false; }, { capture: true });
+    document.addEventListener('dragstart', (e) => { e.preventDefault(); return false; }, { capture: true });
+    document.addEventListener('copy', (e) => { e.preventDefault(); return false; }, { capture: true });
+    document.addEventListener('cut', (e) => { e.preventDefault(); return false; }, { capture: true });
+    document.addEventListener('paste', (e) => { e.preventDefault(); return false; }, { capture: true });
+
+    document.addEventListener('keydown', (e) => {
+      const k = (e.key || '').toLowerCase();
+      // F12
+      if (e.key === 'F12') { e.preventDefault(); return false; }
+      // Ctrl+Shift+I / J / C / K — инструменты разработчика
+      if (e.ctrlKey && e.shiftKey && (k === 'i' || k === 'j' || k === 'c' || k === 'k')) { e.preventDefault(); return false; }
+      if (e.metaKey && e.altKey && (k === 'i' || k === 'j' || k === 'c' || k === 'k')) { e.preventDefault(); return false; }
+      // Ctrl+U — просмотр исходного кода
+      if ((e.ctrlKey || e.metaKey) && k === 'u') { e.preventDefault(); return false; }
+      // Ctrl+S — сохранить страницу
+      if ((e.ctrlKey || e.metaKey) && k === 's') { e.preventDefault(); return false; }
+      // Ctrl+A — выделить всё
+      if ((e.ctrlKey || e.metaKey) && k === 'a') { e.preventDefault(); return false; }
+      // Ctrl+C / Ctrl+X / Ctrl+V — копирование / вырезание / вставка
+      if ((e.ctrlKey || e.metaKey) && (k === 'c' || k === 'x' || k === 'v')) { e.preventDefault(); return false; }
+    }, { capture: true });
+  } catch (e) {}
+})();
+
+/* Запрет зума: колёсико с Ctrl, Ctrl+ / Ctrl-, мультитач-жесты */
+(function() {
+  try {
+    // Колёсико с Ctrl
+    document.addEventListener('wheel', (e) => {
+      if (e.ctrlKey) { e.preventDefault(); return false; }
+    }, { passive: false, capture: true });
+
+    // Ctrl+ / Ctrl- / Ctrl+0
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === '+' || e.key === '-' || e.key === '=' || e.key === '0' || e.key === '_')) {
+        e.preventDefault();
+        return false;
+      }
+    }, { capture: true });
+
+    // Мультитач-жесты (pinch-to-zoom) на всём документе
+    document.addEventListener('touchstart', (e) => {
+      if (e.touches && e.touches.length > 1) {
+        e.preventDefault();
+      }
+    }, { passive: false, capture: true });
+
+    document.addEventListener('touchmove', (e) => {
+      if (e.touches && e.touches.length > 1) {
+        e.preventDefault();
+      }
+    }, { passive: false, capture: true });
+
+    // Safari-specific pinch gestures
+    document.addEventListener('gesturestart', (e) => { e.preventDefault(); }, { capture: true });
+    document.addEventListener('gesturechange', (e) => { e.preventDefault(); }, { capture: true });
+    document.addEventListener('gestureend', (e) => { e.preventDefault(); }, { capture: true });
+
+    // Двойной тап — предотвращение (уже есть на столе, но добавим общий)
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', (e) => {
+      const now = Date.now();
+      if (now - lastTouchEnd < 300) {
+        // Не блокируем кнопки и инпуты — там своя логика
+        const t = e.target;
+        if (t && (t.closest('button') || t.closest('input') || t.closest('select'))) {
+          lastTouchEnd = now;
+          return;
+        }
+        e.preventDefault();
+      }
+      lastTouchEnd = now;
+    }, { passive: false, capture: false });
+  } catch (e) {}
+})();
+</script>
 
 <script>
 /* ============================================================
@@ -2584,7 +2698,10 @@ const UI = (() => {
     table.addEventListener('touchend', (e) => {
       const now = Date.now();
       if (now - lastTapTime < 300) {
-        e.preventDefault();
+        const t = e.target;
+        if (!(t && (t.closest('button') || t.closest('input') || t.closest('select')))) {
+          e.preventDefault();
+        }
       }
       lastTapTime = now;
     }, { passive: false });
