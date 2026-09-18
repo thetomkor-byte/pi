@@ -1189,11 +1189,6 @@ const Engine = (() => {
   const SEATS = 8;
   const STREETS = ['preflop', 'flop', 'turn', 'river'];
 
-  // Наборы названий позиций для разного количества игроков.
-  // Последняя позиция — BTN, первые две после BTN — SB и BB.
-  // Для 8-max: BTN, SB, BB, UTG, UTG1, LJ, HJ, CO.
-  // При вылетах количество живых игроков уменьшается, и позиции
-  // пересчитываются корректно — без учёта пустых мест.
   const POSITION_LABELS = {
     8: ['BTN','SB','BB','UTG','UTG1','LJ','HJ','CO'],
     7: ['BTN','SB','BB','UTG','LJ','HJ','CO'],
@@ -1361,44 +1356,22 @@ const Engine = (() => {
     for (let i = 0; i < count; i++) state.board.push(state.deck[state._deckIdx++]);
   }
 
-  // Назначаем позиции по фактическому количеству живых игроков.
-  // Идём от баттона по часовой стрелке: баттон — последний в наборе,
-  // следующие за ним игроки получают SB, BB и далее.
   function assignPositions(state) {
     const n = state.players.length;
-    // Считаем только тех, кто ещё в игре.
     let alive = 0;
     for (const p of state.players) if (!p.eliminated) alive++;
 
     const labels = POSITION_LABELS[alive] || POSITION_LABELS[POSITION_LABELS.length - 1] || ['BTN'];
 
-    // Собираем список индексов живых игроков в порядке от баттона по часовой.
     const aliveOrder = [];
     for (let i = 0; i < n; i++) {
       const idx = (state.buttonIndex + i) % n;
       if (!state.players[idx].eliminated) aliveOrder.push(idx);
     }
 
-    // Первый в aliveOrder — это баттон (buttonIndex указывает на баттон,
-    // если он жив; иначе мы всё равно начинаем с ближайшего живого после баттона).
-    // Расставляем метки в порядке: BTN, SB, BB, UTG... — начиная с первого живого
-    // после баттона по часовой.
-    //
-    // По соглашению баттон — последний в массиве labels, и по кругу: игрок
-    // сразу после баттона — SB, следующий — BB, и далее.
-    //
-    // Значит, если aliveOrder[0] — баттон, то метки распределяются так:
-    //   aliveOrder[0] -> 'BTN'
-    //   aliveOrder[1] -> 'SB'
-    //   aliveOrder[2] -> 'BB'
-    //   aliveOrder[3] -> 'UTG'
-    //   ...
-    // Но набор labels у нас в виде ['BTN','SB','BB','UTG',...] с BTN первым —
-    // значит, присваиваем по порядку метки в этом наборе по индексам aliveOrder.
     for (let i = 0; i < aliveOrder.length; i++) {
       state.players[aliveOrder[i]].position = labels[i] || '—';
     }
-    // Вылетевшим очищаем позицию, чтобы не путать.
     for (const p of state.players) {
       if (p.eliminated) p.position = null;
     }
@@ -1420,7 +1393,6 @@ const Engine = (() => {
 
   function postBlinds(state) {
     const n = state.players.length;
-    // Находим ближайшего живого игрока после баттона для SB и следующего для BB.
     let sbIndex = (state.buttonIndex + 1) % n;
     let guard = 0;
     while (state.players[sbIndex].eliminated && guard < n) { sbIndex = (sbIndex + 1) % n; guard++; }
@@ -2139,7 +2111,6 @@ const UI = (() => {
   }
 
   function createSeatElement(player, state) {
-    // Если игрок вылетел ДО начала текущей раздачи (не участвует) — место не рисуем.
     const wasEliminatedBeforeHand = player.eliminated && !player.inHand;
     if (wasEliminatedBeforeHand) return null;
 
@@ -2206,13 +2177,11 @@ const UI = (() => {
       const seat = document.getElementById(`seat-${p.id}`);
       const wasEliminatedBeforeHand = p.eliminated && !p.inHand;
 
-      // Если игрок вылетел ДО этой раздачи — места нет вообще.
       if (wasEliminatedBeforeHand) {
         if (seat && seat.parentNode) seat.parentNode.removeChild(seat);
         continue;
       }
 
-      // Если место отсутствует, а игрок должен быть виден — создаём.
       if (!seat) {
         const newSeat = createSeatElement(p, state);
         if (newSeat) el.seats.appendChild(newSeat);
@@ -3169,7 +3138,6 @@ const UI = (() => {
 
   function botTurn(bot, idx) {
     const state = session.state;
-    // Ровно два варианта: 0.5 сек или 1 сек. Случайно.
     const delay = Engine.cryptoRandomInt(2) === 0 ? 500 : 1000;
     clearTimeout(session.botTimerId);
     session.botTimerId = setTimeout(() => {
@@ -3369,14 +3337,10 @@ const UI = (() => {
     const snap = session.history[session.viewingIndex];
     if (!snap) return;
     UI.setHeroActionsActive(false);
-    // Очищаем стол полностью и перерисовываем только тех, кто участвовал в этой раздаче.
     el.seats.innerHTML = '';
     for (const p of snap.players) {
       const seat = UI.createSeatElement ? UI.createSeatElement(p, snap) : null;
-      // createSeatElement не экспортирован напрямую — вернём через перерисовку
     }
-    // Проще: используем renderTable-like логику через updateBoard/updateSeats.
-    // Отрисовка производится ниже — сначала создаём только нужные места.
     UI.renderTable(snap);
     UI.updateBoard(snap);
     UI.updateSeats(snap, true);
