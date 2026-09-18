@@ -30,8 +30,6 @@
   --ok: #2fb571;
   --allin: #e63946;
   --safari-pad: env(safe-area-inset-bottom, 0px);
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
   --board-card-w: clamp(34px, 5.2vmin, 48px);
   --board-card-h: clamp(48px, 7.3vmin, 67px);
   --edge: clamp(6px, 1.1vmin, 10px);
@@ -156,42 +154,6 @@ button.disabled {
   border-radius: clamp(20px, 3vmin, 30px);
   pointer-events: none;
   z-index: 2;
-}
-
-/* ============================================================
-   РЕЖИМ УСТАНОВЛЕННОГО ВЕБ-ПРИЛОЖЕНИЯ (standalone)
-   Стол растягивается на всю свободную высоту между системными
-   зонами. Сверху и снизу — одинаковое расстояние: высота
-   системной зоны (вырез/«островок») + 8 пикселей.
-   ============================================================ */
-@media all and (display-mode: standalone) {
-  #table-scene {
-    top: calc(var(--safe-top) + 8px);
-    bottom: calc(var(--safe-bottom) + 8px);
-    align-items: stretch;
-  }
-
-  #poker-table {
-    aspect-ratio: auto;
-    height: 100%;
-    width: auto;
-    max-width: 94vw;
-    max-height: 100%;
-  }
-}
-
-/* Для iOS, где display-mode: standalone в некоторых версиях не срабатывает — дублируем через navigator.standalone */
-html.ios-standalone #table-scene {
-  top: calc(var(--safe-top) + 8px);
-  bottom: calc(var(--safe-bottom) + 8px);
-  align-items: stretch;
-}
-html.ios-standalone #poker-table {
-  aspect-ratio: auto;
-  height: 100%;
-  width: auto;
-  max-width: 94vw;
-  max-height: 100%;
 }
 
 #board-area {
@@ -1111,27 +1073,6 @@ html.ios-standalone #poker-table {
   </div>
 
 </div>
-
-<script>
-/* Определение режима установленного веб-приложения на iOS.
-   На iOS Safari не всегда сообщает display-mode: standalone через media query,
-   но выставляет navigator.standalone = true.
-   Добавляем класс на <html>, чтобы CSS применил растяжение стола. */
-(function() {
-  try {
-    var isStandalone = false;
-    if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
-      isStandalone = true;
-    }
-    if (typeof navigator !== 'undefined' && navigator.standalone === true) {
-      isStandalone = true;
-    }
-    if (isStandalone) {
-      document.documentElement.classList.add('ios-standalone');
-    }
-  } catch (e) {}
-})();
-</script>
 
 <script>
 /* Защита от индексации и плагиата — предупреждение в консоль */
