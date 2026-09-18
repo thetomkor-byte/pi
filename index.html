@@ -510,6 +510,12 @@ button.disabled,
 #hero-actions.inactive {
   opacity: 0.4;
 }
+#hero-actions.inactive #hero-slider-row,
+#hero-actions.inactive #hero-buttons,
+#hero-actions.inactive #hero-slider-row *,
+#hero-actions.inactive #hero-buttons * {
+  pointer-events: none !important;
+}
 
 #hero-actions.inactive #raise-slider-horiz {
   filter: brightness(0.7);
@@ -567,6 +573,7 @@ button.disabled,
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  pointer-events: auto;
 }
 #hand-nav button:active:not(:disabled) { background: rgba(255,255,255,.06); }
 #hand-nav button:disabled { opacity: .28; }
@@ -728,8 +735,9 @@ button.disabled,
 #quick-percent-list.inactive {
   opacity: 0.55;
 }
-#quick-percent-list.inactive button {
-  pointer-events: none;
+#quick-percent-list.inactive button,
+#quick-percent-list.inactive button * {
+  pointer-events: none !important;
 }
 #quick-percent-list.inactive button .label { color: #6a5a1a; }
 #quick-percent-list.inactive button.allin-btn .label { color: #7a2028; }
@@ -751,6 +759,12 @@ button.disabled,
   min-height: 32px;
   width: 100%;
   transition: transform .08s ease, filter .08s ease;
+}
+#quick-percent-list button.allin-btn {
+  justify-content: center;
+}
+#quick-percent-list button.allin-btn .value {
+  display: none;
 }
 #quick-percent-list button:active:not(:disabled) {
   transform: scale(0.96);
@@ -2021,6 +2035,9 @@ const UI = (() => {
     const payout = payouts[p.id] || 0;
     const committed = p.committedTotal || 0;
 
+    // WIN — если получил выплату из банка (значит забрал чужие фишки).
+    // LOSS — если вложил и не получил ничего.
+    // Иначе — не показываем.
     if (payout > 0) {
       badge.textContent = 'WIN';
       badge.classList.remove('hidden');
@@ -2050,7 +2067,8 @@ const UI = (() => {
     const committed = p.committedTotal || 0;
 
     if (payout > 0) {
-      deltaEl.textContent = '+' + formatChips(payout, state);
+      const net = payout - committed;
+      deltaEl.textContent = '+' + formatChips(net, state);
       deltaEl.classList.remove('hidden');
       deltaEl.classList.add('positive');
       deltaEl.classList.remove('negative');
@@ -2275,8 +2293,12 @@ const UI = (() => {
       if (target < bb) target = bb;
 
       const btn = document.createElement('button');
-      if (opt.allin) btn.classList.add('allin-btn');
-      btn.innerHTML = `<span class="label">${opt.label}</span><span class="value">${formatChips(target, state)}</span>`;
+      if (opt.allin) {
+        btn.classList.add('allin-btn');
+        btn.innerHTML = `<span class="label">ALL-IN</span>`;
+      } else {
+        btn.innerHTML = `<span class="label">${opt.label}</span><span class="value">${formatChips(target, state)}</span>`;
+      }
       btn.dataset.target = target;
       btn.disabled = !canRaise;
       el.quickPercentList.appendChild(btn);
@@ -2315,8 +2337,8 @@ const UI = (() => {
     const slider = document.getElementById('raise-slider-horiz');
     el.sliderHoriz = slider;
 
-    // Следим за "зажатием" кружка. Если палец/курсор был нажал не на кружок — игнорируем.
-    // pointerdown: определяем, попал ли тап по кружку. Если нет — отменяем стандартное поведение (перескок).
+    // Запоминаем значение на момент нажатия. Отправляем ставку только если значение изменилось.
+    let startValue = Number(slider.value);
     let pressedOnThumb = false;
     let sliderDragging = false;
 
@@ -2326,25 +2348,23 @@ const UI = (() => {
       const max = Number(slider.max);
       const val = Number(slider.value);
       if (max <= min) return false;
-      // ширина дорожки (без учёта кружка — приблизительно)
-      const thumbW = 16; // из CSS
+      const thumbW = 16;
       const trackW = rect.width - thumbW;
       const ratio = (val - min) / (max - min);
       const thumbCenter = rect.left + thumbW / 2 + ratio * trackW;
-      // Допуск на палец — половина кружка + запас
       return Math.abs(clientX - thumbCenter) <= thumbW * 0.9;
     }
 
     slider.onpointerdown = (e) => {
       e.stopPropagation();
-      if (slider.disabled) return;
+      if (el.heroActions.classList.contains('inactive')) return;
       pressedOnThumb = isPointOnThumb(e.clientX);
       if (!pressedOnThumb) {
-        // тап по дорожке — не даём слайдеру перескочить
         e.preventDefault();
         return;
       }
       sliderDragging = true;
+      startValue = Number(slider.value);
       slider.classList.add('pressed');
     };
 
@@ -2355,14 +2375,14 @@ const UI = (() => {
       pressedOnThumb = false;
       if (!sliderDragging) return;
       sliderDragging = false;
-      // Ставка отправляется только здесь — после отпускания
-      const target = Number(slider.value);
+      const current = Number(slider.value);
+      if (current === startValue) return; // не двигали или вернули — ничего не отправляем
       const hero = state.players[heroIndex];
       const maxTarget = hero.committedThisStreet + hero.stack;
-      if (target >= maxTarget) {
+      if (current >= maxTarget) {
         handlers.onAllIn();
       } else {
-        handlers.onRaise(target);
+        handlers.onRaise(current);
       }
     };
 
@@ -2372,15 +2392,12 @@ const UI = (() => {
       sliderDragging = false;
     };
 
-    // Подавляем click после перетаскивания, чтобы не было двойных действий
     slider.onclick = (e) => { e.preventDefault(); e.stopPropagation(); };
 
-    // Обновление цифры рядом со слайдером при перемещении кружка
     slider.oninput = () => updateSliderDisplay(state);
 
-    // Запрет на реакцию тапа по дорожке (fallback для браузеров без pointer events)
     slider.ontouchstart = (e) => {
-      if (slider.disabled) return;
+      if (el.heroActions.classList.contains('inactive')) return;
       const t = e.touches && e.touches[0];
       if (!t) return;
       if (!isPointOnThumb(t.clientX)) {
@@ -2390,6 +2407,7 @@ const UI = (() => {
 
     el.quickPercentList.querySelectorAll('button').forEach(btn => {
       btn.onclick = () => {
+        if (el.quickPercentList.classList.contains('inactive')) return;
         handlers.onRaise(Number(btn.dataset.target));
       };
     });
@@ -2815,6 +2833,7 @@ const UI = (() => {
 
   function heroAct(action) {
     if (!session.waitingForHero) return;
+    if (session.viewingIndex >= 0) return;
     session.waitingForHero = false;
     UI.setHeroActionsActive(false);
     UI.resetSliderToStart();
