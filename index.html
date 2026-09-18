@@ -381,9 +381,9 @@ button.disabled {
 }
 .seat .dealer-chip.hidden { display: none; }
 
-.seat.left .dealer-chip { right: clamp(-26px, -3.4vmin, -22px); top: 32px; left: auto; }
+.seat.left .dealer-chip { right: clamp(-26px, -3.4vmin, -22px); top: 28px; left: auto; }
 .seat.right .dealer-chip,
-.seat.top .dealer-chip { left: clamp(-26px, -3.4vmin, -22px); top: 32px; right: auto; }
+.seat.top .dealer-chip { left: clamp(-26px, -3.4vmin, -22px); top: 28px; right: auto; }
 .seat.hero .dealer-chip {
   top: clamp(-30px, -3.8vmin, -24px);
   left: 50%;
@@ -1187,8 +1187,23 @@ const Engine = (() => {
   ];
   const STARTING_STACK = 1500;
   const SEATS = 8;
-  const POSITIONS_8MAX = ['BTN','SB','BB','UTG','UTG1','LJ','HJ','CO'];
   const STREETS = ['preflop', 'flop', 'turn', 'river'];
+
+  // Наборы названий позиций для разного количества игроков.
+  // Последняя позиция — BTN, первые две после BTN — SB и BB.
+  // Для 8-max: BTN, SB, BB, UTG, UTG1, LJ, HJ, CO.
+  // При вылетах количество живых игроков уменьшается, и позиции
+  // пересчитываются корректно — без учёта пустых мест.
+  const POSITION_LABELS = {
+    8: ['BTN','SB','BB','UTG','UTG1','LJ','HJ','CO'],
+    7: ['BTN','SB','BB','UTG','LJ','HJ','CO'],
+    6: ['BTN','SB','BB','UTG','HJ','CO'],
+    5: ['BTN','SB','BB','UTG','CO'],
+    4: ['BTN','SB','BB','UTG'],
+    3: ['BTN','SB','BB'],
+    2: ['BTN','SB'],
+    1: ['BTN']
+  };
 
   function cryptoRandomInt(maxExclusive) {
     if (maxExclusive <= 0) return 0;
@@ -1308,7 +1323,8 @@ const Engine = (() => {
       holeCards: [], folded: false, allIn: false, eliminated: false,
       committedThisStreet: 0, committedTotal: 0, hasActedThisStreet: false,
       lastAction: null, position: null,
-      acted: false, blindPaid: 0, revealed: false
+      acted: false, blindPaid: 0, revealed: false,
+      inHand: false
     }));
     return {
       handNumber: 0, levelIndex: 0, handsAtLevel: 0, buttonIndex: 0,
@@ -1345,11 +1361,46 @@ const Engine = (() => {
     for (let i = 0; i < count; i++) state.board.push(state.deck[state._deckIdx++]);
   }
 
+  // Назначаем позиции по фактическому количеству живых игроков.
+  // Идём от баттона по часовой стрелке: баттон — последний в наборе,
+  // следующие за ним игроки получают SB, BB и далее.
   function assignPositions(state) {
     const n = state.players.length;
+    // Считаем только тех, кто ещё в игре.
+    let alive = 0;
+    for (const p of state.players) if (!p.eliminated) alive++;
+
+    const labels = POSITION_LABELS[alive] || POSITION_LABELS[POSITION_LABELS.length - 1] || ['BTN'];
+
+    // Собираем список индексов живых игроков в порядке от баттона по часовой.
+    const aliveOrder = [];
     for (let i = 0; i < n; i++) {
-      const offset = (i - state.buttonIndex + n) % n;
-      state.players[i].position = POSITIONS_8MAX[offset];
+      const idx = (state.buttonIndex + i) % n;
+      if (!state.players[idx].eliminated) aliveOrder.push(idx);
+    }
+
+    // Первый в aliveOrder — это баттон (buttonIndex указывает на баттон,
+    // если он жив; иначе мы всё равно начинаем с ближайшего живого после баттона).
+    // Расставляем метки в порядке: BTN, SB, BB, UTG... — начиная с первого живого
+    // после баттона по часовой.
+    //
+    // По соглашению баттон — последний в массиве labels, и по кругу: игрок
+    // сразу после баттона — SB, следующий — BB, и далее.
+    //
+    // Значит, если aliveOrder[0] — баттон, то метки распределяются так:
+    //   aliveOrder[0] -> 'BTN'
+    //   aliveOrder[1] -> 'SB'
+    //   aliveOrder[2] -> 'BB'
+    //   aliveOrder[3] -> 'UTG'
+    //   ...
+    // Но набор labels у нас в виде ['BTN','SB','BB','UTG',...] с BTN первым —
+    // значит, присваиваем по порядку метки в этом наборе по индексам aliveOrder.
+    for (let i = 0; i < aliveOrder.length; i++) {
+      state.players[aliveOrder[i]].position = labels[i] || '—';
+    }
+    // Вылетевшим очищаем позицию, чтобы не путать.
+    for (const p of state.players) {
+      if (p.eliminated) p.position = null;
     }
   }
 
@@ -1369,8 +1420,14 @@ const Engine = (() => {
 
   function postBlinds(state) {
     const n = state.players.length;
-    const sbIndex = (state.buttonIndex + 1) % n;
-    const bbIndex = (state.buttonIndex + 2) % n;
+    // Находим ближайшего живого игрока после баттона для SB и следующего для BB.
+    let sbIndex = (state.buttonIndex + 1) % n;
+    let guard = 0;
+    while (state.players[sbIndex].eliminated && guard < n) { sbIndex = (sbIndex + 1) % n; guard++; }
+    let bbIndex = (sbIndex + 1) % n;
+    guard = 0;
+    while (state.players[bbIndex].eliminated && guard < n) { bbIndex = (bbIndex + 1) % n; guard++; }
+
     const { sb, bb, ante } = state.blinds;
 
     if (ante > 0) {
@@ -1508,7 +1565,6 @@ const Engine = (() => {
   function resetStreetState(state) {
     for (const p of state.players) {
       p.committedThisStreet = 0; p.hasActedThisStreet = false;
-      // Сохраняем fold и allin до конца раздачи — эти бейджи должны быть видны и на вскрытии.
       if (p.lastAction !== 'fold' && p.lastAction !== 'allin') p.lastAction = null;
     }
     state.currentBet = 0; state.minRaise = state.blinds.bb; state.lastAggressorIndex = null;
@@ -1621,6 +1677,7 @@ const Engine = (() => {
       p.committedThisStreet = 0; p.committedTotal = 0;
       p.hasActedThisStreet = false; p.lastAction = null; p.holeCards = [];
       p.acted = false; p.blindPaid = 0; p.revealed = false;
+      p.inHand = !p.eliminated;
     }
 
     const n = state.players.length;
@@ -1669,7 +1726,7 @@ const Engine = (() => {
 
   return {
     SUITS, RANKS, RANK_VALUE, HAND_CATEGORIES,
-    BLIND_LEVELS, STARTING_STACK, SEATS, POSITIONS_8MAX, STREETS,
+    BLIND_LEVELS, STARTING_STACK, SEATS, STREETS, POSITION_LABELS,
     cryptoRandomInt, createDeck, shuffle,
     evaluateHand, evaluate5, compareScores,
     buildSidePots, getBlindLevel, createInitialState,
@@ -2072,13 +2129,20 @@ const UI = (() => {
 
   function renderTable(state) {
     el.seats.innerHTML = '';
-    for (const p of state.players) el.seats.appendChild(createSeatElement(p, state));
+    for (const p of state.players) {
+      const seat = createSeatElement(p, state);
+      if (seat) el.seats.appendChild(seat);
+    }
     updateStacks(state);
     updatePot(state);
     updateLevel(state);
   }
 
   function createSeatElement(player, state) {
+    // Если игрок вылетел ДО начала текущей раздачи (не участвует) — место не рисуем.
+    const wasEliminatedBeforeHand = player.eliminated && !player.inHand;
+    if (wasEliminatedBeforeHand) return null;
+
     const pos = SEAT_POSITIONS[player.seatIndex] || { x: 50, y: 50, side: 'middle' };
     const seat = document.createElement('div');
     seat.className = 'seat';
@@ -2100,15 +2164,6 @@ const UI = (() => {
     }
     if (pos.side) seat.classList.add(pos.side);
     if (player.isHero) seat.classList.add('hero');
-
-    // Ключевое правило: если игрок вылетел ДО начала текущей раздачи
-    // (был eliminated уже на момент старта раздачи) — место полностью
-    // скрыто и не рисуется. Если игрок вылетел ВО ВРЕМЯ раздачи —
-    // место видимо, чтобы показать, как он вылетел.
-    const wasEliminatedBeforeHand = player.eliminated && !player.inHand;
-    if (wasEliminatedBeforeHand) {
-      seat.classList.add('eliminated');
-    }
 
     if (player.isHero || pos.side === 'top') {
       seat.innerHTML = `
@@ -2149,15 +2204,19 @@ const UI = (() => {
   function updateSeats(state, revealAll) {
     for (const p of state.players) {
       const seat = document.getElementById(`seat-${p.id}`);
-      if (!seat) continue;
-
-      // Место скрыто только если игрок вылетел ДО этой раздачи (не участвовал в ней).
       const wasEliminatedBeforeHand = p.eliminated && !p.inHand;
+
+      // Если игрок вылетел ДО этой раздачи — места нет вообще.
       if (wasEliminatedBeforeHand) {
-        seat.classList.add('eliminated');
+        if (seat && seat.parentNode) seat.parentNode.removeChild(seat);
         continue;
-      } else {
-        seat.classList.remove('eliminated');
+      }
+
+      // Если место отсутствует, а игрок должен быть виден — создаём.
+      if (!seat) {
+        const newSeat = createSeatElement(p, state);
+        if (newSeat) el.seats.appendChild(newSeat);
+        continue;
       }
 
       seat.querySelector('[data-role="pos"]').textContent = p.position || '—';
@@ -2303,7 +2362,7 @@ const UI = (() => {
   function updateActiveHighlight(state) {
     for (const p of state.players) {
       const seat = document.getElementById(`seat-${p.id}`);
-      if (!seat || p.eliminated) continue;
+      if (!seat) continue;
       const isActing = state.actingIndex === p.seatIndex && !state.handOver && !p.folded;
       seat.classList.toggle('active', isActing);
     }
@@ -3006,11 +3065,8 @@ const UI = (() => {
   function startHand() {
     if (!session.active) return;
 
-    // Обновляем флаг "вылетел ранее" у всех мест. inHand = true будет
-    // выставлено позже движком для тех, кто участвует в этой раздаче.
     for (const p of session.state.players) {
       if (!p.eliminated && p.stack <= 0) p.eliminated = true;
-      p.inHand = !p.eliminated; // участвует в этой раздаче, если ещё не вылетел
     }
 
     const hero = session.state.players[session.heroIndex];
@@ -3282,8 +3338,6 @@ const UI = (() => {
         folded: p.folded, eliminated: p.eliminated, revealed: p.revealed,
         committedThisStreet: 0, acted: p.acted, lastAction: p.lastAction,
         committedTotal: p.committedTotal, blindPaid: p.blindPaid,
-        // inHand фиксируем на момент снимка: если игрок не участвовал в этой
-        // раздаче — его место в истории не должно отрисовываться.
         inHand: p.inHand
       })),
       showdownResults: state.showdownResults
@@ -3315,6 +3369,15 @@ const UI = (() => {
     const snap = session.history[session.viewingIndex];
     if (!snap) return;
     UI.setHeroActionsActive(false);
+    // Очищаем стол полностью и перерисовываем только тех, кто участвовал в этой раздаче.
+    el.seats.innerHTML = '';
+    for (const p of snap.players) {
+      const seat = UI.createSeatElement ? UI.createSeatElement(p, snap) : null;
+      // createSeatElement не экспортирован напрямую — вернём через перерисовку
+    }
+    // Проще: используем renderTable-like логику через updateBoard/updateSeats.
+    // Отрисовка производится ниже — сначала создаём только нужные места.
+    UI.renderTable(snap);
     UI.updateBoard(snap);
     UI.updateSeats(snap, true);
     UI.updatePot(snap);
