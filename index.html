@@ -68,22 +68,26 @@ body {
 button { cursor: pointer; }
 button:disabled { cursor: default; }
 button:disabled,
-button.disabled,
-#quick-percent-list.inactive button,
-#hero-actions.inactive button {
+button.disabled {
   cursor: default;
 }
-#hero-actions.inactive #hero-slider-row,
-#hero-actions.inactive #hero-buttons,
-#hero-actions.inactive #hero-slider-row *,
-#hero-actions.inactive #hero-buttons *,
+
+/* Когда блок неактивен — курсор обычный на всех его элементах, включая псевдоэлементы слайдера */
+#hero-actions.inactive,
+#hero-actions.inactive *,
 #hero-actions.inactive input,
 #hero-actions.inactive input::-webkit-slider-thumb,
 #hero-actions.inactive input::-moz-range-thumb,
-#quick-percent-list.inactive button,
-#quick-percent-list.inactive button * {
+#hero-actions.inactive input::-webkit-slider-runnable-track,
+#hero-actions.inactive input::-moz-range-track,
+#quick-percent-list.inactive,
+#quick-percent-list.inactive * {
   cursor: default !important;
 }
+
+/* Кнопки блока истории раздач — всегда палец */
+#hand-nav button { cursor: pointer !important; }
+#hand-nav button:disabled { cursor: default !important; }
 
 #app {
   position: relative;
@@ -694,6 +698,15 @@ button.disabled,
   transform: scale(0.85);
   filter: brightness(1.35);
 }
+#raise-slider-horiz:disabled {
+  cursor: default !important;
+}
+#raise-slider-horiz:disabled::-webkit-slider-thumb {
+  cursor: default !important;
+}
+#raise-slider-horiz:disabled::-moz-range-thumb {
+  cursor: default !important;
+}
 
 #raise-amount-mini {
   color: var(--gold);
@@ -744,6 +757,7 @@ button.disabled,
   opacity: .28;
   box-shadow: none;
   filter: grayscale(0.5) brightness(0.55);
+  cursor: default !important;
 }
 
 #btn-fold  { background: linear-gradient(180deg, #5a5a5a, #3a3a3a); }
@@ -808,7 +822,7 @@ button.disabled,
   transform: scale(0.96);
   filter: brightness(1.65);
 }
-#quick-percent-list button:disabled { opacity: 0.55; }
+#quick-percent-list button:disabled { opacity: 0.55; cursor: default !important; }
 #quick-percent-list button .label { color: var(--gold); font-weight: 800; }
 #quick-percent-list button.allin-btn .label { color: var(--allin); }
 #quick-percent-list button .value { color: var(--muted); font-weight: 600; font-size: clamp(9px, 1.2vmin, 11px); }
@@ -966,7 +980,7 @@ button.disabled,
           <button id="hn-settings" title="Настройки">⚙︎</button>
         </div>
         <div id="hero-slider-row">
-          <input type="range" id="raise-slider-horiz" min="0" max="100" value="0" />
+          <input type="range" id="raise-slider-horiz" min="0" max="100" value="0" disabled />
           <span id="raise-amount-mini">0</span>
         </div>
         <div id="hero-buttons">
@@ -2330,9 +2344,29 @@ const UI = (() => {
   function setHeroActionsActive(active) {
     el.heroActions.classList.toggle('inactive', !active);
     el.quickPercentList.classList.toggle('inactive', !active);
-    if (!active) {
-      const slider = document.getElementById('raise-slider-horiz');
-      if (slider) slider.classList.remove('pressed');
+
+    // Жёсткая блокировка: при неактивном блоке ставим disabled на сам слайдер и все кнопки.
+    const slider = document.getElementById('raise-slider-horiz');
+    if (slider) {
+      if (!active) {
+        slider.disabled = true;
+        slider.classList.remove('pressed');
+      } else {
+        slider.disabled = false;
+      }
+    }
+
+    if (el.btnFold)  el.btnFold.disabled  = el.btnFold.disabled  || !active;
+    if (el.btnCheck) el.btnCheck.disabled = el.btnCheck.disabled || !active;
+    if (el.btnCall)  el.btnCall.disabled  = el.btnCall.disabled  || !active;
+
+    // Кнопки процентных ставок
+    if (el.quickPercentList) {
+      el.quickPercentList.querySelectorAll('button').forEach(btn => {
+        if (!active) {
+          btn.disabled = true;
+        }
+      });
     }
   }
 
@@ -2464,7 +2498,7 @@ const UI = (() => {
     let sliderDragging = false;
 
     function isSliderDisabled() {
-      return el.heroActions.classList.contains('inactive');
+      return el.heroActions.classList.contains('inactive') || slider.disabled;
     }
 
     function isPointOnThumb(clientX) {
