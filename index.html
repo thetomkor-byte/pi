@@ -381,9 +381,9 @@ button.disabled {
 }
 .seat .dealer-chip.hidden { display: none; }
 
-.seat.left .dealer-chip { right: clamp(-26px, -3.4vmin, -22px); top: 36px; left: auto; }
+.seat.left .dealer-chip { right: clamp(-26px, -3.4vmin, -22px); top: 32px; left: auto; }
 .seat.right .dealer-chip,
-.seat.top .dealer-chip { left: clamp(-26px, -3.4vmin, -22px); top: 36px; right: auto; }
+.seat.top .dealer-chip { left: clamp(-26px, -3.4vmin, -22px); top: 32px; right: auto; }
 .seat.hero .dealer-chip {
   top: clamp(-30px, -3.8vmin, -24px);
   left: 50%;
@@ -2072,13 +2072,13 @@ const UI = (() => {
 
   function renderTable(state) {
     el.seats.innerHTML = '';
-    for (const p of state.players) el.seats.appendChild(createSeatElement(p));
+    for (const p of state.players) el.seats.appendChild(createSeatElement(p, state));
     updateStacks(state);
     updatePot(state);
     updateLevel(state);
   }
 
-  function createSeatElement(player) {
+  function createSeatElement(player, state) {
     const pos = SEAT_POSITIONS[player.seatIndex] || { x: 50, y: 50, side: 'middle' };
     const seat = document.createElement('div');
     seat.className = 'seat';
@@ -2088,23 +2088,27 @@ const UI = (() => {
     if (player.isHero) {
       seat.style.transform = 'translate(-50%, calc(-50% - 16px))';
     } else if (player.seatIndex === 1) {
-      // SB — поднято на 2 пикселя: -1px
       seat.style.transform = 'translate(-50%, calc(-50% - 1px))';
     } else if (player.seatIndex === 2) {
-      // BB — опущено на 1 пиксель: было +3px, стало +4px
       seat.style.transform = 'translate(-50%, calc(-50% + 4px))';
     } else if (player.seatIndex === 6) {
-      // HJ — опущено на 1 пиксель: было +2px, стало +3px
       seat.style.transform = 'translate(-50%, calc(-50% + 3px))';
     } else if (player.seatIndex === 7) {
-      // CO — поднято на 2 пикселя: +1px
       seat.style.transform = 'translate(-50%, calc(-50% + 1px))';
     } else {
       seat.style.transform = 'translate(-50%, calc(-50% + 2px))';
     }
     if (pos.side) seat.classList.add(pos.side);
     if (player.isHero) seat.classList.add('hero');
-    if (player.eliminated) seat.classList.add('eliminated');
+
+    // Ключевое правило: если игрок вылетел ДО начала текущей раздачи
+    // (был eliminated уже на момент старта раздачи) — место полностью
+    // скрыто и не рисуется. Если игрок вылетел ВО ВРЕМЯ раздачи —
+    // место видимо, чтобы показать, как он вылетел.
+    const wasEliminatedBeforeHand = player.eliminated && !player.inHand;
+    if (wasEliminatedBeforeHand) {
+      seat.classList.add('eliminated');
+    }
 
     if (player.isHero || pos.side === 'top') {
       seat.innerHTML = `
@@ -2147,7 +2151,9 @@ const UI = (() => {
       const seat = document.getElementById(`seat-${p.id}`);
       if (!seat) continue;
 
-      if (p.eliminated && !state.handOver) {
+      // Место скрыто только если игрок вылетел ДО этой раздачи (не участвовал в ней).
+      const wasEliminatedBeforeHand = p.eliminated && !p.inHand;
+      if (wasEliminatedBeforeHand) {
         seat.classList.add('eliminated');
         continue;
       } else {
@@ -3000,8 +3006,11 @@ const UI = (() => {
   function startHand() {
     if (!session.active) return;
 
+    // Обновляем флаг "вылетел ранее" у всех мест. inHand = true будет
+    // выставлено позже движком для тех, кто участвует в этой раздаче.
     for (const p of session.state.players) {
       if (!p.eliminated && p.stack <= 0) p.eliminated = true;
+      p.inHand = !p.eliminated; // участвует в этой раздаче, если ещё не вылетел
     }
 
     const hero = session.state.players[session.heroIndex];
@@ -3104,7 +3113,8 @@ const UI = (() => {
 
   function botTurn(bot, idx) {
     const state = session.state;
-    const delay = 500 + Engine.cryptoRandomInt(1001);
+    // Ровно два варианта: 0.5 сек или 1 сек. Случайно.
+    const delay = Engine.cryptoRandomInt(2) === 0 ? 500 : 1000;
     clearTimeout(session.botTimerId);
     session.botTimerId = setTimeout(() => {
       if (session.isPaused) return;
@@ -3271,7 +3281,10 @@ const UI = (() => {
         holeCards: p.holeCards.map(c => ({ ...c })),
         folded: p.folded, eliminated: p.eliminated, revealed: p.revealed,
         committedThisStreet: 0, acted: p.acted, lastAction: p.lastAction,
-        committedTotal: p.committedTotal, blindPaid: p.blindPaid
+        committedTotal: p.committedTotal, blindPaid: p.blindPaid,
+        // inHand фиксируем на момент снимка: если игрок не участвовал в этой
+        // раздаче — его место в истории не должно отрисовываться.
+        inHand: p.inHand
       })),
       showdownResults: state.showdownResults
     };
@@ -3381,10 +3394,3 @@ const UI = (() => {
 </script>
 </body>
 </html>
-```
-
-Готово. Что изменилось:
-
-В том месте, где после завершения улицы сбрасываются состояния игроков, теперь сохраняется не только последний бейдж «fold», но и «allin». То есть если игрок пошёл олл-ин — его бейдж ALL-IN остаётся видимым до конца раздачи, включая вскрытие. Раньше он обнулялся вместе с остальными действиями улицы, поэтому на вскрытии пропадал.
-
-Это работает для всех игроков (включая героя), на всех улицах, и в истории раздач (потому что бейдж попадает в снимок раздачи, а он используется при просмотре истории).
