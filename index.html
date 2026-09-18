@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -1508,7 +1509,8 @@ const Engine = (() => {
   function resetStreetState(state) {
     for (const p of state.players) {
       p.committedThisStreet = 0; p.hasActedThisStreet = false;
-      if (p.lastAction !== 'fold') p.lastAction = null;
+      // Сохраняем fold и allin до конца раздачи — эти бейджи должны быть видны и на вскрытии.
+      if (p.lastAction !== 'fold' && p.lastAction !== 'allin') p.lastAction = null;
     }
     state.currentBet = 0; state.minRaise = state.blinds.bb; state.lastAggressorIndex = null;
   }
@@ -1698,13 +1700,13 @@ const Bots = (() => {
     Loose: { name: 'Loose', aggression: 0.30, looseness: 0.75, bluff: 0.15, callThreshold: 0.35 },
     Phone: { name: 'Phone', aggression: 0.10, looseness: 0.85, bluff: 0.02, callThreshold: 0.25 },
     Nit:   { name: 'Nit',   aggression: 0.15, looseness: 0.15, bluff: 0.03, callThreshold: 0.70 },
-    MANIAC:{ name: 'MANIAC',aggression: 0.95, looseness: 0.95, bluff: 0.65, callThreshold: 0.25 }
+    Maniac:{ name: 'Maniac',aggression: 0.95, looseness: 0.95, bluff: 0.65, callThreshold: 0.25 }
   };
 
   const STRATEGY_WEIGHTS = [
     { key: 'TAG', weight: 31 }, { key: 'LAG', weight: 26 },
     { key: 'Tight', weight: 12 }, { key: 'Loose', weight: 12 },
-    { key: 'Phone', weight: 6 }, { key: 'Nit', weight: 8 }, { key: 'MANIAC', weight: 5 }
+    { key: 'Phone', weight: 6 }, { key: 'Nit', weight: 8 }, { key: 'Maniac', weight: 5 }
   ];
 
   const CHARTS = {
@@ -1800,12 +1802,12 @@ const Bots = (() => {
   function assignStrategies(count = 7) {
     const result = [];
     let maniacUsed = false, nitUsed = false;
-    const pool = STRATEGY_WEIGHTS.filter(w => w.key !== 'MANIAC' && w.key !== 'Nit');
+    const pool = STRATEGY_WEIGHTS.filter(w => w.key !== 'Maniac' && w.key !== 'Nit');
     for (let i = 0; i < count; i++) {
       let key;
       const roll = Engine.cryptoRandomInt(100);
       if (!nitUsed && roll < 8) { key = 'Nit'; nitUsed = true; }
-      else if (!maniacUsed && roll >= 95) { key = 'MANIAC'; maniacUsed = true; }
+      else if (!maniacUsed && roll >= 95) { key = 'Maniac'; maniacUsed = true; }
       else { key = pickWeighted(pool); }
       result.push(key);
     }
@@ -3384,9 +3386,6 @@ const UI = (() => {
 
 Готово. Что изменилось:
 
-· Место 2 (BB, слева-выше от героя) — опущено на 1 пиксель вниз: было +3px, стало +4px.
-· Место 6 (HJ, справа-выше от героя) — опущено на 1 пиксель вниз: было стандартное +2px, стало +3px.
+В том месте, где после завершения улицы сбрасываются состояния игроков, теперь сохраняется не только последний бейдж «fold», но и «allin». То есть если игрок пошёл олл-ин — его бейдж ALL-IN остаётся видимым до конца раздачи, включая вскрытие. Раньше он обнулялся вместе с остальными действиями улицы, поэтому на вскрытии пропадал.
 
-Всё, что привязано к этим местам (карты, стек, имя позиции, бейдж дилера, бейджи действий, WIN/LOSS, фишки ставки, delta-текст), опустилось вместе с ними.
-
-Больше ничего не трогал: остальные места на своих местах, вся логика, защиты, стратегии, отображение валюты — как было зафиксировано.
+Это работает для всех игроков (включая героя), на всех улицах, и в истории раздач (потому что бейдж попадает в снимок раздачи, а он используется при просмотре истории).
