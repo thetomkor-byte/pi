@@ -111,44 +111,38 @@ button.disabled {
     radial-gradient(ellipse at 50% 50%, #12100e 0%, #0a0a0a 70%, #050505 100%);
 }
 
+/* Зона стола занимает всё окно минус системные зоны телефона сверху и снизу.
+   На десктопе и в браузере, где системные зоны нулевые, стол просто
+   занимает всё окно — как раньше. В установленном приложении стол
+   автоматически сжимается между «островком» и полоской «домой».
+   Везде добавляется небольшой запас 8 пикселей, чтобы стол не
+   прилипал к системным зонам. */
 #table-scene {
   position: absolute;
   top: 0; left: 0; right: 0;
-  bottom: var(--safari-pad);
+  bottom: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   padding-top: calc(var(--top-safe) + 8px);
   padding-bottom: calc(var(--bottom-safe) + 8px);
+  padding-left: 0;
+  padding-right: 0;
 }
 
 #poker-table {
   position: relative;
   aspect-ratio: 9 / 16;
-  height: calc(100% - clamp(8px, 1.6vmin, 20px));
+  height: 100%;
   width: auto;
   max-width: 94vw;
+  max-height: 100%;
   background: linear-gradient(180deg, #6b4622 0%, #3d2512 40%, #2a1a0c 100%);
   border: none;
   border-radius: clamp(28px, 4vmin, 46px);
   box-shadow:
     0 0 60px rgba(0,0,0,.95);
   overflow: hidden;
-}
-
-/* ============================================================
-   РЕЖИМ УСТАНОВЛЕННОГО ВЕБ-ПРИЛОЖЕНИЯ (standalone).
-   Только здесь высота стола увеличивается на 20 пикселей.
-   Ширина НЕ меняется — она фиксируется тем же значением,
-   которое получалось из пропорции 9/16 при исходной высоте.
-   Верх стола на месте, низ опускается на 20 пикселей.
-   В браузере и на десктопе этот блок не применяется.
-   ============================================================ */
-html.standalone #poker-table {
-  aspect-ratio: auto;
-  height: calc(100% - clamp(8px, 1.6vmin, 20px) + 20px);
-  width: calc((100% - clamp(8px, 1.6vmin, 20px)) * 9 / 16);
-  max-width: 94vw;
 }
 
 /* Сукно — внутренний слой с закруглёнными углами, отступ = толщина деревянной окантовки */
@@ -1092,28 +1086,6 @@ html.standalone #poker-table {
   </div>
 
 </div>
-
-<script>
-/* Определение режима установленного веб-приложения.
-   На iOS Safari в standalone-режиме navigator.standalone = true,
-   плюс поддерживаем общий стандарт display-mode: standalone.
-   Добавляем класс на <html>, чтобы только в этом режиме
-   включилось растяжение стола вниз. */
-(function() {
-  try {
-    var isStandalone = false;
-    if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
-      isStandalone = true;
-    }
-    if (typeof navigator !== 'undefined' && navigator.standalone === true) {
-      isStandalone = true;
-    }
-    if (isStandalone) {
-      document.documentElement.classList.add('standalone');
-    }
-  } catch (e) {}
-})();
-</script>
 
 <script>
 /* Защита от индексации и плагиата — предупреждение в консоль */
