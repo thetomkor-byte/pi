@@ -516,6 +516,11 @@ button.disabled,
 #hero-actions.inactive #hero-buttons * {
   pointer-events: none !important;
 }
+#hero-actions.inactive #raise-slider-horiz,
+#hero-actions.inactive #raise-slider-horiz::-webkit-slider-thumb,
+#hero-actions.inactive #raise-slider-horiz::-moz-range-thumb {
+  pointer-events: none !important;
+}
 
 #hero-actions.inactive #raise-slider-horiz {
   filter: brightness(0.7);
@@ -1934,7 +1939,6 @@ const UI = (() => {
     if (player.eliminated) seat.classList.add('eliminated');
 
     if (player.isHero || pos.side === 'top') {
-      // Hero и UTG1 — дельта справа от стека (как было)
       seat.innerHTML = `
         <div class="strat-badge hidden" data-role="strat"></div>
         <div class="dealer-chip hidden" data-role="btn">D</div>
@@ -1951,7 +1955,6 @@ const UI = (() => {
         <div class="bet-chips hidden" data-role="bet"></div>
       `;
     } else {
-      // Боковые места (left / right) — дельта в строке позиции
       seat.innerHTML = `
         <div class="strat-badge hidden" data-role="strat"></div>
         <div class="dealer-chip hidden" data-role="btn">D</div>
@@ -2035,9 +2038,6 @@ const UI = (() => {
     const payout = payouts[p.id] || 0;
     const committed = p.committedTotal || 0;
 
-    // WIN — если получил выплату из банка (значит забрал чужие фишки).
-    // LOSS — если вложил и не получил ничего.
-    // Иначе — не показываем.
     if (payout > 0) {
       badge.textContent = 'WIN';
       badge.classList.remove('hidden');
@@ -2212,6 +2212,10 @@ const UI = (() => {
   function setHeroActionsActive(active) {
     el.heroActions.classList.toggle('inactive', !active);
     el.quickPercentList.classList.toggle('inactive', !active);
+    if (!active) {
+      const slider = document.getElementById('raise-slider-horiz');
+      if (slider) slider.classList.remove('pressed');
+    }
   }
 
   function resetSliderToStart() {
@@ -2330,17 +2334,20 @@ const UI = (() => {
   }
 
   function bindActionHandlers(state, heroIndex, toCall, handlers) {
-    rebind(el.btnFold,  () => handlers.onFold());
-    rebind(el.btnCheck, () => handlers.onCheck());
-    rebind(el.btnCall,  () => handlers.onCall());
+    rebind(el.btnFold,  () => { if (!el.heroActions.classList.contains('inactive')) handlers.onFold(); });
+    rebind(el.btnCheck, () => { if (!el.heroActions.classList.contains('inactive')) handlers.onCheck(); });
+    rebind(el.btnCall,  () => { if (!el.heroActions.classList.contains('inactive')) handlers.onCall(); });
 
     const slider = document.getElementById('raise-slider-horiz');
     el.sliderHoriz = slider;
 
-    // Запоминаем значение на момент нажатия. Отправляем ставку только если значение изменилось.
     let startValue = Number(slider.value);
     let pressedOnThumb = false;
     let sliderDragging = false;
+
+    function isSliderDisabled() {
+      return el.heroActions.classList.contains('inactive');
+    }
 
     function isPointOnThumb(clientX) {
       const rect = slider.getBoundingClientRect();
@@ -2357,7 +2364,7 @@ const UI = (() => {
 
     slider.onpointerdown = (e) => {
       e.stopPropagation();
-      if (el.heroActions.classList.contains('inactive')) return;
+      if (isSliderDisabled()) { e.preventDefault(); return; }
       pressedOnThumb = isPointOnThumb(e.clientX);
       if (!pressedOnThumb) {
         e.preventDefault();
@@ -2375,8 +2382,9 @@ const UI = (() => {
       pressedOnThumb = false;
       if (!sliderDragging) return;
       sliderDragging = false;
+      if (isSliderDisabled()) return;
       const current = Number(slider.value);
-      if (current === startValue) return; // не двигали или вернули — ничего не отправляем
+      if (current === startValue) return;
       const hero = state.players[heroIndex];
       const maxTarget = hero.committedThisStreet + hero.stack;
       if (current >= maxTarget) {
@@ -2394,10 +2402,13 @@ const UI = (() => {
 
     slider.onclick = (e) => { e.preventDefault(); e.stopPropagation(); };
 
-    slider.oninput = () => updateSliderDisplay(state);
+    slider.oninput = () => {
+      if (isSliderDisabled()) return;
+      updateSliderDisplay(state);
+    };
 
     slider.ontouchstart = (e) => {
-      if (el.heroActions.classList.contains('inactive')) return;
+      if (isSliderDisabled()) { e.preventDefault(); return; }
       const t = e.touches && e.touches[0];
       if (!t) return;
       if (!isPointOnThumb(t.clientX)) {
@@ -2408,6 +2419,7 @@ const UI = (() => {
     el.quickPercentList.querySelectorAll('button').forEach(btn => {
       btn.onclick = () => {
         if (el.quickPercentList.classList.contains('inactive')) return;
+        if (el.heroActions.classList.contains('inactive')) return;
         handlers.onRaise(Number(btn.dataset.target));
       };
     });
@@ -2429,9 +2441,18 @@ const UI = (() => {
     el.hnCur.textContent = current;
     el.hnTot.textContent = total;
     const hasHistory = total > 0;
-    el.hnPrev.disabled = !(hasHistory && current > 1);
-    el.hnNext.disabled = !(hasHistory && current < total);
-    el.hnResume.disabled = !isViewingPast;
+
+    if (!isViewingPast) {
+      // Не в режиме просмотра. Если есть хоть одна раздача в истории —
+      // «назад» активна (клик войдёт в просмотр последней раздачи).
+      el.hnPrev.disabled = !hasHistory;
+      el.hnNext.disabled = true;
+      el.hnResume.disabled = true;
+    } else {
+      el.hnPrev.disabled = !(hasHistory && current > 1);
+      el.hnNext.disabled = !(hasHistory && current < total);
+      el.hnResume.disabled = false;
+    }
   }
 
   function applySettingsToUI() {
@@ -2798,6 +2819,7 @@ const UI = (() => {
 
   function processTurn() {
     if (session.isPaused) return;
+    if (session.viewingIndex >= 0) return;
     const state = session.state;
     if (!state) return;
     if (state.handOver) { finishHand(); return; }
@@ -2832,8 +2854,8 @@ const UI = (() => {
   }
 
   function heroAct(action) {
-    if (!session.waitingForHero) return;
     if (session.viewingIndex >= 0) return;
+    if (!session.waitingForHero) return;
     session.waitingForHero = false;
     UI.setHeroActionsActive(false);
     UI.resetSliderToStart();
@@ -2864,6 +2886,7 @@ const UI = (() => {
     clearTimeout(session.botTimerId);
     session.botTimerId = setTimeout(() => {
       if (session.isPaused) return;
+      if (session.viewingIndex >= 0) return;
       if (state.handOver || !session.active) return;
       const ctx = buildBotContext(bot, idx);
       const decision = Bots.decide(ctx);
@@ -2920,6 +2943,7 @@ const UI = (() => {
 
   function advanceOrFinish() {
     if (session.isPaused) return;
+    if (session.viewingIndex >= 0) return;
     const state = session.state;
     if (state.handOver) { finishHand(); return; }
 
@@ -3056,12 +3080,12 @@ const UI = (() => {
   function renderHistorySnapshot() {
     const snap = session.history[session.viewingIndex];
     if (!snap) return;
+    UI.setHeroActionsActive(false);
     UI.updateBoard(snap);
     UI.updateSeats(snap, true);
     UI.updatePot(snap);
     UI.updateLevel(snap);
     UI.updateActiveHighlight({ actingIndex: -1, handOver: true, players: snap.players });
-    UI.setHeroActionsActive(false);
     highlightWinners(snap);
     UI.updateHistoryInfo(session.viewingIndex + 1, session.history.length, true);
   }
