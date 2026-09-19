@@ -124,26 +124,16 @@ button.disabled {
   height: calc(100% - clamp(8px, 1.6vmin, 20px));
   width: auto;
   max-width: 94vw;
-  background: linear-gradient(180deg, #6b4622 0%, #3d2512 40%, #2a1a0c 100%);
-  border: none;
-  border-radius: clamp(28px, 4vmin, 46px);
-  box-shadow:
-    0 0 60px rgba(0,0,0,.95);
-  overflow: hidden;
-}
-
-/* Сукно — внутренний слой с закруглёнными углами, отступ = толщина деревянной окантовки */
-#poker-table::after {
-  content: "";
-  position: absolute;
-  inset: clamp(8px, 1.4vmin, 14px);
   background:
     radial-gradient(ellipse at 50% 45%, #322c26 0%, #1e1a16 55%, #0f0d0b 100%);
-  border-radius: clamp(20px, 3.2vmin, 38px);
+  border: clamp(8px, 1.4vmin, 14px) solid;
+  border-image: linear-gradient(180deg, #6b4622 0%, #3d2512 40%, #2a1a0c 100%) 1;
+  border-radius: clamp(28px, 4vmin, 46px);
   box-shadow:
+    0 0 0 3px #1a0f05,
+    0 0 60px rgba(0,0,0,.95),
     inset 0 0 140px rgba(0,0,0,.7);
-  pointer-events: none;
-  z-index: 1;
+  overflow: hidden;
 }
 
 #poker-table::before {
@@ -289,7 +279,7 @@ button.disabled {
 .style-2color .suit-hearts   { color: #d63535; }
 .style-2color .suit-diamonds { color: #d63535; }
 
-#seats { position: absolute; inset: 0; z-index: 3; }
+#seats { position: absolute; inset: 0; }
 
 .seat {
   position: absolute;
