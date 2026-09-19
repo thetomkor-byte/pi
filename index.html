@@ -136,16 +136,6 @@ button.disabled {
   overflow: hidden;
 }
 
-#poker-table::before {
-  content: "";
-  position: absolute;
-  inset: var(--dash-inset);
-  border: 1px dashed rgba(255,255,255,.09);
-  border-radius: clamp(20px, 3vmin, 30px);
-  pointer-events: none;
-  z-index: 2;
-}
-
 #board-area {
   position: absolute;
   top: 46%; left: 50%;
@@ -2270,7 +2260,6 @@ const UI = (() => {
 
   /**
    * Сумма выигрыша/проигрыша — только для тех, кто вошёл в раздачу.
-   * Если игрок не делал ни одного добровольного действия, суммы нет.
    */
   function renderDelta(p, seat, state) {
     const deltaEl = seat.querySelector('[data-role="delta"]');
@@ -2307,12 +2296,6 @@ const UI = (() => {
     }
   }
 
-  /**
-   * Показ карт на вскрытии.
-   * - Герой видит свои карты всегда.
-   * - Чужие карты показываются только если игрок вошёл в раздачу (acted).
-   * - Опция "показывать карты всех" перебивает это и открывает карты всем.
-   */
   function renderSeatCards(player, state, revealAll) {
     const seat = document.getElementById(`seat-${player.id}`);
     if (!seat) return;
@@ -2432,12 +2415,6 @@ const UI = (() => {
     document.body.classList.add('style-' + settings.cardStyle);
   }
 
-  /**
-   * Форматирует сумму в фишках в строку с учётом выбранного режима.
-   * Размер большого блайнда берётся из САМОГО state — то есть из той
-   * раздачи, к которой относится сумма. Это гарантирует, что при росте
-   * блайндов уже показанные суммы за прошлые раздачи не «прыгают».
-   */
   function formatChips(amount, state) {
     if (settings.stackDisplay === 'bb') {
       let bb = 20;
@@ -3325,13 +3302,6 @@ const UI = (() => {
     }
   }
 
-  /**
-   * Снимок состояния для истории.
-   * Сохраняем blinds этой раздачи (bb), чтобы суммы в BB при просмотре
-   * истории считались по тем же блайндам, что и во время раздачи.
-   * Флаг acted сохраняем, чтобы при просмотре истории работала та же
-   * логика показа карт и бейджей, что и в живой раздаче.
-   */
   function snapshotState(state) {
     return {
       handNumber: state.handNumber,
