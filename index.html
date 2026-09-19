@@ -36,15 +36,15 @@
   --pct-block-w: clamp(88px, 13vmin, 110px);
   --dash-inset: clamp(10px, 2vmin, 18px);
   --small-text: clamp(11px, 1.4vmin, 13px);
+  --wood-border: clamp(8px, 1.4vmin, 14px);
+  --table-radius: clamp(28px, 4vmin, 46px);
+  --wood-outset: 2px;
 
   --nav-btn: clamp(32px, 4.4vmin, 38px);
   --nav-icon-size: clamp(16px, 2.4vmin, 19px);
   --nav-gap: clamp(1px, 0.5vmin, 4px);
   --nav-counter-w: clamp(44px, 6.2vmin, 54px);
   --nav-counter-size: clamp(12px, 1.6vmin, 14px);
-
-  --table-border: clamp(8px, 1.4vmin, 14px);
-  --table-radius: clamp(28px, 4vmin, 46px);
 }
 
 html, body {
@@ -121,6 +121,8 @@ button.disabled {
   justify-content: center;
 }
 
+/* Деревянная рамка — единственный видимый слой (::after).
+   У самого стола границы нет. Рамка сдвинута на 2 пикселя наружу по всему периметру. */
 #poker-table {
   position: relative;
   aspect-ratio: 9 / 16;
@@ -129,33 +131,36 @@ button.disabled {
   max-width: 94vw;
   background:
     radial-gradient(ellipse at 50% 45%, #322c26 0%, #1e1a16 55%, #0f0d0b 100%);
-  border: var(--table-border) solid transparent;
   border-radius: var(--table-radius);
   box-shadow:
     0 0 0 3px #1a0f05,
     0 0 60px rgba(0,0,0,.95),
     inset 0 0 140px rgba(0,0,0,.7);
-  overflow: hidden;
 }
 
-/* Деревянная рамка-градиент со скруглёнными углами.
-   Рисуется отдельным слоем поверх края стола, чтобы края были закруглены. */
+/* Верхний слой — деревянная рамка с градиентом (сверху светлое, снизу тёмное).
+   Сдвинута на 2 пикселя наружу по всему периметру, ширина рамки не меняется. */
 #poker-table::after {
   content: "";
   position: absolute;
-  inset: calc(-1 * var(--table-border));
+  inset: calc(-1 * var(--wood-outset));
   border-radius: var(--table-radius);
-  padding: var(--table-border);
-  background: linear-gradient(180deg, #6b4622 0%, #3d2512 40%, #2a1a0c 100%);
+  background: linear-gradient(180deg, #6b4622 0%, #3d2512 60%, #2a1a0c 100%);
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
-          mask-composite: exclude;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  padding: var(--wood-border);
+  box-sizing: border-box;
   pointer-events: none;
-  z-index: 1;
+  z-index: 100;
 }
 
+/* Внутренняя пунктирная окантовка сукна — не трогаю */
 #poker-table::before {
   content: "";
   position: absolute;
