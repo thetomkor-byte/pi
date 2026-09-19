@@ -69,6 +69,7 @@ html {
   -moz-text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  background: var(--bg);
 }
 
 body {
@@ -77,6 +78,7 @@ body {
   text-size-adjust: 100%;
   touch-action: pan-x pan-y;
   -ms-touch-action: pan-x pan-y;
+  background: var(--bg);
 }
 
 button { cursor: pointer; }
@@ -110,9 +112,6 @@ button.disabled {
   background: var(--bg);
 }
 
-/* Сцена стола. Сверху резервируем место под системный «остров» — ровно
-   столько, сколько занимает safe-area-inset-top. Снизу не резервируем
-   ничего: чёрный фон приложения идёт до самого низа экрана. */
 #table-scene {
   position: absolute;
   top: var(--safe-top);
