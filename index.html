@@ -60,12 +60,16 @@ html, body {
   -webkit-user-select: none;
   -webkit-touch-callout: none;
   overscroll-behavior: none;
-  touch-action: manipulation;
+  touch-action: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 html {
-  touch-action: pan-x pan-y;
-  -ms-touch-action: pan-x pan-y;
+  -ms-touch-action: none;
   -webkit-text-size-adjust: 100%;
   -moz-text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
@@ -77,8 +81,7 @@ body {
   -webkit-text-size-adjust: 100%;
   -moz-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  touch-action: pan-x pan-y;
-  -ms-touch-action: pan-x pan-y;
+  -ms-touch-action: none;
   background: var(--bg-bottom);
 }
 
@@ -105,12 +108,17 @@ button.disabled {
 #hand-nav button:disabled { cursor: default !important; }
 
 #app {
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   width: 100vw;
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
   background: var(--bg-bottom);
+  touch-action: none;
 }
 
 #table-scene {
@@ -122,6 +130,7 @@ button.disabled {
   align-items: center;
   justify-content: center;
   background: var(--bg);
+  touch-action: none;
 }
 
 #poker-table-wood {
@@ -1144,7 +1153,7 @@ button.disabled {
   } catch (e) {}
 })();
 
-/* Жёсткая блокировка зума */
+/* Тотальная блокировка зума и движения страницы */
 (function() {
   try {
     document.addEventListener('wheel', (e) => {
