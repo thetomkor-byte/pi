@@ -36,8 +36,6 @@
   --pct-block-w: clamp(88px, 13vmin, 110px);
   --dash-inset: clamp(10px, 2vmin, 18px);
   --small-text: clamp(11px, 1.4vmin, 13px);
-  --wood-border: clamp(8px, 1.4vmin, 14px);
-  --table-radius: clamp(28px, 4vmin, 46px);
 
   --nav-btn: clamp(32px, 4.4vmin, 38px);
   --nav-icon-size: clamp(16px, 2.4vmin, 19px);
@@ -128,34 +126,14 @@ button.disabled {
   max-width: 94vw;
   background:
     radial-gradient(ellipse at 50% 45%, #322c26 0%, #1e1a16 55%, #0f0d0b 100%);
-  border: var(--wood-border) solid #4a2f18;
-  border-radius: var(--table-radius);
+  border: clamp(8px, 1.4vmin, 14px) solid;
+  border-image: linear-gradient(180deg, #6b4622 0%, #3d2512 40%, #2a1a0c 100%) 1;
+  border-radius: clamp(28px, 4vmin, 46px);
   box-shadow:
     0 0 0 3px #1a0f05,
     0 0 60px rgba(0,0,0,.95),
     inset 0 0 140px rgba(0,0,0,.7);
   overflow: hidden;
-}
-
-/* Деревянный градиент (сверху светлое, снизу тёмное) — узкая полоса ровно по толщине рамки */
-#poker-table::after {
-  content: "";
-  position: absolute;
-  inset: calc(-1 * var(--wood-border));
-  border-radius: var(--table-radius);
-  background: linear-gradient(180deg, #6b4622 0%, #3d2512 60%, #2a1a0c 100%);
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  padding: var(--wood-border);
-  box-sizing: border-box;
-  z-index: 4;
-  pointer-events: none;
 }
 
 #poker-table::before {
