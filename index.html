@@ -869,6 +869,7 @@ button.disabled {
   letter-spacing: 1px;
   margin-bottom: 12px;
   font-weight: 800;
+  text-align: center;
 }
 
 .setting {
@@ -897,6 +898,32 @@ button.disabled {
   height: 22px;
   accent-color: var(--gold);
   cursor: pointer;
+}
+
+#btn-restart-panel {
+  display: block;
+  width: 100%;
+  margin-top: 20px;
+  padding: 14px 16px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ffcb2b, #e0a800);
+  color: #1a1a1a;
+  font-weight: 900;
+  font-size: 15px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-align: center;
+  box-shadow: 0 3px 0 #8a6508, inset 0 1px 0 rgba(255,255,255,.35);
+  touch-action: manipulation;
+  min-height: 48px;
+  transition: transform .08s ease, filter .08s ease;
+  font-family: inherit;
+}
+#btn-restart-panel:active:not(:disabled) {
+  transform: scale(0.97);
+  filter: brightness(1.1);
+  box-shadow: 0 1px 0 #8a6508, inset 0 1px 0 rgba(255,255,255,.35);
 }
 
 #tap-close {
@@ -987,8 +1014,8 @@ button.disabled {
               <span class="nav-counter"><span id="hn-cur">0</span><span class="total"> / </span><span id="hn-tot">0</span></span>
               <button id="hn-next" title="Вперёд" disabled>▶︎</button>
             </div>
-            <button id="hn-resume" title="Продолжить" disabled>▶︎▶︎</button>
             <button id="hn-reset" title="Заново">⟲︎</button>
+            <button id="hn-resume" title="Продолжить" disabled>▶︎▶︎</button>
             <button id="hn-settings" title="Настройки">⚙︎</button>
           </div>
           <div id="hero-slider-row">
@@ -1055,6 +1082,7 @@ button.disabled {
       <span>На вскрытии показывать карты всех</span>
       <input type="checkbox" id="set-show-all-showdown" />
     </label>
+    <button id="btn-restart-panel" type="button">Начать заново</button>
   </div>
 
   <div id="start-overlay">
@@ -2077,6 +2105,8 @@ const UI = (() => {
     el.setShowAllHands   = document.getElementById('set-show-all-hands');
     el.setShowAllShowdown = document.getElementById('set-show-all-showdown');
 
+    el.btnRestartPanel   = document.getElementById('btn-restart-panel');
+
     el.startOverlay   = document.getElementById('start-overlay');
     el.btnStart       = document.getElementById('btn-start');
 
@@ -2796,6 +2826,7 @@ const UI = (() => {
     el.hnResume       = document.getElementById('hn-resume');
     el.hnReset        = document.getElementById('hn-reset');
     el.hnSettings     = document.getElementById('hn-settings');
+    el.btnRestartPanel = document.getElementById('btn-restart-panel');
     el.app            = document.getElementById('app');
     el.seats          = document.getElementById('seats');
   }
@@ -2889,6 +2920,11 @@ const UI = (() => {
     el.hnResume.addEventListener('click', () => resumeGame());
     el.hnReset.addEventListener('click', () => restartSession());
     el.hnSettings.addEventListener('click', () => UI.openBottomPanel());
+
+    el.btnRestartPanel.addEventListener('click', () => {
+      UI.closeAllPanels();
+      restartSession();
+    });
 
     bindSeatInteractions();
   }
