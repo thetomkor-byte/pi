@@ -118,6 +118,11 @@ button.disabled {
   justify-content: center;
 }
 
+/*
+  Деревянный обвод стола.
+  Обвод сделан обычной сплошной рамкой с закруглением, а деревянный вид
+  даётся линейным градиентом поверх рамки. Светлое — сверху, тёмное — снизу.
+*/
 #poker-table {
   position: relative;
   aspect-ratio: 9 / 16;
@@ -126,8 +131,7 @@ button.disabled {
   max-width: 94vw;
   background:
     radial-gradient(ellipse at 50% 45%, #322c26 0%, #1e1a16 55%, #0f0d0b 100%);
-  border: clamp(8px, 1.4vmin, 14px) solid;
-  border-image: linear-gradient(180deg, #6b4622 0%, #3d2512 40%, #2a1a0c 100%) 1;
+  border: clamp(8px, 1.4vmin, 14px) solid #2a1a0c;
   border-radius: clamp(28px, 4vmin, 46px);
   box-shadow:
     0 0 0 3px #1a0f05,
@@ -136,14 +140,25 @@ button.disabled {
   overflow: hidden;
 }
 
-#poker-table::before {
+/* Деревянный градиент поверх рамки: светлое сверху, тёмное снизу */
+#poker-table::after {
   content: "";
   position: absolute;
-  inset: var(--dash-inset);
-  border: 1px dashed rgba(255,255,255,.09);
-  border-radius: clamp(20px, 3vmin, 30px);
+  inset: calc(-1 * clamp(8px, 1.4vmin, 14px));
+  border-radius: clamp(28px, 4vmin, 46px);
+  border: clamp(8px, 1.4vmin, 14px) solid transparent;
+  background:
+    linear-gradient(180deg, #2a1a0c 0%, #3d2512 40%, #6b4622 100%);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
   pointer-events: none;
-  z-index: 2;
+  z-index: 3;
 }
 
 #board-area {
@@ -2229,11 +2244,22 @@ const UI = (() => {
     badge.className = 'action-badge ' + (cls[p.lastAction] || '');
   }
 
+  /**
+   * Показывает бейдж WIN/LOSS только игрокам, которые вошли в раздачу
+   * любым добровольным действием (колл / рейз / оллин / чек). Блайндеры,
+   * которые просто доехали до вскрытия без действий, остаются без бейджа.
+   */
   function renderWinnerBadge(p, seat, state) {
     const badge = seat.querySelector('[data-role="winner"]');
     if (!badge) return;
 
     if (!state.handOver || !state.showdownResults) {
+      badge.classList.add('hidden');
+      return;
+    }
+
+    const entered = p.acted === true;
+    if (!entered) {
       badge.classList.add('hidden');
       return;
     }
@@ -2257,11 +2283,21 @@ const UI = (() => {
     }
   }
 
+  /**
+   * Сумма выигрыша/проигрыша — только для тех, кто вошёл в раздачу.
+   * Если игрок не делал ни одного добровольного действия, суммы нет.
+   */
   function renderDelta(p, seat, state) {
     const deltaEl = seat.querySelector('[data-role="delta"]');
     if (!deltaEl) return;
 
     if (!state.handOver || !state.showdownResults) {
+      deltaEl.classList.add('hidden');
+      return;
+    }
+
+    const entered = p.acted === true;
+    if (!entered) {
       deltaEl.classList.add('hidden');
       return;
     }
@@ -2286,6 +2322,12 @@ const UI = (() => {
     }
   }
 
+  /**
+   * Показ карт на вскрытии.
+   * - Герой видит свои карты всегда.
+   * - Чужие карты показываются только если игрок вошёл в раздачу (acted).
+   * - Опция "показывать карты всех" перебивает это и открывает карты всем.
+   */
   function renderSeatCards(player, state, revealAll) {
     const seat = document.getElementById(`seat-${player.id}`);
     if (!seat) return;
@@ -2300,10 +2342,11 @@ const UI = (() => {
       if (settings.showAllShowdown && revealAll) {
         show = true;
       } else {
-        show = (player.committedTotal > 0) || player.isHero || player.revealed;
+        const entered = player.acted === true;
+        show = player.isHero || entered || player.revealed === true;
       }
     } else {
-      show = revealAll || player.isHero || player.revealed;
+      show = revealAll || player.isHero || player.revealed === true;
     }
 
     if (show) {
@@ -2404,9 +2447,17 @@ const UI = (() => {
     document.body.classList.add('style-' + settings.cardStyle);
   }
 
+  /**
+   * Форматирует сумму в фишках в строку с учётом выбранного режима.
+   * Размер большого блайнда берётся из САМОГО state — то есть из той
+   * раздачи, к которой относится сумма. Это гарантирует, что при росте
+   * блайндов уже показанные суммы за прошлые раздачи не «прыгают».
+   */
   function formatChips(amount, state) {
     if (settings.stackDisplay === 'bb') {
-      const bb = (state.blinds && state.blinds.bb) || Engine.getBlindLevel(state.levelIndex).bb;
+      let bb = 20;
+      if (state && state.blinds && state.blinds.bb > 0) bb = state.blinds.bb;
+      else if (state && state.levelIndex !== undefined) bb = Engine.getBlindLevel(state.levelIndex).bb;
       const bbVal = amount / bb;
       return bbVal.toFixed(bbVal >= 10 ? 0 : 1) + ' BB';
     }
@@ -2733,7 +2784,7 @@ const UI = (() => {
     updateHistoryInfo,
     readSettingsFromUI, applySettingsToUI,
     syncSettingsUI, toggleStackDisplay, toggleShowStrategies, toggleShowAllHands,
-    createCardElement, formatChips,
+    createCardElement, createSeatElement, formatChips,
     renderQuickRaiseOptions,
     clearWinnerHighlights,
     resetSliderToStart
@@ -3289,6 +3340,13 @@ const UI = (() => {
     }
   }
 
+  /**
+   * Снимок состояния для истории.
+   * Сохраняем blinds этой раздачи (bb), чтобы суммы в BB при просмотре
+   * истории считались по тем же блайндам, что и во время раздачи.
+   * Флаг acted сохраняем, чтобы при просмотре истории работала та же
+   * логика показа карт и бейджей, что и в живой раздаче.
+   */
   function snapshotState(state) {
     return {
       handNumber: state.handNumber,
@@ -3337,10 +3395,6 @@ const UI = (() => {
     const snap = session.history[session.viewingIndex];
     if (!snap) return;
     UI.setHeroActionsActive(false);
-    el.seats.innerHTML = '';
-    for (const p of snap.players) {
-      const seat = UI.createSeatElement ? UI.createSeatElement(p, snap) : null;
-    }
     UI.renderTable(snap);
     UI.updateBoard(snap);
     UI.updateSeats(snap, true);
