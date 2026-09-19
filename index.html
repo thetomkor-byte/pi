@@ -1153,7 +1153,7 @@ button.disabled {
   } catch (e) {}
 })();
 
-/* Тотальная блокировка зума и движения страницы */
+/* Тотальная блокировка зума и движения страницы + принудительное уменьшение по двойному тапу */
 (function() {
   try {
     document.addEventListener('wheel', (e) => {
@@ -1197,12 +1197,47 @@ button.disabled {
     document.addEventListener('gesturechange', (e) => { e.preventDefault(); return false; }, { passive: false, capture: true });
     document.addEventListener('gestureend', (e) => { e.preventDefault(); return false; }, { passive: false, capture: true });
 
+    /* Принудительное возвращение страницы к исходному масштабу.
+       Используется при двойном тапе по столу, если страница всё-таки «съехала». */
+    function resetViewportScale() {
+      try {
+        const meta = document.querySelector('meta[name="viewport"]');
+        if (meta) {
+          meta.setAttribute('content',
+            'width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover');
+        }
+        /* Пересоздаём мета-тег — на iOS это заставляет браузер пересчитать масштаб */
+        const parent = document.head;
+        const old = document.querySelector('meta[name="viewport"]');
+        if (old && parent) {
+          const fresh = document.createElement('meta');
+          fresh.setAttribute('name', 'viewport');
+          fresh.setAttribute('content',
+            'width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover');
+          parent.removeChild(old);
+          parent.appendChild(fresh);
+        }
+        /* Прокручиваем окно в исходное положение и сбрасываем визуальный масштаб */
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      } catch (e) {}
+    }
+
+    /* Экспортируем наружу, чтобы главный скрипт мог вызвать при двойном тапе */
+    window.__resetViewportScale = resetViewportScale;
+
+    /* Двойной тап по документу — блокируем дефолтное поведение и,
+       если страница «съехала», принудительно возвращаем масштаб. */
     let lastTouchEnd = 0;
     document.addEventListener('touchend', (e) => {
       const now = Date.now();
       if (now - lastTouchEnd < 300) {
         e.preventDefault();
         lastTouchEnd = 0;
+        if (typeof window.__resetViewportScale === 'function') {
+          window.__resetViewportScale();
+        }
         return false;
       }
       lastTouchEnd = now;
@@ -2856,6 +2891,9 @@ const UI = (() => {
   }
 
   function bindDoubleTapGuard() {
+    /* Двойной тап по столу: если страница «съехала» — принудительно возвращаем
+       масштаб к исходному. Если масштаб нормальный — ничего не делаем,
+       чтобы не мешать двойным тапам по картам и стекам. */
     let lastTapTime = 0;
     const table = document.getElementById('poker-table-wood');
     if (!table) return;
@@ -2863,6 +2901,9 @@ const UI = (() => {
       const now = Date.now();
       if (now - lastTapTime < 300) {
         e.preventDefault();
+        if (typeof window.__resetViewportScale === 'function') {
+          window.__resetViewportScale();
+        }
       }
       lastTapTime = now;
     }, { passive: false });
