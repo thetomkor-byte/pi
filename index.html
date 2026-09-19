@@ -119,9 +119,6 @@ button.disabled {
   justify-content: center;
 }
 
-/* Внешний слой — деревянный обод. Тот же градиент, что и раньше,
-   сверху светлее, снизу темнее. Направление не менялось.
-   Углы теперь закруглены так же, как у сукна. */
 #poker-table-wood {
   position: relative;
   aspect-ratio: 9 / 16;
@@ -2128,15 +2125,15 @@ const UI = (() => {
     if (player.isHero) {
       seat.style.transform = 'translate(-50%, calc(-50% - 16px))';
     } else if (player.seatIndex === 1) {
-      seat.style.transform = 'translate(-50%, calc(-50% - 1px))';
+      seat.style.transform = 'translate(-50%, calc(-50% - 1px + 1px))';
     } else if (player.seatIndex === 2) {
-      seat.style.transform = 'translate(-50%, calc(-50% + 4px))';
+      seat.style.transform = 'translate(-50%, calc(-50% + 4px + 1px))';
     } else if (player.seatIndex === 6) {
-      seat.style.transform = 'translate(-50%, calc(-50% + 3px))';
+      seat.style.transform = 'translate(-50%, calc(-50% + 3px + 1px))';
     } else if (player.seatIndex === 7) {
-      seat.style.transform = 'translate(-50%, calc(-50% + 1px))';
+      seat.style.transform = 'translate(-50%, calc(-50% + 1px + 1px))';
     } else {
-      seat.style.transform = 'translate(-50%, calc(-50% + 2px))';
+      seat.style.transform = 'translate(-50%, calc(-50% + 2px + 1px))';
     }
     if (pos.side) seat.classList.add(pos.side);
     if (player.isHero) seat.classList.add('hero');
