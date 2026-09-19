@@ -118,11 +118,6 @@ button.disabled {
   justify-content: center;
 }
 
-/*
-  Деревянный обвод стола.
-  Обвод сделан обычной сплошной рамкой с закруглением, а деревянный вид
-  даётся линейным градиентом поверх рамки. Светлое — сверху, тёмное — снизу.
-*/
 #poker-table {
   position: relative;
   aspect-ratio: 9 / 16;
@@ -131,7 +126,8 @@ button.disabled {
   max-width: 94vw;
   background:
     radial-gradient(ellipse at 50% 45%, #322c26 0%, #1e1a16 55%, #0f0d0b 100%);
-  border: clamp(8px, 1.4vmin, 14px) solid #2a1a0c;
+  border: clamp(8px, 1.4vmin, 14px) solid;
+  border-image: linear-gradient(180deg, #6b4622 0%, #3d2512 40%, #2a1a0c 100%) 1;
   border-radius: clamp(28px, 4vmin, 46px);
   box-shadow:
     0 0 0 3px #1a0f05,
@@ -140,25 +136,14 @@ button.disabled {
   overflow: hidden;
 }
 
-/* Деревянный градиент поверх рамки: светлое сверху, тёмное снизу */
-#poker-table::after {
+#poker-table::before {
   content: "";
   position: absolute;
-  inset: calc(-1 * clamp(8px, 1.4vmin, 14px));
-  border-radius: clamp(28px, 4vmin, 46px);
-  border: clamp(8px, 1.4vmin, 14px) solid transparent;
-  background:
-    linear-gradient(180deg, #2a1a0c 0%, #3d2512 40%, #6b4622 100%);
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  mask-composite: exclude;
+  inset: var(--dash-inset);
+  border: 1px dashed rgba(255,255,255,.09);
+  border-radius: clamp(20px, 3vmin, 30px);
   pointer-events: none;
-  z-index: 3;
+  z-index: 2;
 }
 
 #board-area {
