@@ -42,6 +42,9 @@
   --nav-gap: clamp(1px, 0.5vmin, 4px);
   --nav-counter-w: clamp(44px, 6.2vmin, 54px);
   --nav-counter-size: clamp(12px, 1.6vmin, 14px);
+
+  --table-radius: clamp(28px, 4vmin, 46px);
+  --table-border-w: clamp(8px, 1.4vmin, 14px);
 }
 
 html, body {
@@ -82,7 +85,6 @@ button.disabled {
   cursor: default;
 }
 
-/* Когда блок неактивен — курсор обычный на всех его элементах, включая псевдоэлементы слайдера */
 #hero-actions.inactive,
 #hero-actions.inactive *,
 #hero-actions.inactive input,
@@ -95,7 +97,6 @@ button.disabled {
   cursor: default !important;
 }
 
-/* Кнопки блока истории раздач — всегда палец */
 #hand-nav button { cursor: pointer !important; }
 #hand-nav button:disabled { cursor: default !important; }
 
@@ -118,20 +119,32 @@ button.disabled {
   justify-content: center;
 }
 
-#poker-table {
+/* Внешний слой — деревянный обод. Тот же градиент, что и раньше,
+   сверху светлее, снизу темнее. Направление не менялось.
+   Углы теперь закруглены так же, как у сукна. */
+#poker-table-wood {
   position: relative;
   aspect-ratio: 9 / 16;
   height: calc(100% - clamp(8px, 1.6vmin, 20px));
   width: auto;
   max-width: 94vw;
-  background:
-    radial-gradient(ellipse at 50% 45%, #322c26 0%, #1e1a16 55%, #0f0d0b 100%);
-  border: clamp(8px, 1.4vmin, 14px) solid;
-  border-image: linear-gradient(180deg, #6b4622 0%, #3d2512 40%, #2a1a0c 100%) 1;
-  border-radius: clamp(28px, 4vmin, 46px);
+  background: linear-gradient(180deg, #6b4622 0%, #3d2512 40%, #2a1a0c 100%);
+  border-radius: var(--table-radius);
   box-shadow:
     0 0 0 3px #1a0f05,
-    0 0 60px rgba(0,0,0,.95),
+    0 0 60px rgba(0,0,0,.95);
+  padding: var(--table-border-w);
+  box-sizing: border-box;
+}
+
+#poker-table {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(ellipse at 50% 45%, #322c26 0%, #1e1a16 55%, #0f0d0b 100%);
+  border-radius: calc(var(--table-radius) - var(--table-border-w) + 2px);
+  box-shadow:
     inset 0 0 140px rgba(0,0,0,.7);
   overflow: hidden;
 }
@@ -953,47 +966,49 @@ button.disabled {
 <div id="app">
 
   <div id="table-scene">
-    <div id="poker-table">
-      <div id="swipe-center"></div>
-      <div id="board-area">
-        <div id="top-info">
-          <div id="pot-display">Банк: 0</div>
-        </div>
-        <div id="board-cards"></div>
-        <div id="table-info">
-          <div class="info-row" id="info-blinds-row">Блайнды: 10/20</div>
-          <div class="info-row faded" id="info-timer-row">через 10 раздач</div>
-          <div class="info-row faded" id="info-next-blinds-row">15/30</div>
-        </div>
-      </div>
-      <div id="seats"></div>
-
-      <div id="hero-actions" class="inactive">
-        <div id="hand-nav">
-          <div class="nav-history">
-            <button id="hn-prev" title="Назад" disabled>◀︎</button>
-            <span class="nav-counter"><span id="hn-cur">0</span><span class="total"> / </span><span id="hn-tot">0</span></span>
-            <button id="hn-next" title="Вперёд" disabled>▶︎</button>
+    <div id="poker-table-wood">
+      <div id="poker-table">
+        <div id="swipe-center"></div>
+        <div id="board-area">
+          <div id="top-info">
+            <div id="pot-display">Банк: 0</div>
           </div>
-          <button id="hn-resume" title="Продолжить" disabled>▶︎▶︎</button>
-          <button id="hn-reset" title="Заново">⟲︎</button>
-          <button id="hn-settings" title="Настройки">⚙︎</button>
+          <div id="board-cards"></div>
+          <div id="table-info">
+            <div class="info-row" id="info-blinds-row">Блайнды: 10/20</div>
+            <div class="info-row faded" id="info-timer-row">через 10 раздач</div>
+            <div class="info-row faded" id="info-next-blinds-row">15/30</div>
+          </div>
         </div>
-        <div id="hero-slider-row">
-          <input type="range" id="raise-slider-horiz" min="0" max="100" value="0" disabled />
-          <span id="raise-amount-mini">0</span>
-        </div>
-        <div id="hero-buttons">
-          <button id="btn-fold" disabled>Fold</button>
-          <button id="btn-check" disabled>Check</button>
-          <button id="btn-call" disabled>
-            <span class="call-label">Call</span>
-            <span class="call-amount" id="call-amount"></span>
-          </button>
-        </div>
-      </div>
+        <div id="seats"></div>
 
-      <div id="quick-percent-list" class="inactive"></div>
+        <div id="hero-actions" class="inactive">
+          <div id="hand-nav">
+            <div class="nav-history">
+              <button id="hn-prev" title="Назад" disabled>◀︎</button>
+              <span class="nav-counter"><span id="hn-cur">0</span><span class="total"> / </span><span id="hn-tot">0</span></span>
+              <button id="hn-next" title="Вперёд" disabled>▶︎</button>
+            </div>
+            <button id="hn-resume" title="Продолжить" disabled>▶︎▶︎</button>
+            <button id="hn-reset" title="Заново">⟲︎</button>
+            <button id="hn-settings" title="Настройки">⚙︎</button>
+          </div>
+          <div id="hero-slider-row">
+            <input type="range" id="raise-slider-horiz" min="0" max="100" value="0" disabled />
+            <span id="raise-amount-mini">0</span>
+          </div>
+          <div id="hero-buttons">
+            <button id="btn-fold" disabled>Fold</button>
+            <button id="btn-check" disabled>Check</button>
+            <button id="btn-call" disabled>
+              <span class="call-label">Call</span>
+              <span class="call-amount" id="call-amount"></span>
+            </button>
+          </div>
+        </div>
+
+        <div id="quick-percent-list" class="inactive"></div>
+      </div>
     </div>
   </div>
 
@@ -2219,11 +2234,6 @@ const UI = (() => {
     badge.className = 'action-badge ' + (cls[p.lastAction] || '');
   }
 
-  /**
-   * Показывает бейдж WIN/LOSS только игрокам, которые вошли в раздачу
-   * любым добровольным действием (колл / рейз / оллин / чек). Блайндеры,
-   * которые просто доехали до вскрытия без действий, остаются без бейджа.
-   */
   function renderWinnerBadge(p, seat, state) {
     const badge = seat.querySelector('[data-role="winner"]');
     if (!badge) return;
@@ -2258,9 +2268,6 @@ const UI = (() => {
     }
   }
 
-  /**
-   * Сумма выигрыша/проигрыша — только для тех, кто вошёл в раздачу.
-   */
   function renderDelta(p, seat, state) {
     const deltaEl = seat.querySelector('[data-role="delta"]');
     if (!deltaEl) return;
@@ -2797,7 +2804,7 @@ const UI = (() => {
 
   function bindDoubleTapGuard() {
     let lastTapTime = 0;
-    const table = document.getElementById('poker-table');
+    const table = document.getElementById('poker-table-wood');
     if (!table) return;
     table.addEventListener('touchend', (e) => {
       const now = Date.now();
