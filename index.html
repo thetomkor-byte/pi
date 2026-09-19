@@ -13,7 +13,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="format-detection" content="telephone=no,date=no,address=no,email=no" />
-<meta name="theme-color" content="#0a0a0a" />
+<meta name="theme-color" content="#000000" />
 <meta name="copyright" content="All rights reserved" />
 <title>Poker Simulator</title>
 <style>
@@ -21,6 +21,7 @@
 
 :root {
   --bg: #0a0a0a;
+  --bg-bottom: #000000;
   --gold: #ffcb2b;
   --gold-2: #e0a800;
   --text: #e8eef5;
@@ -50,7 +51,7 @@
 
 html, body {
   height: 100%;
-  background: var(--bg);
+  background: var(--bg-bottom);
   color: var(--text);
   font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   font-size: 14px;
@@ -69,7 +70,7 @@ html {
   -moz-text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  background: var(--bg);
+  background: var(--bg-bottom);
 }
 
 body {
@@ -78,7 +79,7 @@ body {
   text-size-adjust: 100%;
   touch-action: pan-x pan-y;
   -ms-touch-action: pan-x pan-y;
-  background: var(--bg);
+  background: var(--bg-bottom);
 }
 
 button { cursor: pointer; }
@@ -109,7 +110,7 @@ button.disabled {
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
-  background: var(--bg);
+  background: var(--bg-bottom);
 }
 
 #table-scene {
