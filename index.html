@@ -2873,6 +2873,7 @@ const UI = (() => {
     bindGlobalHandlers();
     UI.applySettingsToUI();
     bindDoubleTapGuard();
+    bindDesktopDoubleClick();
   });
 
   function cacheDom() {
@@ -2907,6 +2908,36 @@ const UI = (() => {
       }
       lastTapTime = now;
     }, { passive: false });
+  }
+
+  /* Двойной клик мышью на десктопе по тем же зонам, что и двойной тап:
+     карты героя, карты ботов, стек любого игрока. */
+  function bindDesktopDoubleClick() {
+    if (!el.seats) return;
+
+    el.seats.addEventListener('dblclick', (e) => {
+      const stackEl = e.target.closest('.stack');
+      const cardsEl = e.target.closest('.seat-cards');
+
+      if (stackEl) {
+        e.preventDefault();
+        e.stopPropagation();
+        handleStackDoubleTap();
+        return;
+      }
+
+      if (cardsEl) {
+        const isHeroSeat = !!cardsEl.closest('.seat.hero');
+        e.preventDefault();
+        e.stopPropagation();
+        if (isHeroSeat) {
+          handleHeroCardsDoubleTap();
+        } else {
+          handleCardsDoubleTap();
+        }
+        return;
+      }
+    });
   }
 
   function isInteractiveTarget(target) {
