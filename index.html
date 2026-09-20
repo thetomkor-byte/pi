@@ -749,7 +749,7 @@ button.disabled {
 #hn-resume { color: var(--ok); }
 #hn-resume:disabled { color: var(--text); }
 
-#hn-reset { color: var(--gold); }
+#hn-replay { color: var(--gold); }
 #hn-settings { color: var(--gold); }
 
 #hero-slider-row {
@@ -1117,7 +1117,7 @@ button.disabled {
               <span class="nav-counter"><span id="hn-cur">0</span><span class="total"> / </span><span id="hn-tot">0</span></span>
               <button id="hn-next" title="Вперёд" disabled>▶︎</button>
             </div>
-            <button id="hn-reset" title="Заново">⟲︎</button>
+            <button id="hn-replay" title="Реплей">▶︎⏸︎</button>
             <button id="hn-resume" title="Продолжить" disabled>▶︎▶︎</button>
             <button id="hn-settings" title="Настройки">⚙︎</button>
           </div>
@@ -2224,8 +2224,8 @@ const UI = (() => {
     el.hnNext         = document.getElementById('hn-next');
     el.hnCur          = document.getElementById('hn-cur');
     el.hnTot          = document.getElementById('hn-tot');
+    el.hnReplay       = document.getElementById('hn-replay');
     el.hnResume       = document.getElementById('hn-resume');
-    el.hnReset        = document.getElementById('hn-reset');
     el.hnSettings     = document.getElementById('hn-settings');
 
     el.setCardStyle      = document.getElementById('set-card-style');
@@ -2266,6 +2266,21 @@ const UI = (() => {
   function setHistoryLabelVisible(visible) {
     if (!el.boardHistoryLabel) return;
     el.boardHistoryLabel.classList.toggle('visible', !!visible);
+  }
+
+  function setReplayButtonState(state) {
+    /* state: 'replay' | 'pause' | 'play' */
+    if (!el.hnReplay) return;
+    if (state === 'replay') {
+      el.hnReplay.textContent = '▶︎⏸︎';
+      el.hnReplay.title = 'Реплей';
+    } else if (state === 'pause') {
+      el.hnReplay.textContent = '⏸︎';
+      el.hnReplay.title = 'Пауза';
+    } else if (state === 'play') {
+      el.hnReplay.textContent = '▶︎';
+      el.hnReplay.title = 'Продолжить';
+    }
   }
 
   function renderTable(state) {
@@ -2853,10 +2868,12 @@ const UI = (() => {
       el.hnPrev.disabled = !hasHistory;
       el.hnNext.disabled = true;
       el.hnResume.disabled = true;
+      if (el.hnReplay) el.hnReplay.disabled = true;
     } else {
       el.hnPrev.disabled = !(hasHistory && current > 1);
       el.hnNext.disabled = !(hasHistory && current < total);
       el.hnResume.disabled = false;
+      if (el.hnReplay) el.hnReplay.disabled = false;
     }
   }
 
@@ -2924,7 +2941,8 @@ const UI = (() => {
     renderQuickRaiseOptions,
     clearWinnerHighlights,
     resetSliderToStart,
-    setHistoryLabelVisible
+    setHistoryLabelVisible,
+    setReplayButtonState
   };
 
 })();
@@ -2943,7 +2961,17 @@ const UI = (() => {
     heroEntered: false,
     history: [], viewingIndex: -1, autoNextTimerId: null,
     botTimerId: null, revealTimerId: null,
-    isPaused: false
+    isPaused: false,
+
+    /* Реплей истории */
+    replay: {
+      active: false,
+      paused: false,
+      stepIndex: 0,
+      steps: [],
+      timerId: null,
+      handSnapshot: null
+    }
   };
 
   const el = {};
@@ -2964,8 +2992,8 @@ const UI = (() => {
     el.tapClose       = document.getElementById('tap-close');
     el.hnPrev         = document.getElementById('hn-prev');
     el.hnNext         = document.getElementById('hn-next');
+    el.hnReplay       = document.getElementById('hn-replay');
     el.hnResume       = document.getElementById('hn-resume');
-    el.hnReset        = document.getElementById('hn-reset');
     el.hnSettings     = document.getElementById('hn-settings');
     el.btnRestartPanel = document.getElementById('btn-restart-panel');
     el.app            = document.getElementById('app');
@@ -3089,8 +3117,8 @@ const UI = (() => {
 
     el.hnPrev.addEventListener('click', () => navigateHistory(-1));
     el.hnNext.addEventListener('click', () => navigateHistory(1));
+    el.hnReplay.addEventListener('click', () => toggleReplay());
     el.hnResume.addEventListener('click', () => resumeGame());
-    el.hnReset.addEventListener('click', () => restartSession());
     el.hnSettings.addEventListener('click', () => UI.openBottomPanel());
 
     el.btnRestartPanel.addEventListener('click', () => {
@@ -3210,6 +3238,7 @@ const UI = (() => {
   }
 
   function restartSession() {
+    stopReplay(true);
     clearTimeout(session.autoNextTimerId);
     clearTimeout(session.botTimerId);
     clearTimeout(session.revealTimerId);
@@ -3226,11 +3255,13 @@ const UI = (() => {
     UI.updateHistoryInfo(0, 0, false);
     UI.clearWinnerHighlights();
     UI.setHistoryLabelVisible(false);
+    UI.setReplayButtonState('replay');
 
     startNewSession();
   }
 
   function startNewSession() {
+    stopReplay(true);
     clearTimeout(session.autoNextTimerId);
     clearTimeout(session.botTimerId);
     clearTimeout(session.revealTimerId);
@@ -3255,12 +3286,14 @@ const UI = (() => {
     UI.renderTable(session.state);
     UI.updateHistoryInfo(0, 0, false);
     UI.setHistoryLabelVisible(false);
+    UI.setReplayButtonState('replay');
 
     startHand();
   }
 
   function startHand() {
     if (!session.active) return;
+    stopReplay(true);
 
     for (const p of session.state.players) {
       if (!p.eliminated && p.stack <= 0) p.eliminated = true;
@@ -3305,6 +3338,7 @@ const UI = (() => {
   function processTurn() {
     if (session.isPaused) return;
     if (session.viewingIndex >= 0) return;
+    if (session.replay.active) return;
     const state = session.state;
     if (!state) return;
     if (state.handOver) { finishHand(); return; }
@@ -3340,6 +3374,7 @@ const UI = (() => {
 
   function heroAct(action) {
     if (session.viewingIndex >= 0) return;
+    if (session.replay.active) return;
     if (!session.waitingForHero) return;
     session.waitingForHero = false;
     UI.setHeroActionsActive(false);
@@ -3372,6 +3407,7 @@ const UI = (() => {
     session.botTimerId = setTimeout(() => {
       if (session.isPaused) return;
       if (session.viewingIndex >= 0) return;
+      if (session.replay.active) return;
       if (state.handOver || !session.active) return;
       const ctx = buildBotContext(bot, idx);
       const decision = Bots.decide(ctx);
@@ -3429,6 +3465,7 @@ const UI = (() => {
   function advanceOrFinish() {
     if (session.isPaused) return;
     if (session.viewingIndex >= 0) return;
+    if (session.replay.active) return;
     const state = session.state;
     if (state.handOver) { finishHand(); return; }
 
@@ -3462,6 +3499,7 @@ const UI = (() => {
 
   function finishHand() {
     if (session.isPaused) return;
+    if (session.replay.active) return;
     const state = session.state;
     Engine.finalizeHand(state);
 
@@ -3485,6 +3523,7 @@ const UI = (() => {
       if (!session.state || session.state !== state) return;
       if (!state.handOver) return;
       if (session.viewingIndex >= 0) return;
+      if (session.replay.active) return;
       UI.updateSeats(state, true);
     }, 1000);
 
@@ -3493,6 +3532,7 @@ const UI = (() => {
       if (!session.active) return;
       if (session.viewingIndex >= 0) return;
       if (session.isPaused) return;
+      if (session.replay.active) return;
 
       const period = UI.settings.blindGrowthHands || 10;
       state.handsAtLevel++;
@@ -3538,7 +3578,8 @@ const UI = (() => {
         committedTotal: p.committedTotal, blindPaid: p.blindPaid,
         inHand: p.inHand
       })),
-      showdownResults: state.showdownResults
+      showdownResults: state.showdownResults,
+      actionLog: (state.actionLog || []).map(a => ({ ...a }))
     };
   }
 
@@ -3552,8 +3593,13 @@ const UI = (() => {
     UI.setHeroActionsActive(false);
   }
 
+  /* ============================================================
+     ИСТОРИЯ И РЕПЛЕЙ
+     ============================================================ */
+
   function navigateHistory(delta) {
     if (session.history.length === 0) return;
+    stopReplay(true);
     if (session.viewingIndex < 0) {
       session.viewingIndex = session.history.length - 1;
       pauseGame();
@@ -3576,13 +3622,192 @@ const UI = (() => {
     highlightWinners(snap);
     UI.setHistoryLabelVisible(true);
     UI.updateHistoryInfo(session.viewingIndex + 1, session.history.length, true);
+    UI.setReplayButtonState('replay');
+  }
+
+  function buildReplaySteps(snap) {
+    /* Снимок финального состояния раздачи.
+       Шаги: preflop (ставки), флоп, тёрн, ривер, шоудаун.
+       Каждый шаг описывает, как должны выглядеть борд, пот, стеки и бейджи. */
+    const steps = [];
+    const baseBoard = snap.board || [];
+    const finalStreet = snap.finalStreet || 'river';
+
+    const streetForCount = (n) => {
+      if (n <= 0) return 'preflop';
+      if (n <= 3) return 'flop';
+      if (n === 4) return 'turn';
+      return 'river';
+    };
+
+    /* Восстанавливаем состояние по финальному снимку, показывая постепенно:
+       1) префлоп — 0 карт борда, банк = итоговый минус неразыгранное; упрощённо: показываем 0 карт и маленький банк.
+       2) флоп — 3 карты борда.
+       3) тёрн — 4 карты борда.
+       4) ривер — 5 карт борда.
+       5) шоудаун — бейджи и выплаты. */
+
+    for (let i = 1; i <= baseBoard.length; i++) {
+      const visibleBoard = baseBoard.slice(0, i);
+      const street = streetForCount(i);
+      const partial = JSON.parse(JSON.stringify({
+        handNumber: snap.handNumber,
+        levelIndex: snap.levelIndex,
+        handOver: false,
+        finalStreet: street,
+        board: visibleBoard,
+        pot: snap.pot,
+        buttonIndex: snap.buttonIndex,
+        blinds: { ...snap.blinds },
+        players: snap.players.map(p => ({
+          ...p,
+          holeCards: p.holeCards.map(c => ({ ...c })),
+          committedThisStreet: 0,
+          acted: p.acted,
+          lastAction: null,
+          committedTotal: p.committedTotal,
+          inHand: p.inHand,
+          folded: p.folded,
+          eliminated: p.eliminated,
+          revealed: p.eliminated ? false : false
+        })),
+        showdownResults: null,
+        actionLog: []
+      }));
+      steps.push({ kind: 'street', snapshot: partial });
+    }
+
+    /* Финальный шаг — полный снимок раздачи (шоудаун) */
+    const finalSnap = JSON.parse(JSON.stringify(snap));
+    finalSnap.handOver = true;
+    steps.push({ kind: 'final', snapshot: finalSnap });
+
+    return steps;
+  }
+
+  function toggleReplay() {
+    if (session.viewingIndex < 0) return;
+    const snap = session.history[session.viewingIndex];
+    if (!snap) return;
+
+    if (!session.replay.active) {
+      startReplay(snap);
+      return;
+    }
+
+    if (session.replay.paused) {
+      resumeReplay();
+    } else {
+      pauseReplay();
+    }
+  }
+
+  function startReplay(snap) {
+    stopReplay(true);
+    const steps = buildReplaySteps(snap);
+    session.replay.active = true;
+    session.replay.paused = false;
+    session.replay.stepIndex = 0;
+    session.replay.steps = steps;
+    session.replay.handSnapshot = snap;
+
+    UI.setHeroActionsActive(false);
+    UI.setHistoryLabelVisible(true);
+    UI.setReplayButtonState('pause');
+
+    renderReplayStep();
+    scheduleNextReplayStep();
+  }
+
+  function renderReplayStep() {
+    const r = session.replay;
+    if (!r.active) return;
+    const step = r.steps[r.stepIndex];
+    if (!step) return;
+
+    const s = step.snapshot;
+    UI.renderTable(s);
+    UI.updateBoard(s);
+    UI.updateSeats(s, true);
+    UI.updatePot(s);
+    UI.updateLevel(s);
+    UI.updateActiveHighlight({ actingIndex: -1, handOver: !!s.handOver, players: s.players });
+    if (s.handOver) {
+      highlightWinners(s);
+    } else {
+      UI.clearWinnerHighlights();
+    }
+    UI.setHistoryLabelVisible(true);
+    UI.updateHistoryInfo(session.viewingIndex + 1, session.history.length, true);
+  }
+
+  function scheduleNextReplayStep() {
+    const r = session.replay;
+    if (!r.active || r.paused) return;
+    clearTimeout(r.timerId);
+    r.timerId = setTimeout(() => {
+      if (!r.active || r.paused) return;
+      r.stepIndex++;
+      if (r.stepIndex >= r.steps.length) {
+        finishReplay();
+        return;
+      }
+      renderReplayStep();
+      scheduleNextReplayStep();
+    }, 1200);
+  }
+
+  function pauseReplay() {
+    const r = session.replay;
+    if (!r.active) return;
+    r.paused = true;
+    clearTimeout(r.timerId);
+    r.timerId = null;
+    UI.setReplayButtonState('play');
+  }
+
+  function resumeReplay() {
+    const r = session.replay;
+    if (!r.active) return;
+    r.paused = false;
+    UI.setReplayButtonState('pause');
+    scheduleNextReplayStep();
+  }
+
+  function finishReplay() {
+    const r = session.replay;
+    r.active = false;
+    r.paused = false;
+    clearTimeout(r.timerId);
+    r.timerId = null;
+    r.steps = [];
+    r.stepIndex = 0;
+    UI.setReplayButtonState('replay');
+  }
+
+  function stopReplay(restoreView) {
+    const r = session.replay;
+    if (r.timerId) clearTimeout(r.timerId);
+    r.timerId = null;
+    r.active = false;
+    r.paused = false;
+    r.steps = [];
+    r.stepIndex = 0;
+    r.handSnapshot = null;
+    UI.setReplayButtonState('replay');
+
+    if (restoreView && session.viewingIndex >= 0) {
+      renderHistorySnapshot();
+    }
   }
 
   function resumeGame() {
+    stopReplay(true);
     session.viewingIndex = -1;
     session.isPaused = false;
     UI.setHistoryLabelVisible(false);
     const state = session.state;
+    if (!state) return;
     if (state.handOver) {
       UI.updateBoard(state);
       UI.updateSeats(state, true);
@@ -3596,6 +3821,7 @@ const UI = (() => {
           if (!session.active) return;
           if (session.viewingIndex >= 0) return;
           if (session.isPaused) return;
+          if (session.replay.active) return;
 
           const period = UI.settings.blindGrowthHands || 10;
           state.handsAtLevel++;
@@ -3631,6 +3857,7 @@ const UI = (() => {
   }
 
   function endSession(title) {
+    stopReplay(true);
     session.active = false;
     clearTimeout(session.autoNextTimerId);
     clearTimeout(session.botTimerId);
