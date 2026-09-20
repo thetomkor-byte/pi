@@ -2525,7 +2525,6 @@ const UI = (() => {
     el.guidePanel.classList.add('open');
     updateOverlayState();
   }
-  /* Открыть руководство вместо настроек: настройки уезжают вниз, руководство выезжает сверху. */
   function openGuideInsteadOfSettings() {
     el.bottomPanel.classList.remove('open');
     el.guidePanel.classList.add('open');
@@ -3379,12 +3378,15 @@ const UI = (() => {
 
   const el = {};
 
+  /* Тройной тап / тройной клик: окно в миллисекундах между касаниями. */
+  const TRIPLE_TAP_WINDOW = 400;
+
   window.addEventListener('DOMContentLoaded', () => {
     UI.init();
     cacheDom();
     bindGlobalHandlers();
     UI.applySettingsToUI();
-    bindDesktopDoubleClick();
+    bindDesktopTripleClick();
     window.addEventListener('resize', () => {
       UI.placeHeroTimer();
     });
@@ -3414,32 +3416,54 @@ const UI = (() => {
     el.supportName    = document.getElementById('support-name');
   }
 
-  function bindDesktopDoubleClick() {
+  function bindDesktopTripleClick() {
     if (!el.seats) return;
 
-    el.seats.addEventListener('dblclick', (e) => {
+    el.seats.addEventListener('click', (e) => {
+      /* На тач-устройствах тройной тап обрабатывается отдельно. */
+      if (e.pointerType && e.pointerType !== 'mouse') return;
+
       const stackEl = e.target.closest('.stack');
       const cardsEl = e.target.closest('.seat-cards');
 
       if (stackEl) {
-        e.preventDefault();
-        e.stopPropagation();
-        handleStackDoubleTap();
+        if (registerTripleTap(stackEl)) {
+          e.preventDefault();
+          e.stopPropagation();
+          handleStackDoubleTap();
+        }
         return;
       }
 
       if (cardsEl) {
         const isHeroSeat = !!cardsEl.closest('.seat.hero');
-        e.preventDefault();
-        e.stopPropagation();
-        if (isHeroSeat) {
-          handleHeroCardsDoubleTap();
-        } else {
-          handleCardsDoubleTap();
+        if (registerTripleTap(cardsEl)) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (isHeroSeat) {
+            handleHeroCardsDoubleTap();
+          } else {
+            handleCardsDoubleTap();
+          }
         }
         return;
       }
     });
+  }
+
+  /* Универсальный счётчик тройного тапа: возвращает true, когда накопилось три касания. */
+  function registerTripleTap(node) {
+    const now = Date.now();
+    const last = node._lastTripleTapTime || 0;
+    const count = (now - last < TRIPLE_TAP_WINDOW) ? (node._tripleTapCount || 0) + 1 : 1;
+    node._lastTripleTapTime = now;
+    node._tripleTapCount = count;
+    if (count >= 3) {
+      node._tripleTapCount = 0;
+      node._lastTripleTapTime = 0;
+      return true;
+    }
+    return false;
   }
 
   function isInteractiveTarget(target) {
@@ -3465,7 +3489,6 @@ const UI = (() => {
     let startX = 0, startY = 0, tracking = false;
     el.app.addEventListener('touchstart', (e) => {
       if (e.touches.length !== 1) return;
-      /* Пока открыто любое окошко — свайпы игнорируются полностью. */
       if (UI.anyOverlayOpen()) { tracking = false; return; }
       if (isInteractiveTarget(e.target)) { tracking = false; return; }
       tracking = true;
@@ -3489,32 +3512,28 @@ const UI = (() => {
       }
     }, { passive: true });
 
-    /* Тап по затемнённой области за панелью закрывает все окошки. */
     el.tapClose.addEventListener('click', () => closeAllPanelsAndResume());
 
     if (el.heroTimerZone) {
-      let timerLastTap = 0;
+      /* Тройной тап по зоне таймера переключает «Время на ход». */
       el.heroTimerZone.addEventListener('touchend', (e) => {
-        const now = Date.now();
-        if (now - timerLastTap < 300) {
-          timerLastTap = 0;
+        e.stopPropagation();
+        if (registerTripleTap(el.heroTimerZone)) {
+          e.preventDefault();
+          toggleTurnTimeOption();
+        }
+      }, { passive: false });
+
+      el.heroTimerZone.addEventListener('click', (e) => {
+        if (e.pointerType && e.pointerType !== 'mouse') return;
+        if (registerTripleTap(el.heroTimerZone)) {
           e.preventDefault();
           e.stopPropagation();
           toggleTurnTimeOption();
-          return;
         }
-        timerLastTap = now;
-        e.stopPropagation();
-      }, { passive: false });
-
-      el.heroTimerZone.addEventListener('dblclick', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        toggleTurnTimeOption();
       });
     }
 
-    /* Клик по фону оверлея поддержки — закрывает окошко и возобновляет игру */
     if (el.supportOverlay) {
       el.supportOverlay.addEventListener('click', (e) => {
         if (e.target === el.supportOverlay) {
@@ -3530,7 +3549,6 @@ const UI = (() => {
       }, { passive: false });
     }
 
-    /* Тап по номеру карты — копировать */
     if (el.supportCardNumber) {
       el.supportCardNumber.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -3541,7 +3559,6 @@ const UI = (() => {
       }, { passive: false });
     }
 
-    /* Тап по ФИО — копировать */
     if (el.supportName) {
       el.supportName.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -3552,13 +3569,11 @@ const UI = (() => {
       }, { passive: false });
     }
 
-    /* Клик по самому окошку не закрывает его */
     if (el.supportWindow) {
       el.supportWindow.addEventListener('click', (e) => { e.stopPropagation(); });
       el.supportWindow.addEventListener('touchend', (e) => { e.stopPropagation(); }, { passive: false });
     }
 
-    /* Кнопка Поддержать внутри верхнего руководства */
     if (el.btnSupportPanel) {
       el.btnSupportPanel.addEventListener('click', (e) => {
         e.preventDefault();
@@ -3572,8 +3587,6 @@ const UI = (() => {
       }, { passive: false });
     }
 
-    /* Круглый значок вопроса в правом верхнем углу панели настроек:
-       настройки уезжают вниз, руководство выезжает сверху. */
     if (el.settingsHelpBtn) {
       el.settingsHelpBtn.addEventListener('click', (e) => {
         e.preventDefault();
@@ -3587,8 +3600,6 @@ const UI = (() => {
       }, { passive: false });
     }
 
-    /* Круглый значок с кредитной картой в левом верхнем углу панели настроек:
-       открывает окошко «Поддержать автора». */
     if (el.settingsCardBtn) {
       el.settingsCardBtn.addEventListener('click', (e) => {
         e.preventDefault();
@@ -3602,7 +3613,6 @@ const UI = (() => {
       }, { passive: false });
     }
 
-    /* Клики внутри панелей не должны всплывать как тап по столу. */
     if (el.bottomPanel) {
       el.bottomPanel.addEventListener('click', (e) => e.stopPropagation());
       el.bottomPanel.addEventListener('touchend', (e) => e.stopPropagation(), { passive: false });
@@ -3646,7 +3656,6 @@ const UI = (() => {
     bindSeatInteractions();
   }
 
-  /* Открыть панель и поставить игру на паузу. */
   function openPanelWithPause(openFn) {
     if (session.supportPaused) return;
     if (UI.anyOverlayOpen()) return;
@@ -3655,7 +3664,6 @@ const UI = (() => {
     pauseGame();
   }
 
-  /* Закрыть все панели и возобновить игру. */
   function closeAllPanelsAndResume() {
     const wasOpen = UI.anyPanelOpen();
     UI.closeAllPanels();
@@ -3722,39 +3730,31 @@ const UI = (() => {
   function bindSeatInteractions() {
     if (!el.seats) return;
 
+    /* Тройной тап по стеку и картам места. */
     el.seats.addEventListener('touchend', (e) => {
       const stackEl = e.target.closest('.stack');
       const cardsEl = e.target.closest('.seat-cards');
-      const now = Date.now();
 
       if (stackEl) {
-        const last = stackEl._lastTap || 0;
-        if (now - last < 300) {
-          stackEl._lastTap = 0;
+        e.stopPropagation();
+        if (registerTripleTap(stackEl)) {
           e.preventDefault();
-          e.stopPropagation();
           handleStackDoubleTap();
-          return;
         }
-        stackEl._lastTap = now;
         return;
       }
 
       if (cardsEl) {
+        e.stopPropagation();
         const isHeroSeat = !!cardsEl.closest('.seat.hero');
-        const last = cardsEl._lastTap || 0;
-        if (now - last < 300) {
-          cardsEl._lastTap = 0;
+        if (registerTripleTap(cardsEl)) {
           e.preventDefault();
-          e.stopPropagation();
           if (isHeroSeat) {
             handleHeroCardsDoubleTap();
           } else {
             handleCardsDoubleTap();
           }
-          return;
         }
-        cardsEl._lastTap = now;
         return;
       }
     }, { passive: false });
