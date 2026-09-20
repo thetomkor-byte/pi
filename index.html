@@ -2549,15 +2549,11 @@ const UI = (() => {
     const cardsRect = cards.getBoundingClientRect();
 
     const size = el.heroTimer.offsetWidth || 44;
-
-    /* Отступ от правого края карт героя:
-       - на мобильной (окно уже 768px) — 8 пикселей (как было);
-       - на десктопе (окно 768px и шире) — 12 пикселей,
-         чтобы крупный круг таймера не налезал на карты. */
-    const isDesktop = (typeof window !== 'undefined' && window.innerWidth >= 768);
-    const offsetFromCardsRight = isDesktop ? 12 : 8;
-
-    const left = cardsRect.right - tableRect.left + offsetFromCardsRight;
+    /* На десктопе (ширина окна ≥ 768px) отступ от правого края карт героя — 10px,
+       на мобильной версии — 8px, как было. */
+    const isDesktop = window.innerWidth >= 768;
+    const gap = isDesktop ? 10 : 8;
+    const left = cardsRect.right - tableRect.left + gap;
     const top = cardsRect.top - tableRect.top + cardsRect.height / 2 - size / 2;
 
     el.heroTimer.style.left = left + 'px';
