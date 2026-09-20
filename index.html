@@ -1401,7 +1401,7 @@ button.disabled {
 
         <!-- Три круглые кнопки над блоком истории раздач. -->
         <div id="top-round-row">
-          <button id="settings-card-btn" class="round-help-btn" type="button" aria-label="Поддержать">💳</button>
+          <button id="settings-card-btn" class="round-help-btn" type="button" aria-label="Поддержать">$</button>
           <button id="settings-help-btn" class="round-help-btn" type="button" aria-label="Руководство">?</button>
           <button id="settings-excl-btn" class="round-help-btn" type="button" aria-label="Внимание">!</button>
         </div>
@@ -2742,7 +2742,6 @@ const UI = (() => {
 
     const rowHeight = el.topRoundRow.offsetHeight || 40;
     const top = haRect.top - tableRect.top - 4 - rowHeight;
-    /* Левый край кнопок совпадает с левым краем блока истории раздач. */
     const left = haRect.left - tableRect.left;
 
     el.topRoundRow.style.left = left + 'px';
