@@ -206,16 +206,44 @@ button.disabled {
   white-space: nowrap;
 }
 
-#board-cards {
-  display: flex;
-  gap: clamp(3px, 0.6vmin, 5px);
-  justify-content: center;
-  align-items: center;
+#board-cards-wrap {
+  position: relative;
   margin-bottom: clamp(4px, 0.8vmin, 10px);
   height: var(--board-card-h);
   width: calc(var(--board-card-w) * 5 + clamp(3px, 0.6vmin, 5px) * 4);
   max-width: 100%;
-  position: relative;
+}
+
+#board-brand-label {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  text-align: center;
+  font-weight: 900;
+  font-size: clamp(12px, 2.2vmin, 24px);
+  letter-spacing: clamp(1.5px, 0.6vmin, 6px);
+  color: rgba(210, 210, 210, 0.3);
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.55),
+    0 -1px 0 rgba(255, 255, 255, 0.08);
+  text-transform: uppercase;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+  z-index: 0;
+  line-height: 1;
+}
+
+#board-cards {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  gap: clamp(3px, 0.6vmin, 5px);
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
 }
 #board-cards .card {
   --card-w: var(--board-card-w);
@@ -242,34 +270,11 @@ button.disabled {
   pointer-events: none;
   user-select: none;
   white-space: nowrap;
-  z-index: 6;
+  z-index: 2;
   display: none;
   line-height: 1;
 }
 #board-history-label.visible { display: block; }
-
-#board-brand-label {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 100%;
-  text-align: center;
-  font-weight: 900;
-  font-size: clamp(16px, 3vmin, 34px);
-  letter-spacing: clamp(2px, 0.9vmin, 10px);
-  color: rgba(210, 210, 210, 0.5);
-  text-shadow:
-    0 1px 0 rgba(0, 0, 0, 0.55),
-    0 -1px 0 rgba(255, 255, 255, 0.08);
-  text-transform: uppercase;
-  pointer-events: none;
-  user-select: none;
-  white-space: nowrap;
-  z-index: 1;
-  line-height: 1;
-  font-stretch: expanded;
-}
 
 #table-info {
   display: flex;
@@ -1070,9 +1075,11 @@ button.disabled {
           <div id="top-info">
             <div id="pot-display">Банк: 0</div>
           </div>
-          <div id="board-cards">
+          <div id="board-cards-wrap">
             <div id="board-brand-label">POKER TRAINER</div>
-            <div id="board-history-label">ИСТОРИЯ РАЗДАЧ</div>
+            <div id="board-cards">
+              <div id="board-history-label">ИСТОРИЯ РАЗДАЧ</div>
+            </div>
           </div>
           <div id="table-info">
             <div class="info-row" id="info-blinds-row">Блайнды: 10/20</div>
@@ -2493,10 +2500,8 @@ const UI = (() => {
   }
 
   function updateBoard(state) {
-    const brandLabel = el.boardBrandLabel;
     const historyLabel = el.boardHistoryLabel;
     el.boardCards.innerHTML = '';
-    if (brandLabel) el.boardCards.appendChild(brandLabel);
     if (historyLabel) el.boardCards.appendChild(historyLabel);
 
     const actualCount = state.board.length;
