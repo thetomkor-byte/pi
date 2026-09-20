@@ -612,16 +612,14 @@ button.disabled {
 }
 .seat .bet-chips.hidden { display: none; }
 
-/* Таймер героя */
+/* Таймер героя (визуал) */
 #hero-timer {
   position: absolute;
   width: var(--hero-timer-size);
   height: var(--hero-timer-size);
-  pointer-events: auto;
+  pointer-events: none;
   z-index: 40;
   display: none;
-  cursor: pointer;
-  touch-action: manipulation;
 }
 #hero-timer.visible { display: block; }
 #hero-timer .timer-svg {
@@ -652,6 +650,18 @@ button.disabled {
   paint-order: stroke;
   stroke: #000;
   stroke-width: 1.5px;
+}
+
+/* Невидимая зона таймера — реагирует на двойной тап всегда */
+#hero-timer-zone {
+  position: absolute;
+  width: var(--hero-timer-size);
+  height: var(--hero-timer-size);
+  pointer-events: auto;
+  z-index: 41;
+  background: transparent;
+  touch-action: manipulation;
+  cursor: pointer;
 }
 
 #hero-actions {
@@ -1126,6 +1136,8 @@ button.disabled {
           </div>
         </div>
         <div id="seats"></div>
+
+        <div id="hero-timer-zone"></div>
 
         <div id="hero-timer">
           <svg class="timer-svg" viewBox="0 0 40 40">
@@ -2253,8 +2265,8 @@ const UI = (() => {
     el.hnSettings     = document.getElementById('hn-settings');
 
     el.heroTimer      = document.getElementById('hero-timer');
+    el.heroTimerZone  = document.getElementById('hero-timer-zone');
     el.heroTimerNum   = document.getElementById('hero-timer-num');
-    el.heroTimerFill  = el.heroTimer ? el.heroTimer.querySelector('.timer-fill') : null;
 
     el.setCardStyle      = document.getElementById('set-card-style');
     el.setStackDisplay   = document.getElementById('set-stack-display');
@@ -2305,13 +2317,21 @@ const UI = (() => {
     }
   }
 
-  /* Таймер героя */
+  /* Таймер героя — визуальный элемент */
   function placeHeroTimer() {
-    if (!el.heroTimer) return;
+    if (!el.heroTimer || !el.heroTimerZone) return;
     const heroSeat = document.getElementById('seat-hero');
-    if (!heroSeat) { el.heroTimer.classList.remove('visible'); return; }
+    if (!heroSeat) {
+      el.heroTimer.classList.remove('visible');
+      el.heroTimerZone.style.display = 'none';
+      return;
+    }
     const cards = heroSeat.querySelector('.seat-cards');
-    if (!cards) { el.heroTimer.classList.remove('visible'); return; }
+    if (!cards) {
+      el.heroTimer.classList.remove('visible');
+      el.heroTimerZone.style.display = 'none';
+      return;
+    }
 
     const tableRect = document.getElementById('poker-table').getBoundingClientRect();
     const cardsRect = cards.getBoundingClientRect();
@@ -2319,8 +2339,14 @@ const UI = (() => {
     const size = el.heroTimer.offsetWidth || 44;
     const left = cardsRect.right - tableRect.left + 8;
     const top = cardsRect.top - tableRect.top + cardsRect.height / 2 - size / 2;
+
     el.heroTimer.style.left = left + 'px';
     el.heroTimer.style.top = top + 'px';
+
+    /* Невидимая зона всегда на месте таймера */
+    el.heroTimerZone.style.display = 'block';
+    el.heroTimerZone.style.left = left + 'px';
+    el.heroTimerZone.style.top = top + 'px';
   }
 
   function showHeroTimer(seconds) {
@@ -3034,7 +3060,6 @@ const UI = (() => {
     heroTimerTimeoutId: null,
     heroTimerRemaining: 0,
     heroTimerTotal: 0,
-    heroTimerTickCount: 0,
 
     replay: {
       active: false,
@@ -3071,7 +3096,7 @@ const UI = (() => {
     el.btnRestartPanel = document.getElementById('btn-restart-panel');
     el.app            = document.getElementById('app');
     el.seats          = document.getElementById('seats');
-    el.heroTimer      = document.getElementById('hero-timer');
+    el.heroTimerZone  = document.getElementById('hero-timer-zone');
   }
 
   function bindDoubleTapGuard() {
@@ -3127,7 +3152,7 @@ const UI = (() => {
               target.closest('#start-overlay') ||
               target.closest('#hero-actions') ||
               target.closest('#quick-percent-list') ||
-              target.closest('#hero-timer'));
+              target.closest('#hero-timer-zone'));
   }
 
   function bindGlobalHandlers() {
@@ -3175,10 +3200,10 @@ const UI = (() => {
       if (dy > 60) UI.closeBottomPanel();
     }, { passive: true });
 
-    /* Двойной тап / двойной клик по таймеру — переключение опции времени на ход */
-    if (el.heroTimer) {
+    /* Двойной тап / двойной клик по невидимой зоне таймера — переключение опции времени на ход */
+    if (el.heroTimerZone) {
       let timerLastTap = 0;
-      el.heroTimer.addEventListener('touchend', (e) => {
+      el.heroTimerZone.addEventListener('touchend', (e) => {
         const now = Date.now();
         if (now - timerLastTap < 300) {
           timerLastTap = 0;
@@ -3188,9 +3213,10 @@ const UI = (() => {
           return;
         }
         timerLastTap = now;
+        e.stopPropagation();
       }, { passive: false });
 
-      el.heroTimer.addEventListener('dblclick', (e) => {
+      el.heroTimerZone.addEventListener('dblclick', (e) => {
         e.preventDefault();
         e.stopPropagation();
         toggleTurnTimeOption();
@@ -3242,9 +3268,9 @@ const UI = (() => {
     if (next === 0) {
       stopHeroTimer();
     } else {
-      /* Если ход героя сейчас идёт — не запускаем с середины, только следующий ход. */
+      /* Если сейчас ход героя — запускаем таймер заново с новым значением. */
       if (session.waitingForHero && !session.heroEliminated) {
-        /* Следующий ход героя будет с таймером */
+        startHeroTimerIfNeeded();
       }
     }
   }
