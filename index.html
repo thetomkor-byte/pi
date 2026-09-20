@@ -1103,14 +1103,14 @@ button.disabled {
 }
 
 /* Круглый значок вопроса в левом верхнем углу панели «Настройки».
-   Диаметр — как у таймера героя. Позиционируется абсолютно, чтобы
-   ни один элемент панели не сдвигался. */
+   Диаметр — на 2 пикселя меньше, чем у таймера героя.
+   Поднят на 6 пикселей вверх от исходного положения. */
 #settings-help-btn {
   position: absolute;
-  top: 24px;
+  top: 18px;
   left: 20px;
-  width: var(--hero-timer-size);
-  height: var(--hero-timer-size);
+  width: calc(var(--hero-timer-size) - 2px);
+  height: calc(var(--hero-timer-size) - 2px);
   border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, #3a3530, #1a1a1a 70%);
   border: 1px solid #8a6508;
@@ -2558,8 +2558,9 @@ const UI = (() => {
     el.guidePanel.classList.add('open');
     updateOverlayState();
   }
-  /* Открыть руководство ПОВЕРХ панели настроек, не закрывая её. */
-  function openGuideOverSettings() {
+  /* Открыть руководство вместо настроек: настройки уезжают вниз, руководство выезжает сверху. */
+  function openGuideInsteadOfSettings() {
+    el.bottomPanel.classList.remove('open');
     el.guidePanel.classList.add('open');
     updateOverlayState();
   }
@@ -3358,7 +3359,7 @@ const UI = (() => {
     renderTable, updateSeats, updateBoard, updatePot, updateLevel,
     updateStacks, updateActiveHighlight,
     showActions, setHeroActionsActive,
-    openBottomPanel, closeBottomPanel, openGuidePanel, openGuideOverSettings, closeGuidePanel,
+    openBottomPanel, closeBottomPanel, openGuidePanel, openGuideInsteadOfSettings, closeGuidePanel,
     closeAllPanels, anyPanelOpen, anyOverlayOpen,
     updateHistoryInfo,
     readSettingsFromUI, applySettingsToUI,
@@ -3621,17 +3622,17 @@ const UI = (() => {
     }
 
     /* Круглый значок вопроса внутри панели настроек:
-       открывает руководство поверх панели настроек. */
+       настройки уезжают вниз, руководство выезжает сверху. */
     if (el.settingsHelpBtn) {
       el.settingsHelpBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        UI.openGuideOverSettings();
+        UI.openGuideInsteadOfSettings();
       });
       el.settingsHelpBtn.addEventListener('touchend', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        UI.openGuideOverSettings();
+        UI.openGuideInsteadOfSettings();
       }, { passive: false });
     }
 
