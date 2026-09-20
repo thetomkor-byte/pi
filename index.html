@@ -648,6 +648,17 @@ button.disabled {
   text-align: center;
 }
 
+/* Строка с номером карты: слева номер, справа VISA */
+.support-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+}
+
+#support-card-number { border-bottom: 1px solid #1f1f1f; }
+
 #support-card-number,
 #support-name {
   color: #f0e9d0;
@@ -655,14 +666,24 @@ button.disabled {
   font-size: clamp(14px, 2vmin, 17px);
   letter-spacing: .5px;
   text-align: left;
-  padding: 10px 0;
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
   transition: color .15s ease;
   word-break: break-word;
 }
-#support-card-number { border-bottom: 1px solid #1f1f1f; }
+
+#support-visa,
+#support-usd {
+  color: var(--muted);
+  font-weight: 800;
+  font-size: clamp(12px, 1.7vmin, 14px);
+  letter-spacing: 1px;
+  text-align: right;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 #support-card-number:active,
 #support-name:active {
   color: var(--gold);
@@ -1171,8 +1192,9 @@ button.disabled {
   text-align: center;
 }
 
+/* Весь текст руководства — серый, как в настройках */
 .guide-text {
-  color: var(--text);
+  color: var(--muted);
   font-size: 13px;
   line-height: 1.5;
   margin-bottom: 10px;
@@ -1401,10 +1423,16 @@ button.disabled {
 
   <div id="support-overlay">
     <div id="support-window">
-      <h3>Поддержать автора</h3>
-      <div id="support-card-number">1234 1234 1234 1234</div>
-      <div id="support-name">TOM TOT</div>
-      <div id="support-footer">Благодарю за поддержку</div>
+      <h3>ПОДДЕРЖИ АВТОРА</h3>
+      <div class="support-row">
+        <div id="support-card-number">4255 1901 3916 7251</div>
+        <div id="support-visa">VISA</div>
+      </div>
+      <div class="support-row">
+        <div id="support-name">TOM TOT</div>
+        <div id="support-usd">USD</div>
+      </div>
+      <div id="support-footer">Благодарю</div>
     </div>
   </div>
 
@@ -2514,6 +2542,11 @@ const UI = (() => {
            el.guidePanel.classList.contains('open');
   }
 
+  function anyOverlayOpen() {
+    return anyPanelOpen() ||
+           (el.supportOverlay && el.supportOverlay.classList.contains('visible'));
+  }
+
   function setReplayButtonState(state) {
     if (!el.hnReplay) return;
     if (state === 'replay') {
@@ -2543,16 +2576,12 @@ const UI = (() => {
       return;
     }
     const lastCard = cardsContainer.querySelector('.card');
-    /* Правый край последней карты героя — точка отсчёта для таймера.
-       Если карт ещё нет (первый рендер), берём контейнер как запасной вариант. */
     const anchorEl = cardsContainer.lastElementChild || lastCard || cardsContainer;
 
     const tableRect = document.getElementById('poker-table').getBoundingClientRect();
     const anchorRect = anchorEl.getBoundingClientRect();
 
     const size = el.heroTimer.offsetWidth || 44;
-    /* На десктопе (ширина окна ≥ 768px) отступ от правого края карт героя — 10px,
-       на мобильной версии — 8px, как было. */
     const isDesktop = window.innerWidth >= 768;
     const gap = isDesktop ? 10 : 8;
     const left = anchorRect.right - tableRect.left + gap;
@@ -3294,7 +3323,7 @@ const UI = (() => {
     updateStacks, updateActiveHighlight,
     showActions, setHeroActionsActive,
     openBottomPanel, closeBottomPanel, openGuidePanel, closeGuidePanel,
-    closeAllPanels, anyPanelOpen,
+    closeAllPanels, anyPanelOpen, anyOverlayOpen,
     updateHistoryInfo,
     readSettingsFromUI, applySettingsToUI,
     syncSettingsUI, toggleStackDisplay, toggleShowStrategies, toggleShowAllHands,
@@ -3447,6 +3476,8 @@ const UI = (() => {
     let startX = 0, startY = 0, tracking = false;
     el.app.addEventListener('touchstart', (e) => {
       if (e.touches.length !== 1) return;
+      /* Пока открыто любое окошко — свайпы игнорируются полностью. */
+      if (UI.anyOverlayOpen()) { tracking = false; return; }
       if (isInteractiveTarget(e.target)) { tracking = false; return; }
       tracking = true;
       startX = e.touches[0].clientX;
@@ -3599,12 +3630,10 @@ const UI = (() => {
   /* Открыть панель и поставить игру на паузу. */
   function openPanelWithPause(openFn) {
     if (session.supportPaused) return;
-    const wasOpen = UI.anyPanelOpen();
+    if (UI.anyOverlayOpen()) return;
     openFn();
-    if (!wasOpen) {
-      session.panelsPaused = true;
-      pauseGame();
-    }
+    session.panelsPaused = true;
+    pauseGame();
   }
 
   /* Закрыть все панели и возобновить игру. */
