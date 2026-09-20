@@ -697,10 +697,12 @@ button.disabled {
   letter-spacing: .3px;
 }
 
+/* Сообщение «Скопировано» — теперь появляется НАД окошком поддержки,
+   то есть ближе к верхней части экрана. */
 #support-copied {
   position: fixed;
   left: 50%;
-  bottom: 24%;
+  top: 12%;
   transform: translateX(-50%);
   background: rgba(20, 18, 16, 0.95);
   color: var(--gold);
@@ -1103,14 +1105,14 @@ button.disabled {
 }
 
 /* Круглый значок вопроса в левом верхнем углу панели «Настройки».
-   Диаметр — на 2 пикселя меньше, чем у таймера героя.
+   Диаметр — на 6 пикселей меньше, чем у таймера героя.
    Поднят на 6 пикселей вверх от исходного положения. */
 #settings-help-btn {
   position: absolute;
   top: 18px;
   left: 20px;
-  width: calc(var(--hero-timer-size) - 2px);
-  height: calc(var(--hero-timer-size) - 2px);
+  width: calc(var(--hero-timer-size) - 6px);
+  height: calc(var(--hero-timer-size) - 6px);
   border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, #3a3530, #1a1a1a 70%);
   border: 1px solid #8a6508;
