@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0, user-scalable=yes, viewport-fit=cover" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="referrer" content="no-referrer" />
 <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex, notranslate, nocache" />
@@ -64,7 +64,6 @@ html, body {
   -webkit-user-select: none;
   -webkit-touch-callout: none;
   overscroll-behavior: none;
-  touch-action: none;
   position: fixed;
   top: 0;
   left: 0;
@@ -73,7 +72,7 @@ html, body {
 }
 
 html {
-  -ms-touch-action: none;
+  -ms-touch-action: manipulation;
   -webkit-text-size-adjust: 100%;
   -moz-text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
@@ -85,7 +84,7 @@ body {
   -webkit-text-size-adjust: 100%;
   -moz-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  -ms-touch-action: none;
+  -ms-touch-action: manipulation;
   background: var(--bg-bottom);
 }
 
@@ -122,7 +121,6 @@ button.disabled {
   height: 100dvh;
   overflow: hidden;
   background: var(--bg-bottom);
-  touch-action: none;
 }
 
 #table-scene {
@@ -134,7 +132,6 @@ button.disabled {
   align-items: center;
   justify-content: center;
   background: var(--bg);
-  touch-action: none;
 }
 
 #poker-table-wood {
@@ -697,8 +694,7 @@ button.disabled {
   letter-spacing: .3px;
 }
 
-/* Сообщение «Скопировано» — теперь появляется НАД окошком поддержки,
-   то есть ближе к верхней части экрана. */
+/* Сообщение «Скопировано» — появляется НАД окошком поддержки. */
 #support-copied {
   position: fixed;
   left: 50%;
@@ -1104,21 +1100,19 @@ button.disabled {
   text-align: center;
 }
 
-/* Круглый значок вопроса в левом верхнем углу панели «Настройки».
-   Диаметр — на 6 пикселей меньше, чем у таймера героя.
-   Поднят на 6 пикселей вверх от исходного положения. */
-#settings-help-btn {
+/* Круглые кнопки в панели «Настройки»: слева — кредитная карта (открывает поддержку),
+   справа — вопрос (открывает руководство). Диаметр каждой — на 8 пикселей меньше таймера. */
+.round-help-btn {
   position: absolute;
   top: 18px;
-  left: 20px;
-  width: calc(var(--hero-timer-size) - 6px);
-  height: calc(var(--hero-timer-size) - 6px);
+  width: calc(var(--hero-timer-size) - 8px);
+  height: calc(var(--hero-timer-size) - 8px);
   border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, #3a3530, #1a1a1a 70%);
   border: 1px solid #8a6508;
   color: var(--gold);
   font-weight: 900;
-  font-size: clamp(20px, 2.8vmin, 26px);
+  font-size: clamp(18px, 2.4vmin, 22px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1130,9 +1124,16 @@ button.disabled {
   font-family: inherit;
   padding: 0;
 }
-#settings-help-btn:active:not(:disabled) {
+.round-help-btn:active:not(:disabled) {
   transform: scale(0.96);
   filter: brightness(1.35);
+}
+
+#settings-card-btn {
+  left: 20px;
+}
+#settings-help-btn {
+  right: 20px;
 }
 
 .setting {
@@ -1408,7 +1409,8 @@ button.disabled {
   </div>
 
   <div id="bottom-panel">
-    <button id="settings-help-btn" type="button" aria-label="Руководство">?</button>
+    <button id="settings-card-btn" class="round-help-btn" type="button" aria-label="Поддержать">💳</button>
+    <button id="settings-help-btn" class="round-help-btn" type="button" aria-label="Руководство">?</button>
     <h3>Настройки</h3>
     <label class="setting">
       <span>Стиль карт</span>
@@ -1514,7 +1516,8 @@ button.disabled {
   } catch (e) {}
 })();
 
-/* Тотальная блокировка зума и движения страницы + принудительное уменьшение по двойному тапу */
+/* Блокировка зума: пинч, gesture, Ctrl+колесо, Ctrl+клавиши — заблокированы.
+   Двойной тап (touch-action: manipulation) — разрешён для зума страницы. */
 (function() {
   try {
     document.addEventListener('wheel', (e) => {
@@ -1558,50 +1561,11 @@ button.disabled {
     document.addEventListener('gesturechange', (e) => { e.preventDefault(); return false; }, { passive: false, capture: true });
     document.addEventListener('gestureend', (e) => { e.preventDefault(); return false; }, { passive: false, capture: true });
 
-    function resetViewportScale() {
-      try {
-        const meta = document.querySelector('meta[name="viewport"]');
-        if (meta) {
-          meta.setAttribute('content',
-            'width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover');
-        }
-        const parent = document.head;
-        const old = document.querySelector('meta[name="viewport"]');
-        if (old && parent) {
-          const fresh = document.createElement('meta');
-          fresh.setAttribute('name', 'viewport');
-          fresh.setAttribute('content',
-            'width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover');
-          parent.removeChild(old);
-          parent.appendChild(fresh);
-        }
-        window.scrollTo(0, 0);
-        document.documentElement.scrollTop = 0;
-        document.body.scrollTop = 0;
-      } catch (e) {}
-    }
-
-    window.__resetViewportScale = resetViewportScale;
-
-    let lastTouchEnd = 0;
-    document.addEventListener('touchend', (e) => {
-      const now = Date.now();
-      if (now - lastTouchEnd < 300) {
-        e.preventDefault();
-        lastTouchEnd = 0;
-        if (typeof window.__resetViewportScale === 'function') {
-          window.__resetViewportScale();
-        }
-        return false;
-      }
-      lastTouchEnd = now;
-    }, { passive: false, capture: true });
-
     try {
       const metaViewport = document.querySelector('meta[name="viewport"]');
       if (metaViewport) {
         metaViewport.setAttribute('content',
-          'width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover');
+          'width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0, user-scalable=yes, viewport-fit=cover');
       }
     } catch (e) {}
   } catch (e) {}
@@ -2522,6 +2486,7 @@ const UI = (() => {
     el.supportCopied  = document.getElementById('support-copied');
     el.btnSupportPanel = document.getElementById('btn-support-panel');
     el.settingsHelpBtn = document.getElementById('settings-help-btn');
+    el.settingsCardBtn = document.getElementById('settings-card-btn');
 
     el.setCardStyle      = document.getElementById('set-card-style');
     el.setStackDisplay   = document.getElementById('set-stack-display');
@@ -3419,7 +3384,6 @@ const UI = (() => {
     cacheDom();
     bindGlobalHandlers();
     UI.applySettingsToUI();
-    bindDoubleTapGuard();
     bindDesktopDoubleClick();
     window.addEventListener('resize', () => {
       UI.placeHeroTimer();
@@ -3440,6 +3404,7 @@ const UI = (() => {
     el.btnRestartPanel = document.getElementById('btn-restart-panel');
     el.btnSupportPanel = document.getElementById('btn-support-panel');
     el.settingsHelpBtn = document.getElementById('settings-help-btn');
+    el.settingsCardBtn = document.getElementById('settings-card-btn');
     el.app            = document.getElementById('app');
     el.seats          = document.getElementById('seats');
     el.heroTimerZone  = document.getElementById('hero-timer-zone');
@@ -3447,22 +3412,6 @@ const UI = (() => {
     el.supportWindow  = document.getElementById('support-window');
     el.supportCardNumber = document.getElementById('support-card-number');
     el.supportName    = document.getElementById('support-name');
-  }
-
-  function bindDoubleTapGuard() {
-    let lastTapTime = 0;
-    const table = document.getElementById('poker-table-wood');
-    if (!table) return;
-    table.addEventListener('touchend', (e) => {
-      const now = Date.now();
-      if (now - lastTapTime < 300) {
-        e.preventDefault();
-        if (typeof window.__resetViewportScale === 'function') {
-          window.__resetViewportScale();
-        }
-      }
-      lastTapTime = now;
-    }, { passive: false });
   }
 
   function bindDesktopDoubleClick() {
@@ -3623,7 +3572,7 @@ const UI = (() => {
       }, { passive: false });
     }
 
-    /* Круглый значок вопроса внутри панели настроек:
+    /* Круглый значок вопроса в правом верхнем углу панели настроек:
        настройки уезжают вниз, руководство выезжает сверху. */
     if (el.settingsHelpBtn) {
       el.settingsHelpBtn.addEventListener('click', (e) => {
@@ -3635,6 +3584,21 @@ const UI = (() => {
         e.preventDefault();
         e.stopPropagation();
         UI.openGuideInsteadOfSettings();
+      }, { passive: false });
+    }
+
+    /* Круглый значок с кредитной картой в левом верхнем углу панели настроек:
+       открывает окошко «Поддержать автора». */
+    if (el.settingsCardBtn) {
+      el.settingsCardBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openSupportWindow();
+      });
+      el.settingsCardBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openSupportWindow();
       }, { passive: false });
     }
 
