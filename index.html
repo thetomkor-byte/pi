@@ -664,7 +664,6 @@ button.disabled {
   color: #ffffff;
   font-family: "Inter", "Segoe UI", system-ui, sans-serif;
 }
-/* Белая диагональная полоса как на карте Беларусбанка */
 .belcard::before {
   content: "";
   position: absolute;
@@ -676,7 +675,6 @@ button.disabled {
   transform: rotate(22deg);
   pointer-events: none;
 }
-/* Лёгкий блик */
 .belcard::after {
   content: "";
   position: absolute;
@@ -731,20 +729,39 @@ button.disabled {
   border-radius: 2px;
 }
 
-.belcard-number {
+/* Строка с номером карты и VISA */
+.belcard-number-row {
   position: relative;
   z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 8px;
+  margin-top: auto;
+  margin-bottom: clamp(6px, 1.2vmin, 10px);
+}
+
+.belcard-number {
   font-size: clamp(14px, 2.2vmin, 18px);
   font-weight: 700;
   letter-spacing: 1.5px;
   text-shadow: 0 1px 2px rgba(0,0,0,.4);
-  margin-top: auto;
-  margin-bottom: clamp(6px, 1.2vmin, 10px);
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
+  align-self: flex-end;
 }
 .belcard-number:active { color: var(--gold); }
+
+.belcard-visa {
+  font-size: clamp(14px, 2.2vmin, 18px);
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 2px rgba(0,0,0,.4);
+  align-self: flex-end;
+  white-space: nowrap;
+}
 
 .belcard-bottom {
   position: relative;
@@ -775,26 +792,44 @@ button.disabled {
   white-space: nowrap;
 }
 
-.belcard-visa {
-  position: absolute;
-  bottom: clamp(10px, 1.8vmin, 14px);
-  right: clamp(12px, 2.2vmin, 18px);
-  font-size: clamp(14px, 2.2vmin, 18px);
-  font-weight: 900;
-  font-style: italic;
-  letter-spacing: 1px;
-  z-index: 2;
-  text-shadow: 0 1px 2px rgba(0,0,0,.4);
-}
-
 #support-footer {
   color: var(--muted);
   font-size: clamp(11px, 1.4vmin, 13px);
   text-align: center;
   margin-top: 18px;
-  font-style: italic;
   letter-spacing: .3px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
 }
+
+#support-footer .foot-center {
+  flex: 1;
+  text-align: center;
+}
+
+/* Иконки-кнопки рядом с «Благодарю» */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(22px, 3vmin, 28px);
+  height: clamp(22px, 3vmin, 28px);
+  border-radius: 7px;
+  flex-shrink: 0;
+  transition: transform .08s ease, filter .08s ease;
+  text-decoration: none;
+  border: none;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.icon-btn:active {
+  transform: scale(0.94);
+  filter: brightness(1.15);
+}
+.icon-btn svg { display: block; width: 100%; height: 100%; }
 
 /* Сообщение «Скопировано» — появляется НАД окошком поддержки. */
 #support-copied {
@@ -1613,22 +1648,41 @@ button.disabled {
       <div class="belcard">
         <div class="belcard-top">
           <div class="belcard-bank">BELARUSBANK</div>
-          <div class="belcard-club">#настарт<br>Visa Classic</div>
+          <div class="belcard-club">Visa Classic</div>
         </div>
 
         <div class="belcard-chip"></div>
 
-        <div class="belcard-number" id="support-card-number">4255 1901 3916 7251</div>
+        <div class="belcard-number-row">
+          <div class="belcard-number" id="support-card-number">4255 1901 3916 7251</div>
+          <div class="belcard-visa">VISA</div>
+        </div>
 
         <div class="belcard-bottom">
           <div class="belcard-name" id="support-name">TOM TOT</div>
           <div class="belcard-currencies">USD / EUR / BYN</div>
         </div>
-
-        <div class="belcard-visa">VISA</div>
       </div>
 
-      <div id="support-footer">Благодарю</div>
+      <div id="support-footer">
+        <a class="icon-btn" id="gmail-btn" href="#" rel="noopener noreferrer" aria-label="Gmail">
+          <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <rect x="0" y="0" width="48" height="48" rx="10" ry="10" fill="#ffffff"/>
+            <path d="M6 12v24h6V21l12 9 12-9v15h6V12h-5l-13 10L11 12H6z" fill="#EA4335"/>
+            <path d="M6 12v24h6V21l12 9 12-9v15h6V12l-18 14L6 12z" fill="none"/>
+            <path d="M6 12h6v9H6z" fill="#4285F4"/>
+            <path d="M36 12h6v9h-6z" fill="#34A853"/>
+            <path d="M12 21l12 9 12-9v15H12z" fill="#FBBC04"/>
+          </svg>
+        </a>
+        <span class="foot-center">Благодарю</span>
+        <a class="icon-btn" id="tg-btn" href="#" rel="noopener noreferrer" aria-label="Telegram">
+          <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <rect x="0" y="0" width="48" height="48" rx="10" ry="10" fill="#0088cc"/>
+            <path d="M11 24l22-9-4 20-8-6-3 3-1-6 8-6-9 5z" fill="#ffffff"/>
+          </svg>
+        </a>
+      </div>
     </div>
   </div>
 
@@ -1685,8 +1739,7 @@ button.disabled {
   } catch (e) {}
 })();
 
-/* Полный запрет зума: пинч, gesture, Ctrl+колесо, Ctrl+клавиши, авто-сброс при загрузке
-   и при возврате из фона, жёсткий перехват двойного тапа. */
+/* Полный запрет зума */
 (function() {
   try {
     const VIEWPORT_LOCK = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover';
@@ -1706,7 +1759,6 @@ button.disabled {
     function resetZoomToDefault() {
       try {
         forceViewportLock();
-
         try {
           const old = document.querySelector('meta[name="viewport"]');
           if (old && old.parentNode) {
@@ -1717,7 +1769,6 @@ button.disabled {
             document.head.appendChild(fresh);
           }
         } catch (e) {}
-
         try {
           window.scrollTo(0, 0);
           document.documentElement.scrollTop = 0;
@@ -2762,6 +2813,8 @@ const UI = (() => {
     el.exclOverlay     = document.getElementById('excl-overlay');
     el.exclWindow      = document.getElementById('excl-window');
     el.topRoundRow     = document.getElementById('top-round-row');
+    el.gmailBtn        = document.getElementById('gmail-btn');
+    el.tgBtn           = document.getElementById('tg-btn');
 
     el.setCardStyle      = document.getElementById('set-card-style');
     el.setStackDisplay   = document.getElementById('set-stack-display');
@@ -3716,6 +3769,8 @@ const UI = (() => {
     el.exclOverlay     = document.getElementById('excl-overlay');
     el.exclWindow      = document.getElementById('excl-window');
     el.topRoundRow     = document.getElementById('top-round-row');
+    el.gmailBtn        = document.getElementById('gmail-btn');
+    el.tgBtn           = document.getElementById('tg-btn');
     el.app            = document.getElementById('app');
     el.seats          = document.getElementById('seats');
     el.heroTimerZone  = document.getElementById('hero-timer-zone');
@@ -3966,6 +4021,38 @@ const UI = (() => {
         e.stopPropagation();
         openExclWindow();
       }, { passive: false });
+    }
+
+    /* Ссылки на почту и Телеграм — собираются в момент клика, в HTML их нет. */
+    if (el.gmailBtn) {
+      const openMail = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        try {
+          const scheme = ['ma','il','to',':'].join('');
+          const user = ['the','tom','tot'].join('');
+          const domain = ['gm','ail','.','com'].join('');
+          const address = user + '@' + domain;
+          window.location.href = scheme + address;
+        } catch (err) {}
+      };
+      el.gmailBtn.addEventListener('click', openMail);
+      el.gmailBtn.addEventListener('touchend', openMail, { passive: false });
+    }
+
+    if (el.tgBtn) {
+      const openTg = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        try {
+          const scheme = ['ht','tp','s',':','/','/'].join('');
+          const host = ['t','.','me','/'].join('');
+          const user = ['the','tom','tot'].join('');
+          window.open(scheme + host + user, '_blank', 'noopener,noreferrer');
+        } catch (err) {}
+      };
+      el.tgBtn.addEventListener('click', openTg);
+      el.tgBtn.addEventListener('touchend', openTg, { passive: false });
     }
 
     if (el.bottomPanel) {
