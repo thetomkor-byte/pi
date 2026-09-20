@@ -49,6 +49,8 @@
   --table-border-w: clamp(8px, 1.4vmin, 14px);
 
   --hero-timer-size: clamp(40px, 5.6vmin, 52px);
+  --support-btn-h: clamp(28px, 3.6vmin, 34px);
+  --support-btn-fs: clamp(10px, 1.3vmin, 12px);
 }
 
 html, body {
@@ -612,7 +614,120 @@ button.disabled {
 }
 .seat .bet-chips.hidden { display: none; }
 
-/* Таймер героя (визуал) */
+/* Кнопка ПОДДЕРЖАТЬ — слева от героя над блоком истории раздач */
+#support-btn {
+  position: absolute;
+  right: calc(50% + var(--support-btn-offset-r, 130px));
+  bottom: calc(var(--dash-inset) + var(--edge) + var(--hero-actions-height, 100px) + 4px);
+  height: var(--support-btn-h);
+  padding: 0 clamp(10px, 1.6vmin, 14px);
+  border-radius: 8px;
+  background: linear-gradient(180deg, #2a2118, #1a130c);
+  border: 1px solid #8a6508;
+  color: var(--gold);
+  font-weight: 900;
+  font-size: var(--support-btn-fs);
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  box-shadow: 0 2px 8px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,203,43,.18);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 46;
+  touch-action: manipulation;
+  transition: transform .08s ease, filter .08s ease;
+  white-space: nowrap;
+  cursor: pointer;
+}
+#support-btn.visible { display: inline-flex; }
+#support-btn:active {
+  transform: scale(0.96);
+  filter: brightness(1.35);
+}
+
+/* Оверлей окошка поддержки */
+#support-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  z-index: 300;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  touch-action: none;
+}
+#support-overlay.visible { display: flex; }
+
+#support-window {
+  width: min(90%, 380px);
+  background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
+  border: 2px solid #3a3530;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.9), 0 0 80px rgba(255,203,43,.08);
+  padding: clamp(20px, 4vmin, 28px) clamp(18px, 3.6vmin, 26px);
+  text-align: left;
+}
+
+#support-window h3 {
+  color: var(--gold);
+  font-size: clamp(12px, 1.8vmin, 15px);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 18px;
+  font-weight: 900;
+  text-align: center;
+}
+
+#support-card-number,
+#support-name {
+  color: #f0e9d0;
+  font-weight: 700;
+  font-size: clamp(14px, 2vmin, 17px);
+  letter-spacing: .5px;
+  text-align: left;
+  padding: 10px 0;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: color .15s ease;
+  word-break: break-word;
+}
+#support-card-number { border-bottom: 1px solid #1f1f1f; }
+#support-card-number:active,
+#support-name:active {
+  color: var(--gold);
+}
+
+#support-footer {
+  color: var(--muted);
+  font-size: clamp(11px, 1.4vmin, 13px);
+  text-align: center;
+  margin-top: 18px;
+  font-style: italic;
+  letter-spacing: .3px;
+}
+
+#support-copied {
+  position: fixed;
+  left: 50%;
+  bottom: 24%;
+  transform: translateX(-50%);
+  background: rgba(20, 18, 16, 0.95);
+  color: var(--gold);
+  font-weight: 800;
+  font-size: clamp(11px, 1.4vmin, 13px);
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid #8a6508;
+  box-shadow: 0 4px 12px rgba(0,0,0,.8);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s ease;
+  z-index: 310;
+}
+#support-copied.visible { opacity: 1; }
+
 #hero-timer {
   position: absolute;
   width: var(--hero-timer-size);
@@ -652,7 +767,6 @@ button.disabled {
   stroke-width: 1.5px;
 }
 
-/* Невидимая зона таймера — реагирует на двойной тап всегда, курсор — стрелка */
 #hero-timer-zone {
   position: absolute;
   width: var(--hero-timer-size);
@@ -1147,6 +1261,8 @@ button.disabled {
           </svg>
         </div>
 
+        <button id="support-btn" type="button">Поддержать</button>
+
         <div id="hero-actions" class="inactive">
           <div id="hand-nav">
             <div class="nav-history">
@@ -1223,6 +1339,17 @@ button.disabled {
     </label>
     <button id="btn-restart-panel" type="button">Начать заново</button>
   </div>
+
+  <div id="support-overlay">
+    <div id="support-window">
+      <h3>Поддержать автора</h3>
+      <div id="support-card-number">1234 1234 1234 1234</div>
+      <div id="support-name">TOM TOT</div>
+      <div id="support-footer">Благодарю за поддержку</div>
+    </div>
+  </div>
+
+  <div id="support-copied">Скопировано</div>
 
   <div id="start-overlay">
     <div class="start-card">
@@ -2268,6 +2395,13 @@ const UI = (() => {
     el.heroTimerZone  = document.getElementById('hero-timer-zone');
     el.heroTimerNum   = document.getElementById('hero-timer-num');
 
+    el.supportBtn     = document.getElementById('support-btn');
+    el.supportOverlay = document.getElementById('support-overlay');
+    el.supportWindow  = document.getElementById('support-window');
+    el.supportCardNumber = document.getElementById('support-card-number');
+    el.supportName    = document.getElementById('support-name');
+    el.supportCopied  = document.getElementById('support-copied');
+
     el.setCardStyle      = document.getElementById('set-card-style');
     el.setStackDisplay   = document.getElementById('set-stack-display');
     el.setBlindGrowth    = document.getElementById('set-blind-growth');
@@ -2347,6 +2481,29 @@ const UI = (() => {
     el.heroTimerZone.style.top = top + 'px';
   }
 
+  function placeSupportButton() {
+    if (!el.supportBtn) return;
+    const heroActions = document.getElementById('hero-actions');
+    if (!heroActions) return;
+
+    const tableRect = document.getElementById('poker-table').getBoundingClientRect();
+    const haRect = heroActions.getBoundingClientRect();
+    if (haRect.height <= 0) return;
+
+    /* Кнопка слева от героя, над блоком истории раздач, на 4px выше верхней границы блока. */
+    const heroSeat = document.getElementById('seat-hero');
+    const tableW = tableRect.width;
+    const supportWidth = el.supportBtn.offsetWidth || 100;
+    const top = haRect.top - tableRect.top - 4 - (el.supportBtn.offsetHeight || 30);
+    /* Позиционируем так, чтобы кнопка стояла левее центра, но правее левого края блока процентных ставок. */
+    const left = Math.max(8, (tableW / 2) - supportWidth - 100);
+    el.supportBtn.style.left = left + 'px';
+    el.supportBtn.style.top = top + 'px';
+    el.supportBtn.style.right = 'auto';
+    el.supportBtn.style.bottom = 'auto';
+    el.supportBtn.classList.add('visible');
+  }
+
   function showHeroTimer(seconds) {
     if (!el.heroTimer) return;
     el.heroTimer.classList.add('visible');
@@ -2383,6 +2540,7 @@ const UI = (() => {
     updatePot(state);
     updateLevel(state);
     placeHeroTimer();
+    placeSupportButton();
   }
 
   function createSeatElement(player, state) {
@@ -2491,6 +2649,7 @@ const UI = (() => {
     updateStacks(state);
     updateActiveHighlight(state);
     placeHeroTimer();
+    placeSupportButton();
   }
 
   function renderActionBadge(p, seat) {
@@ -3017,6 +3176,58 @@ const UI = (() => {
     document.querySelectorAll('.seat.winner').forEach(s => s.classList.remove('winner'));
   }
 
+  function showSupportOverlay() {
+    if (!el.supportOverlay) return;
+    el.supportOverlay.classList.add('visible');
+  }
+
+  function hideSupportOverlay() {
+    if (!el.supportOverlay) return;
+    el.supportOverlay.classList.remove('visible');
+  }
+
+  function showSupportCopiedHint() {
+    if (!el.supportCopied) return;
+    el.supportCopied.classList.add('visible');
+    clearTimeout(el.supportCopied._timer);
+    el.supportCopied._timer = setTimeout(() => {
+      el.supportCopied.classList.remove('visible');
+    }, 1200);
+  }
+
+  function copySupportText(text) {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          showSupportCopiedHint();
+        }).catch(() => {
+          fallbackCopy(text);
+        });
+      } else {
+        fallbackCopy(text);
+      }
+    } catch (e) {
+      fallbackCopy(text);
+    }
+  }
+
+  function fallbackCopy(text) {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.top = '-1000px';
+      ta.style.left = '-1000px';
+      document.body.appendChild(ta);
+      ta.select();
+      ta.setSelectionRange(0, ta.value.length);
+      const ok = document.execCommand && document.execCommand('copy');
+      document.body.removeChild(ta);
+      if (ok) showSupportCopiedHint();
+    } catch (e) {}
+  }
+
   return {
     settings, init, el,
     renderTable, updateSeats, updateBoard, updatePot, updateLevel,
@@ -3031,7 +3242,8 @@ const UI = (() => {
     clearWinnerHighlights,
     resetSliderToStart,
     setReplayButtonState,
-    showHeroTimer, hideHeroTimer, updateHeroTimer, placeHeroTimer
+    showHeroTimer, hideHeroTimer, updateHeroTimer, placeHeroTimer,
+    placeSupportButton, showSupportOverlay, hideSupportOverlay, copySupportText
   };
 
 })();
@@ -3053,6 +3265,7 @@ const UI = (() => {
     history: [], viewingIndex: -1, autoNextTimerId: null,
     botTimerId: null, revealTimerId: null,
     isPaused: false,
+    supportPaused: false,
 
     heroTimerIntervalId: null,
     heroTimerTimeoutId: null,
@@ -3078,7 +3291,10 @@ const UI = (() => {
     UI.applySettingsToUI();
     bindDoubleTapGuard();
     bindDesktopDoubleClick();
-    window.addEventListener('resize', () => { UI.placeHeroTimer(); });
+    window.addEventListener('resize', () => {
+      UI.placeHeroTimer();
+      UI.placeSupportButton();
+    });
   });
 
   function cacheDom() {
@@ -3095,6 +3311,11 @@ const UI = (() => {
     el.app            = document.getElementById('app');
     el.seats          = document.getElementById('seats');
     el.heroTimerZone  = document.getElementById('hero-timer-zone');
+    el.supportBtn     = document.getElementById('support-btn');
+    el.supportOverlay = document.getElementById('support-overlay');
+    el.supportWindow  = document.getElementById('support-window');
+    el.supportCardNumber = document.getElementById('support-card-number');
+    el.supportName    = document.getElementById('support-name');
   }
 
   function bindDoubleTapGuard() {
@@ -3150,7 +3371,9 @@ const UI = (() => {
               target.closest('#start-overlay') ||
               target.closest('#hero-actions') ||
               target.closest('#quick-percent-list') ||
-              target.closest('#hero-timer-zone'));
+              target.closest('#hero-timer-zone') ||
+              target.closest('#support-overlay') ||
+              target.closest('#support-btn'));
   }
 
   function bindGlobalHandlers() {
@@ -3198,7 +3421,6 @@ const UI = (() => {
       if (dy > 60) UI.closeBottomPanel();
     }, { passive: true });
 
-    /* Двойной тап / двойной клик по невидимой зоне таймера — переключение опции времени на ход */
     if (el.heroTimerZone) {
       let timerLastTap = 0;
       el.heroTimerZone.addEventListener('touchend', (e) => {
@@ -3219,6 +3441,63 @@ const UI = (() => {
         e.stopPropagation();
         toggleTurnTimeOption();
       });
+    }
+
+    /* Кнопка Поддержать */
+    if (el.supportBtn) {
+      el.supportBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openSupportWindow();
+      });
+      el.supportBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }, { passive: false });
+    }
+
+    /* Клик по фону оверлея поддержки — закрывает окошко и возобновляет игру */
+    if (el.supportOverlay) {
+      el.supportOverlay.addEventListener('click', (e) => {
+        if (e.target === el.supportOverlay) {
+          closeSupportWindow();
+        }
+      });
+      el.supportOverlay.addEventListener('touchend', (e) => {
+        if (e.target === el.supportOverlay) {
+          e.preventDefault();
+          e.stopPropagation();
+          closeSupportWindow();
+        }
+      }, { passive: false });
+    }
+
+    /* Тап по номеру карты — копировать */
+    if (el.supportCardNumber) {
+      el.supportCardNumber.addEventListener('click', (e) => {
+        e.stopPropagation();
+        UI.copySupportText(el.supportCardNumber.textContent.trim());
+      });
+      el.supportCardNumber.addEventListener('touchend', (e) => {
+        e.stopPropagation();
+      }, { passive: false });
+    }
+
+    /* Тап по ФИО — копировать */
+    if (el.supportName) {
+      el.supportName.addEventListener('click', (e) => {
+        e.stopPropagation();
+        UI.copySupportText(el.supportName.textContent.trim());
+      });
+      el.supportName.addEventListener('touchend', (e) => {
+        e.stopPropagation();
+      }, { passive: false });
+    }
+
+    /* Клик по самому окошку не закрывает его */
+    if (el.supportWindow) {
+      el.supportWindow.addEventListener('click', (e) => { e.stopPropagation(); });
+      el.supportWindow.addEventListener('touchend', (e) => { e.stopPropagation(); }, { passive: false });
     }
 
     ['set-card-style','set-stack-display','set-blind-growth','set-turn-time','set-show-strategies','set-show-all-hands','set-show-all-showdown'].forEach(id => {
@@ -3253,6 +3532,20 @@ const UI = (() => {
     });
 
     bindSeatInteractions();
+  }
+
+  function openSupportWindow() {
+    if (session.supportPaused) return;
+    session.supportPaused = true;
+    pauseGame();
+    UI.showSupportOverlay();
+  }
+
+  function closeSupportWindow() {
+    if (!session.supportPaused) return;
+    session.supportPaused = false;
+    UI.hideSupportOverlay();
+    resumeGame();
   }
 
   function toggleTurnTimeOption() {
@@ -3408,7 +3701,9 @@ const UI = (() => {
     session.heroEliminated = false;
     session.tournamentOver = false;
     session.isPaused = false;
+    session.supportPaused = false;
 
+    UI.hideSupportOverlay();
     UI.setHeroActionsActive(false);
     UI.updateHistoryInfo(0, 0, false);
     UI.clearWinnerHighlights();
@@ -3432,6 +3727,7 @@ const UI = (() => {
     session.history = [];
     session.viewingIndex = -1;
     session.isPaused = false;
+    session.supportPaused = false;
 
     const botStrategies = Bots.assignStrategies(7);
     const players = [{ id: 'hero', name: 'Ты', isHero: true, strategy: null, stack: Engine.STARTING_STACK }];
@@ -3771,6 +4067,7 @@ const UI = (() => {
       if (session.viewingIndex >= 0) return;
       if (session.isPaused) return;
       if (session.replay.active) return;
+      if (session.supportPaused) return;
 
       const period = UI.settings.blindGrowthHands || 10;
       state.handsAtLevel++;
@@ -3835,10 +4132,6 @@ const UI = (() => {
     stopHeroTimer();
   }
 
-  /* ============================================================
-     ИСТОРИЯ
-     ============================================================ */
-
   function navigateHistory(delta) {
     if (session.history.length === 0) return;
     stopReplay(true);
@@ -3866,10 +4159,6 @@ const UI = (() => {
     UI.updateHistoryInfo(session.viewingIndex + 1, session.history.length, true);
     UI.setReplayButtonState('replay');
   }
-
-  /* ============================================================
-     РЕПЛЕЙ
-     ============================================================ */
 
   function buildReplaySteps(snap) {
     const steps = [];
@@ -4163,6 +4452,7 @@ const UI = (() => {
           if (session.viewingIndex >= 0) return;
           if (session.isPaused) return;
           if (session.replay.active) return;
+          if (session.supportPaused) return;
 
           const period = UI.settings.blindGrowthHands || 10;
           state.handsAtLevel++;
