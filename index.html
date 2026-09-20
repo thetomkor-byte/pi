@@ -1144,8 +1144,6 @@ button.disabled {
   transform: translate(-50%, -110%);
   width: min(94vw, calc((100vh - clamp(8px, 1.6vmin, 20px)) * 9 / 16));
   max-width: 94vw;
-  /* Градиент зеркален относительно настроек:
-     у настроек снизу тёмный → вверх светлее. Здесь сверху тёмный → вниз светлее. */
   background: linear-gradient(180deg, #000000 0%, #0d0d0d 50%, #1a1a1a 100%);
   border-bottom: 1px solid #2a2520;
   border-left: 1px solid #2a2520;
@@ -2538,23 +2536,27 @@ const UI = (() => {
       el.heroTimerZone.style.display = 'none';
       return;
     }
-    const cards = heroSeat.querySelector('.seat-cards');
-    if (!cards) {
+    const cardsContainer = heroSeat.querySelector('.seat-cards');
+    if (!cardsContainer) {
       el.heroTimer.classList.remove('visible');
       el.heroTimerZone.style.display = 'none';
       return;
     }
+    const lastCard = cardsContainer.querySelector('.card');
+    /* Правый край последней карты героя — точка отсчёта для таймера.
+       Если карт ещё нет (первый рендер), берём контейнер как запасной вариант. */
+    const anchorEl = cardsContainer.lastElementChild || lastCard || cardsContainer;
 
     const tableRect = document.getElementById('poker-table').getBoundingClientRect();
-    const cardsRect = cards.getBoundingClientRect();
+    const anchorRect = anchorEl.getBoundingClientRect();
 
     const size = el.heroTimer.offsetWidth || 44;
     /* На десктопе (ширина окна ≥ 768px) отступ от правого края карт героя — 10px,
        на мобильной версии — 8px, как было. */
     const isDesktop = window.innerWidth >= 768;
     const gap = isDesktop ? 10 : 8;
-    const left = cardsRect.right - tableRect.left + gap;
-    const top = cardsRect.top - tableRect.top + cardsRect.height / 2 - size / 2;
+    const left = anchorRect.right - tableRect.left + gap;
+    const top = anchorRect.top - tableRect.top + anchorRect.height / 2 - size / 2;
 
     el.heroTimer.style.left = left + 'px';
     el.heroTimer.style.top = top + 'px';
