@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0, user-scalable=yes, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="referrer" content="no-referrer" />
 <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex, notranslate, nocache" />
@@ -1516,14 +1516,61 @@ button.disabled {
   } catch (e) {}
 })();
 
-/* Блокировка зума: пинч, gesture, Ctrl+колесо, Ctrl+клавиши — заблокированы.
-   Двойной тап (touch-action: manipulation) — разрешён для зума страницы. */
+/* Полный запрет зума: пинч, gesture, Ctrl+колесо, Ctrl+клавиши, авто-сброс при загрузке
+   и при возврате из фона. Защита от «пробившегося» двойного тапа. */
 (function() {
   try {
+    const VIEWPORT_LOCK = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover';
+
+    function forceViewportLock() {
+      try {
+        let meta = document.querySelector('meta[name="viewport"]');
+        if (!meta) {
+          meta = document.createElement('meta');
+          meta.setAttribute('name', 'viewport');
+          document.head.appendChild(meta);
+        }
+        meta.setAttribute('content', VIEWPORT_LOCK);
+      } catch (e) {}
+    }
+
+    /* Принудительный сброс масштаба к 1. Работает через переустановку meta-тега,
+       через сброс scroll и через попытку сбросить визуальный viewport. */
+    function resetZoomToDefault() {
+      try {
+        forceViewportLock();
+
+        /* Пересоздаём meta-тег, чтобы браузер применил масштаб заново. */
+        try {
+          const old = document.querySelector('meta[name="viewport"]');
+          if (old && old.parentNode) {
+            const fresh = document.createElement('meta');
+            fresh.setAttribute('name', 'viewport');
+            fresh.setAttribute('content', VIEWPORT_LOCK);
+            old.parentNode.removeChild(old);
+            document.head.appendChild(fresh);
+          }
+        } catch (e) {}
+
+        /* Возврат прокрутки в левый верхний угол: если браузер зумил через смещение
+           визуального viewport, это вернёт страницу в норму. */
+        try {
+          window.scrollTo(0, 0);
+          document.documentElement.scrollTop = 0;
+          document.body.scrollTop = 0;
+        } catch (e) {}
+      } catch (e) {}
+    }
+
+    /* Выставляем meta сразу, ещё до полной загрузки DOM. */
+    forceViewportLock();
+
+    /* Блокируем колесо с Ctrl (зум на десктопе). */
     document.addEventListener('wheel', (e) => {
       if (e.ctrlKey) { e.preventDefault(); return false; }
     }, { passive: false, capture: true });
 
+    /* Блокируем Ctrl / Cmd + / - / 0 (зум с клавиатуры). */
     document.addEventListener('keydown', (e) => {
       if (!(e.ctrlKey || e.metaKey)) return;
       const k = e.key;
@@ -1536,6 +1583,7 @@ button.disabled {
       }
     }, { capture: true });
 
+    /* Блокируем мультитач: два и более пальцев — отменяем (это пинч и жест «щипок»). */
     document.addEventListener('touchstart', (e) => {
       if (e.touches && e.touches.length > 1) {
         e.preventDefault();
@@ -1557,17 +1605,71 @@ button.disabled {
       }
     }, { passive: false, capture: true });
 
+    /* Жесты Safari (gesturestart / change / end) — полностью отменяем. */
     document.addEventListener('gesturestart', (e) => { e.preventDefault(); return false; }, { passive: false, capture: true });
     document.addEventListener('gesturechange', (e) => { e.preventDefault(); return false; }, { passive: false, capture: true });
     document.addEventListener('gestureend', (e) => { e.preventDefault(); return false; }, { passive: false, capture: true });
 
-    try {
-      const metaViewport = document.querySelector('meta[name="viewport"]');
-      if (metaViewport) {
-        metaViewport.setAttribute('content',
-          'width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0, user-scalable=yes, viewport-fit=cover');
+    /* Следим за фактическим масштабом. Если вдруг он стал больше 1 (браузер
+       проскочил запрет) — принудительно сбрасываем масштаб к 1. */
+    function checkZoomAndFix() {
+      try {
+        const vv = window.visualViewport;
+        if (vv && vv.scale && vv.scale > 1.01) {
+          resetZoomToDefault();
+        }
+      } catch (e) {}
+    }
+
+    /* Проверяем масштаб после каждого двойного тапа и с небольшой задержкой. */
+    let zoomGuardTimer = null;
+    function scheduleZoomGuard() {
+      if (zoomGuardTimer) clearTimeout(zoomGuardTimer);
+      zoomGuardTimer = setTimeout(checkZoomAndFix, 60);
+    }
+
+    document.addEventListener('touchend', (e) => {
+      /* Отдельно от мультитача: сюда попадают одиночные и двойные тапы. */
+      scheduleZoomGuard();
+    }, { passive: true, capture: true });
+
+    /* Авто-сброс при загрузке. */
+    window.addEventListener('load', () => {
+      resetZoomToDefault();
+      setTimeout(resetZoomToDefault, 50);
+      setTimeout(resetZoomToDefault, 250);
+      setTimeout(checkZoomAndFix, 500);
+    });
+
+    /* Авто-сброс при возврате страницы из фона (свёрнутая вкладка, переключение
+       приложений). Именно в этот момент часто «вылезает» оставшийся в браузере зум. */
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        resetZoomToDefault();
+        setTimeout(checkZoomAndFix, 100);
       }
-    } catch (e) {}
+    });
+
+    window.addEventListener('focus', () => {
+      resetZoomToDefault();
+      setTimeout(checkZoomAndFix, 100);
+    });
+
+    window.addEventListener('pageshow', () => {
+      resetZoomToDefault();
+      setTimeout(checkZoomAndFix, 100);
+    });
+
+    /* При любом изменении визуального viewport проверяем масштаб. */
+    if (window.visualViewport) {
+      try {
+        window.visualViewport.addEventListener('resize', () => {
+          if (window.visualViewport.scale > 1.01) {
+            resetZoomToDefault();
+          }
+        });
+      } catch (e) {}
+    }
   } catch (e) {}
 })();
 </script>
@@ -3420,7 +3522,6 @@ const UI = (() => {
     if (!el.seats) return;
 
     el.seats.addEventListener('click', (e) => {
-      /* На тач-устройствах тройной тап обрабатывается отдельно. */
       if (e.pointerType && e.pointerType !== 'mouse') return;
 
       const stackEl = e.target.closest('.stack');
@@ -3451,7 +3552,6 @@ const UI = (() => {
     });
   }
 
-  /* Универсальный счётчик тройного тапа: возвращает true, когда накопилось три касания. */
   function registerTripleTap(node) {
     const now = Date.now();
     const last = node._lastTripleTapTime || 0;
@@ -3515,7 +3615,6 @@ const UI = (() => {
     el.tapClose.addEventListener('click', () => closeAllPanelsAndResume());
 
     if (el.heroTimerZone) {
-      /* Тройной тап по зоне таймера переключает «Время на ход». */
       el.heroTimerZone.addEventListener('touchend', (e) => {
         e.stopPropagation();
         if (registerTripleTap(el.heroTimerZone)) {
@@ -3730,7 +3829,6 @@ const UI = (() => {
   function bindSeatInteractions() {
     if (!el.seats) return;
 
-    /* Тройной тап по стеку и картам места. */
     el.seats.addEventListener('touchend', (e) => {
       const stackEl = e.target.closest('.stack');
       const cardsEl = e.target.closest('.seat-cards');
