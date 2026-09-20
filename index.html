@@ -648,7 +648,6 @@ button.disabled {
   text-align: center;
 }
 
-/* Строка с номером карты: слева номер, справа VISA */
 .support-row {
   display: flex;
   justify-content: space-between;
@@ -1103,6 +1102,37 @@ button.disabled {
   text-align: center;
 }
 
+/* Круглый значок вопроса в левом верхнем углу панели «Настройки».
+   Диаметр — как у таймера героя. Позиционируется абсолютно, чтобы
+   ни один элемент панели не сдвигался. */
+#settings-help-btn {
+  position: absolute;
+  top: 24px;
+  left: 20px;
+  width: var(--hero-timer-size);
+  height: var(--hero-timer-size);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #3a3530, #1a1a1a 70%);
+  border: 1px solid #8a6508;
+  color: var(--gold);
+  font-weight: 900;
+  font-size: clamp(20px, 2.8vmin, 26px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  z-index: 5;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform .08s ease, filter .08s ease;
+  font-family: inherit;
+  padding: 0;
+}
+#settings-help-btn:active:not(:disabled) {
+  transform: scale(0.96);
+  filter: brightness(1.35);
+}
+
 .setting {
   display: flex;
   justify-content: space-between;
@@ -1173,7 +1203,7 @@ button.disabled {
   border-bottom-right-radius: 14px;
   padding: calc(24px + var(--safe-top)) 20px 30px;
   transition: transform .28s ease;
-  z-index: 100;
+  z-index: 110;
   max-height: 72vh;
   overflow-y: auto;
   touch-action: pan-y;
@@ -1192,7 +1222,6 @@ button.disabled {
   text-align: center;
 }
 
-/* Весь текст руководства — серый, как в настройках */
 .guide-text {
   color: var(--muted);
   font-size: 13px;
@@ -1377,6 +1406,7 @@ button.disabled {
   </div>
 
   <div id="bottom-panel">
+    <button id="settings-help-btn" type="button" aria-label="Руководство">?</button>
     <h3>Настройки</h3>
     <label class="setting">
       <span>Стиль карт</span>
@@ -1407,7 +1437,7 @@ button.disabled {
       </select>
     </label>
     <label class="setting">
-      <span>Показывать типы игроков</span>
+      <span>Показывать тип игроков</span>
       <input type="checkbox" id="set-show-strategies" />
     </label>
     <label class="setting">
@@ -2489,6 +2519,7 @@ const UI = (() => {
     el.supportName    = document.getElementById('support-name');
     el.supportCopied  = document.getElementById('support-copied');
     el.btnSupportPanel = document.getElementById('btn-support-panel');
+    el.settingsHelpBtn = document.getElementById('settings-help-btn');
 
     el.setCardStyle      = document.getElementById('set-card-style');
     el.setStackDisplay   = document.getElementById('set-stack-display');
@@ -2524,6 +2555,11 @@ const UI = (() => {
   }
   function openGuidePanel() {
     el.bottomPanel.classList.remove('open');
+    el.guidePanel.classList.add('open');
+    updateOverlayState();
+  }
+  /* Открыть руководство ПОВЕРХ панели настроек, не закрывая её. */
+  function openGuideOverSettings() {
     el.guidePanel.classList.add('open');
     updateOverlayState();
   }
@@ -3322,7 +3358,7 @@ const UI = (() => {
     renderTable, updateSeats, updateBoard, updatePot, updateLevel,
     updateStacks, updateActiveHighlight,
     showActions, setHeroActionsActive,
-    openBottomPanel, closeBottomPanel, openGuidePanel, closeGuidePanel,
+    openBottomPanel, closeBottomPanel, openGuidePanel, openGuideOverSettings, closeGuidePanel,
     closeAllPanels, anyPanelOpen, anyOverlayOpen,
     updateHistoryInfo,
     readSettingsFromUI, applySettingsToUI,
@@ -3400,6 +3436,7 @@ const UI = (() => {
     el.hnSettings     = document.getElementById('hn-settings');
     el.btnRestartPanel = document.getElementById('btn-restart-panel');
     el.btnSupportPanel = document.getElementById('btn-support-panel');
+    el.settingsHelpBtn = document.getElementById('settings-help-btn');
     el.app            = document.getElementById('app');
     el.seats          = document.getElementById('seats');
     el.heroTimerZone  = document.getElementById('hero-timer-zone');
@@ -3580,6 +3617,21 @@ const UI = (() => {
         e.preventDefault();
         e.stopPropagation();
         openSupportWindow();
+      }, { passive: false });
+    }
+
+    /* Круглый значок вопроса внутри панели настроек:
+       открывает руководство поверх панели настроек. */
+    if (el.settingsHelpBtn) {
+      el.settingsHelpBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        UI.openGuideOverSettings();
+      });
+      el.settingsHelpBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        UI.openGuideOverSettings();
       }, { passive: false });
     }
 
