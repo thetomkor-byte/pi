@@ -48,7 +48,7 @@
   --table-radius: clamp(28px, 4vmin, 46px);
   --table-border-w: clamp(8px, 1.4vmin, 14px);
 
-  --hero-timer-size: clamp(48px, 6.6vmin, 60px);
+  --hero-timer-size: clamp(44px, 6vmin, 56px);
 }
 
 html, body {
@@ -640,7 +640,6 @@ button.disabled {
   stroke-dasharray: 100.53 100.53;
   stroke-dashoffset: 0;
   transition: stroke-dashoffset 0.95s linear;
-  filter: drop-shadow(0 0 4px rgba(255, 203, 43, 0.7));
 }
 #hero-timer .timer-num {
   fill: #fff;
@@ -2316,7 +2315,7 @@ const UI = (() => {
     const cardsRect = cards.getBoundingClientRect();
 
     const size = el.heroTimer.offsetWidth || 48;
-    const left = cardsRect.right - tableRect.left + 4;
+    const left = cardsRect.right - tableRect.left + 6;
     const top = cardsRect.top - tableRect.top + cardsRect.height / 2 - size / 2;
     el.heroTimer.style.left = left + 'px';
     el.heroTimer.style.top = top + 'px';
@@ -3396,7 +3395,6 @@ const UI = (() => {
 
     const hero = session.state.players[session.heroIndex];
     if (hero.eliminated && !session.heroEliminated) {
-      /* Герой вылетел впервые — переходим в режим наблюдателя */
       session.heroEliminated = true;
     }
 
@@ -3491,7 +3489,6 @@ const UI = (() => {
       UI.updateHeroTimer(session.heroTimerRemaining, session.heroTimerTotal);
       if (session.heroTimerRemaining <= 0) {
         stopHeroTimer();
-        /* Авто-фолд */
         if (session.waitingForHero && !session.heroEliminated) {
           session.waitingForHero = false;
           UI.setHeroActionsActive(false);
@@ -3675,7 +3672,6 @@ const UI = (() => {
     session.history.push(snapshotState(state));
     if (session.history.length > 1000) session.history.shift();
 
-    /* Помечаем героя как вылетевшего, если он вылетел в этой раздаче */
     const heroP = state.players[session.heroIndex];
     if (heroP.eliminated || heroP.stack <= 0) {
       session.heroEliminated = true;
