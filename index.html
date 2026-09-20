@@ -1100,8 +1100,6 @@ button.disabled {
   text-align: center;
 }
 
-/* Круглые кнопки в панели «Настройки»: слева — кредитная карта (открывает поддержку),
-   справа — вопрос (открывает руководство). Диаметр каждой — на 8 пикселей меньше таймера. */
 .round-help-btn {
   position: absolute;
   top: 18px;
@@ -1534,13 +1532,10 @@ button.disabled {
       } catch (e) {}
     }
 
-    /* Принудительный сброс масштаба к 1. Работает через переустановку meta-тега,
-       через сброс scroll и через попытку сбросить визуальный viewport. */
     function resetZoomToDefault() {
       try {
         forceViewportLock();
 
-        /* Пересоздаём meta-тег, чтобы браузер применил масштаб заново. */
         try {
           const old = document.querySelector('meta[name="viewport"]');
           if (old && old.parentNode) {
@@ -1552,8 +1547,6 @@ button.disabled {
           }
         } catch (e) {}
 
-        /* Возврат прокрутки в левый верхний угол: если браузер зумил через смещение
-           визуального viewport, это вернёт страницу в норму. */
         try {
           window.scrollTo(0, 0);
           document.documentElement.scrollTop = 0;
@@ -1562,15 +1555,12 @@ button.disabled {
       } catch (e) {}
     }
 
-    /* Выставляем meta сразу, ещё до полной загрузки DOM. */
     forceViewportLock();
 
-    /* Блокируем колесо с Ctrl (зум на десктопе). */
     document.addEventListener('wheel', (e) => {
       if (e.ctrlKey) { e.preventDefault(); return false; }
     }, { passive: false, capture: true });
 
-    /* Блокируем Ctrl / Cmd + / - / 0 (зум с клавиатуры). */
     document.addEventListener('keydown', (e) => {
       if (!(e.ctrlKey || e.metaKey)) return;
       const k = e.key;
@@ -1583,7 +1573,6 @@ button.disabled {
       }
     }, { capture: true });
 
-    /* Блокируем мультитач: два и более пальцев — отменяем (это пинч и жест «щипок»). */
     document.addEventListener('touchstart', (e) => {
       if (e.touches && e.touches.length > 1) {
         e.preventDefault();
@@ -1605,13 +1594,10 @@ button.disabled {
       }
     }, { passive: false, capture: true });
 
-    /* Жесты Safari (gesturestart / change / end) — полностью отменяем. */
     document.addEventListener('gesturestart', (e) => { e.preventDefault(); return false; }, { passive: false, capture: true });
     document.addEventListener('gesturechange', (e) => { e.preventDefault(); return false; }, { passive: false, capture: true });
     document.addEventListener('gestureend', (e) => { e.preventDefault(); return false; }, { passive: false, capture: true });
 
-    /* Следим за фактическим масштабом. Если вдруг он стал больше 1 (браузер
-       проскочил запрет) — принудительно сбрасываем масштаб к 1. */
     function checkZoomAndFix() {
       try {
         const vv = window.visualViewport;
@@ -1621,7 +1607,6 @@ button.disabled {
       } catch (e) {}
     }
 
-    /* Проверяем масштаб после каждого двойного тапа и с небольшой задержкой. */
     let zoomGuardTimer = null;
     function scheduleZoomGuard() {
       if (zoomGuardTimer) clearTimeout(zoomGuardTimer);
@@ -1629,11 +1614,9 @@ button.disabled {
     }
 
     document.addEventListener('touchend', (e) => {
-      /* Отдельно от мультитача: сюда попадают одиночные и двойные тапы. */
       scheduleZoomGuard();
     }, { passive: true, capture: true });
 
-    /* Авто-сброс при загрузке. */
     window.addEventListener('load', () => {
       resetZoomToDefault();
       setTimeout(resetZoomToDefault, 50);
@@ -1641,8 +1624,6 @@ button.disabled {
       setTimeout(checkZoomAndFix, 500);
     });
 
-    /* Авто-сброс при возврате страницы из фона (свёрнутая вкладка, переключение
-       приложений). Именно в этот момент часто «вылезает» оставшийся в браузере зум. */
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden) {
         resetZoomToDefault();
@@ -1660,7 +1641,6 @@ button.disabled {
       setTimeout(checkZoomAndFix, 100);
     });
 
-    /* При любом изменении визуального viewport проверяем масштаб. */
     if (window.visualViewport) {
       try {
         window.visualViewport.addEventListener('resize', () => {
@@ -3480,15 +3460,15 @@ const UI = (() => {
 
   const el = {};
 
-  /* Тройной тап / тройной клик: окно в миллисекундах между касаниями. */
-  const TRIPLE_TAP_WINDOW = 400;
+  /* Двойной тап / двойной клик: окно в миллисекундах между касаниями. */
+  const DOUBLE_TAP_WINDOW = 400;
 
   window.addEventListener('DOMContentLoaded', () => {
     UI.init();
     cacheDom();
     bindGlobalHandlers();
     UI.applySettingsToUI();
-    bindDesktopTripleClick();
+    bindDesktopDoubleClick();
     window.addEventListener('resize', () => {
       UI.placeHeroTimer();
     });
@@ -3518,7 +3498,7 @@ const UI = (() => {
     el.supportName    = document.getElementById('support-name');
   }
 
-  function bindDesktopTripleClick() {
+  function bindDesktopDoubleClick() {
     if (!el.seats) return;
 
     el.seats.addEventListener('click', (e) => {
@@ -3528,7 +3508,7 @@ const UI = (() => {
       const cardsEl = e.target.closest('.seat-cards');
 
       if (stackEl) {
-        if (registerTripleTap(stackEl)) {
+        if (registerDoubleTap(stackEl)) {
           e.preventDefault();
           e.stopPropagation();
           handleStackDoubleTap();
@@ -3538,7 +3518,7 @@ const UI = (() => {
 
       if (cardsEl) {
         const isHeroSeat = !!cardsEl.closest('.seat.hero');
-        if (registerTripleTap(cardsEl)) {
+        if (registerDoubleTap(cardsEl)) {
           e.preventDefault();
           e.stopPropagation();
           if (isHeroSeat) {
@@ -3552,17 +3532,15 @@ const UI = (() => {
     });
   }
 
-  function registerTripleTap(node) {
+  /* Счётчик двойного тапа: возвращает true, когда накопилось два касания. */
+  function registerDoubleTap(node) {
     const now = Date.now();
-    const last = node._lastTripleTapTime || 0;
-    const count = (now - last < TRIPLE_TAP_WINDOW) ? (node._tripleTapCount || 0) + 1 : 1;
-    node._lastTripleTapTime = now;
-    node._tripleTapCount = count;
-    if (count >= 3) {
-      node._tripleTapCount = 0;
-      node._lastTripleTapTime = 0;
+    const last = node._lastDoubleTapTime || 0;
+    if (now - last < DOUBLE_TAP_WINDOW) {
+      node._lastDoubleTapTime = 0;
       return true;
     }
+    node._lastDoubleTapTime = now;
     return false;
   }
 
@@ -3617,7 +3595,7 @@ const UI = (() => {
     if (el.heroTimerZone) {
       el.heroTimerZone.addEventListener('touchend', (e) => {
         e.stopPropagation();
-        if (registerTripleTap(el.heroTimerZone)) {
+        if (registerDoubleTap(el.heroTimerZone)) {
           e.preventDefault();
           toggleTurnTimeOption();
         }
@@ -3625,7 +3603,7 @@ const UI = (() => {
 
       el.heroTimerZone.addEventListener('click', (e) => {
         if (e.pointerType && e.pointerType !== 'mouse') return;
-        if (registerTripleTap(el.heroTimerZone)) {
+        if (registerDoubleTap(el.heroTimerZone)) {
           e.preventDefault();
           e.stopPropagation();
           toggleTurnTimeOption();
@@ -3835,7 +3813,7 @@ const UI = (() => {
 
       if (stackEl) {
         e.stopPropagation();
-        if (registerTripleTap(stackEl)) {
+        if (registerDoubleTap(stackEl)) {
           e.preventDefault();
           handleStackDoubleTap();
         }
@@ -3845,7 +3823,7 @@ const UI = (() => {
       if (cardsEl) {
         e.stopPropagation();
         const isHeroSeat = !!cardsEl.closest('.seat.hero');
-        if (registerTripleTap(cardsEl)) {
+        if (registerDoubleTap(cardsEl)) {
           e.preventDefault();
           if (isHeroSeat) {
             handleHeroCardsDoubleTap();
