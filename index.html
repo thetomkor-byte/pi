@@ -162,14 +162,14 @@ button.disabled {
 
 #poker-table-brand {
   position: absolute;
-  left: 20%;
-  right: 20%;
+  left: 50%;
   top: 32%;
-  height: 0;
+  transform: translate(-50%, -50%);
+  width: 72%;
+  max-width: 72%;
   display: flex;
   align-items: center;
   justify-content: center;
-  transform: translateY(-50%);
   pointer-events: none;
   user-select: none;
   z-index: 3;
@@ -181,16 +181,15 @@ button.disabled {
   text-align: center;
   font-weight: 900;
   letter-spacing: clamp(2px, 0.7vmin, 8px);
-  font-size: clamp(16px, 2.6vmin, 30px);
+  font-size: clamp(14px, 2.4vmin, 26px);
   text-transform: uppercase;
-  color: rgba(180, 140, 40, 0.3);
+  color: rgba(255, 209, 92, 0.42);
   text-shadow:
-    0 -1px 0 rgba(0, 0, 0, 0.55),
-    0 1px 0 rgba(255, 235, 180, 0.06),
-    inset 0 0 0 rgba(0,0,0,0);
+    0 -1px 1px rgba(0, 0, 0, 0.75),
+    0 1px 1px rgba(255, 235, 180, 0.10),
+    0 2px 4px rgba(0, 0, 0, 0.45);
   white-space: nowrap;
   line-height: 1;
-  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.4));
 }
 
 #board-area {
@@ -1257,8 +1256,6 @@ button.disabled {
     document.addEventListener('gesturechange', (e) => { e.preventDefault(); return false; }, { passive: false, capture: true });
     document.addEventListener('gestureend', (e) => { e.preventDefault(); return false; }, { passive: false, capture: true });
 
-    /* Принудительное возвращение страницы к исходному масштабу.
-       Используется при двойном тапе по столу, если страница всё-таки «съехала». */
     function resetViewportScale() {
       try {
         const meta = document.querySelector('meta[name="viewport"]');
@@ -1266,7 +1263,6 @@ button.disabled {
           meta.setAttribute('content',
             'width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover');
         }
-        /* Пересоздаём мета-тег — на iOS это заставляет браузер пересчитать масштаб */
         const parent = document.head;
         const old = document.querySelector('meta[name="viewport"]');
         if (old && parent) {
@@ -1277,18 +1273,14 @@ button.disabled {
           parent.removeChild(old);
           parent.appendChild(fresh);
         }
-        /* Прокручиваем окно в исходное положение и сбрасываем визуальный масштаб */
         window.scrollTo(0, 0);
         document.documentElement.scrollTop = 0;
         document.body.scrollTop = 0;
       } catch (e) {}
     }
 
-    /* Экспортируем наружу, чтобы главный скрипт мог вызвать при двойном тапе */
     window.__resetViewportScale = resetViewportScale;
 
-    /* Двойной тап по документу — блокируем дефолтное поведение и,
-       если страница «съехала», принудительно возвращаем масштаб. */
     let lastTouchEnd = 0;
     document.addEventListener('touchend', (e) => {
       const now = Date.now();
@@ -2509,7 +2501,6 @@ const UI = (() => {
   }
 
   function updateBoard(state) {
-    /* Удаляем только карты, оставляя надпись-водяной знак внутри board-cards. */
     const label = el.boardHistoryLabel;
     el.boardCards.innerHTML = '';
     if (label) el.boardCards.appendChild(label);
@@ -2963,9 +2954,6 @@ const UI = (() => {
   }
 
   function bindDoubleTapGuard() {
-    /* Двойной тап по столу: если страница «съехала» — принудительно возвращаем
-       масштаб к исходному. Если масштаб нормальный — ничего не делаем,
-       чтобы не мешать двойным тапам по картам и стекам. */
     let lastTapTime = 0;
     const table = document.getElementById('poker-table-wood');
     if (!table) return;
@@ -2981,8 +2969,6 @@ const UI = (() => {
     }, { passive: false });
   }
 
-  /* Двойной клик мышью на десктопе по тем же зонам, что и двойной тап:
-     карты героя, карты ботов, стек любого игрока. */
   function bindDesktopDoubleClick() {
     if (!el.seats) return;
 
