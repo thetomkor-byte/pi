@@ -260,7 +260,6 @@ button.disabled {
 }
 #board-cards .card .suit { font-size: clamp(24px, 3.8vmin, 36px); }
 
-/* Карты непрозрачны для фона, чтобы надпись не просвечивала даже при затемнении */
 #board-cards .card.dimmed {
   position: relative;
 }
@@ -273,29 +272,6 @@ button.disabled {
   pointer-events: none;
   z-index: 2;
 }
-
-#board-history-label {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 100%;
-  text-align: center;
-  font-weight: 900;
-  font-size: clamp(13px, 2vmin, 20px);
-  letter-spacing: clamp(1px, 0.35vmin, 4px);
-  color: rgba(20, 20, 20, 0.2);
-  text-shadow:
-    0 0 1px rgba(0,0,0,.15),
-    0 1px 2px rgba(255,255,255,.2);
-  pointer-events: none;
-  user-select: none;
-  white-space: nowrap;
-  z-index: 2;
-  display: none;
-  line-height: 1;
-}
-#board-history-label.visible { display: block; }
 
 #table-info {
   display: flex;
@@ -478,7 +454,6 @@ button.disabled {
   transform: translateX(-50%);
 }
 
-/* На десктопе отодвигаем кнопку дилера от карт на 6px (у всех, кроме героя). */
 @media (min-width: 768px) {
   .seat.left .dealer-chip {
     right: calc(clamp(-26px, -3.4vmin, -22px) - 6px);
@@ -1098,9 +1073,7 @@ button.disabled {
           </div>
           <div id="board-cards-wrap">
             <div id="board-brand-label">POKER TRAINER</div>
-            <div id="board-cards">
-              <div id="board-history-label">ИСТОРИЯ РАЗДАЧ</div>
-            </div>
+            <div id="board-cards"></div>
           </div>
           <div id="table-info">
             <div class="info-row" id="info-blinds-row">Блайнды: 10/20</div>
@@ -2205,7 +2178,6 @@ const UI = (() => {
     el.infoBlindsRow  = document.getElementById('info-blinds-row');
     el.infoTimerRow   = document.getElementById('info-timer-row');
     el.infoNextBlinds = document.getElementById('info-next-blinds-row');
-    el.boardHistoryLabel = document.getElementById('board-history-label');
 
     el.heroActions    = document.getElementById('hero-actions');
     el.heroButtons    = document.getElementById('hero-buttons');
@@ -2263,13 +2235,7 @@ const UI = (() => {
     updateOverlayState();
   }
 
-  function setHistoryLabelVisible(visible) {
-    if (!el.boardHistoryLabel) return;
-    el.boardHistoryLabel.classList.toggle('visible', !!visible);
-  }
-
   function setReplayButtonState(state) {
-    /* state: 'replay' | 'pause' | 'play' */
     if (!el.hnReplay) return;
     if (state === 'replay') {
       el.hnReplay.textContent = '▶︎⏸︎';
@@ -2535,10 +2501,7 @@ const UI = (() => {
   }
 
   function updateBoard(state) {
-    const historyLabel = el.boardHistoryLabel;
     el.boardCards.innerHTML = '';
-    if (historyLabel) el.boardCards.appendChild(historyLabel);
-
     const actualCount = state.board.length;
     const finalStreet = state.finalStreet;
 
@@ -2941,7 +2904,6 @@ const UI = (() => {
     renderQuickRaiseOptions,
     clearWinnerHighlights,
     resetSliderToStart,
-    setHistoryLabelVisible,
     setReplayButtonState
   };
 
@@ -3112,6 +3074,9 @@ const UI = (() => {
             refreshCallAmount();
           }
         }
+        if (session.replay.active) {
+          renderReplayStep();
+        }
       });
     });
 
@@ -3193,6 +3158,10 @@ const UI = (() => {
 
   function handleStackDoubleTap() {
     UI.toggleStackDisplay();
+    if (session.replay.active) {
+      renderReplayStep();
+      return;
+    }
     if (session.state) {
       const state = session.state;
       const showAll = state.handOver || session.viewingIndex >= 0;
@@ -3213,6 +3182,10 @@ const UI = (() => {
 
   function handleCardsDoubleTap() {
     UI.toggleShowStrategies();
+    if (session.replay.active) {
+      renderReplayStep();
+      return;
+    }
     if (session.state) {
       const state = session.state;
       const showAll = state.handOver || session.viewingIndex >= 0;
@@ -3226,6 +3199,10 @@ const UI = (() => {
 
   function handleHeroCardsDoubleTap() {
     UI.toggleShowAllHands();
+    if (session.replay.active) {
+      renderReplayStep();
+      return;
+    }
     if (session.state) {
       const state = session.state;
       const showAll = state.handOver || session.viewingIndex >= 0;
@@ -3254,7 +3231,6 @@ const UI = (() => {
     UI.setHeroActionsActive(false);
     UI.updateHistoryInfo(0, 0, false);
     UI.clearWinnerHighlights();
-    UI.setHistoryLabelVisible(false);
     UI.setReplayButtonState('replay');
 
     startNewSession();
@@ -3285,7 +3261,6 @@ const UI = (() => {
 
     UI.renderTable(session.state);
     UI.updateHistoryInfo(0, 0, false);
-    UI.setHistoryLabelVisible(false);
     UI.setReplayButtonState('replay');
 
     startHand();
@@ -3312,7 +3287,6 @@ const UI = (() => {
     session.isPaused = false;
 
     UI.clearWinnerHighlights();
-    UI.setHistoryLabelVisible(false);
     UI.renderTable(session.state);
     UI.updateBoard(session.state);
     UI.updatePot(session.state);
@@ -3391,6 +3365,7 @@ const UI = (() => {
       return;
     }
 
+    pushActionLog(state, session.heroIndex, action.type, action.amount || 0);
     UI.updateSeats(state);
     UI.updatePot(state);
     advanceOrFinish();
@@ -3431,7 +3406,10 @@ const UI = (() => {
       if (!res.ok) {
         const fallback = toCall > 0 ? { type: 'fold' } : { type: 'check' };
         Engine.applyAction(state, idx, fallback);
+        engineAction = fallback;
       }
+
+      pushActionLog(state, idx, engineAction.type, engineAction.amount || 0);
 
       UI.updateSeats(state);
       UI.updatePot(state);
@@ -3460,6 +3438,17 @@ const UI = (() => {
       raiserPosition: raiser ? raiser.position : null,
       strategy: bot.strategy
     };
+  }
+
+  function pushActionLog(state, playerIndex, actionType, amount) {
+    if (!state.actionLog) state.actionLog = [];
+    state.actionLog.push({
+      playerIndex,
+      actionType,
+      amount: amount || 0,
+      street: state.street,
+      potAfter: state.pot
+    });
   }
 
   function advanceOrFinish() {
@@ -3514,7 +3503,6 @@ const UI = (() => {
     UI.resetSliderToStart();
     refreshQuickPercentList();
     UI.updateHistoryInfo(session.history.length, session.history.length, false);
-    UI.setHistoryLabelVisible(false);
 
     highlightWinners(state);
 
@@ -3620,69 +3608,224 @@ const UI = (() => {
     UI.updateLevel(snap);
     UI.updateActiveHighlight({ actingIndex: -1, handOver: true, players: snap.players });
     highlightWinners(snap);
-    UI.setHistoryLabelVisible(true);
     UI.updateHistoryInfo(session.viewingIndex + 1, session.history.length, true);
     UI.setReplayButtonState('replay');
   }
 
-  function buildReplaySteps(snap) {
-    /* Снимок финального состояния раздачи.
-       Шаги: preflop (ставки), флоп, тёрн, ривер, шоудаун.
-       Каждый шаг описывает, как должны выглядеть борд, пот, стеки и бейджи. */
-    const steps = [];
-    const baseBoard = snap.board || [];
-    const finalStreet = snap.finalStreet || 'river';
+  /* ============================================================
+     РЕПЛЕЙ — покадровое воспроизведение
+     Каждый шаг — «снимок» стола до определённого действия
+     или до смены улицы. Шаги строятся по actionLog и борду.
+     ============================================================ */
 
-    const streetForCount = (n) => {
-      if (n <= 0) return 'preflop';
+  function buildReplaySteps(snap) {
+    const steps = [];
+    const players = snap.players.map(p => ({
+      ...p,
+      holeCards: p.holeCards.map(c => ({ ...c }))
+    }));
+
+    const baseStacks = players.map(p => {
+      /* Отматываем стеки к старту раздачи: стартовый стек = текущий + всё, что было вложено. */
+      return {
+        id: p.id,
+        stack: p.stack + (p.committedTotal || 0)
+      };
+    });
+
+    const stackMap = {};
+    for (const b of baseStacks) stackMap[b.id] = b.stack;
+
+    const streetNameForBoardCount = (n) => {
+      if (n === 0) return 'preflop';
       if (n <= 3) return 'flop';
       if (n === 4) return 'turn';
       return 'river';
     };
 
-    /* Восстанавливаем состояние по финальному снимку, показывая постепенно:
-       1) префлоп — 0 карт борда, банк = итоговый минус неразыгранное; упрощённо: показываем 0 карт и маленький банк.
-       2) флоп — 3 карты борда.
-       3) тёрн — 4 карты борда.
-       4) ривер — 5 карт борда.
-       5) шоудаун — бейджи и выплаты. */
+    const finalBoard = snap.board || [];
+    const actionLog = snap.actionLog || [];
 
-    for (let i = 1; i <= baseBoard.length; i++) {
-      const visibleBoard = baseBoard.slice(0, i);
-      const street = streetForCount(i);
-      const partial = JSON.parse(JSON.stringify({
-        handNumber: snap.handNumber,
-        levelIndex: snap.levelIndex,
-        handOver: false,
-        finalStreet: street,
-        board: visibleBoard,
-        pot: snap.pot,
-        buttonIndex: snap.buttonIndex,
-        blinds: { ...snap.blinds },
-        players: snap.players.map(p => ({
-          ...p,
-          holeCards: p.holeCards.map(c => ({ ...c })),
-          committedThisStreet: 0,
-          acted: p.acted,
-          lastAction: null,
-          committedTotal: p.committedTotal,
-          inHand: p.inHand,
-          folded: p.folded,
-          eliminated: p.eliminated,
-          revealed: p.eliminated ? false : false
-        })),
-        showdownResults: null,
-        actionLog: []
-      }));
-      steps.push({ kind: 'street', snapshot: partial });
+    /* Текущее состояние реплея */
+    const cur = {
+      board: [],
+      pot: 0,
+      players: players.map(p => ({
+        id: p.id,
+        stack: stackMap[p.id] !== undefined ? stackMap[p.id] : p.stack,
+        committedThisStreet: 0,
+        committedTotal: 0,
+        folded: false,
+        allIn: false,
+        eliminated: !!p.eliminated,
+        inHand: !!p.inHand,
+        acted: false,
+        lastAction: null,
+        revealed: false,
+        holeCards: p.holeCards.map(c => ({ ...c })),
+        position: p.position,
+        seatIndex: p.seatIndex,
+        isHero: p.isHero,
+        name: p.name,
+        strategy: p.strategy,
+        blindPaid: 0
+      }))
+    };
+
+    /* Начальный шаг — все места, ставки блайндов и анте ещё не показаны.
+       Начнём с пустого борда и пустого банка. */
+    const snapshotBase = () => makeReplaySnapshot(cur, snap, [], false, 0, 'preflop');
+    steps.push({ kind: 'start', snapshot: snapshotBase() });
+
+    let lastStreet = 'preflop';
+    let boardDealIndex = 0;
+    const boardDeals = [
+      { street: 'flop',  count: 3 },
+      { street: 'turn',  count: 1 },
+      { street: 'river', count: 1 }
+    ];
+
+    const advanceStreet = (targetStreet) => {
+      if (targetStreet === lastStreet) return;
+      lastStreet = targetStreet;
+      /* Сброс коммитов на новой улице */
+      for (const p of cur.players) {
+        p.committedThisStreet = 0;
+        p.hasActedThisStreet = false;
+        if (p.lastAction !== 'fold' && p.lastAction !== 'allin') p.lastAction = null;
+      }
+      /* Добор карт борда до нужного количества */
+      let needed = 0;
+      if (targetStreet === 'flop') needed = 3;
+      else if (targetStreet === 'turn') needed = 4;
+      else if (targetStreet === 'river') needed = 5;
+      while (cur.board.length < needed && boardDealIndex < finalBoard.length) {
+        cur.board.push({ ...finalBoard[boardDealIndex++] });
+      }
+      steps.push({ kind: 'street', snapshot: makeReplaySnapshot(cur, snap, [], false, 0, targetStreet) });
+    };
+
+    /* Пройдём по логу действий */
+    for (const act of actionLog) {
+      if (act.street !== lastStreet) {
+        advanceStreet(act.street);
+      }
+
+      const pl = cur.players.find(p => p.seatIndex === act.playerIndex);
+      if (!pl) continue;
+      const street = act.street;
+      const toCall = 0;
+      let lastAction = act.actionType;
+      let paid = 0;
+
+      if (act.actionType === 'fold') {
+        pl.folded = true;
+        pl.lastAction = 'fold';
+      } else if (act.actionType === 'check') {
+        pl.lastAction = 'check';
+        pl.acted = true;
+      } else if (act.actionType === 'call') {
+        /* Находим разницу между текущим currentBet улицы и коммитом игрока.
+           Для реплея используем сумму, вычисленную по изменению стека — но мы её не знаем.
+           Упростим: используем разницу между potAfter этого действия и предыдущего? Нельзя.
+           Возьмём: сумма, которую игрок должен был доложить, вычисляется по изменению potAfter.
+           Но potAfter неудобен, так как включает анте и блайнды.
+           Поэтому будем восстанавливать коммиты по увеличениям банка.
+           Здесь присваиваем pl.committedThisStreet = максимальный коммит на улице.
+           Это делается ниже через рост банка. */
+        pl.lastAction = 'call';
+        pl.acted = true;
+      } else if (act.actionType === 'raise') {
+        pl.lastAction = 'raise';
+        pl.acted = true;
+      } else if (act.actionType === 'allin') {
+        pl.lastAction = 'allin';
+        pl.allIn = true;
+        pl.acted = true;
+      } else if (act.actionType === 'call') {
+        pl.lastAction = 'call';
+        pl.acted = true;
+      }
+
+      /* Обновляем банк и стеки на основе potAfter */
+      const prevPot = cur.pot;
+      const newPot = act.potAfter;
+      const diff = Math.max(0, newPot - prevPot);
+      if (diff > 0) {
+        pl.stack = Math.max(0, pl.stack - diff);
+        pl.committedThisStreet += diff;
+        pl.committedTotal += diff;
+        cur.pot = newPot;
+      }
+
+      if (pl.stack === 0 && act.actionType !== 'check' && act.actionType !== 'fold') {
+        pl.allIn = true;
+      }
+
+      /* Уменьшаем стек, если он был ошибочно больше после fold? Fold не влияет на стек. */
+
+      steps.push({ kind: 'action', snapshot: makeReplaySnapshot(cur, snap, [], false, 0, street), playerIndex: act.playerIndex, actionType: lastAction });
     }
 
-    /* Финальный шаг — полный снимок раздачи (шоудаун) */
+    /* Показываем все карты борда до конца, если их не хватило в логе */
+    while (cur.board.length < finalBoard.length) {
+      cur.board.push({ ...finalBoard[boardDealIndex++] });
+    }
+
+    /* Финальный шаг — вскрытие */
+    for (const p of cur.players) {
+      const src = players.find(x => x.id === p.id);
+      if (src) {
+        p.revealed = !!src.revealed;
+        p.folded = !!src.folded;
+        p.allIn = !!src.allIn;
+      }
+      /* Стеки и коммиты подтягиваем к финальному снимку */
+      if (src) {
+        p.committedTotal = src.committedTotal;
+        p.committedThisStreet = 0;
+      }
+    }
+    /* Восстановим финальные стеки и банк из снапшота */
     const finalSnap = JSON.parse(JSON.stringify(snap));
     finalSnap.handOver = true;
     steps.push({ kind: 'final', snapshot: finalSnap });
 
     return steps;
+  }
+
+  function makeReplaySnapshot(cur, baseSnap, forcedBoard, handOver, extraPot, street) {
+    return {
+      handNumber: baseSnap.handNumber,
+      levelIndex: baseSnap.levelIndex,
+      handOver: !!handOver,
+      finalStreet: street || baseSnap.finalStreet,
+      board: cur.board.map(c => ({ ...c })),
+      pot: cur.pot,
+      buttonIndex: baseSnap.buttonIndex,
+      blinds: { ...baseSnap.blinds },
+      players: cur.players.map(p => ({
+        id: p.id,
+        seatIndex: p.seatIndex,
+        name: p.name,
+        isHero: p.isHero,
+        strategy: p.strategy,
+        stack: p.stack,
+        position: p.position,
+        holeCards: p.holeCards.map(c => ({ ...c })),
+        folded: p.folded,
+        eliminated: p.eliminated,
+        revealed: p.revealed,
+        committedThisStreet: p.committedThisStreet,
+        acted: p.acted,
+        lastAction: p.lastAction,
+        committedTotal: p.committedTotal,
+        blindPaid: p.blindPaid,
+        inHand: p.inHand
+      })),
+      showdownResults: null,
+      actionLog: []
+    };
   }
 
   function toggleReplay() {
@@ -3712,7 +3855,6 @@ const UI = (() => {
     session.replay.handSnapshot = snap;
 
     UI.setHeroActionsActive(false);
-    UI.setHistoryLabelVisible(true);
     UI.setReplayButtonState('pause');
 
     renderReplayStep();
@@ -3728,7 +3870,7 @@ const UI = (() => {
     const s = step.snapshot;
     UI.renderTable(s);
     UI.updateBoard(s);
-    UI.updateSeats(s, true);
+    UI.updateSeats(s, false);
     UI.updatePot(s);
     UI.updateLevel(s);
     UI.updateActiveHighlight({ actingIndex: -1, handOver: !!s.handOver, players: s.players });
@@ -3737,7 +3879,6 @@ const UI = (() => {
     } else {
       UI.clearWinnerHighlights();
     }
-    UI.setHistoryLabelVisible(true);
     UI.updateHistoryInfo(session.viewingIndex + 1, session.history.length, true);
   }
 
@@ -3754,7 +3895,7 @@ const UI = (() => {
       }
       renderReplayStep();
       scheduleNextReplayStep();
-    }, 1200);
+    }, 900);
   }
 
   function pauseReplay() {
@@ -3805,7 +3946,6 @@ const UI = (() => {
     stopReplay(true);
     session.viewingIndex = -1;
     session.isPaused = false;
-    UI.setHistoryLabelVisible(false);
     const state = session.state;
     if (!state) return;
     if (state.handOver) {
