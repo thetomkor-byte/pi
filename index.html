@@ -47,6 +47,8 @@
 
   --table-radius: clamp(28px, 4vmin, 46px);
   --table-border-w: clamp(8px, 1.4vmin, 14px);
+
+  --hero-timer-size: clamp(48px, 6.6vmin, 60px);
 }
 
 html, body {
@@ -610,6 +612,47 @@ button.disabled {
 }
 .seat .bet-chips.hidden { display: none; }
 
+/* Таймер героя */
+#hero-timer {
+  position: absolute;
+  width: var(--hero-timer-size);
+  height: var(--hero-timer-size);
+  pointer-events: none;
+  z-index: 40;
+  display: none;
+}
+#hero-timer.visible { display: block; }
+#hero-timer .timer-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+#hero-timer .timer-track {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 4;
+}
+#hero-timer .timer-fill {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 100.53 100.53;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 0.95s linear;
+  filter: drop-shadow(0 0 4px rgba(255, 203, 43, 0.7));
+}
+#hero-timer .timer-num {
+  fill: #fff;
+  font-size: 20px;
+  font-weight: 900;
+  text-anchor: middle;
+  dominant-baseline: central;
+  paint-order: stroke;
+  stroke: #000;
+  stroke-width: 1.5px;
+}
+
 #hero-actions {
   position: absolute;
   left: calc(var(--dash-inset) + var(--edge));
@@ -1082,6 +1125,14 @@ button.disabled {
           </div>
         </div>
         <div id="seats"></div>
+
+        <div id="hero-timer">
+          <svg class="timer-svg" viewBox="0 0 40 40">
+            <circle class="timer-track" cx="20" cy="20" r="16"></circle>
+            <circle class="timer-fill" cx="20" cy="20" r="16"></circle>
+            <text class="timer-num" x="20" y="20" id="hero-timer-num">10</text>
+          </svg>
+        </div>
 
         <div id="hero-actions" class="inactive">
           <div id="hand-nav">
@@ -2200,6 +2251,10 @@ const UI = (() => {
     el.hnResume       = document.getElementById('hn-resume');
     el.hnSettings     = document.getElementById('hn-settings');
 
+    el.heroTimer      = document.getElementById('hero-timer');
+    el.heroTimerNum   = document.getElementById('hero-timer-num');
+    el.heroTimerFill  = el.heroTimer ? el.heroTimer.querySelector('.timer-fill') : null;
+
     el.setCardStyle      = document.getElementById('set-card-style');
     el.setStackDisplay   = document.getElementById('set-stack-display');
     el.setBlindGrowth    = document.getElementById('set-blind-growth');
@@ -2249,6 +2304,50 @@ const UI = (() => {
     }
   }
 
+  /* Таймер героя */
+  function placeHeroTimer() {
+    if (!el.heroTimer) return;
+    const heroSeat = document.getElementById('seat-hero');
+    if (!heroSeat) { el.heroTimer.classList.remove('visible'); return; }
+    const cards = heroSeat.querySelector('.seat-cards');
+    if (!cards) { el.heroTimer.classList.remove('visible'); return; }
+
+    const tableRect = document.getElementById('poker-table').getBoundingClientRect();
+    const cardsRect = cards.getBoundingClientRect();
+
+    const size = el.heroTimer.offsetWidth || 48;
+    const left = cardsRect.right - tableRect.left + 4;
+    const top = cardsRect.top - tableRect.top + cardsRect.height / 2 - size / 2;
+    el.heroTimer.style.left = left + 'px';
+    el.heroTimer.style.top = top + 'px';
+  }
+
+  function showHeroTimer(seconds) {
+    if (!el.heroTimer) return;
+    el.heroTimer.classList.add('visible');
+    updateHeroTimer(seconds, seconds);
+    placeHeroTimer();
+  }
+
+  function hideHeroTimer() {
+    if (!el.heroTimer) return;
+    el.heroTimer.classList.remove('visible');
+    const fill = el.heroTimer.querySelector('.timer-fill');
+    if (fill) fill.style.strokeDashoffset = 0;
+  }
+
+  function updateHeroTimer(currentSec, totalSec) {
+    if (!el.heroTimer) return;
+    const fill = el.heroTimer.querySelector('.timer-fill');
+    const num = el.heroTimerNum;
+    if (!fill || !num) return;
+    num.textContent = String(Math.max(0, currentSec));
+
+    const circumference = 2 * Math.PI * 16;
+    const ratio = totalSec > 0 ? Math.max(0, Math.min(1, currentSec / totalSec)) : 0;
+    fill.style.strokeDashoffset = String(circumference * (1 - ratio));
+  }
+
   function renderTable(state) {
     el.seats.innerHTML = '';
     for (const p of state.players) {
@@ -2258,6 +2357,7 @@ const UI = (() => {
     updateStacks(state);
     updatePot(state);
     updateLevel(state);
+    placeHeroTimer();
   }
 
   function createSeatElement(player, state) {
@@ -2365,6 +2465,7 @@ const UI = (() => {
     }
     updateStacks(state);
     updateActiveHighlight(state);
+    placeHeroTimer();
   }
 
   function renderActionBadge(p, seat) {
@@ -2904,7 +3005,8 @@ const UI = (() => {
     renderQuickRaiseOptions,
     clearWinnerHighlights,
     resetSliderToStart,
-    setReplayButtonState
+    setReplayButtonState,
+    showHeroTimer, hideHeroTimer, updateHeroTimer, placeHeroTimer
   };
 
 })();
@@ -2921,9 +3023,16 @@ const UI = (() => {
     stats: { hands: 0, hit: 0, miss: 0, place: null, streak: 0 },
     waitingForHero: false, active: false,
     heroEntered: false,
+    heroEliminated: false,
+    tournamentOver: false,
     history: [], viewingIndex: -1, autoNextTimerId: null,
     botTimerId: null, revealTimerId: null,
     isPaused: false,
+
+    heroTimerIntervalId: null,
+    heroTimerTimeoutId: null,
+    heroTimerRemaining: 0,
+    heroTimerTotal: 0,
 
     replay: {
       active: false,
@@ -2944,6 +3053,7 @@ const UI = (() => {
     UI.applySettingsToUI();
     bindDoubleTapGuard();
     bindDesktopDoubleClick();
+    window.addEventListener('resize', () => { UI.placeHeroTimer(); });
   });
 
   function cacheDom() {
@@ -3217,6 +3327,7 @@ const UI = (() => {
 
   function restartSession() {
     stopReplay(true);
+    stopHeroTimer();
     clearTimeout(session.autoNextTimerId);
     clearTimeout(session.botTimerId);
     clearTimeout(session.revealTimerId);
@@ -3227,6 +3338,8 @@ const UI = (() => {
     session.stats = { hands: 0, hit: 0, miss: 0, place: null, streak: 0 };
     session.waitingForHero = false;
     session.heroEntered = false;
+    session.heroEliminated = false;
+    session.tournamentOver = false;
     session.isPaused = false;
 
     UI.setHeroActionsActive(false);
@@ -3239,6 +3352,7 @@ const UI = (() => {
 
   function startNewSession() {
     stopReplay(true);
+    stopHeroTimer();
     clearTimeout(session.autoNextTimerId);
     clearTimeout(session.botTimerId);
     clearTimeout(session.revealTimerId);
@@ -3246,6 +3360,8 @@ const UI = (() => {
     session.stats = { hands: 0, hit: 0, miss: 0, place: null, streak: 0 };
     session.waitingForHero = false;
     session.heroEntered = false;
+    session.heroEliminated = false;
+    session.tournamentOver = false;
     session.history = [];
     session.viewingIndex = -1;
     session.isPaused = false;
@@ -3270,15 +3386,27 @@ const UI = (() => {
   function startHand() {
     if (!session.active) return;
     stopReplay(true);
+    stopHeroTimer();
+
+    if (session.tournamentOver) return;
 
     for (const p of session.state.players) {
       if (!p.eliminated && p.stack <= 0) p.eliminated = true;
     }
 
     const hero = session.state.players[session.heroIndex];
-    if (hero.eliminated || hero.stack <= 0) { endSession('Герой вылетел'); return; }
+    if (hero.eliminated && !session.heroEliminated) {
+      /* Герой вылетел впервые — переходим в режим наблюдателя */
+      session.heroEliminated = true;
+    }
+
     const alive = session.state.players.filter(p => !p.eliminated);
-    if (alive.length <= 1) { endSession('Турнир выигран!'); return; }
+    if (alive.length <= 1) {
+      session.tournamentOver = true;
+      UI.setHeroActionsActive(false);
+      UI.hideHeroTimer();
+      return;
+    }
 
     clearTimeout(session.revealTimerId);
 
@@ -3324,12 +3452,13 @@ const UI = (() => {
 
     UI.updateActiveHighlight(state);
 
-    if (player.isHero) {
+    if (player.isHero && !session.heroEliminated) {
       session.waitingForHero = true;
       heroTurn(player);
     } else {
       session.waitingForHero = false;
       UI.setHeroActionsActive(false);
+      UI.hideHeroTimer();
       UI.resetSliderToStart();
       refreshQuickPercentList();
       botTurn(player, idx);
@@ -3345,12 +3474,61 @@ const UI = (() => {
       onRaise: (amount) => heroAct({ type: 'raise', amount }),
       onAllIn: () => heroAct({ type: 'allin' })
     });
+    startHeroTimerIfNeeded();
+  }
+
+  function startHeroTimerIfNeeded() {
+    stopHeroTimer();
+    const seconds = Number(UI.settings.turnTime) || 0;
+    if (seconds <= 0) return;
+
+    session.heroTimerTotal = seconds;
+    session.heroTimerRemaining = seconds;
+    UI.showHeroTimer(seconds);
+
+    session.heroTimerIntervalId = setInterval(() => {
+      session.heroTimerRemaining -= 1;
+      UI.updateHeroTimer(session.heroTimerRemaining, session.heroTimerTotal);
+      if (session.heroTimerRemaining <= 0) {
+        stopHeroTimer();
+        /* Авто-фолд */
+        if (session.waitingForHero && !session.heroEliminated) {
+          session.waitingForHero = false;
+          UI.setHeroActionsActive(false);
+          UI.resetSliderToStart();
+          const state = session.state;
+          if (state) {
+            const res = Engine.applyAction(state, session.heroIndex, { type: 'fold' });
+            if (res.ok) {
+              pushActionLog(state, session.heroIndex, 'fold', 0);
+              UI.updateSeats(state);
+              UI.updatePot(state);
+            }
+            advanceOrFinish();
+          }
+        }
+      }
+    }, 1000);
+  }
+
+  function stopHeroTimer() {
+    if (session.heroTimerIntervalId) {
+      clearInterval(session.heroTimerIntervalId);
+      session.heroTimerIntervalId = null;
+    }
+    if (session.heroTimerTimeoutId) {
+      clearTimeout(session.heroTimerTimeoutId);
+      session.heroTimerTimeoutId = null;
+    }
+    session.heroTimerRemaining = 0;
+    UI.hideHeroTimer();
   }
 
   function heroAct(action) {
     if (session.viewingIndex >= 0) return;
     if (session.replay.active) return;
     if (!session.waitingForHero) return;
+    stopHeroTimer();
     session.waitingForHero = false;
     UI.setHeroActionsActive(false);
     UI.resetSliderToStart();
@@ -3490,11 +3668,18 @@ const UI = (() => {
   function finishHand() {
     if (session.isPaused) return;
     if (session.replay.active) return;
+    stopHeroTimer();
     const state = session.state;
     Engine.finalizeHand(state);
 
     session.history.push(snapshotState(state));
     if (session.history.length > 1000) session.history.shift();
+
+    /* Помечаем героя как вылетевшего, если он вылетел в этой раздаче */
+    const heroP = state.players[session.heroIndex];
+    if (heroP.eliminated || heroP.stack <= 0) {
+      session.heroEliminated = true;
+    }
 
     UI.updateBoard(state);
     UI.updateSeats(state, false);
@@ -3530,10 +3715,13 @@ const UI = (() => {
         state.levelIndex = Math.min(state.levelIndex + 1, Engine.BLIND_LEVELS.length - 1);
       }
 
-      const heroP = state.players[session.heroIndex];
-      if (heroP.eliminated || heroP.stack <= 0) { endSession('Герой вылетел'); return; }
       const alive = state.players.filter(p => !p.eliminated);
-      if (alive.length <= 1) { endSession('Турнир выигран!'); return; }
+      if (alive.length <= 1) {
+        session.tournamentOver = true;
+        UI.setHeroActionsActive(false);
+        UI.hideHeroTimer();
+        return;
+      }
       startHand();
     }, 4000);
   }
@@ -3580,6 +3768,7 @@ const UI = (() => {
     session.botTimerId = null;
     session.autoNextTimerId = null;
     UI.setHeroActionsActive(false);
+    stopHeroTimer();
   }
 
   /* ============================================================
@@ -3602,6 +3791,7 @@ const UI = (() => {
     const snap = session.history[session.viewingIndex];
     if (!snap) return;
     UI.setHeroActionsActive(false);
+    UI.hideHeroTimer();
     UI.renderTable(snap);
     UI.updateBoard(snap);
     UI.updateSeats(snap, true);
@@ -3622,7 +3812,6 @@ const UI = (() => {
     const finalBoard = snap.board || [];
     const actionLog = snap.actionLog || [];
 
-    /* Восстанавливаем стартовые стеки: финальный стек + все вложения. */
     const baseStacks = {};
     for (const p of snap.players) {
       baseStacks[p.id] = p.stack + (p.committedTotal || 0);
@@ -3681,7 +3870,6 @@ const UI = (() => {
         lastStreet = act.street;
         resetStreetCommits();
         takeBoardSnapshot(lastStreet);
-        /* Сбросим бейджи действий у тех, кто уже не действует (кроме fold/allin) */
         for (const p of cur.players) {
           if (p.lastAction !== 'fold' && p.lastAction !== 'allin') p.lastAction = null;
         }
@@ -3691,7 +3879,6 @@ const UI = (() => {
       const pl = cur.players.find(p => p.seatIndex === act.playerIndex);
       if (!pl) continue;
 
-      /* Разница банка — фактически вложенная сумма этим действием. */
       const diff = Math.max(0, act.potAfter - cur.pot);
 
       if (act.actionType === 'fold') {
@@ -3731,12 +3918,10 @@ const UI = (() => {
       steps.push({ kind: 'action', snapshot: makeReplaySnapshot(cur, snap, lastStreet, false) });
     }
 
-    /* Показываем оставшиеся карты борда (если лог закончился раньше) */
     while (cur.board.length < finalBoard.length) {
       cur.board.push({ ...finalBoard[cur.board.length] });
     }
 
-    /* Финальный шаг — показываем вскрытие, бейджи и стеки как в финальном снимке */
     const finalSnap = JSON.parse(JSON.stringify(snap));
     finalSnap.handOver = true;
     steps.push({ kind: 'final', snapshot: finalSnap });
@@ -3805,6 +3990,7 @@ const UI = (() => {
     session.replay.handSnapshot = snap;
 
     UI.setHeroActionsActive(false);
+    UI.hideHeroTimer();
     UI.setReplayButtonState('pause');
 
     renderReplayStep();
@@ -3898,6 +4084,7 @@ const UI = (() => {
     session.isPaused = false;
     const state = session.state;
     if (!state) return;
+    UI.hideHeroTimer();
     if (state.handOver) {
       UI.updateBoard(state);
       UI.updateSeats(state, true);
@@ -3920,10 +4107,12 @@ const UI = (() => {
             state.levelIndex = Math.min(state.levelIndex + 1, Engine.BLIND_LEVELS.length - 1);
           }
 
-          const heroP = state.players[session.heroIndex];
-          if (heroP.eliminated || heroP.stack <= 0) { endSession('Герой вылетел'); return; }
           const alive = state.players.filter(p => !p.eliminated);
-          if (alive.length <= 1) { endSession('Турнир выигран!'); return; }
+          if (alive.length <= 1) {
+            session.tournamentOver = true;
+            UI.setHeroActionsActive(false);
+            return;
+          }
           startHand();
         }, 4000);
       }
@@ -3936,7 +4125,7 @@ const UI = (() => {
       UI.updateActiveHighlight(state);
       UI.resetSliderToStart();
       refreshQuickPercentList();
-      if (session.waitingForHero) {
+      if (session.waitingForHero && !session.heroEliminated) {
         heroTurn(state.players[session.heroIndex]);
       } else {
         UI.setHeroActionsActive(false);
@@ -3944,22 +4133,6 @@ const UI = (() => {
       }
     }
     UI.updateHistoryInfo(session.history.length, session.history.length, false);
-  }
-
-  function endSession(title) {
-    stopReplay(true);
-    session.active = false;
-    clearTimeout(session.autoNextTimerId);
-    clearTimeout(session.botTimerId);
-    clearTimeout(session.revealTimerId);
-    UI.setHeroActionsActive(false);
-    const alive = session.state.players.filter(p => !p.eliminated).length;
-    const heroAlive = !session.state.players[session.heroIndex].eliminated;
-    session.stats.place = heroAlive ? alive : (alive + 1);
-    alert(title + '\nМесто: ' + session.stats.place + '/' + Engine.SEATS +
-          '\nРаздач: ' + session.stats.hands);
-    el.startOverlay.classList.remove('hidden');
-    el.btnStart.textContent = 'Начать заново';
   }
 
 })();
