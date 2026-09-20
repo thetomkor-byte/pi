@@ -1515,7 +1515,7 @@ button.disabled {
 })();
 
 /* Полный запрет зума: пинч, gesture, Ctrl+колесо, Ctrl+клавиши, авто-сброс при загрузке
-   и при возврате из фона. Защита от «пробившегося» двойного тапа. */
+   и при возврате из фона, жёсткий перехват двойного тапа. */
 (function() {
   try {
     const VIEWPORT_LOCK = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover';
@@ -1597,6 +1597,30 @@ button.disabled {
     document.addEventListener('gesturestart', (e) => { e.preventDefault(); return false; }, { passive: false, capture: true });
     document.addEventListener('gesturechange', (e) => { e.preventDefault(); return false; }, { passive: false, capture: true });
     document.addEventListener('gestureend', (e) => { e.preventDefault(); return false; }, { passive: false, capture: true });
+
+    /* Двойной тап на Safari/Chrome сам по себе пытается зуммировать.
+       Гасим его на самом раннем этапе на всей странице. Наши собственные
+       обработчики двойного тапа срабатывают параллельно — они не зависят
+       от системного поведения браузера. */
+    let lastTapTs = 0;
+    document.addEventListener('touchend', (e) => {
+      const now = Date.now();
+      if (now - lastTapTs < 350) {
+        /* Это был второй тап подряд — отменяем системную реакцию. */
+        if (e.cancelable) {
+          e.preventDefault();
+        }
+        lastTapTs = 0;
+      } else {
+        lastTapTs = now;
+      }
+    }, { passive: false, capture: true });
+
+    /* Отключаем системный dblclick: именно он в Safari/Chrome вызывает зум. */
+    document.addEventListener('dblclick', (e) => {
+      e.preventDefault();
+      return false;
+    }, { passive: false, capture: true });
 
     function checkZoomAndFix() {
       try {
@@ -3461,7 +3485,7 @@ const UI = (() => {
   const el = {};
 
   /* Двойной тап / двойной клик: окно в миллисекундах между касаниями. */
-  const DOUBLE_TAP_WINDOW = 400;
+  const DOUBLE_TAP_WINDOW = 500;
 
   window.addEventListener('DOMContentLoaded', () => {
     UI.init();
@@ -3532,11 +3556,12 @@ const UI = (() => {
     });
   }
 
-  /* Счётчик двойного тапа: возвращает true, когда накопилось два касания. */
+  /* Счётчик двойного тапа: возвращает true, когда накопилось два касания.
+     Окно срабатывания чуть увеличено, чтобы не терять первый тап. */
   function registerDoubleTap(node) {
     const now = Date.now();
     const last = node._lastDoubleTapTime || 0;
-    if (now - last < DOUBLE_TAP_WINDOW) {
+    if (last && (now - last) < DOUBLE_TAP_WINDOW) {
       node._lastDoubleTapTime = 0;
       return true;
     }
