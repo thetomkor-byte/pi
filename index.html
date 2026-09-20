@@ -215,6 +215,7 @@ button.disabled {
   height: var(--board-card-h);
   width: calc(var(--board-card-w) * 5 + clamp(3px, 0.6vmin, 5px) * 4);
   max-width: 100%;
+  position: relative;
 }
 #board-cards .card {
   --card-w: var(--board-card-w);
@@ -223,6 +224,29 @@ button.disabled {
   padding: 1px 4px;
 }
 #board-cards .card .suit { font-size: clamp(24px, 3.8vmin, 36px); }
+
+#board-history-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  text-align: center;
+  font-weight: 900;
+  font-size: clamp(13px, 2vmin, 20px);
+  letter-spacing: clamp(1px, 0.35vmin, 4px);
+  color: rgba(20, 20, 20, 0.2);
+  text-shadow:
+    0 0 1px rgba(0,0,0,.15),
+    0 1px 2px rgba(255,255,255,.2);
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+  z-index: 6;
+  display: none;
+  line-height: 1;
+}
+#board-history-label.visible { display: block; }
 
 #table-info {
   display: flex;
@@ -1023,7 +1047,9 @@ button.disabled {
           <div id="top-info">
             <div id="pot-display">Банк: 0</div>
           </div>
-          <div id="board-cards"></div>
+          <div id="board-cards">
+            <div id="board-history-label">ИСТОРИЯ РАЗДАЧ</div>
+          </div>
           <div id="table-info">
             <div class="info-row" id="info-blinds-row">Блайнды: 10/20</div>
             <div class="info-row faded" id="info-timer-row">через 10 раздач</div>
@@ -2134,6 +2160,7 @@ const UI = (() => {
     el.infoBlindsRow  = document.getElementById('info-blinds-row');
     el.infoTimerRow   = document.getElementById('info-timer-row');
     el.infoNextBlinds = document.getElementById('info-next-blinds-row');
+    el.boardHistoryLabel = document.getElementById('board-history-label');
 
     el.heroActions    = document.getElementById('hero-actions');
     el.heroButtons    = document.getElementById('hero-buttons');
@@ -2189,6 +2216,11 @@ const UI = (() => {
   function closeAllPanels() {
     el.bottomPanel.classList.remove('open');
     updateOverlayState();
+  }
+
+  function setHistoryLabelVisible(visible) {
+    if (!el.boardHistoryLabel) return;
+    el.boardHistoryLabel.classList.toggle('visible', !!visible);
   }
 
   function renderTable(state) {
@@ -2443,7 +2475,11 @@ const UI = (() => {
   }
 
   function updateBoard(state) {
+    /* Удаляем только карты, оставляя надпись-водяной знак внутри board-cards. */
+    const label = el.boardHistoryLabel;
     el.boardCards.innerHTML = '';
+    if (label) el.boardCards.appendChild(label);
+
     const actualCount = state.board.length;
     const finalStreet = state.finalStreet;
 
@@ -2843,7 +2879,8 @@ const UI = (() => {
     createCardElement, createSeatElement, formatChips,
     renderQuickRaiseOptions,
     clearWinnerHighlights,
-    resetSliderToStart
+    resetSliderToStart,
+    setHistoryLabelVisible
   };
 
 })();
@@ -3149,6 +3186,7 @@ const UI = (() => {
     UI.setHeroActionsActive(false);
     UI.updateHistoryInfo(0, 0, false);
     UI.clearWinnerHighlights();
+    UI.setHistoryLabelVisible(false);
 
     startNewSession();
   }
@@ -3177,6 +3215,7 @@ const UI = (() => {
 
     UI.renderTable(session.state);
     UI.updateHistoryInfo(0, 0, false);
+    UI.setHistoryLabelVisible(false);
 
     startHand();
   }
@@ -3201,6 +3240,7 @@ const UI = (() => {
     session.isPaused = false;
 
     UI.clearWinnerHighlights();
+    UI.setHistoryLabelVisible(false);
     UI.renderTable(session.state);
     UI.updateBoard(session.state);
     UI.updatePot(session.state);
@@ -3397,6 +3437,7 @@ const UI = (() => {
     UI.resetSliderToStart();
     refreshQuickPercentList();
     UI.updateHistoryInfo(session.history.length, session.history.length, false);
+    UI.setHistoryLabelVisible(false);
 
     highlightWinners(state);
 
@@ -3494,12 +3535,14 @@ const UI = (() => {
     UI.updateLevel(snap);
     UI.updateActiveHighlight({ actingIndex: -1, handOver: true, players: snap.players });
     highlightWinners(snap);
+    UI.setHistoryLabelVisible(true);
     UI.updateHistoryInfo(session.viewingIndex + 1, session.history.length, true);
   }
 
   function resumeGame() {
     session.viewingIndex = -1;
     session.isPaused = false;
+    UI.setHistoryLabelVisible(false);
     const state = session.state;
     if (state.handOver) {
       UI.updateBoard(state);
