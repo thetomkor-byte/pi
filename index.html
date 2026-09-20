@@ -715,6 +715,48 @@ button.disabled {
 }
 #support-copied.visible { opacity: 1; }
 
+/* Оверлей окошка «!» */
+#excl-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  z-index: 300;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  touch-action: none;
+}
+#excl-overlay.visible { display: flex; }
+
+#excl-window {
+  width: min(94vw, calc((100vh - clamp(8px, 1.6vmin, 20px)) * 9 / 16));
+  max-width: 94vw;
+  background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
+  border: 2px solid #3a3530;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.9), 0 0 80px rgba(255,203,43,.08);
+  padding: clamp(20px, 4vmin, 28px) clamp(18px, 3.6vmin, 26px);
+  text-align: left;
+}
+
+#excl-window h3 {
+  color: var(--gold);
+  font-size: clamp(12px, 1.8vmin, 15px);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 18px;
+  font-weight: 900;
+  text-align: center;
+}
+
+#excl-window p {
+  color: var(--muted);
+  font-size: clamp(12px, 1.6vmin, 14px);
+  line-height: 1.5;
+  text-align: left;
+}
+
 #hero-timer {
   position: absolute;
   width: var(--hero-timer-size);
@@ -1100,9 +1142,19 @@ button.disabled {
   text-align: center;
 }
 
-.round-help-btn {
+/* Круглые кнопки-символы над блоком истории раздач. */
+#top-round-row {
   position: absolute;
-  top: 18px;
+  display: flex;
+  gap: 4px;
+  z-index: 46;
+  pointer-events: auto;
+  left: 0;
+  top: 0;
+}
+
+.round-help-btn {
+  position: relative;
   width: calc(var(--hero-timer-size) - 8px);
   height: calc(var(--hero-timer-size) - 8px);
   border-radius: 50%;
@@ -1115,7 +1167,6 @@ button.disabled {
   align-items: center;
   justify-content: center;
   line-height: 1;
-  z-index: 5;
   cursor: pointer;
   touch-action: manipulation;
   transition: transform .08s ease, filter .08s ease;
@@ -1125,13 +1176,6 @@ button.disabled {
 .round-help-btn:active:not(:disabled) {
   transform: scale(0.96);
   filter: brightness(1.35);
-}
-
-#settings-card-btn {
-  left: 20px;
-}
-#settings-help-btn {
-  right: 20px;
 }
 
 .setting {
@@ -1355,6 +1399,13 @@ button.disabled {
           </svg>
         </div>
 
+        <!-- Три круглые кнопки над блоком истории раздач. -->
+        <div id="top-round-row">
+          <button id="settings-card-btn" class="round-help-btn" type="button" aria-label="Поддержать">💳</button>
+          <button id="settings-help-btn" class="round-help-btn" type="button" aria-label="Руководство">?</button>
+          <button id="settings-excl-btn" class="round-help-btn" type="button" aria-label="Внимание">!</button>
+        </div>
+
         <div id="hero-actions" class="inactive">
           <div id="hand-nav">
             <div class="nav-history">
@@ -1407,8 +1458,6 @@ button.disabled {
   </div>
 
   <div id="bottom-panel">
-    <button id="settings-card-btn" class="round-help-btn" type="button" aria-label="Поддержать">💳</button>
-    <button id="settings-help-btn" class="round-help-btn" type="button" aria-label="Руководство">?</button>
     <h3>Настройки</h3>
     <label class="setting">
       <span>Стиль карт</span>
@@ -1465,6 +1514,13 @@ button.disabled {
         <div id="support-usd">USD</div>
       </div>
       <div id="support-footer">Благодарю</div>
+    </div>
+  </div>
+
+  <div id="excl-overlay">
+    <div id="excl-window">
+      <h3>Внимание</h3>
+      <p>Раздел в разработке. Здесь будет полезная информация.</p>
     </div>
   </div>
 
@@ -1598,15 +1654,10 @@ button.disabled {
     document.addEventListener('gesturechange', (e) => { e.preventDefault(); return false; }, { passive: false, capture: true });
     document.addEventListener('gestureend', (e) => { e.preventDefault(); return false; }, { passive: false, capture: true });
 
-    /* Двойной тап на Safari/Chrome сам по себе пытается зуммировать.
-       Гасим его на самом раннем этапе на всей странице. Наши собственные
-       обработчики двойного тапа срабатывают параллельно — они не зависят
-       от системного поведения браузера. */
     let lastTapTs = 0;
     document.addEventListener('touchend', (e) => {
       const now = Date.now();
       if (now - lastTapTs < 350) {
-        /* Это был второй тап подряд — отменяем системную реакцию. */
         if (e.cancelable) {
           e.preventDefault();
         }
@@ -1616,7 +1667,6 @@ button.disabled {
       }
     }, { passive: false, capture: true });
 
-    /* Отключаем системный dblclick: именно он в Safari/Chrome вызывает зум. */
     document.addEventListener('dblclick', (e) => {
       e.preventDefault();
       return false;
@@ -2593,6 +2643,10 @@ const UI = (() => {
     el.btnSupportPanel = document.getElementById('btn-support-panel');
     el.settingsHelpBtn = document.getElementById('settings-help-btn');
     el.settingsCardBtn = document.getElementById('settings-card-btn');
+    el.settingsExclBtn = document.getElementById('settings-excl-btn');
+    el.exclOverlay     = document.getElementById('excl-overlay');
+    el.exclWindow      = document.getElementById('excl-window');
+    el.topRoundRow     = document.getElementById('top-round-row');
 
     el.setCardStyle      = document.getElementById('set-card-style');
     el.setStackDisplay   = document.getElementById('set-stack-display');
@@ -2653,7 +2707,17 @@ const UI = (() => {
 
   function anyOverlayOpen() {
     return anyPanelOpen() ||
-           (el.supportOverlay && el.supportOverlay.classList.contains('visible'));
+           (el.supportOverlay && el.supportOverlay.classList.contains('visible')) ||
+           (el.exclOverlay && el.exclOverlay.classList.contains('visible'));
+  }
+
+  function showExclOverlay() {
+    if (!el.exclOverlay) return;
+    el.exclOverlay.classList.add('visible');
+  }
+  function hideExclOverlay() {
+    if (!el.exclOverlay) return;
+    el.exclOverlay.classList.remove('visible');
   }
 
   function setReplayButtonState(state) {
@@ -2668,6 +2732,21 @@ const UI = (() => {
       el.hnReplay.textContent = '▶︎';
       el.hnReplay.title = 'Продолжить';
     }
+  }
+
+  function placeTopRoundRow() {
+    if (!el.topRoundRow || !el.heroActions) return;
+    const tableRect = document.getElementById('poker-table').getBoundingClientRect();
+    const haRect = el.heroActions.getBoundingClientRect();
+    if (haRect.height <= 0) return;
+
+    const rowHeight = el.topRoundRow.offsetHeight || 40;
+    const top = haRect.top - tableRect.top - 4 - rowHeight;
+    /* Левый край кнопок совпадает с левым краем блока истории раздач. */
+    const left = haRect.left - tableRect.left;
+
+    el.topRoundRow.style.left = left + 'px';
+    el.topRoundRow.style.top = top + 'px';
   }
 
   function placeHeroTimer() {
@@ -2740,6 +2819,7 @@ const UI = (() => {
     updatePot(state);
     updateLevel(state);
     placeHeroTimer();
+    placeTopRoundRow();
   }
 
   function createSeatElement(player, state) {
@@ -2848,6 +2928,7 @@ const UI = (() => {
     updateStacks(state);
     updateActiveHighlight(state);
     placeHeroTimer();
+    placeTopRoundRow();
   }
 
   function renderActionBadge(p, seat) {
@@ -3433,6 +3514,7 @@ const UI = (() => {
     showActions, setHeroActionsActive,
     openBottomPanel, closeBottomPanel, openGuidePanel, openGuideInsteadOfSettings, closeGuidePanel,
     closeAllPanels, anyPanelOpen, anyOverlayOpen,
+    showExclOverlay, hideExclOverlay,
     updateHistoryInfo,
     readSettingsFromUI, applySettingsToUI,
     syncSettingsUI, toggleStackDisplay, toggleShowStrategies, toggleShowAllHands,
@@ -3442,6 +3524,7 @@ const UI = (() => {
     resetSliderToStart,
     setReplayButtonState,
     showHeroTimer, hideHeroTimer, updateHeroTimer, placeHeroTimer,
+    placeTopRoundRow,
     showSupportOverlay, hideSupportOverlay, copySupportText
   };
 
@@ -3466,6 +3549,7 @@ const UI = (() => {
     isPaused: false,
     supportPaused: false,
     panelsPaused: false,
+    exclPaused: false,
 
     heroTimerIntervalId: null,
     heroTimerTimeoutId: null,
@@ -3495,6 +3579,7 @@ const UI = (() => {
     bindDesktopDoubleClick();
     window.addEventListener('resize', () => {
       UI.placeHeroTimer();
+      UI.placeTopRoundRow();
     });
   });
 
@@ -3513,6 +3598,10 @@ const UI = (() => {
     el.btnSupportPanel = document.getElementById('btn-support-panel');
     el.settingsHelpBtn = document.getElementById('settings-help-btn');
     el.settingsCardBtn = document.getElementById('settings-card-btn');
+    el.settingsExclBtn = document.getElementById('settings-excl-btn');
+    el.exclOverlay     = document.getElementById('excl-overlay');
+    el.exclWindow      = document.getElementById('excl-window');
+    el.topRoundRow     = document.getElementById('top-round-row');
     el.app            = document.getElementById('app');
     el.seats          = document.getElementById('seats');
     el.heroTimerZone  = document.getElementById('hero-timer-zone');
@@ -3556,8 +3645,6 @@ const UI = (() => {
     });
   }
 
-  /* Счётчик двойного тапа: возвращает true, когда накопилось два касания.
-     Окно срабатывания чуть увеличено, чтобы не терять первый тап. */
   function registerDoubleTap(node) {
     const now = Date.now();
     const last = node._lastDoubleTapTime || 0;
@@ -3580,7 +3667,9 @@ const UI = (() => {
               target.closest('#hero-actions') ||
               target.closest('#quick-percent-list') ||
               target.closest('#hero-timer-zone') ||
-              target.closest('#support-overlay'));
+              target.closest('#support-overlay') ||
+              target.closest('#excl-overlay') ||
+              target.closest('#top-round-row'));
   }
 
   function bindGlobalHandlers() {
@@ -3617,6 +3706,23 @@ const UI = (() => {
 
     el.tapClose.addEventListener('click', () => closeAllPanelsAndResume());
 
+    /* Свайп вниз внутри панели настроек — закрывает её. */
+    let bpStartY = 0, bpTracking = false;
+    el.bottomPanel.addEventListener('touchstart', (e) => {
+      if (e.touches.length !== 1) return;
+      bpTracking = true;
+      bpStartY = e.touches[0].clientY;
+    }, { passive: true });
+    el.bottomPanel.addEventListener('touchend', (e) => {
+      if (!bpTracking) return;
+      bpTracking = false;
+      const endY = e.changedTouches[0].clientY;
+      const dy = endY - bpStartY;
+      if (dy > 60) {
+        closeAllPanelsAndResume();
+      }
+    }, { passive: true });
+
     if (el.heroTimerZone) {
       el.heroTimerZone.addEventListener('touchend', (e) => {
         e.stopPropagation();
@@ -3649,6 +3755,26 @@ const UI = (() => {
           closeSupportWindow();
         }
       }, { passive: false });
+    }
+
+    if (el.exclOverlay) {
+      el.exclOverlay.addEventListener('click', (e) => {
+        if (e.target === el.exclOverlay) {
+          closeExclWindow();
+        }
+      });
+      el.exclOverlay.addEventListener('touchend', (e) => {
+        if (e.target === el.exclOverlay) {
+          e.preventDefault();
+          e.stopPropagation();
+          closeExclWindow();
+        }
+      }, { passive: false });
+    }
+
+    if (el.exclWindow) {
+      el.exclWindow.addEventListener('click', (e) => e.stopPropagation());
+      el.exclWindow.addEventListener('touchend', (e) => e.stopPropagation(), { passive: false });
     }
 
     if (el.supportCardNumber) {
@@ -3715,6 +3841,19 @@ const UI = (() => {
       }, { passive: false });
     }
 
+    if (el.settingsExclBtn) {
+      el.settingsExclBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openExclWindow();
+      });
+      el.settingsExclBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openExclWindow();
+      }, { passive: false });
+    }
+
     if (el.bottomPanel) {
       el.bottomPanel.addEventListener('click', (e) => e.stopPropagation());
       el.bottomPanel.addEventListener('touchend', (e) => e.stopPropagation(), { passive: false });
@@ -3759,7 +3898,7 @@ const UI = (() => {
   }
 
   function openPanelWithPause(openFn) {
-    if (session.supportPaused) return;
+    if (session.supportPaused || session.exclPaused) return;
     if (UI.anyOverlayOpen()) return;
     openFn();
     session.panelsPaused = true;
@@ -3771,7 +3910,9 @@ const UI = (() => {
     UI.closeAllPanels();
     if (wasOpen && session.panelsPaused) {
       session.panelsPaused = false;
-      resumeGame();
+      if (!session.supportPaused && !session.exclPaused) {
+        resumeGame();
+      }
     }
   }
 
@@ -3786,7 +3927,23 @@ const UI = (() => {
     if (!session.supportPaused) return;
     session.supportPaused = false;
     UI.hideSupportOverlay();
-    if (!session.panelsPaused && !UI.anyPanelOpen()) {
+    if (!session.panelsPaused && !session.exclPaused && !UI.anyPanelOpen()) {
+      resumeGame();
+    }
+  }
+
+  function openExclWindow() {
+    if (session.exclPaused) return;
+    session.exclPaused = true;
+    pauseGame();
+    UI.showExclOverlay();
+  }
+
+  function closeExclWindow() {
+    if (!session.exclPaused) return;
+    session.exclPaused = false;
+    UI.hideExclOverlay();
+    if (!session.panelsPaused && !session.supportPaused && !UI.anyPanelOpen()) {
       resumeGame();
     }
   }
@@ -3937,8 +4094,10 @@ const UI = (() => {
     session.isPaused = false;
     session.supportPaused = false;
     session.panelsPaused = false;
+    session.exclPaused = false;
 
     UI.hideSupportOverlay();
+    UI.hideExclOverlay();
     UI.setHeroActionsActive(false);
     UI.updateHistoryInfo(0, 0, false);
     UI.clearWinnerHighlights();
@@ -3964,6 +4123,7 @@ const UI = (() => {
     session.isPaused = false;
     session.supportPaused = false;
     session.panelsPaused = false;
+    session.exclPaused = false;
 
     const botStrategies = Bots.assignStrategies(7);
     const players = [{ id: 'hero', name: 'Ты', isHero: true, strategy: null, stack: Engine.STARTING_STACK }];
@@ -4305,6 +4465,7 @@ const UI = (() => {
       if (session.replay.active) return;
       if (session.supportPaused) return;
       if (session.panelsPaused) return;
+      if (session.exclPaused) return;
 
       const period = UI.settings.blindGrowthHands || 10;
       state.handsAtLevel++;
@@ -4670,6 +4831,7 @@ const UI = (() => {
 
   function resumeGame() {
     if (session.supportPaused) return;
+    if (session.exclPaused) return;
     if (UI.anyPanelOpen()) return;
 
     stopReplay(true);
@@ -4694,6 +4856,7 @@ const UI = (() => {
           if (session.replay.active) return;
           if (session.supportPaused) return;
           if (session.panelsPaused) return;
+          if (session.exclPaused) return;
 
           const period = UI.settings.blindGrowthHands || 10;
           state.handsAtLevel++;
