@@ -614,37 +614,6 @@ button.disabled {
 }
 .seat .bet-chips.hidden { display: none; }
 
-/* Кнопка ПОДДЕРЖАТЬ — слева от героя над блоком истории раздач */
-#support-btn {
-  position: absolute;
-  right: calc(50% + var(--support-btn-offset-r, 130px));
-  bottom: calc(var(--dash-inset) + var(--edge) + var(--hero-actions-height, 100px) + 4px);
-  height: var(--support-btn-h);
-  padding: 0 clamp(10px, 1.6vmin, 14px);
-  border-radius: 8px;
-  background: linear-gradient(180deg, #2a2118, #1a130c);
-  border: 1px solid #8a6508;
-  color: var(--gold);
-  font-weight: 900;
-  font-size: var(--support-btn-fs);
-  letter-spacing: .8px;
-  text-transform: uppercase;
-  box-shadow: 0 2px 8px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,203,43,.18);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 46;
-  touch-action: manipulation;
-  transition: transform .08s ease, filter .08s ease;
-  white-space: nowrap;
-  cursor: pointer;
-}
-#support-btn.visible { display: inline-flex; }
-#support-btn:active {
-  transform: scale(0.96);
-  filter: brightness(1.35);
-}
-
 /* Оверлей окошка поддержки */
 #support-overlay {
   position: absolute;
@@ -1167,6 +1136,81 @@ button.disabled {
   box-shadow: 0 1px 0 #8a6508, inset 0 1px 0 rgba(255,255,255,.35);
 }
 
+/* ===== Верхняя панель РУКОВОДСТВО ===== */
+#guide-panel {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -110%);
+  width: min(94vw, calc((100vh - clamp(8px, 1.6vmin, 20px)) * 9 / 16));
+  max-width: 94vw;
+  /* Градиент зеркален относительно настроек:
+     у настроек снизу тёмный → вверх светлее. Здесь сверху тёмный → вниз светлее. */
+  background: linear-gradient(180deg, #000000 0%, #0d0d0d 50%, #1a1a1a 100%);
+  border-bottom: 1px solid #2a2520;
+  border-left: 1px solid #2a2520;
+  border-right: 1px solid #2a2520;
+  border-bottom-left-radius: 14px;
+  border-bottom-right-radius: 14px;
+  padding: calc(24px + var(--safe-top)) 20px 30px;
+  transition: transform .28s ease;
+  z-index: 100;
+  max-height: 72vh;
+  overflow-y: auto;
+  touch-action: pan-y;
+  scrollbar-width: none;
+}
+#guide-panel::-webkit-scrollbar { display: none; }
+#guide-panel.open { transform: translate(-50%, 0); }
+
+#guide-panel h3 {
+  color: var(--gold);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 14px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.guide-text {
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: 10px;
+  text-align: left;
+}
+.guide-text.muted {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+#btn-support-panel {
+  display: block;
+  width: 100%;
+  margin-top: 20px;
+  padding: 14px 16px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ffcb2b, #e0a800);
+  color: #1a1a1a;
+  font-weight: 900;
+  font-size: 15px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-align: center;
+  box-shadow: 0 3px 0 #8a6508, inset 0 1px 0 rgba(255,255,255,.35);
+  touch-action: manipulation;
+  min-height: 48px;
+  transition: transform .08s ease, filter .08s ease;
+  font-family: inherit;
+}
+#btn-support-panel:active:not(:disabled) {
+  transform: scale(0.97);
+  filter: brightness(1.1);
+  box-shadow: 0 1px 0 #8a6508, inset 0 1px 0 rgba(255,255,255,.35);
+}
+
 #tap-close {
   position: absolute;
   inset: 0;
@@ -1261,8 +1305,6 @@ button.disabled {
           </svg>
         </div>
 
-        <button id="support-btn" type="button">Поддержать</button>
-
         <div id="hero-actions" class="inactive">
           <div id="hand-nav">
             <div class="nav-history">
@@ -1294,6 +1336,25 @@ button.disabled {
   </div>
 
   <div id="tap-close"></div>
+
+  <div id="guide-panel">
+    <h3>Руководство</h3>
+    <p class="guide-text">
+      Poker Trainer — это симулятор покерного стола Sit&nbsp;&amp;&nbsp;Go (Texas Hold'em, 8-max).
+      Он тренирует интуицию: ты должен нащупать чувством, выиграешь ты на вскрытии
+      или нет, и действовать в согласии с этим чувством.
+    </p>
+    <p class="guide-text">
+      Обратная связь здесь — только факт: совпало или не совпало. Никаких подсказок
+      по правильности решения, EV, диапазонам и прочему. После раздачи ты просто
+      видишь бейдж WIN или LOSS и сумму выигранных или проигранных фишек.
+    </p>
+    <p class="guide-text muted">
+      Свайп снизу вверх по столу — настройки. Свайп сверху вниз — это руководство.
+      Любое открытое окошко ставит игру на паузу. Закрыть окошко — тап за его пределами.
+    </p>
+    <button id="btn-support-panel" type="button">Поддержать</button>
+  </div>
 
   <div id="bottom-panel">
     <h3>Настройки</h3>
@@ -2381,6 +2442,7 @@ const UI = (() => {
     el.callAmount     = document.getElementById('call-amount');
 
     el.bottomPanel    = document.getElementById('bottom-panel');
+    el.guidePanel     = document.getElementById('guide-panel');
     el.tapClose       = document.getElementById('tap-close');
 
     el.hnPrev         = document.getElementById('hn-prev');
@@ -2395,12 +2457,12 @@ const UI = (() => {
     el.heroTimerZone  = document.getElementById('hero-timer-zone');
     el.heroTimerNum   = document.getElementById('hero-timer-num');
 
-    el.supportBtn     = document.getElementById('support-btn');
     el.supportOverlay = document.getElementById('support-overlay');
     el.supportWindow  = document.getElementById('support-window');
     el.supportCardNumber = document.getElementById('support-card-number');
     el.supportName    = document.getElementById('support-name');
     el.supportCopied  = document.getElementById('support-copied');
+    el.btnSupportPanel = document.getElementById('btn-support-panel');
 
     el.setCardStyle      = document.getElementById('set-card-style');
     el.setStackDisplay   = document.getElementById('set-stack-display');
@@ -2420,11 +2482,13 @@ const UI = (() => {
   }
 
   function updateOverlayState() {
-    const anyOpen = el.bottomPanel.classList.contains('open');
+    const anyOpen = el.bottomPanel.classList.contains('open') ||
+                    el.guidePanel.classList.contains('open');
     el.tapClose.classList.toggle('active', anyOpen);
   }
 
   function openBottomPanel() {
+    el.guidePanel.classList.remove('open');
     el.bottomPanel.classList.add('open');
     updateOverlayState();
   }
@@ -2432,9 +2496,24 @@ const UI = (() => {
     el.bottomPanel.classList.remove('open');
     updateOverlayState();
   }
+  function openGuidePanel() {
+    el.bottomPanel.classList.remove('open');
+    el.guidePanel.classList.add('open');
+    updateOverlayState();
+  }
+  function closeGuidePanel() {
+    el.guidePanel.classList.remove('open');
+    updateOverlayState();
+  }
   function closeAllPanels() {
     el.bottomPanel.classList.remove('open');
+    el.guidePanel.classList.remove('open');
     updateOverlayState();
+  }
+
+  function anyPanelOpen() {
+    return el.bottomPanel.classList.contains('open') ||
+           el.guidePanel.classList.contains('open');
   }
 
   function setReplayButtonState(state) {
@@ -2481,29 +2560,6 @@ const UI = (() => {
     el.heroTimerZone.style.top = top + 'px';
   }
 
-  function placeSupportButton() {
-    if (!el.supportBtn) return;
-    const heroActions = document.getElementById('hero-actions');
-    if (!heroActions) return;
-
-    const tableRect = document.getElementById('poker-table').getBoundingClientRect();
-    const haRect = heroActions.getBoundingClientRect();
-    if (haRect.height <= 0) return;
-
-    /* Кнопка слева от героя, над блоком истории раздач, на 4px выше верхней границы блока. */
-    const heroSeat = document.getElementById('seat-hero');
-    const tableW = tableRect.width;
-    const supportWidth = el.supportBtn.offsetWidth || 100;
-    const top = haRect.top - tableRect.top - 4 - (el.supportBtn.offsetHeight || 30);
-    /* Позиционируем так, чтобы кнопка стояла левее центра, но правее левого края блока процентных ставок. */
-    const left = Math.max(8, (tableW / 2) - supportWidth - 100);
-    el.supportBtn.style.left = left + 'px';
-    el.supportBtn.style.top = top + 'px';
-    el.supportBtn.style.right = 'auto';
-    el.supportBtn.style.bottom = 'auto';
-    el.supportBtn.classList.add('visible');
-  }
-
   function showHeroTimer(seconds) {
     if (!el.heroTimer) return;
     el.heroTimer.classList.add('visible');
@@ -2540,7 +2596,6 @@ const UI = (() => {
     updatePot(state);
     updateLevel(state);
     placeHeroTimer();
-    placeSupportButton();
   }
 
   function createSeatElement(player, state) {
@@ -2649,7 +2704,6 @@ const UI = (() => {
     updateStacks(state);
     updateActiveHighlight(state);
     placeHeroTimer();
-    placeSupportButton();
   }
 
   function renderActionBadge(p, seat) {
@@ -3233,7 +3287,8 @@ const UI = (() => {
     renderTable, updateSeats, updateBoard, updatePot, updateLevel,
     updateStacks, updateActiveHighlight,
     showActions, setHeroActionsActive,
-    openBottomPanel, closeBottomPanel, closeAllPanels,
+    openBottomPanel, closeBottomPanel, openGuidePanel, closeGuidePanel,
+    closeAllPanels, anyPanelOpen,
     updateHistoryInfo,
     readSettingsFromUI, applySettingsToUI,
     syncSettingsUI, toggleStackDisplay, toggleShowStrategies, toggleShowAllHands,
@@ -3243,7 +3298,7 @@ const UI = (() => {
     resetSliderToStart,
     setReplayButtonState,
     showHeroTimer, hideHeroTimer, updateHeroTimer, placeHeroTimer,
-    placeSupportButton, showSupportOverlay, hideSupportOverlay, copySupportText
+    showSupportOverlay, hideSupportOverlay, copySupportText
   };
 
 })();
@@ -3266,6 +3321,7 @@ const UI = (() => {
     botTimerId: null, revealTimerId: null,
     isPaused: false,
     supportPaused: false,
+    panelsPaused: false,
 
     heroTimerIntervalId: null,
     heroTimerTimeoutId: null,
@@ -3293,7 +3349,6 @@ const UI = (() => {
     bindDesktopDoubleClick();
     window.addEventListener('resize', () => {
       UI.placeHeroTimer();
-      UI.placeSupportButton();
     });
   });
 
@@ -3301,6 +3356,7 @@ const UI = (() => {
     el.btnStart       = document.getElementById('btn-start');
     el.startOverlay   = document.getElementById('start-overlay');
     el.bottomPanel    = document.getElementById('bottom-panel');
+    el.guidePanel     = document.getElementById('guide-panel');
     el.tapClose       = document.getElementById('tap-close');
     el.hnPrev         = document.getElementById('hn-prev');
     el.hnNext         = document.getElementById('hn-next');
@@ -3308,10 +3364,10 @@ const UI = (() => {
     el.hnResume       = document.getElementById('hn-resume');
     el.hnSettings     = document.getElementById('hn-settings');
     el.btnRestartPanel = document.getElementById('btn-restart-panel');
+    el.btnSupportPanel = document.getElementById('btn-support-panel');
     el.app            = document.getElementById('app');
     el.seats          = document.getElementById('seats');
     el.heroTimerZone  = document.getElementById('hero-timer-zone');
-    el.supportBtn     = document.getElementById('support-btn');
     el.supportOverlay = document.getElementById('support-overlay');
     el.supportWindow  = document.getElementById('support-window');
     el.supportCardNumber = document.getElementById('support-card-number');
@@ -3368,12 +3424,12 @@ const UI = (() => {
               target.closest('input') ||
               target.closest('select') ||
               target.closest('#bottom-panel') ||
+              target.closest('#guide-panel') ||
               target.closest('#start-overlay') ||
               target.closest('#hero-actions') ||
               target.closest('#quick-percent-list') ||
               target.closest('#hero-timer-zone') ||
-              target.closest('#support-overlay') ||
-              target.closest('#support-btn'));
+              target.closest('#support-overlay'));
   }
 
   function bindGlobalHandlers() {
@@ -3401,25 +3457,14 @@ const UI = (() => {
       if (Math.abs(dy) < minDist) return;
       if (Math.abs(dx) > Math.abs(dy)) return;
       if (dy < 0) {
-        UI.openBottomPanel();
+        openPanelWithPause(UI.openBottomPanel);
+      } else {
+        openPanelWithPause(UI.openGuidePanel);
       }
     }, { passive: true });
 
-    el.tapClose.addEventListener('click', () => UI.closeAllPanels());
-
-    let bpStartY = 0, bpTracking = false;
-    el.bottomPanel.addEventListener('touchstart', (e) => {
-      if (e.touches.length !== 1) return;
-      bpTracking = true;
-      bpStartY = e.touches[0].clientY;
-    }, { passive: true });
-    el.bottomPanel.addEventListener('touchend', (e) => {
-      if (!bpTracking) return;
-      bpTracking = false;
-      const endY = e.changedTouches[0].clientY;
-      const dy = endY - bpStartY;
-      if (dy > 60) UI.closeBottomPanel();
-    }, { passive: true });
+    /* Тап по затемнённой области за панелью закрывает все окошки. */
+    el.tapClose.addEventListener('click', () => closeAllPanelsAndResume());
 
     if (el.heroTimerZone) {
       let timerLastTap = 0;
@@ -3441,19 +3486,6 @@ const UI = (() => {
         e.stopPropagation();
         toggleTurnTimeOption();
       });
-    }
-
-    /* Кнопка Поддержать */
-    if (el.supportBtn) {
-      el.supportBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        openSupportWindow();
-      });
-      el.supportBtn.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-      }, { passive: false });
     }
 
     /* Клик по фону оверлея поддержки — закрывает окошко и возобновляет игру */
@@ -3500,6 +3532,30 @@ const UI = (() => {
       el.supportWindow.addEventListener('touchend', (e) => { e.stopPropagation(); }, { passive: false });
     }
 
+    /* Кнопка Поддержать внутри верхнего руководства */
+    if (el.btnSupportPanel) {
+      el.btnSupportPanel.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openSupportWindow();
+      });
+      el.btnSupportPanel.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openSupportWindow();
+      }, { passive: false });
+    }
+
+    /* Клики внутри панелей не должны всплывать как тап по столу. */
+    if (el.bottomPanel) {
+      el.bottomPanel.addEventListener('click', (e) => e.stopPropagation());
+      el.bottomPanel.addEventListener('touchend', (e) => e.stopPropagation(), { passive: false });
+    }
+    if (el.guidePanel) {
+      el.guidePanel.addEventListener('click', (e) => e.stopPropagation());
+      el.guidePanel.addEventListener('touchend', (e) => e.stopPropagation(), { passive: false });
+    }
+
     ['set-card-style','set-stack-display','set-blind-growth','set-turn-time','set-show-strategies','set-show-all-hands','set-show-all-showdown'].forEach(id => {
       const node = document.getElementById(id);
       if (!node) return;
@@ -3524,14 +3580,35 @@ const UI = (() => {
     el.hnNext.addEventListener('click', () => navigateHistory(1));
     el.hnReplay.addEventListener('click', () => toggleReplay());
     el.hnResume.addEventListener('click', () => resumeGame());
-    el.hnSettings.addEventListener('click', () => UI.openBottomPanel());
+    el.hnSettings.addEventListener('click', () => openPanelWithPause(UI.openBottomPanel));
 
     el.btnRestartPanel.addEventListener('click', () => {
-      UI.closeAllPanels();
+      closeAllPanelsAndResume();
       restartSession();
     });
 
     bindSeatInteractions();
+  }
+
+  /* Открыть панель и поставить игру на паузу. */
+  function openPanelWithPause(openFn) {
+    if (session.supportPaused) return;
+    const wasOpen = UI.anyPanelOpen();
+    openFn();
+    if (!wasOpen) {
+      session.panelsPaused = true;
+      pauseGame();
+    }
+  }
+
+  /* Закрыть все панели и возобновить игру. */
+  function closeAllPanelsAndResume() {
+    const wasOpen = UI.anyPanelOpen();
+    UI.closeAllPanels();
+    if (wasOpen && session.panelsPaused) {
+      session.panelsPaused = false;
+      resumeGame();
+    }
   }
 
   function openSupportWindow() {
@@ -3545,7 +3622,9 @@ const UI = (() => {
     if (!session.supportPaused) return;
     session.supportPaused = false;
     UI.hideSupportOverlay();
-    resumeGame();
+    if (!session.panelsPaused && !UI.anyPanelOpen()) {
+      resumeGame();
+    }
   }
 
   function toggleTurnTimeOption() {
@@ -3702,6 +3781,7 @@ const UI = (() => {
     session.tournamentOver = false;
     session.isPaused = false;
     session.supportPaused = false;
+    session.panelsPaused = false;
 
     UI.hideSupportOverlay();
     UI.setHeroActionsActive(false);
@@ -3728,6 +3808,7 @@ const UI = (() => {
     session.viewingIndex = -1;
     session.isPaused = false;
     session.supportPaused = false;
+    session.panelsPaused = false;
 
     const botStrategies = Bots.assignStrategies(7);
     const players = [{ id: 'hero', name: 'Ты', isHero: true, strategy: null, stack: Engine.STARTING_STACK }];
@@ -4068,6 +4149,7 @@ const UI = (() => {
       if (session.isPaused) return;
       if (session.replay.active) return;
       if (session.supportPaused) return;
+      if (session.panelsPaused) return;
 
       const period = UI.settings.blindGrowthHands || 10;
       state.handsAtLevel++;
@@ -4432,6 +4514,9 @@ const UI = (() => {
   }
 
   function resumeGame() {
+    if (session.supportPaused) return;
+    if (UI.anyPanelOpen()) return;
+
     stopReplay(true);
     session.viewingIndex = -1;
     session.isPaused = false;
@@ -4453,6 +4538,7 @@ const UI = (() => {
           if (session.isPaused) return;
           if (session.replay.active) return;
           if (session.supportPaused) return;
+          if (session.panelsPaused) return;
 
           const period = UI.settings.blindGrowthHands || 10;
           state.handsAtLevel++;
