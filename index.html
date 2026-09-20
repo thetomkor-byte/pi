@@ -160,38 +160,6 @@ button.disabled {
   overflow: hidden;
 }
 
-#poker-table-brand {
-  position: absolute;
-  left: 50%;
-  top: 32%;
-  transform: translate(-50%, -50%);
-  width: 72%;
-  max-width: 72%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  user-select: none;
-  z-index: 3;
-  text-align: center;
-}
-
-#poker-table-brand .brand-text {
-  width: 100%;
-  text-align: center;
-  font-weight: 900;
-  letter-spacing: clamp(2px, 0.7vmin, 8px);
-  font-size: clamp(14px, 2.4vmin, 26px);
-  text-transform: uppercase;
-  color: rgba(255, 209, 92, 0.42);
-  text-shadow:
-    0 -1px 1px rgba(0, 0, 0, 0.75),
-    0 1px 1px rgba(255, 235, 180, 0.10),
-    0 2px 4px rgba(0, 0, 0, 0.45);
-  white-space: nowrap;
-  line-height: 1;
-}
-
 #board-area {
   position: absolute;
   top: 46%; left: 50%;
@@ -279,6 +247,29 @@ button.disabled {
   line-height: 1;
 }
 #board-history-label.visible { display: block; }
+
+#board-brand-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  text-align: center;
+  font-weight: 900;
+  font-size: clamp(16px, 3vmin, 34px);
+  letter-spacing: clamp(2px, 0.9vmin, 10px);
+  color: rgba(210, 210, 210, 0.5);
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.55),
+    0 -1px 0 rgba(255, 255, 255, 0.08);
+  text-transform: uppercase;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+  z-index: 1;
+  line-height: 1;
+  font-stretch: expanded;
+}
 
 #table-info {
   display: flex;
@@ -1074,13 +1065,13 @@ button.disabled {
   <div id="table-scene">
     <div id="poker-table-wood">
       <div id="poker-table">
-        <div id="poker-table-brand"><span class="brand-text">POKER TRAINER</span></div>
         <div id="swipe-center"></div>
         <div id="board-area">
           <div id="top-info">
             <div id="pot-display">Банк: 0</div>
           </div>
           <div id="board-cards">
+            <div id="board-brand-label">POKER TRAINER</div>
             <div id="board-history-label">ИСТОРИЯ РАЗДАЧ</div>
           </div>
           <div id="table-info">
@@ -2187,6 +2178,7 @@ const UI = (() => {
     el.infoTimerRow   = document.getElementById('info-timer-row');
     el.infoNextBlinds = document.getElementById('info-next-blinds-row');
     el.boardHistoryLabel = document.getElementById('board-history-label');
+    el.boardBrandLabel = document.getElementById('board-brand-label');
 
     el.heroActions    = document.getElementById('hero-actions');
     el.heroButtons    = document.getElementById('hero-buttons');
@@ -2501,9 +2493,11 @@ const UI = (() => {
   }
 
   function updateBoard(state) {
-    const label = el.boardHistoryLabel;
+    const brandLabel = el.boardBrandLabel;
+    const historyLabel = el.boardHistoryLabel;
     el.boardCards.innerHTML = '';
-    if (label) el.boardCards.appendChild(label);
+    if (brandLabel) el.boardCards.appendChild(brandLabel);
+    if (historyLabel) el.boardCards.appendChild(historyLabel);
 
     const actualCount = state.board.length;
     const finalStreet = state.finalStreet;
