@@ -715,6 +715,48 @@ button.disabled {
 }
 #support-copied.visible { opacity: 1; }
 
+/* Оверлей окошка «!» */
+#excl-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  z-index: 300;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  touch-action: none;
+}
+#excl-overlay.visible { display: flex; }
+
+#excl-window {
+  width: min(94vw, calc((100vh - clamp(8px, 1.6vmin, 20px)) * 9 / 16));
+  max-width: 94vw;
+  background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
+  border: 2px solid #3a3530;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.9), 0 0 80px rgba(255,203,43,.08);
+  padding: clamp(20px, 4vmin, 28px) clamp(18px, 3.6vmin, 26px);
+  text-align: left;
+}
+
+#excl-window h3 {
+  color: var(--gold);
+  font-size: clamp(12px, 1.8vmin, 15px);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 18px;
+  font-weight: 900;
+  text-align: center;
+}
+
+#excl-window p {
+  color: var(--muted);
+  font-size: clamp(12px, 1.6vmin, 14px);
+  line-height: 1.5;
+  text-align: left;
+}
+
 #hero-timer {
   position: absolute;
   width: var(--hero-timer-size);
@@ -1100,9 +1142,19 @@ button.disabled {
   text-align: center;
 }
 
-.round-help-btn {
+/* Круглые кнопки-символы над блоком истории раздач. */
+#top-round-row {
   position: absolute;
-  top: 18px;
+  display: flex;
+  gap: 4px;
+  z-index: 46;
+  pointer-events: auto;
+  left: 0;
+  top: 0;
+}
+
+.round-help-btn {
+  position: relative;
   width: calc(var(--hero-timer-size) - 8px);
   height: calc(var(--hero-timer-size) - 8px);
   border-radius: 50%;
@@ -1115,7 +1167,6 @@ button.disabled {
   align-items: center;
   justify-content: center;
   line-height: 1;
-  z-index: 5;
   cursor: pointer;
   touch-action: manipulation;
   transition: transform .08s ease, filter .08s ease;
@@ -1125,13 +1176,6 @@ button.disabled {
 .round-help-btn:active:not(:disabled) {
   transform: scale(0.96);
   filter: brightness(1.35);
-}
-
-#settings-card-btn {
-  left: 20px;
-}
-#settings-help-btn {
-  right: 20px;
 }
 
 .setting {
@@ -1355,6 +1399,13 @@ button.disabled {
           </svg>
         </div>
 
+        <!-- Три круглые кнопки над блоком истории раздач. -->
+        <div id="top-round-row">
+          <button id="settings-card-btn" class="round-help-btn" type="button" aria-label="Поддержать">💳</button>
+          <button id="settings-help-btn" class="round-help-btn" type="button" aria-label="Руководство">?</button>
+          <button id="settings-excl-btn" class="round-help-btn" type="button" aria-label="Внимание">!</button>
+        </div>
+
         <div id="hero-actions" class="inactive">
           <div id="hand-nav">
             <div class="nav-history">
@@ -1407,8 +1458,6 @@ button.disabled {
   </div>
 
   <div id="bottom-panel">
-    <button id="settings-card-btn" class="round-help-btn" type="button" aria-label="Поддержать">💳</button>
-    <button id="settings-help-btn" class="round-help-btn" type="button" aria-label="Руководство">?</button>
     <h3>Настройки</h3>
     <label class="setting">
       <span>Стиль карт</span>
@@ -1465,6 +1514,13 @@ button.disabled {
         <div id="support-usd">USD</div>
       </div>
       <div id="support-footer">Благодарю</div>
+    </div>
+  </div>
+
+  <div id="excl-overlay">
+    <div id="excl-window">
+      <h3>Внимание</h3>
+      <p>Раздел в разработке. Здесь будет полезная информация.</p>
     </div>
   </div>
 
@@ -2587,6 +2643,10 @@ const UI = (() => {
     el.btnSupportPanel = document.getElementById('btn-support-panel');
     el.settingsHelpBtn = document.getElementById('settings-help-btn');
     el.settingsCardBtn = document.getElementById('settings-card-btn');
+    el.settingsExclBtn = document.getElementById('settings-excl-btn');
+    el.exclOverlay     = document.getElementById('excl-overlay');
+    el.exclWindow      = document.getElementById('excl-window');
+    el.topRoundRow     = document.getElementById('top-round-row');
 
     el.setCardStyle      = document.getElementById('set-card-style');
     el.setStackDisplay   = document.getElementById('set-stack-display');
@@ -2647,7 +2707,17 @@ const UI = (() => {
 
   function anyOverlayOpen() {
     return anyPanelOpen() ||
-           (el.supportOverlay && el.supportOverlay.classList.contains('visible'));
+           (el.supportOverlay && el.supportOverlay.classList.contains('visible')) ||
+           (el.exclOverlay && el.exclOverlay.classList.contains('visible'));
+  }
+
+  function showExclOverlay() {
+    if (!el.exclOverlay) return;
+    el.exclOverlay.classList.add('visible');
+  }
+  function hideExclOverlay() {
+    if (!el.exclOverlay) return;
+    el.exclOverlay.classList.remove('visible');
   }
 
   function setReplayButtonState(state) {
@@ -2662,6 +2732,21 @@ const UI = (() => {
       el.hnReplay.textContent = '▶︎';
       el.hnReplay.title = 'Продолжить';
     }
+  }
+
+  function placeTopRoundRow() {
+    if (!el.topRoundRow || !el.heroActions) return;
+    const tableRect = document.getElementById('poker-table').getBoundingClientRect();
+    const haRect = el.heroActions.getBoundingClientRect();
+    if (haRect.height <= 0) return;
+
+    const rowHeight = el.topRoundRow.offsetHeight || 40;
+    const top = haRect.top - tableRect.top - 4 - rowHeight;
+    /* Левый край кнопок совпадает с левым краем блока истории раздач. */
+    const left = haRect.left - tableRect.left;
+
+    el.topRoundRow.style.left = left + 'px';
+    el.topRoundRow.style.top = top + 'px';
   }
 
   function placeHeroTimer() {
@@ -2734,6 +2819,7 @@ const UI = (() => {
     updatePot(state);
     updateLevel(state);
     placeHeroTimer();
+    placeTopRoundRow();
   }
 
   function createSeatElement(player, state) {
@@ -2842,6 +2928,7 @@ const UI = (() => {
     updateStacks(state);
     updateActiveHighlight(state);
     placeHeroTimer();
+    placeTopRoundRow();
   }
 
   function renderActionBadge(p, seat) {
@@ -3126,4 +3213,1687 @@ const UI = (() => {
     const canRaise = hero.stack > toCall && !hero.folded && !hero.eliminated && hero.stack > 0;
 
     let variant = forceVariant;
-    if (!variant
+    if (!variant) {
+      if (state.street === 'preflop' && state.currentBet === bb) variant = 'bb';
+      else variant = 'percent';
+    }
+
+    let options;
+
+    if (variant === 'bb') {
+      options = [
+        { label: 'ALL-IN', target: maxTarget, allin: true },
+        { label: '3.5 BB', target: Math.round(bb * 3.5) },
+        { label: '3 BB',   target: Math.round(bb * 3) },
+        { label: '2.5 BB', target: Math.round(bb * 2.5) },
+        { label: '2 BB',   target: Math.round(bb * 2) }
+      ];
+    } else {
+      const potAfterCall = state.pot + Math.min(toCall, hero.stack);
+      options = [
+        { label: 'ALL-IN', target: maxTarget, allin: true },
+        { label: '100%', target: Math.min(maxTarget, state.currentBet + Math.round(potAfterCall * 1.00)) },
+        { label: '70%',  target: Math.min(maxTarget, state.currentBet + Math.round(potAfterCall * 0.70)) },
+        { label: '50%',  target: Math.min(maxTarget, state.currentBet + Math.round(potAfterCall * 0.50)) },
+        { label: '30%',  target: Math.min(maxTarget, state.currentBet + Math.round(potAfterCall * 0.30)) }
+      ];
+    }
+
+    for (const opt of options) {
+      let target = Math.min(maxTarget, opt.target);
+      if (target < minTarget) target = Math.min(minTarget, maxTarget);
+      if (target < state.currentBet) target = state.currentBet;
+      if (target < bb) target = bb;
+
+      const btn = document.createElement('button');
+      if (opt.allin) {
+        btn.classList.add('allin-btn');
+        btn.innerHTML = `<span class="label">ALL-IN</span>`;
+      } else {
+        btn.innerHTML = `<span class="label">${opt.label}</span><span class="value">${formatChips(target, state)}</span>`;
+      }
+      btn.dataset.target = target;
+      btn.disabled = !canRaise;
+      el.quickPercentList.appendChild(btn);
+    }
+  }
+
+  function setupHorizontalSlider(state, hero) {
+    const slider = document.getElementById('raise-slider-horiz');
+    el.sliderHoriz = slider;
+
+    const minTarget = state.currentBet + state.minRaise;
+    const maxTarget = hero.committedThisStreet + hero.stack;
+    const realMin = Math.min(minTarget, maxTarget);
+    const realMax = maxTarget;
+
+    slider.min   = realMin;
+    slider.max   = realMax;
+    slider.step  = state.blinds.bb >= 100 ? 10 : 1;
+    slider.value = realMin;
+
+    updateSliderDisplay(state);
+  }
+
+  function updateSliderDisplay(state) {
+    const slider = document.getElementById('raise-slider-horiz');
+    el.sliderHoriz = slider;
+    el.raiseAmountMini = document.getElementById('raise-amount-mini');
+    el.raiseAmountMini.textContent = formatChips(Number(slider.value), state);
+  }
+
+  function bindActionHandlers(state, heroIndex, toCall, handlers) {
+    rebind(el.btnFold,  () => { if (!el.heroActions.classList.contains('inactive')) handlers.onFold(); });
+    rebind(el.btnCheck, () => { if (!el.heroActions.classList.contains('inactive')) handlers.onCheck(); });
+    rebind(el.btnCall,  () => { if (!el.heroActions.classList.contains('inactive')) handlers.onCall(); });
+
+    const slider = document.getElementById('raise-slider-horiz');
+    el.sliderHoriz = slider;
+
+    let startValue = Number(slider.value);
+    let pressedOnThumb = false;
+    let sliderDragging = false;
+
+    function isSliderDisabled() {
+      return el.heroActions.classList.contains('inactive') || slider.disabled;
+    }
+
+    function isPointOnThumb(clientX) {
+      const rect = slider.getBoundingClientRect();
+      const min = Number(slider.min);
+      const max = Number(slider.max);
+      const val = Number(slider.value);
+      if (max <= min) return false;
+      const thumbW = 16;
+      const trackW = rect.width - thumbW;
+      const ratio = (val - min) / (max - min);
+      const thumbCenter = rect.left + thumbW / 2 + ratio * trackW;
+      return Math.abs(clientX - thumbCenter) <= thumbW * 0.9;
+    }
+
+    slider.onpointerdown = (e) => {
+      e.stopPropagation();
+      if (isSliderDisabled()) { e.preventDefault(); return; }
+      pressedOnThumb = isPointOnThumb(e.clientX);
+      if (!pressedOnThumb) {
+        e.preventDefault();
+        return;
+      }
+      sliderDragging = true;
+      startValue = Number(slider.value);
+      slider.classList.add('pressed');
+    };
+
+    slider.onpointerup = (e) => {
+      e.stopPropagation();
+      if (!pressedOnThumb) { pressedOnThumb = false; return; }
+      slider.classList.remove('pressed');
+      pressedOnThumb = false;
+      if (!sliderDragging) return;
+      sliderDragging = false;
+      if (isSliderDisabled()) return;
+      const current = Number(slider.value);
+      if (current === startValue) return;
+      const hero = state.players[heroIndex];
+      const maxTarget = hero.committedThisStreet + hero.stack;
+      if (current >= maxTarget) {
+        handlers.onAllIn();
+      } else {
+        handlers.onRaise(current);
+      }
+    };
+
+    slider.onpointercancel = () => {
+      slider.classList.remove('pressed');
+      pressedOnThumb = false;
+      sliderDragging = false;
+    };
+
+    slider.onclick = (e) => { e.preventDefault(); e.stopPropagation(); };
+
+    slider.oninput = () => {
+      if (isSliderDisabled()) return;
+      updateSliderDisplay(state);
+    };
+
+    slider.ontouchstart = (e) => {
+      if (isSliderDisabled()) { e.preventDefault(); return; }
+      const t = e.touches && e.touches[0];
+      if (!t) return;
+      if (!isPointOnThumb(t.clientX)) {
+        e.preventDefault();
+      }
+    };
+
+    el.quickPercentList.querySelectorAll('button').forEach(btn => {
+      btn.onclick = () => {
+        if (el.quickPercentList.classList.contains('inactive')) return;
+        if (el.heroActions.classList.contains('inactive')) return;
+        handlers.onRaise(Number(btn.dataset.target));
+      };
+    });
+  }
+
+  function rebind(node, fn) {
+    const clone = node.cloneNode(true);
+    node.parentNode.replaceChild(clone, node);
+    clone.addEventListener('click', fn);
+    if (node.id === 'btn-fold')  el.btnFold  = clone;
+    if (node.id === 'btn-check') el.btnCheck = clone;
+    if (node.id === 'btn-call') {
+      el.btnCall = clone;
+      el.callAmount = clone.querySelector('#call-amount');
+    }
+  }
+
+  function updateHistoryInfo(current, total, isViewingPast) {
+    el.hnCur.textContent = current;
+    el.hnTot.textContent = total;
+    const hasHistory = total > 0;
+
+    if (!isViewingPast) {
+      el.hnPrev.disabled = !hasHistory;
+      el.hnNext.disabled = true;
+      el.hnResume.disabled = true;
+      if (el.hnReplay) el.hnReplay.disabled = true;
+    } else {
+      el.hnPrev.disabled = !(hasHistory && current > 1);
+      el.hnNext.disabled = !(hasHistory && current < total);
+      el.hnResume.disabled = false;
+      if (el.hnReplay) el.hnReplay.disabled = false;
+    }
+  }
+
+  function applySettingsToUI() {
+    el.setCardStyle.value      = settings.cardStyle;
+    el.setStackDisplay.value   = settings.stackDisplay;
+    el.setBlindGrowth.value    = String(settings.blindGrowthHands);
+    el.setTurnTime.value       = String(settings.turnTime);
+    el.setShowStrategies.checked = settings.showStrategies;
+    el.setShowAllHands.checked   = settings.showAllHands;
+    el.setShowAllShowdown.checked = settings.showAllShowdown;
+  }
+
+  function readSettingsFromUI() {
+    settings.cardStyle         = el.setCardStyle.value;
+    settings.stackDisplay      = el.setStackDisplay.value;
+    settings.blindGrowthHands  = Number(el.setBlindGrowth.value);
+    settings.turnTime          = Number(el.setTurnTime.value);
+    settings.showStrategies    = el.setShowStrategies.checked;
+    settings.showAllHands      = el.setShowAllHands.checked;
+    settings.showAllShowdown   = el.setShowAllShowdown.checked;
+    applyCardStyle();
+    if (settings.onChange) settings.onChange(settings);
+  }
+
+  function syncSettingsUI() {
+    el.setStackDisplay.value       = settings.stackDisplay;
+    el.setShowStrategies.checked   = settings.showStrategies;
+    el.setShowAllHands.checked     = settings.showAllHands;
+    el.setShowAllShowdown.checked  = settings.showAllShowdown;
+  }
+
+  function toggleStackDisplay() {
+    settings.stackDisplay = (settings.stackDisplay === 'bb') ? 'chips' : 'bb';
+    syncSettingsUI();
+    if (settings.onChange) settings.onChange(settings);
+  }
+
+  function toggleShowStrategies() {
+    settings.showStrategies = !settings.showStrategies;
+    syncSettingsUI();
+    if (settings.onChange) settings.onChange(settings);
+  }
+
+  function toggleShowAllHands() {
+    settings.showAllHands = !settings.showAllHands;
+    syncSettingsUI();
+    if (settings.onChange) settings.onChange(settings);
+  }
+
+  function clearWinnerHighlights() {
+    document.querySelectorAll('.seat.winner').forEach(s => s.classList.remove('winner'));
+  }
+
+  function showSupportOverlay() {
+    if (!el.supportOverlay) return;
+    el.supportOverlay.classList.add('visible');
+  }
+
+  function hideSupportOverlay() {
+    if (!el.supportOverlay) return;
+    el.supportOverlay.classList.remove('visible');
+  }
+
+  function showSupportCopiedHint() {
+    if (!el.supportCopied) return;
+    el.supportCopied.classList.add('visible');
+    clearTimeout(el.supportCopied._timer);
+    el.supportCopied._timer = setTimeout(() => {
+      el.supportCopied.classList.remove('visible');
+    }, 1200);
+  }
+
+  function copySupportText(text) {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          showSupportCopiedHint();
+        }).catch(() => {
+          fallbackCopy(text);
+        });
+      } else {
+        fallbackCopy(text);
+      }
+    } catch (e) {
+      fallbackCopy(text);
+    }
+  }
+
+  function fallbackCopy(text) {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.top = '-1000px';
+      ta.style.left = '-1000px';
+      document.body.appendChild(ta);
+      ta.select();
+      ta.setSelectionRange(0, ta.value.length);
+      const ok = document.execCommand && document.execCommand('copy');
+      document.body.removeChild(ta);
+      if (ok) showSupportCopiedHint();
+    } catch (e) {}
+  }
+
+  return {
+    settings, init, el,
+    renderTable, updateSeats, updateBoard, updatePot, updateLevel,
+    updateStacks, updateActiveHighlight,
+    showActions, setHeroActionsActive,
+    openBottomPanel, closeBottomPanel, openGuidePanel, openGuideInsteadOfSettings, closeGuidePanel,
+    closeAllPanels, anyPanelOpen, anyOverlayOpen,
+    showExclOverlay, hideExclOverlay,
+    updateHistoryInfo,
+    readSettingsFromUI, applySettingsToUI,
+    syncSettingsUI, toggleStackDisplay, toggleShowStrategies, toggleShowAllHands,
+    createCardElement, createSeatElement, formatChips,
+    renderQuickRaiseOptions,
+    clearWinnerHighlights,
+    resetSliderToStart,
+    setReplayButtonState,
+    showHeroTimer, hideHeroTimer, updateHeroTimer, placeHeroTimer,
+    placeTopRoundRow,
+    showSupportOverlay, hideSupportOverlay, copySupportText
+  };
+
+})();
+
+
+/* ============================================================
+   MAIN
+   ============================================================ */
+
+(() => {
+
+  const session = {
+    state: null, heroIndex: 0,
+    stats: { hands: 0, hit: 0, miss: 0, place: null, streak: 0 },
+    waitingForHero: false, active: false,
+    heroEntered: false,
+    heroEliminated: false,
+    tournamentOver: false,
+    history: [], viewingIndex: -1, autoNextTimerId: null,
+    botTimerId: null, revealTimerId: null,
+    isPaused: false,
+    supportPaused: false,
+    panelsPaused: false,
+    exclPaused: false,
+
+    heroTimerIntervalId: null,
+    heroTimerTimeoutId: null,
+    heroTimerRemaining: 0,
+    heroTimerTotal: 0,
+
+    replay: {
+      active: false,
+      paused: false,
+      stepIndex: 0,
+      steps: [],
+      timerId: null,
+      handSnapshot: null
+    }
+  };
+
+  const el = {};
+
+  /* Двойной тап / двойной клик: окно в миллисекундах между касаниями. */
+  const DOUBLE_TAP_WINDOW = 500;
+
+  window.addEventListener('DOMContentLoaded', () => {
+    UI.init();
+    cacheDom();
+    bindGlobalHandlers();
+    UI.applySettingsToUI();
+    bindDesktopDoubleClick();
+    window.addEventListener('resize', () => {
+      UI.placeHeroTimer();
+      UI.placeTopRoundRow();
+    });
+  });
+
+  function cacheDom() {
+    el.btnStart       = document.getElementById('btn-start');
+    el.startOverlay   = document.getElementById('start-overlay');
+    el.bottomPanel    = document.getElementById('bottom-panel');
+    el.guidePanel     = document.getElementById('guide-panel');
+    el.tapClose       = document.getElementById('tap-close');
+    el.hnPrev         = document.getElementById('hn-prev');
+    el.hnNext         = document.getElementById('hn-next');
+    el.hnReplay       = document.getElementById('hn-replay');
+    el.hnResume       = document.getElementById('hn-resume');
+    el.hnSettings     = document.getElementById('hn-settings');
+    el.btnRestartPanel = document.getElementById('btn-restart-panel');
+    el.btnSupportPanel = document.getElementById('btn-support-panel');
+    el.settingsHelpBtn = document.getElementById('settings-help-btn');
+    el.settingsCardBtn = document.getElementById('settings-card-btn');
+    el.settingsExclBtn = document.getElementById('settings-excl-btn');
+    el.exclOverlay     = document.getElementById('excl-overlay');
+    el.exclWindow      = document.getElementById('excl-window');
+    el.topRoundRow     = document.getElementById('top-round-row');
+    el.app            = document.getElementById('app');
+    el.seats          = document.getElementById('seats');
+    el.heroTimerZone  = document.getElementById('hero-timer-zone');
+    el.supportOverlay = document.getElementById('support-overlay');
+    el.supportWindow  = document.getElementById('support-window');
+    el.supportCardNumber = document.getElementById('support-card-number');
+    el.supportName    = document.getElementById('support-name');
+  }
+
+  function bindDesktopDoubleClick() {
+    if (!el.seats) return;
+
+    el.seats.addEventListener('click', (e) => {
+      if (e.pointerType && e.pointerType !== 'mouse') return;
+
+      const stackEl = e.target.closest('.stack');
+      const cardsEl = e.target.closest('.seat-cards');
+
+      if (stackEl) {
+        if (registerDoubleTap(stackEl)) {
+          e.preventDefault();
+          e.stopPropagation();
+          handleStackDoubleTap();
+        }
+        return;
+      }
+
+      if (cardsEl) {
+        const isHeroSeat = !!cardsEl.closest('.seat.hero');
+        if (registerDoubleTap(cardsEl)) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (isHeroSeat) {
+            handleHeroCardsDoubleTap();
+          } else {
+            handleCardsDoubleTap();
+          }
+        }
+        return;
+      }
+    });
+  }
+
+  function registerDoubleTap(node) {
+    const now = Date.now();
+    const last = node._lastDoubleTapTime || 0;
+    if (last && (now - last) < DOUBLE_TAP_WINDOW) {
+      node._lastDoubleTapTime = 0;
+      return true;
+    }
+    node._lastDoubleTapTime = now;
+    return false;
+  }
+
+  function isInteractiveTarget(target) {
+    if (!target) return false;
+    return !!(target.closest('button') ||
+              target.closest('input') ||
+              target.closest('select') ||
+              target.closest('#bottom-panel') ||
+              target.closest('#guide-panel') ||
+              target.closest('#start-overlay') ||
+              target.closest('#hero-actions') ||
+              target.closest('#quick-percent-list') ||
+              target.closest('#hero-timer-zone') ||
+              target.closest('#support-overlay') ||
+              target.closest('#excl-overlay') ||
+              target.closest('#top-round-row'));
+  }
+
+  function bindGlobalHandlers() {
+    el.btnStart.addEventListener('click', () => {
+      el.startOverlay.classList.add('hidden');
+      startNewSession();
+    });
+
+    let startX = 0, startY = 0, tracking = false;
+    el.app.addEventListener('touchstart', (e) => {
+      if (e.touches.length !== 1) return;
+      if (UI.anyOverlayOpen()) { tracking = false; return; }
+      if (isInteractiveTarget(e.target)) { tracking = false; return; }
+      tracking = true;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    }, { passive: true });
+    el.app.addEventListener('touchend', (e) => {
+      if (!tracking) return;
+      tracking = false;
+      const endX = e.changedTouches[0].clientX;
+      const endY = e.changedTouches[0].clientY;
+      const dx = endX - startX;
+      const dy = endY - startY;
+      const minDist = 50;
+      if (Math.abs(dy) < minDist) return;
+      if (Math.abs(dx) > Math.abs(dy)) return;
+      if (dy < 0) {
+        openPanelWithPause(UI.openBottomPanel);
+      } else {
+        openPanelWithPause(UI.openGuidePanel);
+      }
+    }, { passive: true });
+
+    el.tapClose.addEventListener('click', () => closeAllPanelsAndResume());
+
+    /* Свайп вниз внутри панели настроек — закрывает её. */
+    let bpStartY = 0, bpTracking = false;
+    el.bottomPanel.addEventListener('touchstart', (e) => {
+      if (e.touches.length !== 1) return;
+      bpTracking = true;
+      bpStartY = e.touches[0].clientY;
+    }, { passive: true });
+    el.bottomPanel.addEventListener('touchend', (e) => {
+      if (!bpTracking) return;
+      bpTracking = false;
+      const endY = e.changedTouches[0].clientY;
+      const dy = endY - bpStartY;
+      if (dy > 60) {
+        closeAllPanelsAndResume();
+      }
+    }, { passive: true });
+
+    if (el.heroTimerZone) {
+      el.heroTimerZone.addEventListener('touchend', (e) => {
+        e.stopPropagation();
+        if (registerDoubleTap(el.heroTimerZone)) {
+          e.preventDefault();
+          toggleTurnTimeOption();
+        }
+      }, { passive: false });
+
+      el.heroTimerZone.addEventListener('click', (e) => {
+        if (e.pointerType && e.pointerType !== 'mouse') return;
+        if (registerDoubleTap(el.heroTimerZone)) {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleTurnTimeOption();
+        }
+      });
+    }
+
+    if (el.supportOverlay) {
+      el.supportOverlay.addEventListener('click', (e) => {
+        if (e.target === el.supportOverlay) {
+          closeSupportWindow();
+        }
+      });
+      el.supportOverlay.addEventListener('touchend', (e) => {
+        if (e.target === el.supportOverlay) {
+          e.preventDefault();
+          e.stopPropagation();
+          closeSupportWindow();
+        }
+      }, { passive: false });
+    }
+
+    if (el.exclOverlay) {
+      el.exclOverlay.addEventListener('click', (e) => {
+        if (e.target === el.exclOverlay) {
+          closeExclWindow();
+        }
+      });
+      el.exclOverlay.addEventListener('touchend', (e) => {
+        if (e.target === el.exclOverlay) {
+          e.preventDefault();
+          e.stopPropagation();
+          closeExclWindow();
+        }
+      }, { passive: false });
+    }
+
+    if (el.exclWindow) {
+      el.exclWindow.addEventListener('click', (e) => e.stopPropagation());
+      el.exclWindow.addEventListener('touchend', (e) => e.stopPropagation(), { passive: false });
+    }
+
+    if (el.supportCardNumber) {
+      el.supportCardNumber.addEventListener('click', (e) => {
+        e.stopPropagation();
+        UI.copySupportText(el.supportCardNumber.textContent.trim());
+      });
+      el.supportCardNumber.addEventListener('touchend', (e) => {
+        e.stopPropagation();
+      }, { passive: false });
+    }
+
+    if (el.supportName) {
+      el.supportName.addEventListener('click', (e) => {
+        e.stopPropagation();
+        UI.copySupportText(el.supportName.textContent.trim());
+      });
+      el.supportName.addEventListener('touchend', (e) => {
+        e.stopPropagation();
+      }, { passive: false });
+    }
+
+    if (el.supportWindow) {
+      el.supportWindow.addEventListener('click', (e) => { e.stopPropagation(); });
+      el.supportWindow.addEventListener('touchend', (e) => { e.stopPropagation(); }, { passive: false });
+    }
+
+    if (el.btnSupportPanel) {
+      el.btnSupportPanel.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openSupportWindow();
+      });
+      el.btnSupportPanel.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openSupportWindow();
+      }, { passive: false });
+    }
+
+    if (el.settingsHelpBtn) {
+      el.settingsHelpBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        UI.openGuideInsteadOfSettings();
+      });
+      el.settingsHelpBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        UI.openGuideInsteadOfSettings();
+      }, { passive: false });
+    }
+
+    if (el.settingsCardBtn) {
+      el.settingsCardBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openSupportWindow();
+      });
+      el.settingsCardBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openSupportWindow();
+      }, { passive: false });
+    }
+
+    if (el.settingsExclBtn) {
+      el.settingsExclBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openExclWindow();
+      });
+      el.settingsExclBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openExclWindow();
+      }, { passive: false });
+    }
+
+    if (el.bottomPanel) {
+      el.bottomPanel.addEventListener('click', (e) => e.stopPropagation());
+      el.bottomPanel.addEventListener('touchend', (e) => e.stopPropagation(), { passive: false });
+    }
+    if (el.guidePanel) {
+      el.guidePanel.addEventListener('click', (e) => e.stopPropagation());
+      el.guidePanel.addEventListener('touchend', (e) => e.stopPropagation(), { passive: false });
+    }
+
+    ['set-card-style','set-stack-display','set-blind-growth','set-turn-time','set-show-strategies','set-show-all-hands','set-show-all-showdown'].forEach(id => {
+      const node = document.getElementById(id);
+      if (!node) return;
+      node.addEventListener('change', () => {
+        UI.readSettingsFromUI();
+        if (session.state) {
+          UI.updateLevel(session.state);
+          UI.updateSeats(session.state, session.state.handOver);
+          UI.updateBoard(session.state);
+          if (session.waitingForHero) {
+            refreshQuickPercentList();
+            refreshCallAmount();
+          }
+        }
+        if (session.replay.active) {
+          renderReplayStep();
+        }
+      });
+    });
+
+    el.hnPrev.addEventListener('click', () => navigateHistory(-1));
+    el.hnNext.addEventListener('click', () => navigateHistory(1));
+    el.hnReplay.addEventListener('click', () => toggleReplay());
+    el.hnResume.addEventListener('click', () => resumeGame());
+    el.hnSettings.addEventListener('click', () => openPanelWithPause(UI.openBottomPanel));
+
+    el.btnRestartPanel.addEventListener('click', () => {
+      closeAllPanelsAndResume();
+      restartSession();
+    });
+
+    bindSeatInteractions();
+  }
+
+  function openPanelWithPause(openFn) {
+    if (session.supportPaused || session.exclPaused) return;
+    if (UI.anyOverlayOpen()) return;
+    openFn();
+    session.panelsPaused = true;
+    pauseGame();
+  }
+
+  function closeAllPanelsAndResume() {
+    const wasOpen = UI.anyPanelOpen();
+    UI.closeAllPanels();
+    if (wasOpen && session.panelsPaused) {
+      session.panelsPaused = false;
+      if (!session.supportPaused && !session.exclPaused) {
+        resumeGame();
+      }
+    }
+  }
+
+  function openSupportWindow() {
+    if (session.supportPaused) return;
+    session.supportPaused = true;
+    pauseGame();
+    UI.showSupportOverlay();
+  }
+
+  function closeSupportWindow() {
+    if (!session.supportPaused) return;
+    session.supportPaused = false;
+    UI.hideSupportOverlay();
+    if (!session.panelsPaused && !session.exclPaused && !UI.anyPanelOpen()) {
+      resumeGame();
+    }
+  }
+
+  function openExclWindow() {
+    if (session.exclPaused) return;
+    session.exclPaused = true;
+    pauseGame();
+    UI.showExclOverlay();
+  }
+
+  function closeExclWindow() {
+    if (!session.exclPaused) return;
+    session.exclPaused = false;
+    UI.hideExclOverlay();
+    if (!session.panelsPaused && !session.supportPaused && !UI.anyPanelOpen()) {
+      resumeGame();
+    }
+  }
+
+  function toggleTurnTimeOption() {
+    const current = Number(UI.settings.turnTime) || 0;
+    const next = current === 0 ? 10 : 0;
+    UI.settings.turnTime = next;
+
+    const select = document.getElementById('set-turn-time');
+    if (select) select.value = String(next);
+
+    if (next === 0) {
+      stopHeroTimer();
+    } else {
+      if (session.waitingForHero && !session.heroEliminated) {
+        startHeroTimerIfNeeded();
+      }
+    }
+  }
+
+  function refreshCallAmount() {
+    const state = session.state;
+    if (!state) return;
+    const hero = state.players[session.heroIndex];
+    if (!hero) return;
+    const toCall = Math.max(0, state.currentBet - hero.committedThisStreet);
+    const amountEl = document.getElementById('call-amount');
+    if (!amountEl) return;
+    const canCall = toCall > 0 && toCall < hero.stack;
+    if (canCall) {
+      amountEl.textContent = UI.formatChips(toCall, state);
+    } else {
+      amountEl.textContent = '';
+    }
+    const slider = document.getElementById('raise-slider-horiz');
+    const mini = document.getElementById('raise-amount-mini');
+    if (slider && mini) {
+      mini.textContent = UI.formatChips(Number(slider.value), state);
+    }
+  }
+
+  function bindSeatInteractions() {
+    if (!el.seats) return;
+
+    el.seats.addEventListener('touchend', (e) => {
+      const stackEl = e.target.closest('.stack');
+      const cardsEl = e.target.closest('.seat-cards');
+
+      if (stackEl) {
+        e.stopPropagation();
+        if (registerDoubleTap(stackEl)) {
+          e.preventDefault();
+          handleStackDoubleTap();
+        }
+        return;
+      }
+
+      if (cardsEl) {
+        e.stopPropagation();
+        const isHeroSeat = !!cardsEl.closest('.seat.hero');
+        if (registerDoubleTap(cardsEl)) {
+          e.preventDefault();
+          if (isHeroSeat) {
+            handleHeroCardsDoubleTap();
+          } else {
+            handleCardsDoubleTap();
+          }
+        }
+        return;
+      }
+    }, { passive: false });
+  }
+
+  function handleStackDoubleTap() {
+    UI.toggleStackDisplay();
+    if (session.replay.active) {
+      renderReplayStep();
+      return;
+    }
+    if (session.state) {
+      const state = session.state;
+      const showAll = state.handOver || session.viewingIndex >= 0;
+      if (session.viewingIndex >= 0) {
+        UI.updateSeats(session.history[session.viewingIndex], true);
+        UI.updatePot(session.history[session.viewingIndex]);
+      } else {
+        UI.updateSeats(state, showAll);
+        UI.updatePot(state);
+      }
+      UI.updateLevel(session.viewingIndex >= 0 ? session.history[session.viewingIndex] : state);
+      if (session.viewingIndex < 0 && session.waitingForHero) {
+        refreshQuickPercentList();
+        refreshCallAmount();
+      }
+    }
+  }
+
+  function handleCardsDoubleTap() {
+    UI.toggleShowStrategies();
+    if (session.replay.active) {
+      renderReplayStep();
+      return;
+    }
+    if (session.state) {
+      const state = session.state;
+      const showAll = state.handOver || session.viewingIndex >= 0;
+      if (session.viewingIndex >= 0) {
+        UI.updateSeats(session.history[session.viewingIndex], true);
+      } else {
+        UI.updateSeats(state, showAll);
+      }
+    }
+  }
+
+  function handleHeroCardsDoubleTap() {
+    UI.toggleShowAllHands();
+    if (session.replay.active) {
+      renderReplayStep();
+      return;
+    }
+    if (session.state) {
+      const state = session.state;
+      const showAll = state.handOver || session.viewingIndex >= 0;
+      if (session.viewingIndex >= 0) {
+        UI.updateSeats(session.history[session.viewingIndex], true);
+      } else {
+        UI.updateSeats(state, showAll);
+      }
+    }
+  }
+
+  function restartSession() {
+    stopReplay(true);
+    stopHeroTimer();
+    clearTimeout(session.autoNextTimerId);
+    clearTimeout(session.botTimerId);
+    clearTimeout(session.revealTimerId);
+    session.active = false;
+    session.state = null;
+    session.history = [];
+    session.viewingIndex = -1;
+    session.stats = { hands: 0, hit: 0, miss: 0, place: null, streak: 0 };
+    session.waitingForHero = false;
+    session.heroEntered = false;
+    session.heroEliminated = false;
+    session.tournamentOver = false;
+    session.isPaused = false;
+    session.supportPaused = false;
+    session.panelsPaused = false;
+    session.exclPaused = false;
+
+    UI.hideSupportOverlay();
+    UI.hideExclOverlay();
+    UI.setHeroActionsActive(false);
+    UI.updateHistoryInfo(0, 0, false);
+    UI.clearWinnerHighlights();
+    UI.setReplayButtonState('replay');
+
+    startNewSession();
+  }
+
+  function startNewSession() {
+    stopReplay(true);
+    stopHeroTimer();
+    clearTimeout(session.autoNextTimerId);
+    clearTimeout(session.botTimerId);
+    clearTimeout(session.revealTimerId);
+    session.active = true;
+    session.stats = { hands: 0, hit: 0, miss: 0, place: null, streak: 0 };
+    session.waitingForHero = false;
+    session.heroEntered = false;
+    session.heroEliminated = false;
+    session.tournamentOver = false;
+    session.history = [];
+    session.viewingIndex = -1;
+    session.isPaused = false;
+    session.supportPaused = false;
+    session.panelsPaused = false;
+    session.exclPaused = false;
+
+    const botStrategies = Bots.assignStrategies(7);
+    const players = [{ id: 'hero', name: 'Ты', isHero: true, strategy: null, stack: Engine.STARTING_STACK }];
+    for (let i = 0; i < 7; i++) {
+      players.push({ id: 'bot' + (i + 1), name: 'Бот ' + (i + 1), isHero: false, strategy: botStrategies[i], stack: Engine.STARTING_STACK });
+    }
+
+    session.heroIndex = 0;
+    session.state = Engine.createInitialState(players);
+    session.state.buttonIndex = 7;
+
+    UI.renderTable(session.state);
+    UI.updateHistoryInfo(0, 0, false);
+    UI.setReplayButtonState('replay');
+
+    startHand();
+  }
+
+  function startHand() {
+    if (!session.active) return;
+    stopReplay(true);
+    stopHeroTimer();
+
+    if (session.tournamentOver) return;
+
+    for (const p of session.state.players) {
+      if (!p.eliminated && p.stack <= 0) p.eliminated = true;
+    }
+
+    const hero = session.state.players[session.heroIndex];
+    if (hero.eliminated && !session.heroEliminated) {
+      session.heroEliminated = true;
+    }
+
+    const alive = session.state.players.filter(p => !p.eliminated);
+    if (alive.length <= 1) {
+      session.tournamentOver = true;
+      UI.setHeroActionsActive(false);
+      UI.hideHeroTimer();
+      return;
+    }
+
+    clearTimeout(session.revealTimerId);
+
+    Engine.startHand(session.state);
+    session.heroEntered = false;
+    session.viewingIndex = -1;
+    session.isPaused = false;
+
+    UI.clearWinnerHighlights();
+    UI.renderTable(session.state);
+    UI.updateBoard(session.state);
+    UI.updatePot(session.state);
+    UI.updateSeats(session.state);
+    UI.updateLevel(session.state);
+    UI.updateHistoryInfo(session.history.length, session.history.length, false);
+
+    UI.resetSliderToStart();
+    refreshQuickPercentList();
+    UI.setHeroActionsActive(false);
+    processTurn();
+  }
+
+  function refreshQuickPercentList() {
+    const state = session.state;
+    if (!state) return;
+    const hero = state.players[session.heroIndex];
+    if (!hero) return;
+    const toCall = Math.max(0, state.currentBet - hero.committedThisStreet);
+    UI.renderQuickRaiseOptions(state, hero, toCall, null);
+  }
+
+  function processTurn() {
+    if (session.isPaused) return;
+    if (session.viewingIndex >= 0) return;
+    if (session.replay.active) return;
+    const state = session.state;
+    if (!state) return;
+    if (state.handOver) { finishHand(); return; }
+
+    const idx = state.actingIndex;
+    const player = state.players[idx];
+    if (!player || player.folded || player.eliminated || player.allIn) { advanceOrFinish(); return; }
+
+    UI.updateActiveHighlight(state);
+
+    if (player.isHero && !session.heroEliminated) {
+      session.waitingForHero = true;
+      heroTurn(player);
+    } else {
+      session.waitingForHero = false;
+      UI.setHeroActionsActive(false);
+      UI.hideHeroTimer();
+      UI.resetSliderToStart();
+      refreshQuickPercentList();
+      botTurn(player, idx);
+    }
+  }
+
+  function heroTurn(hero) {
+    const state = session.state;
+    UI.showActions(state, session.heroIndex, {
+      onFold:  () => heroAct({ type: 'fold' }),
+      onCheck: () => heroAct({ type: 'check' }),
+      onCall:  () => heroAct({ type: 'call' }),
+      onRaise: (amount) => heroAct({ type: 'raise', amount }),
+      onAllIn: () => heroAct({ type: 'allin' })
+    });
+    startHeroTimerIfNeeded();
+  }
+
+  function startHeroTimerIfNeeded() {
+    stopHeroTimer();
+    const seconds = Number(UI.settings.turnTime) || 0;
+    if (seconds <= 0) return;
+
+    session.heroTimerTotal = seconds;
+    session.heroTimerRemaining = seconds;
+    UI.showHeroTimer(seconds);
+
+    session.heroTimerIntervalId = setInterval(() => {
+      session.heroTimerRemaining -= 1;
+      UI.updateHeroTimer(session.heroTimerRemaining, session.heroTimerTotal);
+      if (session.heroTimerRemaining < 0) {
+        stopHeroTimer();
+        if (session.waitingForHero && !session.heroEliminated) {
+          session.waitingForHero = false;
+          UI.setHeroActionsActive(false);
+          UI.resetSliderToStart();
+          const state = session.state;
+          if (state) {
+            const res = Engine.applyAction(state, session.heroIndex, { type: 'fold' });
+            if (res.ok) {
+              pushActionLog(state, session.heroIndex, 'fold', 0);
+              UI.updateSeats(state);
+              UI.updatePot(state);
+            }
+            advanceOrFinish();
+          }
+        }
+      }
+    }, 1000);
+  }
+
+  function stopHeroTimer() {
+    if (session.heroTimerIntervalId) {
+      clearInterval(session.heroTimerIntervalId);
+      session.heroTimerIntervalId = null;
+    }
+    if (session.heroTimerTimeoutId) {
+      clearTimeout(session.heroTimerTimeoutId);
+      session.heroTimerTimeoutId = null;
+    }
+    session.heroTimerRemaining = 0;
+    UI.hideHeroTimer();
+  }
+
+  function heroAct(action) {
+    if (session.viewingIndex >= 0) return;
+    if (session.replay.active) return;
+    if (!session.waitingForHero) return;
+    stopHeroTimer();
+    session.waitingForHero = false;
+    UI.setHeroActionsActive(false);
+    UI.resetSliderToStart();
+    const state = session.state;
+    const hero = state.players[session.heroIndex];
+
+    if (action.type === 'call' || action.type === 'raise' || action.type === 'allin') session.heroEntered = true;
+
+    const res = Engine.applyAction(state, session.heroIndex, action);
+    if (!res.ok) {
+      session.waitingForHero = true;
+      heroTurn(hero);
+      return;
+    }
+
+    pushActionLog(state, session.heroIndex, action.type, action.amount || 0);
+    UI.updateSeats(state);
+    UI.updatePot(state);
+    advanceOrFinish();
+  }
+
+  function botDecisionToEngineAction(decision) {
+    return { type: decision.action, amount: decision.amount || 0 };
+  }
+
+  function botTurn(bot, idx) {
+    const state = session.state;
+    const delay = Engine.cryptoRandomInt(2) === 0 ? 500 : 1000;
+    clearTimeout(session.botTimerId);
+    session.botTimerId = setTimeout(() => {
+      if (session.isPaused) return;
+      if (session.viewingIndex >= 0) return;
+      if (session.replay.active) return;
+      if (state.handOver || !session.active) return;
+      const ctx = buildBotContext(bot, idx);
+      const decision = Bots.decide(ctx);
+      const toCall = Math.max(0, state.currentBet - bot.committedThisStreet);
+
+      let engineAction = botDecisionToEngineAction(decision);
+      if (engineAction.type === 'check' && toCall > 0) engineAction = { type: 'fold', amount: 0 };
+
+      if (engineAction.type === 'raise') {
+        const minTarget = state.currentBet + state.minRaise;
+        const maxTarget = bot.committedThisStreet + bot.stack;
+        let target = engineAction.amount;
+        if (target < minTarget) target = minTarget;
+        if (target > maxTarget) target = maxTarget;
+        if (target <= state.currentBet) {
+          engineAction = toCall > 0 ? { type: 'call', amount: toCall } : { type: 'check', amount: 0 };
+        } else engineAction.amount = target;
+      }
+
+      const res = Engine.applyAction(state, idx, engineAction);
+      if (!res.ok) {
+        const fallback = toCall > 0 ? { type: 'fold' } : { type: 'check' };
+        Engine.applyAction(state, idx, fallback);
+        engineAction = fallback;
+      }
+
+      pushActionLog(state, idx, engineAction.type, engineAction.amount || 0);
+
+      UI.updateSeats(state);
+      UI.updatePot(state);
+      UI.updateActiveHighlight(state);
+      refreshQuickPercentList();
+      advanceOrFinish();
+    }, delay);
+  }
+
+  function buildBotContext(bot, idx) {
+    const state = session.state;
+    const toCall = Math.max(0, state.currentBet - bot.committedThisStreet);
+    const raiser = state.lastAggressorIndex !== null ? state.players[state.lastAggressorIndex] : null;
+    let facingRaise;
+    if (state.street === 'preflop') facingRaise = state.currentBet > state.blinds.bb;
+    else facingRaise = state.currentBet > 0;
+    const facing3Bet = state.street === 'preflop' && state.currentBet > state.blinds.bb * 3;
+    const facingAllin = state.players.some(p => p !== bot && !p.folded && p.allIn && p.committedThisStreet >= state.currentBet);
+
+    return {
+      card1: bot.holeCards[0], card2: bot.holeCards[1], board: state.board,
+      street: state.street, pot: state.pot, toCall, minRaise: state.minRaise,
+      myStack: bot.stack, bb: state.blinds.bb, position: bot.position,
+      numActive: state.players.filter(p => !p.folded && !p.eliminated).length,
+      facingRaise, facing3Bet, facingAllin,
+      raiserPosition: raiser ? raiser.position : null,
+      strategy: bot.strategy
+    };
+  }
+
+  function pushActionLog(state, playerIndex, actionType, amount) {
+    if (!state.actionLog) state.actionLog = [];
+    state.actionLog.push({
+      playerIndex,
+      actionType,
+      amount: amount || 0,
+      street: state.street,
+      potAfter: state.pot
+    });
+  }
+
+  function advanceOrFinish() {
+    if (session.isPaused) return;
+    if (session.viewingIndex >= 0) return;
+    if (session.replay.active) return;
+    const state = session.state;
+    if (state.handOver) { finishHand(); return; }
+
+    if (Engine.isBettingRoundComplete(state)) {
+      const res = Engine.endBettingRound(state);
+      UI.updateBoard(state);
+      UI.updatePot(state);
+      refreshQuickPercentList();
+      if (res.done) { finishHand(); return; }
+      UI.updateSeats(state);
+      UI.updateActiveHighlight(state);
+      processTurn();
+      return;
+    }
+
+    const next = Engine.nextActor(state);
+    if (next < 0) {
+      const res = Engine.endBettingRound(state);
+      UI.updateBoard(state);
+      UI.updatePot(state);
+      refreshQuickPercentList();
+      if (res.done) { finishHand(); return; }
+      UI.updateSeats(state);
+      processTurn();
+      return;
+    }
+
+    state.actingIndex = next;
+    processTurn();
+  }
+
+  function finishHand() {
+    if (session.isPaused) return;
+    if (session.replay.active) return;
+    stopHeroTimer();
+    const state = session.state;
+    Engine.finalizeHand(state);
+
+    session.history.push(snapshotState(state));
+    if (session.history.length > 1000) session.history.shift();
+
+    const heroP = state.players[session.heroIndex];
+    if (heroP.eliminated || heroP.stack <= 0) {
+      session.heroEliminated = true;
+    }
+
+    UI.updateBoard(state);
+    UI.updateSeats(state, false);
+    UI.updatePot(state);
+    UI.updateActiveHighlight(state);
+    UI.setHeroActionsActive(false);
+    UI.resetSliderToStart();
+    refreshQuickPercentList();
+    UI.updateHistoryInfo(session.history.length, session.history.length, false);
+
+    highlightWinners(state);
+
+    clearTimeout(session.revealTimerId);
+    session.revealTimerId = setTimeout(() => {
+      if (!session.state || session.state !== state) return;
+      if (!state.handOver) return;
+      if (session.viewingIndex >= 0) return;
+      if (session.replay.active) return;
+      UI.updateSeats(state, true);
+    }, 1000);
+
+    clearTimeout(session.autoNextTimerId);
+    session.autoNextTimerId = setTimeout(() => {
+      if (!session.active) return;
+      if (session.viewingIndex >= 0) return;
+      if (session.isPaused) return;
+      if (session.replay.active) return;
+      if (session.supportPaused) return;
+      if (session.panelsPaused) return;
+      if (session.exclPaused) return;
+
+      const period = UI.settings.blindGrowthHands || 10;
+      state.handsAtLevel++;
+      if (state.handsAtLevel >= period) {
+        state.handsAtLevel = 0;
+        state.levelIndex = Math.min(state.levelIndex + 1, Engine.BLIND_LEVELS.length - 1);
+      }
+
+      const alive = state.players.filter(p => !p.eliminated);
+      if (alive.length <= 1) {
+        session.tournamentOver = true;
+        UI.setHeroActionsActive(false);
+        UI.hideHeroTimer();
+        return;
+      }
+      startHand();
+    }, 4000);
+  }
+
+  function highlightWinners(state) {
+    UI.clearWinnerHighlights();
+    if (!state.showdownResults) return;
+    for (const [id, amount] of Object.entries(state.showdownResults.payouts || {})) {
+      if (amount <= 0) continue;
+      const seat = document.getElementById(`seat-${id}`);
+      if (seat) seat.classList.add('winner');
+    }
+  }
+
+  function snapshotState(state) {
+    return {
+      handNumber: state.handNumber,
+      levelIndex: state.levelIndex,
+      handOver: state.handOver,
+      finalStreet: state.finalStreet,
+      board: state.board.map(c => ({ ...c })),
+      pot: state.pot,
+      buttonIndex: state.buttonIndex,
+      blinds: { ...state.blinds },
+      players: state.players.map(p => ({
+        id: p.id, seatIndex: p.seatIndex, name: p.name, isHero: p.isHero,
+        strategy: p.strategy, stack: p.stack, position: p.position,
+        holeCards: p.holeCards.map(c => ({ ...c })),
+        folded: p.folded, eliminated: p.eliminated, revealed: p.revealed,
+        committedThisStreet: 0, acted: p.acted, lastAction: p.lastAction,
+        committedTotal: p.committedTotal, blindPaid: p.blindPaid,
+        inHand: p.inHand
+      })),
+      showdownResults: state.showdownResults,
+      actionLog: (state.actionLog || []).map(a => ({ ...a }))
+    };
+  }
+
+  function pauseGame() {
+    if (session.isPaused) return;
+    session.isPaused = true;
+    clearTimeout(session.botTimerId);
+    clearTimeout(session.autoNextTimerId);
+    session.botTimerId = null;
+    session.autoNextTimerId = null;
+    UI.setHeroActionsActive(false);
+    stopHeroTimer();
+  }
+
+  function navigateHistory(delta) {
+    if (session.history.length === 0) return;
+    stopReplay(true);
+    if (session.viewingIndex < 0) {
+      session.viewingIndex = session.history.length - 1;
+      pauseGame();
+    } else {
+      session.viewingIndex = Math.max(0, Math.min(session.history.length - 1, session.viewingIndex + delta));
+    }
+    renderHistorySnapshot();
+  }
+
+  function renderHistorySnapshot() {
+    const snap = session.history[session.viewingIndex];
+    if (!snap) return;
+    UI.setHeroActionsActive(false);
+    UI.hideHeroTimer();
+    UI.renderTable(snap);
+    UI.updateBoard(snap);
+    UI.updateSeats(snap, true);
+    UI.updatePot(snap);
+    UI.updateLevel(snap);
+    UI.updateActiveHighlight({ actingIndex: -1, handOver: true, players: snap.players });
+    highlightWinners(snap);
+    UI.updateHistoryInfo(session.viewingIndex + 1, session.history.length, true);
+    UI.setReplayButtonState('replay');
+  }
+
+  function buildReplaySteps(snap) {
+    const steps = [];
+    const finalBoard = snap.board || [];
+    const actionLog = snap.actionLog || [];
+
+    const baseStacks = {};
+    for (const p of snap.players) {
+      baseStacks[p.id] = p.stack + (p.committedTotal || 0);
+    }
+
+    const cur = {
+      board: [],
+      pot: 0,
+      players: snap.players.map(p => ({
+        id: p.id,
+        seatIndex: p.seatIndex,
+        name: p.name,
+        isHero: p.isHero,
+        strategy: p.strategy,
+        position: p.position,
+        holeCards: p.holeCards.map(c => ({ ...c })),
+        stack: baseStacks[p.id],
+        committedThisStreet: 0,
+        committedTotal: 0,
+        folded: false,
+        allIn: false,
+        eliminated: !!p.eliminated,
+        inHand: !!p.inHand,
+        acted: false,
+        lastAction: null,
+        revealed: false,
+        blindPaid: 0
+      }))
+    };
+
+    const boardDeal = { preflop: 0, flop: 3, turn: 4, river: 5 };
+
+    const takeBoardSnapshot = (street) => {
+      const needed = boardDeal[street] || 0;
+      while (cur.board.length < needed) {
+        const idx = cur.board.length;
+        if (idx < finalBoard.length) {
+          cur.board.push({ ...finalBoard[idx] });
+        } else break;
+      }
+    };
+
+    const resetStreetCommits = () => {
+      for (const p of cur.players) {
+        p.committedThisStreet = 0;
+      }
+    };
+
+    let lastStreet = 'preflop';
+    takeBoardSnapshot(lastStreet);
+
+    steps.push({ kind: 'start', snapshot: makeReplaySnapshot(cur, snap, 'preflop', false) });
+
+    for (const act of actionLog) {
+      if (act.street !== lastStreet) {
+        lastStreet = act.street;
+        resetStreetCommits();
+        takeBoardSnapshot(lastStreet);
+        for (const p of cur.players) {
+          if (p.lastAction !== 'fold' && p.lastAction !== 'allin') p.lastAction = null;
+        }
+        steps.push({ kind: 'street', snapshot: makeReplaySnapshot(cur, snap, lastStreet, false) });
+      }
+
+      const pl = cur.players.find(p => p.seatIndex === act.playerIndex);
+      if (!pl) continue;
+
+      const diff = Math.max(0, act.potAfter - cur.pot);
+
+      if (act.actionType === 'fold') {
+        pl.folded = true;
+        pl.lastAction = 'fold';
+      } else if (act.actionType === 'check') {
+        pl.lastAction = 'check';
+        pl.acted = true;
+      } else if (act.actionType === 'call') {
+        pl.lastAction = 'call';
+        pl.acted = true;
+        pl.stack -= diff;
+        pl.committedThisStreet += diff;
+        pl.committedTotal += diff;
+        cur.pot += diff;
+      } else if (act.actionType === 'raise') {
+        pl.lastAction = 'raise';
+        pl.acted = true;
+        pl.stack -= diff;
+        pl.committedThisStreet += diff;
+        pl.committedTotal += diff;
+        cur.pot += diff;
+      } else if (act.actionType === 'allin') {
+        pl.lastAction = 'allin';
+        pl.acted = true;
+        pl.allIn = true;
+        pl.stack -= diff;
+        pl.committedThisStreet += diff;
+        pl.committedTotal += diff;
+        cur.pot += diff;
+      }
+
+      if (pl.stack <= 0 && !pl.folded && act.actionType !== 'check' && act.actionType !== 'fold') {
+        pl.allIn = true;
+      }
+
+      steps.push({ kind: 'action', snapshot: makeReplaySnapshot(cur, snap, lastStreet, false) });
+    }
+
+    while (cur.board.length < finalBoard.length) {
+      cur.board.push({ ...finalBoard[cur.board.length] });
+    }
+
+    const finalSnap = JSON.parse(JSON.stringify(snap));
+    finalSnap.handOver = true;
+    steps.push({ kind: 'final', snapshot: finalSnap });
+
+    return steps;
+  }
+
+  function makeReplaySnapshot(cur, baseSnap, street, handOver) {
+    return {
+      handNumber: baseSnap.handNumber,
+      levelIndex: baseSnap.levelIndex,
+      handOver: !!handOver,
+      finalStreet: street || baseSnap.finalStreet,
+      board: cur.board.map(c => ({ ...c })),
+      pot: cur.pot,
+      buttonIndex: baseSnap.buttonIndex,
+      blinds: { ...baseSnap.blinds },
+      players: cur.players.map(p => ({
+        id: p.id,
+        seatIndex: p.seatIndex,
+        name: p.name,
+        isHero: p.isHero,
+        strategy: p.strategy,
+        stack: p.stack,
+        position: p.position,
+        holeCards: p.holeCards.map(c => ({ ...c })),
+        folded: p.folded,
+        eliminated: p.eliminated,
+        revealed: p.revealed,
+        committedThisStreet: p.committedThisStreet,
+        acted: p.acted,
+        lastAction: p.lastAction,
+        committedTotal: p.committedTotal,
+        blindPaid: p.blindPaid,
+        inHand: p.inHand
+      })),
+      showdownResults: null,
+      actionLog: []
+    };
+  }
+
+  function toggleReplay() {
+    if (session.viewingIndex < 0) return;
+    const snap = session.history[session.viewingIndex];
+    if (!snap) return;
+
+    if (!session.replay.active) {
+      startReplay(snap);
+      return;
+    }
+
+    if (session.replay.paused) {
+      resumeReplay();
+    } else {
+      pauseReplay();
+    }
+  }
+
+  function startReplay(snap) {
+    stopReplay(true);
+    const steps = buildReplaySteps(snap);
+    session.replay.active = true;
+    session.replay.paused = false;
+    session.replay.stepIndex = 0;
+    session.replay.steps = steps;
+    session.replay.handSnapshot = snap;
+
+    UI.setHeroActionsActive(false);
+    UI.hideHeroTimer();
+    UI.setReplayButtonState('pause');
+
+    renderReplayStep();
+    scheduleNextReplayStep();
+  }
+
+  function renderReplayStep() {
+    const r = session.replay;
+    if (!r.active) return;
+    const step = r.steps[r.stepIndex];
+    if (!step) return;
+
+    const s = step.snapshot;
+    UI.renderTable(s);
+    UI.updateBoard(s);
+    UI.updateSeats(s, false);
+    UI.updatePot(s);
+    UI.updateLevel(s);
+    UI.updateActiveHighlight({ actingIndex: -1, handOver: !!s.handOver, players: s.players });
+    if (s.handOver) {
+      highlightWinners(s);
+    } else {
+      UI.clearWinnerHighlights();
+    }
+    UI.updateHistoryInfo(session.viewingIndex + 1, session.history.length, true);
+  }
+
+  function scheduleNextReplayStep() {
+    const r = session.replay;
+    if (!r.active || r.paused) return;
+    clearTimeout(r.timerId);
+    r.timerId = setTimeout(() => {
+      if (!r.active || r.paused) return;
+      r.stepIndex++;
+      if (r.stepIndex >= r.steps.length) {
+        finishReplay();
+        return;
+      }
+      renderReplayStep();
+      scheduleNextReplayStep();
+    }, 900);
+  }
+
+  function pauseReplay() {
+    const r = session.replay;
+    if (!r.active) return;
+    r.paused = true;
+    clearTimeout(r.timerId);
+    r.timerId = null;
+    UI.setReplayButtonState('play');
+  }
+
+  function resumeReplay() {
+    const r = session.replay;
+    if (!r.active) return;
+    r.paused = false;
+    UI.setReplayButtonState('pause');
+    scheduleNextReplayStep();
+  }
+
+  function finishReplay() {
+    const r = session.replay;
+    r.active = false;
+    r.paused = false;
+    clearTimeout(r.timerId);
+    r.timerId = null;
+    r.steps = [];
+    r.stepIndex = 0;
+    UI.setReplayButtonState('replay');
+  }
+
+  function stopReplay(restoreView) {
+    const r = session.replay;
+    if (r.timerId) clearTimeout(r.timerId);
+    r.timerId = null;
+    r.active = false;
+    r.paused = false;
+    r.steps = [];
+    r.stepIndex = 0;
+    r.handSnapshot = null;
+    UI.setReplayButtonState('replay');
+
+    if (restoreView && session.viewingIndex >= 0) {
+      renderHistorySnapshot();
+    }
+  }
+
+  function resumeGame() {
+    if (session.supportPaused) return;
+    if (session.exclPaused) return;
+    if (UI.anyPanelOpen()) return;
+
+    stopReplay(true);
+    session.viewingIndex = -1;
+    session.isPaused = false;
+    const state = session.state;
+    if (!state) return;
+    UI.hideHeroTimer();
+    if (state.handOver) {
+      UI.updateBoard(state);
+      UI.updateSeats(state, true);
+      UI.updatePot(state);
+      UI.updateLevel(state);
+      highlightWinners(state);
+      UI.setHeroActionsActive(false);
+      refreshQuickPercentList();
+      if (session.autoNextTimerId === null) {
+        session.autoNextTimerId = setTimeout(() => {
+          if (!session.active) return;
+          if (session.viewingIndex >= 0) return;
+          if (session.isPaused) return;
+          if (session.replay.active) return;
+          if (session.supportPaused) return;
+          if (session.panelsPaused) return;
+          if (session.exclPaused) return;
+
+          const period = UI.settings.blindGrowthHands || 10;
+          state.handsAtLevel++;
+          if (state.handsAtLevel >= period) {
+            state.handsAtLevel = 0;
+            state.levelIndex = Math.min(state.levelIndex + 1, Engine.BLIND_LEVELS.length - 1);
+          }
+
+          const alive = state.players.filter(p => !p.eliminated);
+          if (alive.length <= 1) {
+            session.tournamentOver = true;
+            UI.setHeroActionsActive(false);
+            return;
+          }
+          startHand();
+        }, 4000);
+      }
+    } else {
+      UI.clearWinnerHighlights();
+      UI.updateBoard(state);
+      UI.updateSeats(state);
+      UI.updatePot(state);
+      UI.updateLevel(state);
+      UI.updateActiveHighlight(state);
+      UI.resetSliderToStart();
+      refreshQuickPercentList();
+      if (session.waitingForHero && !session.heroEliminated) {
+        heroTurn(state.players[session.heroIndex]);
+      } else {
+        UI.setHeroActionsActive(false);
+        processTurn();
+      }
+    }
+    UI.updateHistoryInfo(session.history.length, session.history.length, false);
+  }
+
+})();
+</script>
+</body>
+</html>
