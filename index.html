@@ -48,7 +48,7 @@
   --table-radius: clamp(28px, 4vmin, 46px);
   --table-border-w: clamp(8px, 1.4vmin, 14px);
 
-  --hero-timer-size: clamp(44px, 6vmin, 56px);
+  --hero-timer-size: clamp(40px, 5.6vmin, 52px);
 }
 
 html, body {
@@ -617,9 +617,11 @@ button.disabled {
   position: absolute;
   width: var(--hero-timer-size);
   height: var(--hero-timer-size);
-  pointer-events: none;
+  pointer-events: auto;
   z-index: 40;
   display: none;
+  cursor: pointer;
+  touch-action: manipulation;
 }
 #hero-timer.visible { display: block; }
 #hero-timer .timer-svg {
@@ -630,12 +632,12 @@ button.disabled {
 #hero-timer .timer-track {
   fill: none;
   stroke: rgba(255, 255, 255, 0.12);
-  stroke-width: 4;
+  stroke-width: 3.5;
 }
 #hero-timer .timer-fill {
   fill: none;
   stroke: var(--gold);
-  stroke-width: 4;
+  stroke-width: 3.5;
   stroke-linecap: round;
   stroke-dasharray: 100.53 100.53;
   stroke-dashoffset: 0;
@@ -643,7 +645,7 @@ button.disabled {
 }
 #hero-timer .timer-num {
   fill: #fff;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 900;
   text-anchor: middle;
   dominant-baseline: central;
@@ -2314,8 +2316,8 @@ const UI = (() => {
     const tableRect = document.getElementById('poker-table').getBoundingClientRect();
     const cardsRect = cards.getBoundingClientRect();
 
-    const size = el.heroTimer.offsetWidth || 48;
-    const left = cardsRect.right - tableRect.left + 6;
+    const size = el.heroTimer.offsetWidth || 44;
+    const left = cardsRect.right - tableRect.left + 8;
     const top = cardsRect.top - tableRect.top + cardsRect.height / 2 - size / 2;
     el.heroTimer.style.left = left + 'px';
     el.heroTimer.style.top = top + 'px';
@@ -3032,6 +3034,7 @@ const UI = (() => {
     heroTimerTimeoutId: null,
     heroTimerRemaining: 0,
     heroTimerTotal: 0,
+    heroTimerTickCount: 0,
 
     replay: {
       active: false,
@@ -3068,6 +3071,7 @@ const UI = (() => {
     el.btnRestartPanel = document.getElementById('btn-restart-panel');
     el.app            = document.getElementById('app');
     el.seats          = document.getElementById('seats');
+    el.heroTimer      = document.getElementById('hero-timer');
   }
 
   function bindDoubleTapGuard() {
@@ -3122,7 +3126,8 @@ const UI = (() => {
               target.closest('#bottom-panel') ||
               target.closest('#start-overlay') ||
               target.closest('#hero-actions') ||
-              target.closest('#quick-percent-list'));
+              target.closest('#quick-percent-list') ||
+              target.closest('#hero-timer'));
   }
 
   function bindGlobalHandlers() {
@@ -3170,6 +3175,28 @@ const UI = (() => {
       if (dy > 60) UI.closeBottomPanel();
     }, { passive: true });
 
+    /* Двойной тап / двойной клик по таймеру — переключение опции времени на ход */
+    if (el.heroTimer) {
+      let timerLastTap = 0;
+      el.heroTimer.addEventListener('touchend', (e) => {
+        const now = Date.now();
+        if (now - timerLastTap < 300) {
+          timerLastTap = 0;
+          e.preventDefault();
+          e.stopPropagation();
+          toggleTurnTimeOption();
+          return;
+        }
+        timerLastTap = now;
+      }, { passive: false });
+
+      el.heroTimer.addEventListener('dblclick', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleTurnTimeOption();
+      });
+    }
+
     ['set-card-style','set-stack-display','set-blind-growth','set-turn-time','set-show-strategies','set-show-all-hands','set-show-all-showdown'].forEach(id => {
       const node = document.getElementById(id);
       if (!node) return;
@@ -3202,6 +3229,24 @@ const UI = (() => {
     });
 
     bindSeatInteractions();
+  }
+
+  function toggleTurnTimeOption() {
+    const current = Number(UI.settings.turnTime) || 0;
+    const next = current === 0 ? 10 : 0;
+    UI.settings.turnTime = next;
+
+    const select = document.getElementById('set-turn-time');
+    if (select) select.value = String(next);
+
+    if (next === 0) {
+      stopHeroTimer();
+    } else {
+      /* Если ход героя сейчас идёт — не запускаем с середины, только следующий ход. */
+      if (session.waitingForHero && !session.heroEliminated) {
+        /* Следующий ход героя будет с таймером */
+      }
+    }
   }
 
   function refreshCallAmount() {
@@ -3487,7 +3532,7 @@ const UI = (() => {
     session.heroTimerIntervalId = setInterval(() => {
       session.heroTimerRemaining -= 1;
       UI.updateHeroTimer(session.heroTimerRemaining, session.heroTimerTotal);
-      if (session.heroTimerRemaining <= 0) {
+      if (session.heroTimerRemaining < 0) {
         stopHeroTimer();
         if (session.waitingForHero && !session.heroEliminated) {
           session.waitingForHero = false;
