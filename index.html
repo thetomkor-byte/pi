@@ -652,7 +652,7 @@ button.disabled {
   stroke-width: 1.5px;
 }
 
-/* Невидимая зона таймера — реагирует на двойной тап всегда */
+/* Невидимая зона таймера — реагирует на двойной тап всегда, курсор — стрелка */
 #hero-timer-zone {
   position: absolute;
   width: var(--hero-timer-size);
@@ -661,7 +661,7 @@ button.disabled {
   z-index: 41;
   background: transparent;
   touch-action: manipulation;
-  cursor: pointer;
+  cursor: default;
 }
 
 #hero-actions {
@@ -1206,7 +1206,7 @@ button.disabled {
       <span>Время на ход</span>
       <select id="set-turn-time">
         <option value="0">Без времени</option>
-        <option value="10">10 секунд</option>
+        <option value="10" selected>10 секунд</option>
       </select>
     </label>
     <label class="setting">
@@ -2212,7 +2212,7 @@ const UI = (() => {
     cardStyle: '4color',
     stackDisplay: 'bb',
     blindGrowthHands: 10,
-    turnTime: 0,
+    turnTime: 10,
     showStrategies: false,
     showAllHands: false,
     showAllShowdown: false
@@ -2317,7 +2317,6 @@ const UI = (() => {
     }
   }
 
-  /* Таймер героя — визуальный элемент */
   function placeHeroTimer() {
     if (!el.heroTimer || !el.heroTimerZone) return;
     const heroSeat = document.getElementById('seat-hero');
@@ -2343,7 +2342,6 @@ const UI = (() => {
     el.heroTimer.style.left = left + 'px';
     el.heroTimer.style.top = top + 'px';
 
-    /* Невидимая зона всегда на месте таймера */
     el.heroTimerZone.style.display = 'block';
     el.heroTimerZone.style.left = left + 'px';
     el.heroTimerZone.style.top = top + 'px';
@@ -3268,7 +3266,6 @@ const UI = (() => {
     if (next === 0) {
       stopHeroTimer();
     } else {
-      /* Если сейчас ход героя — запускаем таймер заново с новым значением. */
       if (session.waitingForHero && !session.heroEliminated) {
         startHeroTimerIfNeeded();
       }
