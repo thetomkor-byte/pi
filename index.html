@@ -216,24 +216,31 @@ button.disabled {
 
 #board-brand-label {
   position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  transform: translateY(-50%);
+  top: 4px;
+  bottom: 4px;
+  left: 2px;
+  right: -2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   font-weight: 900;
-  font-size: clamp(12px, 2.2vmin, 24px);
-  letter-spacing: clamp(1.5px, 0.6vmin, 6px);
-  color: rgba(210, 210, 210, 0.3);
+  font-size: clamp(20px, 3.2vmin, 32px);
+  letter-spacing: 0;
+  color: rgba(255, 255, 255, 0.2);
   text-shadow:
-    0 1px 0 rgba(0, 0, 0, 0.55),
-    0 -1px 0 rgba(255, 255, 255, 0.08);
+    0 -1px 0 rgba(255, 255, 255, 0.05),
+    0 1px 1px rgba(0, 0, 0, 0.85),
+    inset 0 1px 2px rgba(0, 0, 0, 0.9);
   text-transform: uppercase;
   pointer-events: none;
   user-select: none;
   white-space: nowrap;
   z-index: 0;
   line-height: 1;
+  overflow: hidden;
+  transform: scaleY(1.55);
+  transform-origin: center center;
 }
 
 #board-cards {
@@ -2185,7 +2192,6 @@ const UI = (() => {
     el.infoTimerRow   = document.getElementById('info-timer-row');
     el.infoNextBlinds = document.getElementById('info-next-blinds-row');
     el.boardHistoryLabel = document.getElementById('board-history-label');
-    el.boardBrandLabel = document.getElementById('board-brand-label');
 
     el.heroActions    = document.getElementById('hero-actions');
     el.heroButtons    = document.getElementById('hero-buttons');
