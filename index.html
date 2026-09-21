@@ -759,16 +759,6 @@ button.disabled {
   opacity: 0.9;
 }
 
-.belcard-club {
-  font-size: clamp(7px, 1.1vmin, 9px);
-  font-weight: 700;
-  letter-spacing: .8px;
-  text-transform: uppercase;
-  opacity: 0.85;
-  text-align: right;
-  line-height: 1.2;
-}
-
 .belcard-chip {
   position: absolute;
   top: clamp(28px, 4.5vmin, 38px);
@@ -812,16 +802,6 @@ button.disabled {
 }
 .belcard-number:active { color: var(--gold); }
 
-.belcard-visa {
-  font-size: clamp(14px, 2.2vmin, 18px);
-  font-weight: 900;
-  font-style: italic;
-  letter-spacing: 1px;
-  text-shadow: 0 1px 2px rgba(0,0,0,.4);
-  align-self: flex-end;
-  white-space: nowrap;
-}
-
 .belcard-bottom {
   position: relative;
   z-index: 2;
@@ -842,17 +822,7 @@ button.disabled {
 }
 .belcard-name:active { color: var(--gold); }
 
-.belcard-currencies {
-  font-size: clamp(8px, 1.3vmin, 10px);
-  font-weight: 700;
-  letter-spacing: .6px;
-  text-align: right;
-  opacity: 0.95;
-  white-space: nowrap;
-}
-
-/* Стиль для текста справа от номера карты (BYN / RUB, USD / EUR) —
-   такой же, как был у belcard-currencies, но без мелкого шрифта нижнего. */
+/* Стиль для текста справа от номера карты (BYN / RUB, USD / EUR) */
 .belcard-currencies-top {
   font-size: clamp(8px, 1.3vmin, 10px);
   font-weight: 700;
@@ -863,16 +833,18 @@ button.disabled {
   align-self: flex-end;
 }
 
-/* Стиль для надписи в правом верхнем углу (БЕЛКАРТ, VISA) —
-   такой же, как был у belcard-club. */
+/* Стиль для надписи в правом верхнем углу (БЕЛКАРТ, VISA)
+   — ровный, без наклона */
 .belcard-club-top {
-  font-size: clamp(7px, 1.1vmin, 9px);
-  font-weight: 700;
-  letter-spacing: .8px;
+  font-size: clamp(9px, 1.4vmin, 12px);
+  font-weight: 900;
+  font-style: normal;
+  letter-spacing: 1px;
   text-transform: uppercase;
-  opacity: 0.85;
+  opacity: 0.95;
   text-align: right;
   line-height: 1.2;
+  text-shadow: 0 1px 2px rgba(0,0,0,.35);
 }
 
 #support-footer {
@@ -1651,19 +1623,21 @@ button.disabled {
     </label>
 
     <label class="setting">
-      <span>Стиль карт</span>
-      <select id="set-card-style">
-        <option value="4color">4-цветные</option>
-        <option value="2color">2-цветные</option>
-      </select>
-    </label>
-    <label class="setting">
       <span>Стеки игроков</span>
       <select id="set-stack-display">
         <option value="bb">BB</option>
         <option value="chips">Фишки</option>
       </select>
     </label>
+
+    <label class="setting">
+      <span>Стиль карт</span>
+      <select id="set-card-style">
+        <option value="4color">4-цветные</option>
+        <option value="2color">2-цветные</option>
+      </select>
+    </label>
+
     <label class="setting">
       <span>Рост блайндов</span>
       <select id="set-blind-growth">
@@ -3876,9 +3850,7 @@ const UI = (() => {
       mouseLift = 0;
     });
 
-    /* ===== ДВОЙНОЙ КЛИК МЫШЬЮ на десктопе =====
-       Меняет карты местами так же, как свайп. */
-    let clickTimer = null;
+    /* ===== ДВОЙНОЙ КЛИК МЫШЬЮ на десктопе ===== */
     el.belcardStack.addEventListener('click', (e) => {
       if (isAnimating) return;
       if (e.detail !== 2) return;
@@ -4179,12 +4151,12 @@ const UI = (() => {
       el.settingsHelpBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        UI.openGuideInsteadOfSettings();
+        openGuideWithoutClosing();
       });
       el.settingsHelpBtn.addEventListener('touchend', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        UI.openGuideInsteadOfSettings();
+        openGuideWithoutClosing();
       }, { passive: false });
     }
 
@@ -4192,12 +4164,12 @@ const UI = (() => {
       el.settingsCardBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        openSupportWindow();
+        openSupportOverEverything();
       });
       el.settingsCardBtn.addEventListener('touchend', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        openSupportWindow();
+        openSupportOverEverything();
       }, { passive: false });
     }
 
@@ -4239,6 +4211,8 @@ const UI = (() => {
     if (el.guidePanel) {
       el.guidePanel.addEventListener('click', (e) => e.stopPropagation());
       el.guidePanel.addEventListener('touchend', (e) => e.stopPropagation(), { passive: false });
+      el.guidePanel.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+      el.guidePanel.addEventListener('touchmove', (e) => e.stopPropagation(), { passive: true });
     }
 
     ['set-language','set-card-style','set-stack-display','set-blind-growth','set-turn-time','set-show-strategies','set-show-all-hands','set-show-all-showdown'].forEach(id => {
@@ -4292,6 +4266,25 @@ const UI = (() => {
         resumeGame();
       }
     }
+  }
+
+  function openGuideWithoutClosing() {
+    if (UI.el.guidePanel.classList.contains('open')) return;
+    UI.el.bottomPanel.classList.remove('open');
+    UI.el.guidePanel.classList.add('open');
+    UI.el.tapClose.classList.toggle('active', true);
+    if (!session.supportPaused) {
+      pauseGame();
+      session.panelsPaused = true;
+    }
+  }
+
+  function openSupportOverEverything() {
+    if (session.supportPaused) return;
+    session.supportPaused = true;
+    pauseGame();
+    UI.resetBelcardSwap();
+    UI.showSupportOverlay();
   }
 
   function openSupportWindow() {
