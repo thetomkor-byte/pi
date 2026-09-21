@@ -295,13 +295,16 @@ button.disabled {
 }
 #table-info .info-row.faded { opacity: 0.45; }
 
-/* Надпись «Место: N/M» между местами игроков 2 и 6 */
+/* Надпись «Место» и «Следующий приз / ЧЕМПИОН» между местами 2 и 6 */
 #place-center {
   position: absolute;
   left: 50%;
   top: 32%;
   transform: translate(-50%, -50%);
-  font-size: clamp(13px, 1.7vmin, 16px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
   color: var(--text);
   font-weight: 700;
   text-shadow: 0 1px 4px rgba(0,0,0,.95);
@@ -313,6 +316,11 @@ button.disabled {
   text-align: center;
 }
 #place-center.hidden { display: none; }
+#place-center .place-line,
+#place-center .prize-line {
+  font-size: clamp(13px, 1.7vmin, 16px);
+  line-height: 1.2;
+}
 
 .card {
   width: var(--card-w);
@@ -383,7 +391,6 @@ button.disabled {
   top: calc(clamp(-22px, -3vmin, -18px) - 2px);
   left: 50%;
   transform: translateX(-50%);
-  background: #2a4a8a;
   color: #fff;
   font-size: clamp(9px, 1.2vmin, 11px);
   font-weight: 800;
@@ -396,6 +403,18 @@ button.disabled {
 }
 .seat .strat-badge.hidden { display: none; }
 .seat.folded .strat-badge { opacity: 0.35; }
+
+/* PRO — фиолетовый градиент: чем сильнее, тем темнее */
+.seat .strat-badge.pro-gto      { background: #9d7bd6; }
+.seat .strat-badge.pro-solver   { background: #7d55c4; }
+.seat .strat-badge.pro-icm      { background: #5f37a8; }
+.seat .strat-badge.pro-lag      { background: #3d1f76; }
+
+/* VIP — сиреневый градиент: чем слабее, тем светлее */
+.seat .strat-badge.vip-taglite  { background: #b28ad6; }
+.seat .strat-badge.vip-loose    { background: #c6a4e0; }
+.seat .strat-badge.vip-rock     { background: #d9c0ea; }
+.seat .strat-badge.vip-maniac   { background: #ecd9f4; color: #3d1f56; }
 
 .seat .seat-cards {
   display: flex;
@@ -1593,7 +1612,10 @@ button.disabled {
         </div>
         <div id="seats"></div>
 
-        <div id="place-center">Место: 1/8</div>
+        <div id="place-center">
+          <div class="place-line" id="place-line">Место: 1/8</div>
+          <div class="prize-line" id="prize-line">Следующий приз: 3</div>
+        </div>
 
         <div id="hero-timer-zone"></div>
 
@@ -1669,6 +1691,15 @@ button.disabled {
       <select id="set-language">
         <option value="ru">Русский</option>
         <option value="en">Английский</option>
+      </select>
+    </label>
+
+    <label class="setting">
+      <span>Уровень сложности</span>
+      <select id="set-difficulty">
+        <option value="min">Минимум</option>
+        <option value="mid" selected>Средний</option>
+        <option value="max">Максимум</option>
       </select>
     </label>
 
@@ -2103,7 +2134,8 @@ const Engine = (() => {
   function createInitialState(playerConfigs) {
     const players = playerConfigs.map((cfg, i) => ({
       id: cfg.id, seatIndex: i, name: cfg.name, isHero: !!cfg.isHero,
-      strategy: cfg.strategy || null, stack: cfg.stack ?? STARTING_STACK,
+      botType: cfg.botType || null, botClass: cfg.botClass || null,
+      stack: cfg.stack ?? STARTING_STACK,
       holeCards: [], folded: false, allIn: false, eliminated: false,
       committedThisStreet: 0, committedTotal: 0, hasActedThisStreet: false,
       lastAction: null, position: null,
@@ -2503,29 +2535,56 @@ const Engine = (() => {
 
 
 /* ============================================================
-   BOTS
+   BOTS — новая система: 8 подтипов в 2 классах (PRO / VIP)
    ============================================================ */
 
 const Bots = (() => {
 
   const R = Engine.RANK_VALUE;
 
-  const STRATEGIES = {
-    TAG:   { name: 'TAG',   aggression: 0.70, looseness: 0.35, bluff: 0.20, callThreshold: 0.55 },
-    Tight: { name: 'Tight', aggression: 0.25, looseness: 0.35, bluff: 0.08, callThreshold: 0.50 },
-    LAG:   { name: 'LAG',   aggression: 0.80, looseness: 0.75, bluff: 0.40, callThreshold: 0.40 },
-    Loose: { name: 'Loose', aggression: 0.30, looseness: 0.75, bluff: 0.15, callThreshold: 0.35 },
-    Phone: { name: 'Phone', aggression: 0.10, looseness: 0.85, bluff: 0.02, callThreshold: 0.25 },
-    Nit:   { name: 'Nit',   aggression: 0.15, looseness: 0.15, bluff: 0.03, callThreshold: 0.70 },
-    Maniac:{ name: 'Maniac',aggression: 0.95, looseness: 0.95, bluff: 0.65, callThreshold: 0.25 }
+  // Классы и подтипы
+  const CLASS_PRO = 'PRO';
+  const CLASS_VIP = 'VIP';
+
+  const TYPES = {
+    // PRO — сильные игроки. Чем выше tier, тем сильнее.
+    PRO_GTO:    { key: 'PRO_GTO',    cls: CLASS_PRO, badgeClass: 'pro-gto',    tier: 1, label: 'PRO' },
+    PRO_SOLVER: { key: 'PRO_SOLVER', cls: CLASS_PRO, badgeClass: 'pro-solver', tier: 2, label: 'PRO' },
+    PRO_ICM:    { key: 'PRO_ICM',    cls: CLASS_PRO, badgeClass: 'pro-icm',    tier: 3, label: 'PRO' },
+    PRO_LAG:    { key: 'PRO_LAG',    cls: CLASS_PRO, badgeClass: 'pro-lag',    tier: 4, label: 'PRO' },
+    // VIP — слабые игроки. Чем ниже tier, тем слабее.
+    VIP_TAGLITE:{ key: 'VIP_TAGLITE',cls: CLASS_VIP, badgeClass: 'vip-taglite',tier: 1, label: 'VIP' },
+    VIP_LOOSE:  { key: 'VIP_LOOSE',  cls: CLASS_VIP, badgeClass: 'vip-loose',  tier: 2, label: 'VIP' },
+    VIP_ROCK:   { key: 'VIP_ROCK',   cls: CLASS_VIP, badgeClass: 'vip-rock',   tier: 3, label: 'VIP' },
+    VIP_MANIAC: { key: 'VIP_MANIAC', cls: CLASS_VIP, badgeClass: 'vip-maniac', tier: 4, label: 'VIP' }
   };
 
-  const STRATEGY_WEIGHTS = [
-    { key: 'TAG', weight: 31 }, { key: 'LAG', weight: 26 },
-    { key: 'Tight', weight: 12 }, { key: 'Loose', weight: 12 },
-    { key: 'Phone', weight: 6 }, { key: 'Nit', weight: 8 }, { key: 'Maniac', weight: 5 }
-  ];
+  // Параметры поведения каждого подтипа
+  // aggression — насколько давит
+  // looseness — насколько широко входит
+  // bluff — доля блефов
+  // callThreshold — насколько сильная рука нужна для колла
+  // adaptivity — насколько подстраивается под стол (0..1)
+  // proThinking — использует ли продвинутую логику (этап 2+)
+  const PROFILES = {
+    PRO_GTO:    { aggression: 0.68, looseness: 0.42, bluff: 0.22, callThreshold: 0.55, adaptivity: 0.55, proThinking: true,  tightBubble: 0.6 },
+    PRO_SOLVER: { aggression: 0.78, looseness: 0.55, bluff: 0.34, callThreshold: 0.45, adaptivity: 0.72, proThinking: true,  tightBubble: 0.7 },
+    PRO_ICM:    { aggression: 0.72, looseness: 0.45, bluff: 0.28, callThreshold: 0.52, adaptivity: 0.80, proThinking: true,  tightBubble: 1.0 },
+    PRO_LAG:    { aggression: 0.92, looseness: 0.72, bluff: 0.48, callThreshold: 0.32, adaptivity: 0.95, proThinking: true,  tightBubble: 0.5 },
 
+    VIP_TAGLITE:{ aggression: 0.55, looseness: 0.40, bluff: 0.12, callThreshold: 0.60, adaptivity: 0.10, proThinking: false, tightBubble: 0.3 },
+    VIP_LOOSE:  { aggression: 0.22, looseness: 0.72, bluff: 0.06, callThreshold: 0.35, adaptivity: 0.05, proThinking: false, tightBubble: 0.2 },
+    VIP_ROCK:   { aggression: 0.12, looseness: 0.14, bluff: 0.02, callThreshold: 0.85, adaptivity: 0.02, proThinking: false, tightBubble: 0.1 },
+    VIP_MANIAC: { aggression: 0.95, looseness: 0.92, bluff: 0.62, callThreshold: 0.22, adaptivity: 0.05, proThinking: false, tightBubble: 0.1 }
+  };
+
+  // Веса посадки
+  const WEIGHTS = {
+    PRO_GTO: 22, PRO_SOLVER: 16, PRO_ICM: 10, PRO_LAG: 6,
+    VIP_TAGLITE: 18, VIP_LOOSE: 14, VIP_ROCK: 8, VIP_MANIAC: 6
+  };
+
+  // Чарты открытий — привязаны к подтипам
   const CHARTS = {
     OPEN_UTG:  ['22+','A2s+','K7s+','Q8s+','J8s+','T8s+','97s+','86s+','75s+','64s+','54s','ATo+','KJo+','QJo','JTo'],
     OPEN_UTG1: ['22+','A2s+','K6s+','Q8s+','J8s+','T8s+','97s+','86s+','75s+','64s+','54s','ATo+','KTo+','QTo+','JTo'],
@@ -2534,13 +2593,11 @@ const Bots = (() => {
     OPEN_CO:   ['22+','A2s+','K2s+','Q5s+','J6s+','T6s+','95s+','84s+','73s+','63s+','52s+','42s+','32s','A4o+','K9o+','Q9o+','J9o+','T9o','98o','87o'],
     OPEN_BTN:  ['22+','A2s+','K2s+','Q2s+','J3s+','T5s+','94s+','83s+','72s+','62s+','52s+','42s+','32s','A2o+','K5o+','Q7o+','J8o+','T8o+','98o','87o','76o','65o'],
     OPEN_SB:   ['22+','A2s+','K2s+','Q2s+','J2s+','T4s+','93s+','82s+','72s+','62s+','52s+','42s+','32s','A2o+','K4o+','Q6o+','J7o+','T8o+','98o','87o','76o','65o','54o'],
-
     THREE_BET_VS_UTG: ['QQ+','AKs','AKo','AQs','JJ','TT'],
     THREE_BET_VS_MP:  ['TT+','AKs','AKo','AQs','AQo','AJs','KQs','99'],
     THREE_BET_VS_CO:  ['99+','AQs+','AKo','AQo','AJs+','ATs','KQs','KJs','QJs','88'],
     THREE_BET_VS_BTN: ['77+','ATs+','AJo+','KTs+','KQo','QTs+','JTs','T9s','98s','A5s','A4s','66'],
     THREE_BET_VS_SB:  ['66+','A9s+','ATo+','KTs+','KJo+','QTs+','QJo','JTs','T9s','98s','A5s+'],
-
     CALL_RAISE: ['22-99','A2s+','K9s+','Q9s+','J9s+','T8s+','98s','87s','76s','65s','54s','ATo+','KJo+','QJo','JTo','A9o','KTo','QTo'],
     CALL_3BET:  ['JJ','TT','99','88','AQs','AJs','KQs','AQo','ATs'],
     SHOVE_10_15BB: ['22+','A2s+','K5s+','Q7s+','J8s+','T8s+','98s','87s','76s','A7o+','K9o+','Q9o+','J9o+','T9o'],
@@ -2616,17 +2673,90 @@ const Bots = (() => {
     return weights[0].key;
   }
 
-  function assignStrategies(count = 7) {
+  // ============================================================
+  // Назначение типов за столом по уровню сложности
+  // ============================================================
+  // difficulty: 'min' | 'mid' | 'max'
+  // Возвращает массив из 7 ключей подтипов для ботов.
+  function assignBotTypes(difficulty) {
     const result = [];
-    let maniacUsed = false, nitUsed = false;
-    const pool = STRATEGY_WEIGHTS.filter(w => w.key !== 'Maniac' && w.key !== 'Nit');
-    for (let i = 0; i < count; i++) {
-      let key;
-      const roll = Engine.cryptoRandomInt(100);
-      if (!nitUsed && roll < 8) { key = 'Nit'; nitUsed = true; }
-      else if (!maniacUsed && roll >= 95) { key = 'Maniac'; maniacUsed = true; }
-      else { key = pickWeighted(pool); }
-      result.push(key);
+
+    if (difficulty === 'min') {
+      // 1 GTO + 1 TAG-Lite + 5 случайных VIP
+      result.push('PRO_GTO');
+      result.push('VIP_TAGLITE');
+      const vipPool = [
+        { key: 'VIP_LOOSE', weight: 14 },
+        { key: 'VIP_ROCK', weight: 8, max: 1 },
+        { key: 'VIP_MANIAC', weight: 6, max: 1 },
+        { key: 'VIP_TAGLITE', weight: 18 }
+      ];
+      const counts = { VIP_ROCK: 0, VIP_MANIAC: 0 };
+      while (result.length < 7) {
+        const avail = vipPool.filter(w => {
+          if (w.max && counts[w.key] >= w.max) return false;
+          return true;
+        });
+        const pick = pickWeighted(avail);
+        if (pick === 'VIP_ROCK') counts.VIP_ROCK++;
+        if (pick === 'VIP_MANIAC') counts.VIP_MANIAC++;
+        result.push(pick);
+      }
+      return result;
+    }
+
+    if (difficulty === 'max') {
+      // 4 PRO (минимум 2 LAG-Pro) + 3 VIP
+      result.push('PRO_LAG');
+      result.push('PRO_LAG');
+      const proPool = [
+        { key: 'PRO_GTO', weight: 22 },
+        { key: 'PRO_SOLVER', weight: 16 },
+        { key: 'PRO_ICM', weight: 10 }
+      ];
+      result.push(pickWeighted(proPool));
+      result.push(pickWeighted(proPool));
+      const vipPool = [
+        { key: 'VIP_TAGLITE', weight: 18 },
+        { key: 'VIP_LOOSE', weight: 14 },
+        { key: 'VIP_ROCK', weight: 8, max: 1 },
+        { key: 'VIP_MANIAC', weight: 6, max: 1 }
+      ];
+      const counts = { VIP_ROCK: 0, VIP_MANIAC: 0 };
+      while (result.length < 7) {
+        const avail = vipPool.filter(w => !w.max || counts[w.key] < w.max);
+        const pick = pickWeighted(avail);
+        if (pick === 'VIP_ROCK') counts.VIP_ROCK++;
+        if (pick === 'VIP_MANIAC') counts.VIP_MANIAC++;
+        result.push(pick);
+      }
+      return result;
+    }
+
+    // 'mid' — по умолчанию
+    // 3 PRO (включая ровно 1 LAG-Pro) + 4 VIP
+    result.push('PRO_LAG');
+    const proPool = [
+      { key: 'PRO_GTO', weight: 22 },
+      { key: 'PRO_SOLVER', weight: 16 },
+      { key: 'PRO_ICM', weight: 10 }
+    ];
+    result.push(pickWeighted(proPool));
+    result.push(pickWeighted(proPool));
+
+    const vipPool = [
+      { key: 'VIP_TAGLITE', weight: 18 },
+      { key: 'VIP_LOOSE', weight: 14 },
+      { key: 'VIP_ROCK', weight: 8, max: 1 },
+      { key: 'VIP_MANIAC', weight: 6, max: 1 }
+    ];
+    const counts = { VIP_ROCK: 0, VIP_MANIAC: 0 };
+    while (result.length < 7) {
+      const avail = vipPool.filter(w => !w.max || counts[w.key] < w.max);
+      const pick = pickWeighted(avail);
+      if (pick === 'VIP_ROCK') counts.VIP_ROCK++;
+      if (pick === 'VIP_MANIAC') counts.VIP_MANIAC++;
+      result.push(pick);
     }
     return result;
   }
@@ -2651,73 +2781,6 @@ const Bots = (() => {
     return Math.min(1, base + (rank / 14) * 0.05);
   }
 
-  function decide(ctx) {
-    const strat = STRATEGIES[ctx.strategy];
-    if (!strat) return { action: 'fold', amount: 0 };
-    return ctx.street === 'preflop' ? decidePreflop(ctx, strat) : decidePostflop(ctx, strat);
-  }
-
-  function decidePreflop(ctx, strat) {
-    const { card1, card2, position, myStack, bb, toCall, pot, numActive } = ctx;
-    const stackBB = myStack / bb;
-    const strength = preflopStrength(card1, card2);
-
-    if (stackBB <= 15 && !ctx.facingRaise) {
-      if (stackBB <= 10) {
-        if (handInChart(card1, card2, 'SHOVE_5_10BB')) return { action: 'allin', amount: myStack };
-      } else {
-        if (handInChart(card1, card2, 'SHOVE_10_15BB')) return { action: 'allin', amount: myStack };
-      }
-      if (toCall === 0) return { action: 'check', amount: 0 };
-      return { action: 'fold', amount: 0 };
-    }
-
-    if (ctx.facingRaise && ctx.facingAllin) {
-      if (handInChart(card1, card2, 'CALL_SHOVE') ||
-          (strat.looseness > 0.7 && strength > 0.55)) return { action: 'call', amount: toCall };
-      return { action: 'fold', amount: 0 };
-    }
-
-    if (ctx.facing3Bet) {
-      if (handInChart(card1, card2, 'CALL_3BET') ||
-          (strat.looseness > 0.6 && strength > 0.6)) {
-        if (strat.aggression > 0.7 && strength > 0.8 && Math.random() < 0.5) {
-          const size = Math.min(myStack, Math.round((pot + toCall) * 2.2));
-          return { action: 'raise', amount: size };
-        }
-        return { action: 'call', amount: toCall };
-      }
-      return { action: 'fold', amount: 0 };
-    }
-
-    if (ctx.facingRaise) {
-      const chart3bet = threeBetChartFor(ctx.raiserPosition);
-      if (handInChart(card1, card2, chart3bet)) {
-        const size = Math.min(myStack, Math.round((pot + toCall) * 3));
-        return { action: 'raise', amount: size };
-      }
-      if (handInChart(card1, card2, 'CALL_RAISE')) return { action: 'call', amount: toCall };
-      if (strat.looseness > 0.6 && strength > 0.35) return { action: 'call', amount: toCall };
-      if (strat.bluff > 0.4 && strength > 0.3 && Math.random() < strat.bluff * 0.3) {
-        const size = Math.min(myStack, Math.round((pot + toCall) * 3));
-        return { action: 'raise', amount: size };
-      }
-      return { action: 'fold', amount: 0 };
-    }
-
-    const openChart = openChartFor(position);
-    if (handInChart(card1, card2, openChart)) {
-      const openSize = Math.round(bb * (numActive > 5 ? 3 : 2.5));
-      return { action: 'raise', amount: Math.min(myStack, openSize) };
-    }
-    if (strat.looseness > 0.7 && strength > 0.25 && Math.random() < strat.bluff * 0.5) {
-      const openSize = Math.round(bb * 2.5);
-      return { action: 'raise', amount: Math.min(myStack, openSize) };
-    }
-    if (toCall === 0) return { action: 'check', amount: 0 };
-    return { action: 'fold', amount: 0 };
-  }
-
   function openChartFor(position) {
     switch (position) {
       case 'UTG':  return 'OPEN_UTG';
@@ -2736,15 +2799,89 @@ const Bots = (() => {
     switch (raiserPos) {
       case 'UTG': case 'UTG1': return 'THREE_BET_VS_UTG';
       case 'LJ':  case 'HJ':   return 'THREE_BET_VS_MP';
-      case 'CO':                return 'THREE_BET_VS_CO';
-      case 'BTN':               return 'THREE_BET_VS_BTN';
-      case 'SB':                return 'THREE_BET_VS_SB';
-      case 'BB':                return 'THREE_BET_VS_SB';
-      default:                  return 'THREE_BET_VS_CO';
+      case 'CO':               return 'THREE_BET_VS_CO';
+      case 'BTN':              return 'THREE_BET_VS_BTN';
+      case 'SB':               return 'THREE_BET_VS_SB';
+      case 'BB':               return 'THREE_BET_VS_SB';
+      default:                 return 'THREE_BET_VS_CO';
     }
   }
 
-  function decidePostflop(ctx, strat) {
+  // Основное решение бота
+  function decide(ctx) {
+    const profile = PROFILES[ctx.botType];
+    if (!profile) return { action: 'fold', amount: 0 };
+    return ctx.street === 'preflop'
+      ? decidePreflop(ctx, profile)
+      : decidePostflop(ctx, profile);
+  }
+
+  function decidePreflop(ctx, profile) {
+    const { card1, card2, position, myStack, bb, toCall, pot, numActive, playersLeft } = ctx;
+    const stackBB = myStack / bb;
+    const strength = preflopStrength(card1, card2);
+
+    // Пузырь-коррекция: если игроков мало и следующий шаг — призы
+    const bubbleTighten = (playersLeft <= 4) ? profile.tightBubble : 0;
+    const effStrength = strength * (1 - 0.2 * bubbleTighten);
+
+    if (stackBB <= 15 && !ctx.facingRaise) {
+      if (stackBB <= 10) {
+        if (handInChart(card1, card2, 'SHOVE_5_10BB')) return { action: 'allin', amount: myStack };
+      } else {
+        if (handInChart(card1, card2, 'SHOVE_10_15BB')) return { action: 'allin', amount: myStack };
+      }
+      if (toCall === 0) return { action: 'check', amount: 0 };
+      return { action: 'fold', amount: 0 };
+    }
+
+    if (ctx.facingRaise && ctx.facingAllin) {
+      if (handInChart(card1, card2, 'CALL_SHOVE') ||
+          (profile.looseness > 0.7 && effStrength > 0.55)) return { action: 'call', amount: toCall };
+      return { action: 'fold', amount: 0 };
+    }
+
+    if (ctx.facing3Bet) {
+      if (handInChart(card1, card2, 'CALL_3BET') ||
+          (profile.looseness > 0.6 && effStrength > 0.6)) {
+        if (profile.aggression > 0.7 && effStrength > 0.8 && Math.random() < 0.5) {
+          const size = Math.min(myStack, Math.round((pot + toCall) * 2.2));
+          return { action: 'raise', amount: size };
+        }
+        return { action: 'call', amount: toCall };
+      }
+      return { action: 'fold', amount: 0 };
+    }
+
+    if (ctx.facingRaise) {
+      const chart3bet = threeBetChartFor(ctx.raiserPosition);
+      if (handInChart(card1, card2, chart3bet)) {
+        const size = Math.min(myStack, Math.round((pot + toCall) * 3));
+        return { action: 'raise', amount: size };
+      }
+      if (handInChart(card1, card2, 'CALL_RAISE')) return { action: 'call', amount: toCall };
+      if (profile.looseness > 0.6 && effStrength > 0.35) return { action: 'call', amount: toCall };
+      if (profile.bluff > 0.4 && effStrength > 0.3 && Math.random() < profile.bluff * 0.3) {
+        const size = Math.min(myStack, Math.round((pot + toCall) * 3));
+        return { action: 'raise', amount: size };
+      }
+      return { action: 'fold', amount: 0 };
+    }
+
+    const openChart = openChartFor(position);
+    if (handInChart(card1, card2, openChart)) {
+      const openSize = Math.round(bb * (numActive > 5 ? 3 : 2.5));
+      return { action: 'raise', amount: Math.min(myStack, openSize) };
+    }
+    if (profile.looseness > 0.7 && effStrength > 0.25 && Math.random() < profile.bluff * 0.5) {
+      const openSize = Math.round(bb * 2.5);
+      return { action: 'raise', amount: Math.min(myStack, openSize) };
+    }
+    if (toCall === 0) return { action: 'check', amount: 0 };
+    return { action: 'fold', amount: 0 };
+  }
+
+  function decidePostflop(ctx, profile) {
     const { card1, card2, board, toCall, pot, myStack, bb, street } = ctx;
     const allCards = [card1, card2, ...board];
     const handScore = Engine.evaluateHand(allCards);
@@ -2753,14 +2890,14 @@ const Bots = (() => {
 
     if (toCall === 0) {
       if (strength + streetBonus > 0.65) {
-        const betSize = Math.round(pot * (0.5 + strat.aggression * 0.3));
+        const betSize = Math.round(pot * (0.5 + profile.aggression * 0.3));
         return { action: 'raise', amount: Math.min(myStack, Math.max(bb, betSize)) };
       }
-      if (strength > 0.4 && Math.random() < strat.aggression * 0.5) {
+      if (strength > 0.4 && Math.random() < profile.aggression * 0.5) {
         const betSize = Math.round(pot * 0.5);
         return { action: 'raise', amount: Math.min(myStack, Math.max(bb, betSize)) };
       }
-      if (Math.random() < strat.bluff * 0.25) {
+      if (Math.random() < profile.bluff * 0.25) {
         const betSize = Math.round(pot * 0.6);
         return { action: 'raise', amount: Math.min(myStack, Math.max(bb, betSize)) };
       }
@@ -2769,14 +2906,14 @@ const Bots = (() => {
 
     const potOdds = toCall / (pot + toCall);
     if (strength + streetBonus > 0.75) {
-      if (strat.aggression > 0.5 && Math.random() < strat.aggression) {
+      if (profile.aggression > 0.5 && Math.random() < profile.aggression) {
         const raiseSize = Math.min(myStack, Math.round((pot + toCall) * 2.5));
         return { action: 'raise', amount: raiseSize };
       }
       return { action: 'call', amount: toCall };
     }
-    if (strength > strat.callThreshold && strength > potOdds * 1.5) return { action: 'call', amount: toCall };
-    if (strength > 0.3 && Math.random() < strat.bluff * 0.15) {
+    if (strength > profile.callThreshold && strength > potOdds * 1.5) return { action: 'call', amount: toCall };
+    if (strength > 0.3 && Math.random() < profile.bluff * 0.15) {
       const raiseSize = Math.min(myStack, Math.round((pot + toCall) * 2.5));
       return { action: 'raise', amount: raiseSize };
     }
@@ -2784,9 +2921,9 @@ const Bots = (() => {
   }
 
   return {
-    STRATEGIES, STRATEGY_WEIGHTS, CHARTS,
-    assignStrategies, pickWeighted, decide,
-    preflopStrength, postflopStrength,
+    CLASS_PRO, CLASS_VIP, TYPES, PROFILES, WEIGHTS,
+    assignBotTypes,
+    decide, preflopStrength, postflopStrength,
     handInChart, normalizeHand, getChart
   };
 
@@ -2801,6 +2938,7 @@ const UI = (() => {
 
   const settings = {
     language: 'ru',
+    difficulty: 'mid',
     cardStyle: '4color',
     stackDisplay: 'bb',
     blindGrowthHands: 10,
@@ -2835,6 +2973,8 @@ const UI = (() => {
     el.infoTimerRow   = document.getElementById('info-timer-row');
     el.infoNextBlinds = document.getElementById('info-next-blinds-row');
     el.placeCenter    = document.getElementById('place-center');
+    el.placeLine      = document.getElementById('place-line');
+    el.prizeLine      = document.getElementById('prize-line');
 
     el.heroActions    = document.getElementById('hero-actions');
     el.heroButtons    = document.getElementById('hero-buttons');
@@ -2874,6 +3014,7 @@ const UI = (() => {
     el.belcardStack    = document.getElementById('belcard-stack');
 
     el.setLanguage       = document.getElementById('set-language');
+    el.setDifficulty     = document.getElementById('set-difficulty');
     el.setCardStyle      = document.getElementById('set-card-style');
     el.setStackDisplay   = document.getElementById('set-stack-display');
     el.setBlindGrowth    = document.getElementById('set-blind-growth');
@@ -3123,9 +3264,15 @@ const UI = (() => {
       else btn.classList.add('hidden');
 
       const stratBadge = seat.querySelector('[data-role="strat"]');
-      if (settings.showStrategies && p.strategy && !p.isHero) {
-        stratBadge.textContent = p.strategy;
-        stratBadge.classList.remove('hidden');
+      if (settings.showStrategies && p.botType && !p.isHero) {
+        const t = Bots.TYPES[p.botType];
+        if (t) {
+          stratBadge.textContent = t.label;
+          stratBadge.className = 'strat-badge ' + t.badgeClass;
+          stratBadge.classList.remove('hidden');
+        } else {
+          stratBadge.classList.add('hidden');
+        }
       } else stratBadge.classList.add('hidden');
 
       renderSeatCards(p, state, revealAll);
@@ -3298,7 +3445,18 @@ const UI = (() => {
       heroPlace = total;
     }
 
-    el.placeCenter.textContent = `Место: ${heroPlace}/${total}`;
+    if (el.placeLine) el.placeLine.textContent = `Место: ${heroPlace}/${total}`;
+
+    if (el.prizeLine) {
+      if (total <= 1) {
+        el.prizeLine.textContent = 'ЧЕМПИОН';
+      } else if (total === 2) {
+        el.prizeLine.textContent = 'Следующий приз: 2';
+      } else {
+        el.prizeLine.textContent = 'Следующий приз: 3';
+      }
+    }
+
     el.placeCenter.classList.remove('hidden');
   }
 
@@ -3644,6 +3802,7 @@ const UI = (() => {
 
   function applySettingsToUI() {
     el.setLanguage.value       = settings.language;
+    el.setDifficulty.value     = settings.difficulty;
     el.setCardStyle.value      = settings.cardStyle;
     el.setStackDisplay.value   = settings.stackDisplay;
     el.setBlindGrowth.value    = String(settings.blindGrowthHands);
@@ -3655,6 +3814,7 @@ const UI = (() => {
 
   function readSettingsFromUI() {
     settings.language          = el.setLanguage.value;
+    settings.difficulty        = el.setDifficulty.value;
     settings.cardStyle         = el.setCardStyle.value;
     settings.stackDisplay      = el.setStackDisplay.value;
     settings.blindGrowthHands  = Number(el.setBlindGrowth.value);
@@ -3668,6 +3828,7 @@ const UI = (() => {
 
   function syncSettingsUI() {
     el.setLanguage.value           = settings.language;
+    el.setDifficulty.value         = settings.difficulty;
     el.setStackDisplay.value       = settings.stackDisplay;
     el.setShowStrategies.checked   = settings.showStrategies;
     el.setShowAllHands.checked     = settings.showAllHands;
@@ -3967,7 +4128,6 @@ const UI = (() => {
 
   const session = {
     state: null, heroIndex: 0,
-    stats: { hands: 0, hit: 0, miss: 0, place: null, streak: 0 },
     waitingForHero: false, active: false,
     heroEntered: false,
     heroEliminated: false,
@@ -4298,7 +4458,7 @@ const UI = (() => {
       el.guidePanel.addEventListener('touchmove', (e) => e.stopPropagation(), { passive: true });
     }
 
-    ['set-language','set-card-style','set-stack-display','set-blind-growth','set-turn-time','set-show-strategies','set-show-all-hands','set-show-all-showdown'].forEach(id => {
+    ['set-language','set-difficulty','set-card-style','set-stack-display','set-blind-growth','set-turn-time','set-show-strategies','set-show-all-hands','set-show-all-showdown'].forEach(id => {
       const node = document.getElementById(id);
       if (!node) return;
       node.addEventListener('change', () => {
@@ -4524,7 +4684,6 @@ const UI = (() => {
     session.state = null;
     session.history = [];
     session.viewingIndex = -1;
-    session.stats = { hands: 0, hit: 0, miss: 0, place: null, streak: 0 };
     session.waitingForHero = false;
     session.heroEntered = false;
     session.heroEliminated = false;
@@ -4550,7 +4709,6 @@ const UI = (() => {
     clearTimeout(session.botTimerId);
     clearTimeout(session.revealTimerId);
     session.active = true;
-    session.stats = { hands: 0, hit: 0, miss: 0, place: null, streak: 0 };
     session.waitingForHero = false;
     session.heroEntered = false;
     session.heroEliminated = false;
@@ -4561,10 +4719,20 @@ const UI = (() => {
     session.supportPaused = false;
     session.panelsPaused = false;
 
-    const botStrategies = Bots.assignStrategies(7);
-    const players = [{ id: 'hero', name: 'Ты', isHero: true, strategy: null, stack: Engine.STARTING_STACK }];
+    // Назначаем 7 ботов по текущему уровню сложности
+    const botTypes = Bots.assignBotTypes(UI.settings.difficulty);
+
+    const players = [{ id: 'hero', name: 'Ты', isHero: true, botType: null, botClass: null, stack: Engine.STARTING_STACK }];
     for (let i = 0; i < 7; i++) {
-      players.push({ id: 'bot' + (i + 1), name: 'Бот ' + (i + 1), isHero: false, strategy: botStrategies[i], stack: Engine.STARTING_STACK });
+      const t = Bots.TYPES[botTypes[i]];
+      players.push({
+        id: 'bot' + (i + 1),
+        name: 'Бот ' + (i + 1),
+        isHero: false,
+        botType: botTypes[i],
+        botClass: t ? t.cls : null,
+        stack: Engine.STARTING_STACK
+      });
     }
 
     session.heroIndex = 0;
@@ -4810,7 +4978,8 @@ const UI = (() => {
       numActive: state.players.filter(p => !p.folded && !p.eliminated).length,
       facingRaise, facing3Bet, facingAllin,
       raiserPosition: raiser ? raiser.position : null,
-      strategy: bot.strategy
+      botType: bot.botType,
+      playersLeft: state.players.filter(p => !p.eliminated).length
     };
   }
 
@@ -4947,7 +5116,7 @@ const UI = (() => {
       blinds: { ...state.blinds },
       players: state.players.map(p => ({
         id: p.id, seatIndex: p.seatIndex, name: p.name, isHero: p.isHero,
-        strategy: p.strategy, stack: p.stack, position: p.position,
+        botType: p.botType, botClass: p.botClass, stack: p.stack, position: p.position,
         holeCards: p.holeCards.map(c => ({ ...c })),
         folded: p.folded, eliminated: p.eliminated, revealed: p.revealed,
         committedThisStreet: 0, acted: p.acted, lastAction: p.lastAction,
@@ -5016,7 +5185,8 @@ const UI = (() => {
         seatIndex: p.seatIndex,
         name: p.name,
         isHero: p.isHero,
-        strategy: p.strategy,
+        botType: p.botType,
+        botClass: p.botClass,
         position: p.position,
         holeCards: p.holeCards.map(c => ({ ...c })),
         stack: baseStacks[p.id],
@@ -5135,7 +5305,8 @@ const UI = (() => {
         seatIndex: p.seatIndex,
         name: p.name,
         isHero: p.isHero,
-        strategy: p.strategy,
+        botType: p.botType,
+        botClass: p.botClass,
         stack: p.stack,
         position: p.position,
         holeCards: p.holeCards.map(c => ({ ...c })),
