@@ -852,48 +852,6 @@ button.disabled {
 }
 #support-copied.visible { opacity: 1; }
 
-/* Оверлей окошка «!» */
-#excl-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.72);
-  z-index: 300;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  touch-action: none;
-}
-#excl-overlay.visible { display: flex; }
-
-#excl-window {
-  width: min(94vw, calc((100vh - clamp(8px, 1.6vmin, 20px)) * 9 / 16));
-  max-width: 94vw;
-  background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
-  border: 2px solid #3a3530;
-  border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0,0,0,.9), 0 0 80px rgba(255,203,43,.08);
-  padding: clamp(20px, 4vmin, 28px) clamp(18px, 3.6vmin, 26px);
-  text-align: left;
-}
-
-#excl-window h3 {
-  color: var(--gold);
-  font-size: clamp(12px, 1.8vmin, 15px);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 18px;
-  font-weight: 900;
-  text-align: center;
-}
-
-#excl-window p {
-  color: var(--muted);
-  font-size: clamp(12px, 1.6vmin, 14px);
-  line-height: 1.5;
-  text-align: left;
-}
-
 #hero-timer {
   position: absolute;
   width: var(--hero-timer-size);
@@ -1538,11 +1496,10 @@ button.disabled {
           </svg>
         </div>
 
-        <!-- Три круглые кнопки над блоком истории раздач. -->
+        <!-- Две круглые кнопки над блоком истории раздач. -->
         <div id="top-round-row">
           <button id="settings-card-btn" class="round-help-btn" type="button" aria-label="Поддержать">$</button>
           <button id="settings-help-btn" class="round-help-btn" type="button" aria-label="Руководство">?</button>
-          <button id="settings-excl-btn" class="round-help-btn" type="button" aria-label="Внимание">!</button>
         </div>
 
         <div id="hero-actions" class="inactive">
@@ -1683,13 +1640,6 @@ button.disabled {
           </svg>
         </a>
       </div>
-    </div>
-  </div>
-
-  <div id="excl-overlay">
-    <div id="excl-window">
-      <h3>Внимание</h3>
-      <p>Раздел в разработке. Здесь будет полезная информация.</p>
     </div>
   </div>
 
@@ -2809,9 +2759,6 @@ const UI = (() => {
     el.btnSupportPanel = document.getElementById('btn-support-panel');
     el.settingsHelpBtn = document.getElementById('settings-help-btn');
     el.settingsCardBtn = document.getElementById('settings-card-btn');
-    el.settingsExclBtn = document.getElementById('settings-excl-btn');
-    el.exclOverlay     = document.getElementById('excl-overlay');
-    el.exclWindow      = document.getElementById('excl-window');
     el.topRoundRow     = document.getElementById('top-round-row');
     el.gmailBtn        = document.getElementById('gmail-btn');
     el.tgBtn           = document.getElementById('tg-btn');
@@ -2875,17 +2822,7 @@ const UI = (() => {
 
   function anyOverlayOpen() {
     return anyPanelOpen() ||
-           (el.supportOverlay && el.supportOverlay.classList.contains('visible')) ||
-           (el.exclOverlay && el.exclOverlay.classList.contains('visible'));
-  }
-
-  function showExclOverlay() {
-    if (!el.exclOverlay) return;
-    el.exclOverlay.classList.add('visible');
-  }
-  function hideExclOverlay() {
-    if (!el.exclOverlay) return;
-    el.exclOverlay.classList.remove('visible');
+           (el.supportOverlay && el.supportOverlay.classList.contains('visible'));
   }
 
   function setReplayButtonState(state) {
@@ -3681,7 +3618,6 @@ const UI = (() => {
     showActions, setHeroActionsActive,
     openBottomPanel, closeBottomPanel, openGuidePanel, openGuideInsteadOfSettings, closeGuidePanel,
     closeAllPanels, anyPanelOpen, anyOverlayOpen,
-    showExclOverlay, hideExclOverlay,
     updateHistoryInfo,
     readSettingsFromUI, applySettingsToUI,
     syncSettingsUI, toggleStackDisplay, toggleShowStrategies, toggleShowAllHands,
@@ -3716,7 +3652,6 @@ const UI = (() => {
     isPaused: false,
     supportPaused: false,
     panelsPaused: false,
-    exclPaused: false,
 
     heroTimerIntervalId: null,
     heroTimerTimeoutId: null,
@@ -3765,9 +3700,6 @@ const UI = (() => {
     el.btnSupportPanel = document.getElementById('btn-support-panel');
     el.settingsHelpBtn = document.getElementById('settings-help-btn');
     el.settingsCardBtn = document.getElementById('settings-card-btn');
-    el.settingsExclBtn = document.getElementById('settings-excl-btn');
-    el.exclOverlay     = document.getElementById('excl-overlay');
-    el.exclWindow      = document.getElementById('excl-window');
     el.topRoundRow     = document.getElementById('top-round-row');
     el.gmailBtn        = document.getElementById('gmail-btn');
     el.tgBtn           = document.getElementById('tg-btn');
@@ -3837,7 +3769,6 @@ const UI = (() => {
               target.closest('#quick-percent-list') ||
               target.closest('#hero-timer-zone') ||
               target.closest('#support-overlay') ||
-              target.closest('#excl-overlay') ||
               target.closest('#top-round-row'));
   }
 
@@ -3926,26 +3857,6 @@ const UI = (() => {
       }, { passive: false });
     }
 
-    if (el.exclOverlay) {
-      el.exclOverlay.addEventListener('click', (e) => {
-        if (e.target === el.exclOverlay) {
-          closeExclWindow();
-        }
-      });
-      el.exclOverlay.addEventListener('touchend', (e) => {
-        if (e.target === el.exclOverlay) {
-          e.preventDefault();
-          e.stopPropagation();
-          closeExclWindow();
-        }
-      }, { passive: false });
-    }
-
-    if (el.exclWindow) {
-      el.exclWindow.addEventListener('click', (e) => e.stopPropagation());
-      el.exclWindow.addEventListener('touchend', (e) => e.stopPropagation(), { passive: false });
-    }
-
     if (el.supportCardNumber) {
       el.supportCardNumber.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -4007,19 +3918,6 @@ const UI = (() => {
         e.preventDefault();
         e.stopPropagation();
         openSupportWindow();
-      }, { passive: false });
-    }
-
-    if (el.settingsExclBtn) {
-      el.settingsExclBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        openExclWindow();
-      });
-      el.settingsExclBtn.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        openExclWindow();
       }, { passive: false });
     }
 
@@ -4099,7 +3997,7 @@ const UI = (() => {
   }
 
   function openPanelWithPause(openFn) {
-    if (session.supportPaused || session.exclPaused) return;
+    if (session.supportPaused) return;
     if (UI.anyOverlayOpen()) return;
     openFn();
     session.panelsPaused = true;
@@ -4111,7 +4009,7 @@ const UI = (() => {
     UI.closeAllPanels();
     if (wasOpen && session.panelsPaused) {
       session.panelsPaused = false;
-      if (!session.supportPaused && !session.exclPaused) {
+      if (!session.supportPaused) {
         resumeGame();
       }
     }
@@ -4128,23 +4026,7 @@ const UI = (() => {
     if (!session.supportPaused) return;
     session.supportPaused = false;
     UI.hideSupportOverlay();
-    if (!session.panelsPaused && !session.exclPaused && !UI.anyPanelOpen()) {
-      resumeGame();
-    }
-  }
-
-  function openExclWindow() {
-    if (session.exclPaused) return;
-    session.exclPaused = true;
-    pauseGame();
-    UI.showExclOverlay();
-  }
-
-  function closeExclWindow() {
-    if (!session.exclPaused) return;
-    session.exclPaused = false;
-    UI.hideExclOverlay();
-    if (!session.panelsPaused && !session.supportPaused && !UI.anyPanelOpen()) {
+    if (!session.panelsPaused && !UI.anyPanelOpen()) {
       resumeGame();
     }
   }
@@ -4295,10 +4177,8 @@ const UI = (() => {
     session.isPaused = false;
     session.supportPaused = false;
     session.panelsPaused = false;
-    session.exclPaused = false;
 
     UI.hideSupportOverlay();
-    UI.hideExclOverlay();
     UI.setHeroActionsActive(false);
     UI.updateHistoryInfo(0, 0, false);
     UI.clearWinnerHighlights();
@@ -4324,7 +4204,6 @@ const UI = (() => {
     session.isPaused = false;
     session.supportPaused = false;
     session.panelsPaused = false;
-    session.exclPaused = false;
 
     const botStrategies = Bots.assignStrategies(7);
     const players = [{ id: 'hero', name: 'Ты', isHero: true, strategy: null, stack: Engine.STARTING_STACK }];
@@ -4666,7 +4545,6 @@ const UI = (() => {
       if (session.replay.active) return;
       if (session.supportPaused) return;
       if (session.panelsPaused) return;
-      if (session.exclPaused) return;
 
       const period = UI.settings.blindGrowthHands || 10;
       state.handsAtLevel++;
@@ -5032,7 +4910,6 @@ const UI = (() => {
 
   function resumeGame() {
     if (session.supportPaused) return;
-    if (session.exclPaused) return;
     if (UI.anyPanelOpen()) return;
 
     stopReplay(true);
@@ -5057,7 +4934,6 @@ const UI = (() => {
           if (session.replay.active) return;
           if (session.supportPaused) return;
           if (session.panelsPaused) return;
-          if (session.exclPaused) return;
 
           const period = UI.settings.blindGrowthHands || 10;
           state.handsAtLevel++;
