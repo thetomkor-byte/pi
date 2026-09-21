@@ -1295,9 +1295,6 @@ button.disabled {
   text-align: center;
 }
 
-/* Круглые кнопки-символы над блоком истории раздач.
-   Подняты выше панели руководства — z-index 130.
-   Ниже оверлея поддержки (z-index 300). */
 #top-round-row {
   position: absolute;
   display: flex;
@@ -4070,19 +4067,15 @@ const UI = (() => {
     if (el.heroTimerZone) {
       el.heroTimerZone.addEventListener('touchend', (e) => {
         e.stopPropagation();
-        if (registerDoubleTap(el.heroTimerZone)) {
-          e.preventDefault();
-          toggleTurnTimeOption();
-        }
+        e.preventDefault();
+        toggleTurnTimeOption();
       }, { passive: false });
 
       el.heroTimerZone.addEventListener('click', (e) => {
         if (e.pointerType && e.pointerType !== 'mouse') return;
-        if (registerDoubleTap(el.heroTimerZone)) {
-          e.preventDefault();
-          e.stopPropagation();
-          toggleTurnTimeOption();
-        }
+        e.preventDefault();
+        e.stopPropagation();
+        toggleTurnTimeOption();
       });
     }
 
@@ -4347,30 +4340,29 @@ const UI = (() => {
 
       if (stackEl) {
         e.stopPropagation();
-        if (registerDoubleTap(stackEl)) {
-          e.preventDefault();
-          handleStackDoubleTap();
+        e.preventDefault();
+        const isHeroSeat = !!stackEl.closest('.seat.hero');
+        if (isHeroSeat) {
+          handleStackTap();
         }
         return;
       }
 
       if (cardsEl) {
         e.stopPropagation();
+        e.preventDefault();
         const isHeroSeat = !!cardsEl.closest('.seat.hero');
-        if (registerDoubleTap(cardsEl)) {
-          e.preventDefault();
-          if (isHeroSeat) {
-            handleHeroCardsDoubleTap();
-          } else {
-            handleCardsDoubleTap();
-          }
+        if (isHeroSeat) {
+          handleHeroCardsTap();
+        } else {
+          handleCardsTap();
         }
         return;
       }
     }, { passive: false });
   }
 
-  function handleStackDoubleTap() {
+  function handleStackTap() {
     UI.toggleStackDisplay();
     if (session.replay.active) {
       renderReplayStep();
@@ -4394,7 +4386,7 @@ const UI = (() => {
     }
   }
 
-  function handleCardsDoubleTap() {
+  function handleCardsTap() {
     UI.toggleShowStrategies();
     if (session.replay.active) {
       renderReplayStep();
@@ -4411,7 +4403,7 @@ const UI = (() => {
     }
   }
 
-  function handleHeroCardsDoubleTap() {
+  function handleHeroCardsTap() {
     UI.toggleShowAllHands();
     if (session.replay.active) {
       renderReplayStep();
@@ -4426,6 +4418,18 @@ const UI = (() => {
         UI.updateSeats(state, showAll);
       }
     }
+  }
+
+  function handleStackDoubleTap() {
+    handleStackTap();
+  }
+
+  function handleCardsDoubleTap() {
+    handleCardsTap();
+  }
+
+  function handleHeroCardsDoubleTap() {
+    handleHeroCardsTap();
   }
 
   function restartSession() {
