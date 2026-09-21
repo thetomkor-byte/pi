@@ -51,6 +51,11 @@
   --hero-timer-size: clamp(40px, 5.6vmin, 52px);
   --support-btn-h: clamp(28px, 3.6vmin, 34px);
   --support-btn-fs: clamp(10px, 1.3vmin, 12px);
+
+  /* Смещение нижней карты вниз (в пикселях) */
+  --belcard-offset: 8px;
+  /* Максимальный подъём верхней карты при перетаскивании */
+  --belcard-lift: 8px;
 }
 
 html, body {
@@ -626,6 +631,7 @@ button.disabled {
 #support-overlay.visible { display: flex; }
 
 #support-window {
+  position: relative;
   width: min(90%, 380px);
   background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
   border: 2px solid #3a3530;
@@ -646,17 +652,20 @@ button.disabled {
 }
 
 /* ===== Стопка карт Беларусбанка =====
-   Нижняя карта — точная копия верхней, целиком сдвинута вниз на 4px.
-   Из-под нижнего края верхней выглядывает полоска нижней на 4px. */
+   Нижняя карта — копия верхней, сдвинута вниз на 8px.
+   Из-под нижнего края верхней видно полоску нижней на 8px.
+   При перетаскивании вверх верхняя поднимается максимум на 8px,
+   затем уходит вниз под нижнюю. */
 .belcard-stack {
   position: relative;
   width: 100%;
   aspect-ratio: 1.586 / 1;
-  margin-bottom: calc(clamp(14px, 2.4vmin, 20px) + 4px);
-  touch-action: pan-y;
+  margin-bottom: calc(clamp(14px, 2.4vmin, 20px) + var(--belcard-offset));
+  touch-action: none;
   user-select: none;
   -webkit-user-select: none;
   overflow: visible;
+  perspective: 800px;
 }
 
 .belcard-stack .belcard {
@@ -677,31 +686,39 @@ button.disabled {
   justify-content: space-between;
   color: #ffffff;
   font-family: "Inter", "Segoe UI", system-ui, sans-serif;
-  transition: transform .38s cubic-bezier(.22,.61,.36,1);
   will-change: transform;
 }
 
-/* Зелёная — верхняя */
+/* Зелёная — верхняя по умолчанию */
 .belcard-stack .belcard.belcard-green {
   background:
     linear-gradient(135deg, #1f6b3a 0%, #2e8b4e 45%, #4caf6a 100%);
   z-index: 2;
   transform: translateY(0);
+  transition: transform .38s cubic-bezier(.22,.61,.36,1);
 }
 
-/* Синяя — нижняя, сдвинута вниз на 4px */
+/* Синяя — нижняя, сдвинута вниз на 8px */
 .belcard-stack .belcard.belcard-blue {
   background:
     linear-gradient(135deg, #1b3e8c 0%, #2a5bb5 45%, #4a7fd6 100%);
   z-index: 1;
-  transform: translateY(4px);
+  transform: translateY(var(--belcard-offset));
+  transition: transform .38s cubic-bezier(.22,.61,.36,1);
 }
 
-/* Свайп: синяя уезжает вверх и накрывает зелёную,
-   зелёная уезжает ещё ниже и уходит под синюю */
+/* Когда тащат пальцем — без transition, карта следует за пальцем */
+.belcard-stack.dragging .belcard.belcard-green {
+  transition: none;
+}
+.belcard-stack.dragging .belcard.belcard-blue {
+  transition: none;
+}
+
+/* Свайп завершён: синяя встаёт наверх, зелёная уходит вниз */
 .belcard-stack.swapped .belcard-green {
   z-index: 1;
-  transform: translateY(4px);
+  transform: translateY(var(--belcard-offset));
 }
 .belcard-stack.swapped .belcard-blue {
   z-index: 2;
@@ -731,7 +748,7 @@ button.disabled {
 /* Тень верхней карты ложится на выглядывающую полоску нижней */
 .belcard-stack .belcard.belcard-green {
   box-shadow:
-    0 12px 22px rgba(0,0,0,.85),
+    0 14px 24px rgba(0,0,0,.85),
     0 6px 10px rgba(0,0,0,.6),
     inset 0 1px 0 rgba(255,255,255,.25);
 }
@@ -747,7 +764,7 @@ button.disabled {
 }
 .belcard-stack.swapped .belcard-blue {
   box-shadow:
-    0 12px 22px rgba(0,0,0,.85),
+    0 14px 24px rgba(0,0,0,.85),
     0 6px 10px rgba(0,0,0,.6),
     inset 0 1px 0 rgba(255,255,255,.25);
 }
@@ -862,7 +879,7 @@ button.disabled {
 
 #support-footer {
   color: var(--muted);
-  font-size: clamp(11px, 1.4vmin, 13px);
+  font-size: clamp(13px, 1.7vmin, 15px);
   text-align: center;
   margin-top: 18px;
   letter-spacing: .3px;
@@ -877,7 +894,7 @@ button.disabled {
   text-align: center;
 }
 
-/* Иконки-кнопки рядом с «Благодарю» — чуть крупнее */
+/* Иконки-кнопки рядом с «Благодарю» */
 .icon-btn {
   display: inline-flex;
   align-items: center;
@@ -899,26 +916,29 @@ button.disabled {
 }
 .icon-btn svg { display: block; width: 100%; height: 100%; }
 
-/* Сообщение «Скопировано» — появляется НАД окошком поддержки. */
+/* Сообщение «Скопировано» — по центру верхней карты окошка поддержки. */
 #support-copied {
-  position: fixed;
+  position: absolute;
   left: 50%;
-  top: 12%;
-  transform: translateX(-50%);
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
   background: rgba(20, 18, 16, 0.95);
   color: var(--gold);
   font-weight: 800;
-  font-size: clamp(11px, 1.4vmin, 13px);
-  padding: 6px 14px;
-  border-radius: 8px;
+  font-size: clamp(13px, 1.8vmin, 16px);
+  padding: 10px 18px;
+  border-radius: 10px;
   border: 1px solid #8a6508;
   box-shadow: 0 4px 12px rgba(0,0,0,.8);
   opacity: 0;
   pointer-events: none;
-  transition: opacity .2s ease;
+  transition: opacity .2s ease, transform .2s ease;
   z-index: 310;
 }
-#support-copied.visible { opacity: 1; }
+#support-copied.visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
 
 #hero-timer {
   position: absolute;
@@ -1725,14 +1745,14 @@ button.disabled {
         <a class="icon-btn" id="tg-btn" href="#" rel="noopener noreferrer" aria-label="Telegram">
           <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
             <rect x="0" y="0" width="48" height="48" rx="10" ry="10" fill="#0088cc"/>
-            <path d="M11 24l22-9-4 20-8-6-3 3-1-6 8-6-9 5z" fill="#ffffff"/>
+            <path d="M9 24.5l26-10.5-4.5 23-9-7-4 4-1.5-7.5 9.5-8.5-12 7.5z" fill="#ffffff"/>
           </svg>
         </a>
       </div>
     </div>
-  </div>
 
-  <div id="support-copied">Скопировано</div>
+    <div id="support-copied">Скопировано</div>
+  </div>
 
   <div id="start-overlay">
     <div class="start-card">
@@ -3700,60 +3720,187 @@ const UI = (() => {
   }
 
   function resetBelcardSwap() {
-    if (el.belcardStack) el.belcardStack.classList.remove('swapped');
+    if (el.belcardStack) {
+      el.belcardStack.classList.remove('swapped');
+      el.belcardStack.classList.remove('dragging');
+      const green = el.belcardStack.querySelector('.belcard-green');
+      const blue = el.belcardStack.querySelector('.belcard-blue');
+      if (green) green.style.transform = '';
+      if (blue) blue.style.transform = '';
+    }
   }
 
-  function toggleBelcardSwap() {
+  function bindBelcardDrag() {
     if (!el.belcardStack) return;
-    el.belcardStack.classList.toggle('swapped');
-  }
 
-  function bindBelcardSwipe() {
-    if (!el.belcardStack) return;
-    let startY = 0, startX = 0, tracking = false;
-    const MIN_DIST = 40;
+    const LIFT = 8;       // максимум подъёма верхней карты (px)
+    const OFFSET = 8;     // сдвиг нижней карты вниз (px)
+    const SWIPE_THRESHOLD = 40;
 
+    const green = el.belcardStack.querySelector('.belcard-green');
+    const blue = el.belcardStack.querySelector('.belcard-blue');
+    if (!green || !blue) return;
+
+    let startY = 0;
+    let dragging = false;
+    let currentOffset = 0;
+    let isSwapped = false;
+
+    function getTopCard() {
+      return isSwapped ? blue : green;
+    }
+    function getBottomCard() {
+      return isSwapped ? green : blue;
+    }
+
+    /* Установка смещения верхней карты (в px вверх — отрицательное значение) */
+    function setTopTransform(dy) {
+      const top = getTopCard();
+      const bottom = getBottomCard();
+      if (!top || !bottom) return;
+
+      // dy — смещение вверх (положительное — вверх)
+      const lift = Math.max(0, Math.min(LIFT, dy));
+
+      // Пока lift < LIFT — карта поднимается вверх
+      // Когда lift = LIFT — начинаем уводить её вниз под другую
+      let topY;
+      if (lift < LIFT) {
+        topY = -lift;
+      } else {
+        // от LIFT продолжаем движение вниз (под нижнюю карту)
+        // финальное положение — translateY(OFFSET), как у нижней
+        topY = OFFSET;
+      }
+
+      top.style.transform = `translateY(${topY}px)`;
+
+      // нижняя карта остаётся на месте, пока верхняя не ушла полностью
+      // если верхняя дошла до конца — переключаем z-index и меняем местами
+    }
+
+    function applyFinalSwap() {
+      isSwapped = !isSwapped;
+      el.belcardStack.classList.toggle('swapped', isSwapped);
+      green.style.transform = '';
+      blue.style.transform = '';
+    }
+
+    function returnToStart() {
+      green.style.transform = '';
+      blue.style.transform = '';
+      el.belcardStack.classList.remove('dragging');
+    }
+
+    /* ===== TOUCH ===== */
     el.belcardStack.addEventListener('touchstart', (e) => {
       if (e.touches.length !== 1) return;
-      tracking = true;
-      startX = e.touches[0].clientX;
       startY = e.touches[0].clientY;
+      dragging = false;
+      currentOffset = 0;
+      el.belcardStack.classList.add('dragging');
     }, { passive: true });
 
-    el.belcardStack.addEventListener('touchend', (e) => {
-      if (!tracking) return;
-      tracking = false;
-      const endX = e.changedTouches[0].clientX;
-      const endY = e.changedTouches[0].clientY;
-      const dx = endX - startX;
-      const dy = endY - startY;
-      if (Math.abs(dy) < MIN_DIST) return;
-      if (Math.abs(dx) > Math.abs(dy)) return;
-      if (dy < 0) {
-        e.preventDefault();
-        toggleBelcardSwap();
+    el.belcardStack.addEventListener('touchmove', (e) => {
+      if (e.touches.length !== 1) return;
+      const y = e.touches[0].clientY;
+      const dy = startY - y; // положительное — движение вверх
+
+      if (!dragging) {
+        if (Math.abs(dy) < 6) return;
+        dragging = true;
       }
+
+      currentOffset = dy;
+      setTopTransform(dy);
+      e.preventDefault();
     }, { passive: false });
 
-    let mouseStartY = 0, mouseStartX = 0, mouseTracking = false;
+    el.belcardStack.addEventListener('touchend', (e) => {
+      el.belcardStack.classList.remove('dragging');
+      if (!dragging) {
+        returnToStart();
+        return;
+      }
+      dragging = false;
+
+      if (currentOffset >= LIFT) {
+        // довели до конца — меняем местами
+        // сначала доводим анимацию до конца через transition
+        const top = getTopCard();
+        if (top) top.style.transform = `translateY(${OFFSET}px)`;
+        // небольшая задержка, чтобы transition отработал
+        setTimeout(() => {
+          applyFinalSwap();
+        }, 240);
+      } else if (currentOffset >= SWIPE_THRESHOLD) {
+        // свайп достаточный, но не до конца — считаем завершённым
+        const top = getTopCard();
+        if (top) top.style.transform = `translateY(${OFFSET}px)`;
+        setTimeout(() => {
+          applyFinalSwap();
+        }, 240);
+      } else {
+        returnToStart();
+      }
+      currentOffset = 0;
+    }, { passive: false });
+
+    el.belcardStack.addEventListener('touchcancel', () => {
+      el.belcardStack.classList.remove('dragging');
+      dragging = false;
+      returnToStart();
+      currentOffset = 0;
+    }, { passive: true });
+
+    /* ===== MOUSE ===== */
+    let mouseDown = false;
+    let mouseStartY = 0;
+    let mouseOffset = 0;
+    let mouseDragging = false;
 
     el.belcardStack.addEventListener('mousedown', (e) => {
       if (e.button !== 0) return;
-      mouseTracking = true;
-      mouseStartX = e.clientX;
+      mouseDown = true;
       mouseStartY = e.clientY;
+      mouseOffset = 0;
+      mouseDragging = false;
+      el.belcardStack.classList.add('dragging');
+      e.preventDefault();
     });
 
-    el.belcardStack.addEventListener('mouseup', (e) => {
-      if (!mouseTracking) return;
-      mouseTracking = false;
-      const dx = e.clientX - mouseStartX;
-      const dy = e.clientY - mouseStartY;
-      if (Math.abs(dy) < MIN_DIST) return;
-      if (Math.abs(dx) > Math.abs(dy)) return;
-      if (dy < 0) {
-        toggleBelcardSwap();
+    window.addEventListener('mousemove', (e) => {
+      if (!mouseDown) return;
+      const y = e.clientY;
+      const dy = mouseStartY - y;
+      if (!mouseDragging) {
+        if (Math.abs(dy) < 6) return;
+        mouseDragging = true;
       }
+      mouseOffset = dy;
+      setTopTransform(dy);
+    });
+
+    window.addEventListener('mouseup', (e) => {
+      if (!mouseDown) return;
+      mouseDown = false;
+      el.belcardStack.classList.remove('dragging');
+      if (!mouseDragging) {
+        returnToStart();
+        return;
+      }
+      mouseDragging = false;
+
+      if (mouseOffset >= LIFT || mouseOffset >= SWIPE_THRESHOLD) {
+        const top = getTopCard();
+        if (top) top.style.transform = `translateY(${OFFSET}px)`;
+        setTimeout(() => {
+          applyFinalSwap();
+        }, 240);
+      } else {
+        returnToStart();
+      }
+      mouseOffset = 0;
     });
   }
 
@@ -3775,7 +3922,7 @@ const UI = (() => {
     showHeroTimer, hideHeroTimer, updateHeroTimer, placeHeroTimer,
     placeTopRoundRow,
     showSupportOverlay, hideSupportOverlay, copySupportText,
-    resetBelcardSwap, toggleBelcardSwap, bindBelcardSwipe
+    resetBelcardSwap, bindBelcardDrag
   };
 
 })();
@@ -3825,7 +3972,7 @@ const UI = (() => {
     cacheDom();
     bindGlobalHandlers();
     UI.applySettingsToUI();
-    UI.bindBelcardSwipe();
+    UI.bindBelcardDrag();
     bindDesktopDoubleClick();
     window.addEventListener('resize', () => {
       UI.placeHeroTimer();
