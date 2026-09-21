@@ -52,6 +52,7 @@
   --support-btn-h: clamp(28px, 3.6vmin, 34px);
   --support-btn-fs: clamp(10px, 1.3vmin, 12px);
 
+  /* Смещение нижней карты вниз и величина подъёма верхней (в пикселях) */
   --belcard-offset: 8px;
   --belcard-lift: 8px;
 }
@@ -649,7 +650,12 @@ button.disabled {
   text-align: center;
 }
 
-/* ===== Стопка карт Беларусбанка ===== */
+/* ===== Стопка карт Беларусбанка =====
+   Обе карты — копии. Нижняя сдвинута вниз на 8px.
+   При перетаскивании вверх верхняя приподнимается на 8px,
+   затем запрыгивает за верхний край нижней так, что её верх
+   виден на 8px сверху. После этого обе карты одновременно
+   едут навстречу друг другу ровно на 8px. */
 .belcard-stack {
   position: relative;
   width: 100%;
@@ -679,42 +685,45 @@ button.disabled {
   will-change: transform;
 }
 
-/* Зелёная — верхняя по умолчанию. У неё удлинённая тень вниз. */
+/* Зелёная — верхняя по умолчанию */
 .belcard-stack .belcard.belcard-green {
   background:
     linear-gradient(135deg, #1f6b3a 0%, #2e8b4e 45%, #4caf6a 100%);
   z-index: 2;
   transform: translateY(0);
   transition: transform .42s cubic-bezier(.22,.61,.36,1);
+  /* Тень мягкая, стелется вниз ровно до верхнего края иконок, плавно затухает */
   box-shadow:
-    0 18px 28px -10px rgba(0,0,0,.8),
-    0 10px 16px -6px rgba(0,0,0,.55),
+    0 12px 22px -8px rgba(0,0,0,.75),
+    0 6px 10px -4px rgba(0,0,0,.5),
     inset 0 1px 0 rgba(255,255,255,.25);
 }
 
-/* Синяя — нижняя, сдвинута вниз на 8px. Тень обычная. */
+/* Синяя — нижняя, сдвинута вниз на 8px */
 .belcard-stack .belcard.belcard-blue {
   background:
     linear-gradient(135deg, #1b3e8c 0%, #2a5bb5 45%, #4a7fd6 100%);
   z-index: 1;
   transform: translateY(var(--belcard-offset));
   transition: transform .42s cubic-bezier(.22,.61,.36,1);
+  /* Тень мягкая, стелется вниз ровно до верхнего края иконок, плавно затухает */
   box-shadow:
-    0 12px 22px -8px rgba(0,0,0,.7),
+    0 12px 22px -8px rgba(0,0,0,.65),
     0 6px 10px -4px rgba(0,0,0,.45),
     inset 0 1px 0 rgba(255,255,255,.25);
 }
 
+/* Когда тащат пальцем — без transition, карта следует за пальцем */
 .belcard-stack.dragging .belcard {
   transition: none;
 }
 
-/* После смены: синяя наверху с удлинённой тенью, зелёная снизу с обычной. */
+/* После смены: синяя наверху, зелёная снизу */
 .belcard-stack.swapped .belcard-green {
   z-index: 1;
   transform: translateY(var(--belcard-offset));
   box-shadow:
-    0 12px 22px -8px rgba(0,0,0,.7),
+    0 12px 22px -8px rgba(0,0,0,.65),
     0 6px 10px -4px rgba(0,0,0,.45),
     inset 0 1px 0 rgba(255,255,255,.25);
 }
@@ -722,8 +731,8 @@ button.disabled {
   z-index: 2;
   transform: translateY(0);
   box-shadow:
-    0 18px 28px -10px rgba(0,0,0,.8),
-    0 10px 16px -6px rgba(0,0,0,.55),
+    0 12px 22px -8px rgba(0,0,0,.75),
+    0 6px 10px -4px rgba(0,0,0,.5),
     inset 0 1px 0 rgba(255,255,255,.25);
 }
 
@@ -872,7 +881,7 @@ button.disabled {
   text-align: center;
 }
 
-/* Иконки-кнопки рядом с «Благодарю» */
+/* Иконки-кнопки рядом с «Благодарю» с собственной тенью */
 .icon-btn {
   display: inline-flex;
   align-items: center;
@@ -887,6 +896,7 @@ button.disabled {
   padding: 0;
   background: transparent;
   cursor: pointer;
+  /* Тень чуть длиннее вниз, плавная и мягкая */
   box-shadow:
     0 6px 14px rgba(0,0,0,.6),
     0 2px 5px rgba(0,0,0,.45);
@@ -1309,6 +1319,8 @@ button.disabled {
   text-align: center;
 }
 
+/* Круглые кнопки-символы над блоком истории раздач.
+   Прозрачность 70%. */
 #top-round-row {
   position: absolute;
   display: flex;
@@ -1399,6 +1411,7 @@ button.disabled {
   box-shadow: 0 1px 0 #8a6508, inset 0 1px 0 rgba(255,255,255,.35);
 }
 
+/* ===== Верхняя панель РУКОВОДСТВО ===== */
 #guide-panel {
   position: absolute;
   top: 0;
@@ -1746,6 +1759,7 @@ button.disabled {
 </div>
 
 <script>
+/* Защита от индексации и плагиата — предупреждение в консоль */
 (function() {
   try {
     console.log('%cSTOP!', 'color:#e63946;font-size:48px;font-weight:900;text-shadow:2px 2px 0 #000;');
@@ -1755,6 +1769,7 @@ button.disabled {
   } catch (e) {}
 })();
 
+/* Блокировка контекстного меню, выделения, копирования */
 (function() {
   try {
     document.addEventListener('contextmenu', (e) => { e.preventDefault(); return false; }, { capture: true });
@@ -1777,6 +1792,7 @@ button.disabled {
   } catch (e) {}
 })();
 
+/* Полный запрет зума */
 (function() {
   try {
     const VIEWPORT_LOCK = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover';
@@ -3709,9 +3725,9 @@ const UI = (() => {
   function bindBelcardDrag() {
     if (!el.belcardStack) return;
 
-    const OFFSET = 8;
-    const LIFT = 8;
-    const SWIPE_THRESHOLD = 40;
+    const OFFSET = 8;              // сдвиг нижней карты вниз (px)
+    const LIFT = 8;                // максимальный подъём верхней карты (px)
+    const SWIPE_THRESHOLD = 40;    // порог свайпа (px)
 
     const green = el.belcardStack.querySelector('.belcard-green');
     const blue = el.belcardStack.querySelector('.belcard-blue');
@@ -3726,6 +3742,7 @@ const UI = (() => {
     function getTopCard() { return isSwapped ? blue : green; }
     function getBottomCard() { return isSwapped ? green : blue; }
 
+    /* Верхняя карта поднимается на lift пикселей вверх */
     function applyDrag(offset) {
       const lift = Math.max(0, Math.min(LIFT, offset));
       const top = getTopCard();
@@ -3750,19 +3767,35 @@ const UI = (() => {
       el.belcardStack.classList.remove('dragging');
     }
 
+    /* Красивая смена местами.
+       Шаг 1. Верхняя карта запрыгивает за верхний край нижней
+               (z-index меняется, её верх виден на 8px сверху).
+       Шаг 2. Обе карты одновременно и равномерно едут навстречу
+               друг другу ровно на 8 пикселей. */
     function doSwapAnimation() {
       const top = getTopCard();
       const bottom = getBottomCard();
       isAnimating = true;
       el.belcardStack.classList.remove('dragging');
 
+      /* Шаг 1: верхняя карта мгновенно оказывается за верхним краем
+         нижней (z-index меняется), её верхний край виден на 8px сверху.
+         По вертикали это значит, что теперь верхняя карта должна
+         стоять так, чтобы её верхний край был выше на 8px, чем
+         был у нижней. Нижняя стоит на translateY(OFFSET)=8.
+         Значит верхняя должна оказаться на translateY(OFFSET - LIFT) = 0.
+         То есть визуально она на месте, но z-index изменён. */
+
+      /* Резко меняем z-index и сразу едем навстречу друг другу */
       top.style.zIndex = '1';
       bottom.style.zIndex = '2';
 
       top.style.transition = 'transform .38s cubic-bezier(.22,.61,.36,1)';
       bottom.style.transition = 'transform .38s cubic-bezier(.22,.61,.36,1)';
 
+      /* Верхняя едет вниз на 8px — на место нижней */
       top.style.transform = `translateY(${OFFSET}px)`;
+      /* Нижняя едет вверх на 8px — на место верхней */
       bottom.style.transform = 'translateY(0)';
 
       setTimeout(() => {
@@ -3770,6 +3803,7 @@ const UI = (() => {
         bottom.style.transition = '';
         isSwapped = !isSwapped;
         el.belcardStack.classList.toggle('swapped', isSwapped);
+        /* Возвращаем стили классам */
         green.style.transform = '';
         blue.style.transform = '';
         green.style.zIndex = '';
@@ -3778,6 +3812,7 @@ const UI = (() => {
       }, 400);
     }
 
+    /* ===== TOUCH ===== */
     el.belcardStack.addEventListener('touchstart', (e) => {
       if (isAnimating) return;
       if (e.touches.length !== 1) return;
@@ -3828,6 +3863,7 @@ const UI = (() => {
       currentLift = 0;
     }, { passive: true });
 
+    /* ===== MOUSE ===== */
     let mouseDown = false;
     let mouseStartY = 0;
     let mouseLift = 0;
