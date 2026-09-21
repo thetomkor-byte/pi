@@ -295,6 +295,25 @@ button.disabled {
 }
 #table-info .info-row.faded { opacity: 0.45; }
 
+/* Новая надпись «Место: N/M» между местами 2 и 6 */
+#place-center {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  transform: translate(-50%, -50%);
+  font-size: clamp(11px, 1.4vmin, 14px);
+  color: var(--text);
+  font-weight: 700;
+  text-shadow: 0 1px 4px rgba(0,0,0,.95);
+  letter-spacing: .3px;
+  white-space: nowrap;
+  opacity: 0.45;
+  pointer-events: none;
+  z-index: 6;
+  text-align: center;
+}
+#place-center.hidden { display: none; }
+
 .card {
   width: var(--card-w);
   height: var(--card-h);
@@ -841,6 +860,27 @@ button.disabled {
   text-align: right;
   line-height: 1.2;
   text-shadow: 0 1px 2px rgba(0,0,0,.35);
+}
+
+/* Надпись PAYSEND по центру карт в окошке поддержки */
+.belcard-paysend {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: clamp(10px, 1.6vmin, 14px);
+  font-weight: 900;
+  font-style: normal;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  opacity: 0.95;
+  text-align: center;
+  color: #ffffff;
+  line-height: 1.2;
+  text-shadow: 0 1px 2px rgba(0,0,0,.35);
+  pointer-events: none;
+  z-index: 3;
+  white-space: nowrap;
 }
 
 #support-footer {
@@ -1544,6 +1584,8 @@ button.disabled {
         </div>
         <div id="seats"></div>
 
+        <div id="place-center">Место: 1/8</div>
+
         <div id="hero-timer-zone"></div>
 
         <div id="hero-timer">
@@ -1679,6 +1721,8 @@ button.disabled {
 
           <div class="belcard-chip"></div>
 
+          <div class="belcard-paysend" translate="no">PAYSEND</div>
+
           <div class="belcard-number-row">
             <div class="belcard-number" data-copy-card translate="no">9112 3801 6012 8254</div>
             <div class="belcard-currencies-top" translate="no">BYN / RUB</div>
@@ -1696,6 +1740,8 @@ button.disabled {
           </div>
 
           <div class="belcard-chip"></div>
+
+          <div class="belcard-paysend" translate="no">PAYSEND</div>
 
           <div class="belcard-number-row">
             <div class="belcard-number" data-copy-card translate="no">4255 1901 3916 7251</div>
@@ -2779,6 +2825,7 @@ const UI = (() => {
     el.infoBlindsRow  = document.getElementById('info-blinds-row');
     el.infoTimerRow   = document.getElementById('info-timer-row');
     el.infoNextBlinds = document.getElementById('info-next-blinds-row');
+    el.placeCenter    = document.getElementById('place-center');
 
     el.heroActions    = document.getElementById('hero-actions');
     el.heroButtons    = document.getElementById('hero-buttons');
@@ -3086,6 +3133,7 @@ const UI = (() => {
     }
     updateStacks(state);
     updateActiveHighlight(state);
+    updatePlaceCenter(state);
     placeHeroTimer();
     placeTopRoundRow();
   }
@@ -3221,6 +3269,28 @@ const UI = (() => {
       const isActing = state.actingIndex === p.seatIndex && !state.handOver && !p.folded;
       seat.classList.toggle('active', isActing);
     }
+  }
+
+  function updatePlaceCenter(state) {
+    if (!el.placeCenter) return;
+    if (!state) { el.placeCenter.classList.add('hidden'); return; }
+    const players = state.players || [];
+    const alive = players.filter(p => !p.eliminated);
+    const total = alive.length;
+    if (total <= 0) { el.placeCenter.classList.add('hidden'); return; }
+
+    const hero = players.find(p => p.isHero);
+    let heroPlace = null;
+    if (hero && !hero.eliminated) {
+      const sorted = alive.slice().sort((a, b) => b.stack - a.stack);
+      const idx = sorted.findIndex(p => p.id === hero.id);
+      heroPlace = idx >= 0 ? idx + 1 : total;
+    } else {
+      heroPlace = total;
+    }
+
+    el.placeCenter.textContent = `Место: ${heroPlace}/${total}`;
+    el.placeCenter.classList.remove('hidden');
   }
 
   function updateBoard(state) {
@@ -3859,7 +3929,7 @@ const UI = (() => {
   return {
     settings, init, el,
     renderTable, updateSeats, updateBoard, updatePot, updateLevel,
-    updateStacks, updateActiveHighlight,
+    updateStacks, updateActiveHighlight, updatePlaceCenter,
     showActions, setHeroActionsActive,
     openBottomPanel, closeBottomPanel, openGuidePanel, openGuideInsteadOfSettings, closeGuidePanel,
     closeAllPanels, anyPanelOpen, anyOverlayOpen,
@@ -3955,6 +4025,7 @@ const UI = (() => {
     el.supportOverlay = document.getElementById('support-overlay');
     el.supportWindow  = document.getElementById('support-window');
     el.belcardStack   = document.getElementById('belcard-stack');
+    el.placeCenter    = document.getElementById('place-center');
   }
 
   function bindDesktopDoubleClick() {
@@ -4512,6 +4583,7 @@ const UI = (() => {
       session.tournamentOver = true;
       UI.setHeroActionsActive(false);
       UI.hideHeroTimer();
+      UI.updatePlaceCenter(session.state);
       return;
     }
 
@@ -4528,6 +4600,7 @@ const UI = (() => {
     UI.updatePot(session.state);
     UI.updateSeats(session.state);
     UI.updateLevel(session.state);
+    UI.updatePlaceCenter(session.state);
     UI.updateHistoryInfo(session.history.length, session.history.length, false);
 
     UI.resetSliderToStart();
@@ -4790,6 +4863,7 @@ const UI = (() => {
     UI.updateSeats(state, false);
     UI.updatePot(state);
     UI.updateActiveHighlight(state);
+    UI.updatePlaceCenter(state);
     UI.setHeroActionsActive(false);
     UI.resetSliderToStart();
     refreshQuickPercentList();
@@ -4804,6 +4878,7 @@ const UI = (() => {
       if (session.viewingIndex >= 0) return;
       if (session.replay.active) return;
       UI.updateSeats(state, true);
+      UI.updatePlaceCenter(state);
     }, 1000);
 
     clearTimeout(session.autoNextTimerId);
@@ -4827,6 +4902,7 @@ const UI = (() => {
         session.tournamentOver = true;
         UI.setHeroActionsActive(false);
         UI.hideHeroTimer();
+        UI.updatePlaceCenter(state);
         return;
       }
       startHand();
@@ -5192,6 +5268,7 @@ const UI = (() => {
       UI.updateSeats(state, true);
       UI.updatePot(state);
       UI.updateLevel(state);
+      UI.updatePlaceCenter(state);
       highlightWinners(state);
       UI.setHeroActionsActive(false);
       refreshQuickPercentList();
@@ -5215,6 +5292,7 @@ const UI = (() => {
           if (alive.length <= 1) {
             session.tournamentOver = true;
             UI.setHeroActionsActive(false);
+            UI.updatePlaceCenter(state);
             return;
           }
           startHand();
@@ -5227,6 +5305,7 @@ const UI = (() => {
       UI.updatePot(state);
       UI.updateLevel(state);
       UI.updateActiveHighlight(state);
+      UI.updatePlaceCenter(state);
       UI.resetSliderToStart();
       refreshQuickPercentList();
       if (session.waitingForHero && !session.heroEliminated) {
