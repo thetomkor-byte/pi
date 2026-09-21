@@ -295,11 +295,11 @@ button.disabled {
 }
 #table-info .info-row.faded { opacity: 0.45; }
 
-/* Новая надпись «Место: N/M» между местами 2 и 6 */
+/* Надпись «Место: N/M» между местами игроков 2 и 6 */
 #place-center {
   position: absolute;
   left: 50%;
-  top: 44%;
+  top: 32%;
   transform: translate(-50%, -50%);
   font-size: clamp(11px, 1.4vmin, 14px);
   color: var(--text);
@@ -862,13 +862,13 @@ button.disabled {
   text-shadow: 0 1px 2px rgba(0,0,0,.35);
 }
 
-/* Надпись PAYSEND по центру карт в окошке поддержки */
+/* Ссылка PAYSEND по центру синей карты — вид как у обычного текста */
 .belcard-paysend {
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  font-size: clamp(10px, 1.6vmin, 14px);
+  font-size: clamp(12px, 1.9vmin, 17px);
   font-weight: 900;
   font-style: normal;
   letter-spacing: 1.5px;
@@ -876,11 +876,20 @@ button.disabled {
   opacity: 0.95;
   text-align: center;
   color: #ffffff;
+  text-decoration: none;
   line-height: 1.2;
   text-shadow: 0 1px 2px rgba(0,0,0,.35);
-  pointer-events: none;
   z-index: 3;
   white-space: nowrap;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.belcard-paysend:link,
+.belcard-paysend:visited,
+.belcard-paysend:hover,
+.belcard-paysend:active {
+  color: #ffffff;
+  text-decoration: none;
 }
 
 #support-footer {
@@ -1721,8 +1730,6 @@ button.disabled {
 
           <div class="belcard-chip"></div>
 
-          <div class="belcard-paysend" translate="no">PAYSEND</div>
-
           <div class="belcard-number-row">
             <div class="belcard-number" data-copy-card translate="no">9112 3801 6012 8254</div>
             <div class="belcard-currencies-top" translate="no">BYN / RUB</div>
@@ -1741,7 +1748,7 @@ button.disabled {
 
           <div class="belcard-chip"></div>
 
-          <div class="belcard-paysend" translate="no">PAYSEND</div>
+          <a class="belcard-paysend" href="https://paysend.com/" target="_blank" rel="noopener noreferrer" translate="no">PAYSEND</a>
 
           <div class="belcard-number-row">
             <div class="belcard-number" data-copy-card translate="no">4255 1901 3916 7251</div>
@@ -4080,6 +4087,7 @@ const UI = (() => {
     return !!(target.closest('button') ||
               target.closest('input') ||
               target.closest('select') ||
+              target.closest('a') ||
               target.closest('#bottom-panel') ||
               target.closest('#guide-panel') ||
               target.closest('#start-overlay') ||
@@ -4174,6 +4182,9 @@ const UI = (() => {
 
     if (el.supportWindow) {
       el.supportWindow.addEventListener('click', (e) => {
+        if (e.target.closest('.belcard-paysend')) {
+          return;
+        }
         e.stopPropagation();
         const cardEl = e.target.closest('[data-copy-card]');
         if (cardEl) {
@@ -4187,6 +4198,9 @@ const UI = (() => {
         }
       });
       el.supportWindow.addEventListener('touchend', (e) => {
+        if (e.target.closest('.belcard-paysend')) {
+          return;
+        }
         e.stopPropagation();
         const cardEl = e.target.closest('[data-copy-card]');
         if (cardEl) {
