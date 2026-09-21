@@ -3954,6 +3954,7 @@ const UI = (() => {
     el.belcardStack   = document.getElementById('belcard-stack');
   }
 
+  /* Десктоп: двойной клик. Мобильный: одиночный тап (обрабатывается отдельно ниже). */
   function bindDesktopDoubleClick() {
     if (!el.seats) return;
 
@@ -3964,10 +3965,13 @@ const UI = (() => {
       const cardsEl = e.target.closest('.seat-cards');
 
       if (stackEl) {
+        /* Только стек героя. */
+        const isHeroSeat = !!stackEl.closest('.seat.hero');
+        if (!isHeroSeat) return;
         if (registerDoubleTap(stackEl)) {
           e.preventDefault();
           e.stopPropagation();
-          handleStackDoubleTap();
+          handleStackTap();
         }
         return;
       }
@@ -3978,9 +3982,9 @@ const UI = (() => {
           e.preventDefault();
           e.stopPropagation();
           if (isHeroSeat) {
-            handleHeroCardsDoubleTap();
+            handleHeroCardsTap();
           } else {
-            handleCardsDoubleTap();
+            handleCardsTap();
           }
         }
         return;
@@ -4065,6 +4069,7 @@ const UI = (() => {
     }, { passive: true });
 
     if (el.heroTimerZone) {
+      /* Мобильный: одиночный тап. Десктоп: двойной клик. */
       el.heroTimerZone.addEventListener('touchend', (e) => {
         e.stopPropagation();
         e.preventDefault();
@@ -4073,9 +4078,11 @@ const UI = (() => {
 
       el.heroTimerZone.addEventListener('click', (e) => {
         if (e.pointerType && e.pointerType !== 'mouse') return;
-        e.preventDefault();
-        e.stopPropagation();
-        toggleTurnTimeOption();
+        if (registerDoubleTap(el.heroTimerZone)) {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleTurnTimeOption();
+        }
       });
     }
 
@@ -4331,6 +4338,7 @@ const UI = (() => {
     }
   }
 
+  /* Мобильные тапы. Не мешаем десктопу: если pointerType === 'mouse', не срабатываем. */
   function bindSeatInteractions() {
     if (!el.seats) return;
 
@@ -4418,18 +4426,6 @@ const UI = (() => {
         UI.updateSeats(state, showAll);
       }
     }
-  }
-
-  function handleStackDoubleTap() {
-    handleStackTap();
-  }
-
-  function handleCardsDoubleTap() {
-    handleCardsTap();
-  }
-
-  function handleHeroCardsDoubleTap() {
-    handleHeroCardsTap();
   }
 
   function restartSession() {
