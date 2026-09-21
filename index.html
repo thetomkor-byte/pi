@@ -1261,6 +1261,9 @@ button.disabled {
 #quick-percent-list button.allin-btn .label { color: var(--allin); }
 #quick-percent-list button .value { color: var(--muted); font-weight: 600; font-size: clamp(9px, 1.2vmin, 11px); }
 
+/* Слои снизу вверх:
+   стол (0-45) -> руководство (120) -> кнопки Доллар и Вопрос (130)
+   -> настройки (140) -> поддержка (300). */
 #bottom-panel {
   position: absolute;
   bottom: 0;
@@ -1276,7 +1279,7 @@ button.disabled {
   border-top-right-radius: 14px;
   padding: 24px 20px calc(30px + var(--safe-bottom));
   transition: transform .28s ease;
-  z-index: 100;
+  z-index: 140;
   max-height: 72vh;
   overflow-y: auto;
   touch-action: pan-y;
@@ -3954,7 +3957,6 @@ const UI = (() => {
     el.belcardStack   = document.getElementById('belcard-stack');
   }
 
-  /* Десктоп: двойной клик. Мобильный: одиночный тап (обрабатывается отдельно ниже). */
   function bindDesktopDoubleClick() {
     if (!el.seats) return;
 
@@ -3965,7 +3967,6 @@ const UI = (() => {
       const cardsEl = e.target.closest('.seat-cards');
 
       if (stackEl) {
-        /* Только стек героя. */
         const isHeroSeat = !!stackEl.closest('.seat.hero');
         if (!isHeroSeat) return;
         if (registerDoubleTap(stackEl)) {
@@ -4069,7 +4070,6 @@ const UI = (() => {
     }, { passive: true });
 
     if (el.heroTimerZone) {
-      /* Мобильный: одиночный тап. Десктоп: двойной клик. */
       el.heroTimerZone.addEventListener('touchend', (e) => {
         e.stopPropagation();
         e.preventDefault();
@@ -4338,7 +4338,6 @@ const UI = (() => {
     }
   }
 
-  /* Мобильные тапы. Не мешаем десктопу: если pointerType === 'mouse', не срабатываем. */
   function bindSeatInteractions() {
     if (!el.seats) return;
 
