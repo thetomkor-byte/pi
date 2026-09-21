@@ -645,17 +645,31 @@ button.disabled {
   text-align: center;
 }
 
-/* ===== Кредитная карта Беларусбанка ===== */
-.belcard {
+/* ===== Стопка карт Беларусбанка =====
+   Нижняя карта — точная копия верхней, целиком сдвинута вниз на 4px.
+   Из-под нижнего края верхней выглядывает полоска нижней на 4px. */
+.belcard-stack {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1.586 / 1;
+  margin-bottom: calc(clamp(14px, 2.4vmin, 20px) + 4px);
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  overflow: visible;
+}
+
+.belcard-stack .belcard {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
   width: 100%;
   aspect-ratio: 1.586 / 1;
   border-radius: clamp(10px, 1.8vmin, 14px);
-  background:
-    linear-gradient(135deg, #1f6b3a 0%, #2e8b4e 45%, #4caf6a 100%);
   box-shadow:
     0 8px 24px rgba(0,0,0,.7),
     inset 0 1px 0 rgba(255,255,255,.25);
-  position: relative;
   overflow: hidden;
   padding: clamp(12px, 2.2vmin, 18px);
   display: flex;
@@ -663,7 +677,37 @@ button.disabled {
   justify-content: space-between;
   color: #ffffff;
   font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+  transition: transform .38s cubic-bezier(.22,.61,.36,1);
+  will-change: transform;
 }
+
+/* Зелёная — верхняя */
+.belcard-stack .belcard.belcard-green {
+  background:
+    linear-gradient(135deg, #1f6b3a 0%, #2e8b4e 45%, #4caf6a 100%);
+  z-index: 2;
+  transform: translateY(0);
+}
+
+/* Синяя — нижняя, сдвинута вниз на 4px */
+.belcard-stack .belcard.belcard-blue {
+  background:
+    linear-gradient(135deg, #1b3e8c 0%, #2a5bb5 45%, #4a7fd6 100%);
+  z-index: 1;
+  transform: translateY(4px);
+}
+
+/* Свайп: синяя уезжает вверх и накрывает зелёную,
+   зелёная уезжает ещё ниже и уходит под синюю */
+.belcard-stack.swapped .belcard-green {
+  z-index: 1;
+  transform: translateY(4px);
+}
+.belcard-stack.swapped .belcard-blue {
+  z-index: 2;
+  transform: translateY(0);
+}
+
 .belcard::before {
   content: "";
   position: absolute;
@@ -681,6 +725,31 @@ button.disabled {
   top: 0; left: 0; right: 0; bottom: 0;
   background: radial-gradient(circle at 20% 15%, rgba(255,255,255,0.18) 0%, transparent 45%);
   pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Тень верхней карты ложится на выглядывающую полоску нижней */
+.belcard-stack .belcard.belcard-green {
+  box-shadow:
+    0 12px 22px rgba(0,0,0,.85),
+    0 6px 10px rgba(0,0,0,.6),
+    inset 0 1px 0 rgba(255,255,255,.25);
+}
+.belcard-stack .belcard.belcard-blue {
+  box-shadow:
+    0 8px 24px rgba(0,0,0,.7),
+    inset 0 1px 0 rgba(255,255,255,.25);
+}
+.belcard-stack.swapped .belcard-green {
+  box-shadow:
+    0 8px 24px rgba(0,0,0,.7),
+    inset 0 1px 0 rgba(255,255,255,.25);
+}
+.belcard-stack.swapped .belcard-blue {
+  box-shadow:
+    0 12px 22px rgba(0,0,0,.85),
+    0 6px 10px rgba(0,0,0,.6),
+    inset 0 1px 0 rgba(255,255,255,.25);
 }
 
 .belcard-top {
@@ -729,7 +798,6 @@ button.disabled {
   border-radius: 2px;
 }
 
-/* Строка с номером карты и VISA */
 .belcard-number-row {
   position: relative;
   z-index: 2;
@@ -809,14 +877,14 @@ button.disabled {
   text-align: center;
 }
 
-/* Иконки-кнопки рядом с «Благодарю» */
+/* Иконки-кнопки рядом с «Благодарю» — чуть крупнее */
 .icon-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: clamp(22px, 3vmin, 28px);
-  height: clamp(22px, 3vmin, 28px);
-  border-radius: 7px;
+  width: clamp(32px, 4.2vmin, 40px);
+  height: clamp(32px, 4.2vmin, 40px);
+  border-radius: 9px;
   flex-shrink: 0;
   transition: transform .08s ease, filter .08s ease;
   text-decoration: none;
@@ -1602,22 +1670,43 @@ button.disabled {
     <div id="support-window">
       <h3>ПОДДЕРЖИ АВТОРА</h3>
 
-      <div class="belcard">
-        <div class="belcard-top">
-          <div class="belcard-bank">BELARUSBANK</div>
-          <div class="belcard-club">Visa Classic</div>
+      <div class="belcard-stack" id="belcard-stack">
+        <div class="belcard belcard-blue">
+          <div class="belcard-top">
+            <div class="belcard-bank">BELARUSBANK</div>
+            <div class="belcard-club">Visa Classic</div>
+          </div>
+
+          <div class="belcard-chip"></div>
+
+          <div class="belcard-number-row">
+            <div class="belcard-number" data-copy-card>4255 1901 3916 7251</div>
+            <div class="belcard-visa">VISA</div>
+          </div>
+
+          <div class="belcard-bottom">
+            <div class="belcard-name" data-copy-name>TOM TOT</div>
+            <div class="belcard-currencies">USD / EUR / BYN</div>
+          </div>
         </div>
 
-        <div class="belcard-chip"></div>
+        <div class="belcard belcard-green">
+          <div class="belcard-top">
+            <div class="belcard-bank">BELARUSBANK</div>
+            <div class="belcard-club">Visa Classic</div>
+          </div>
 
-        <div class="belcard-number-row">
-          <div class="belcard-number" id="support-card-number">4255 1901 3916 7251</div>
-          <div class="belcard-visa">VISA</div>
-        </div>
+          <div class="belcard-chip"></div>
 
-        <div class="belcard-bottom">
-          <div class="belcard-name" id="support-name">TOM TOT</div>
-          <div class="belcard-currencies">USD / EUR / BYN</div>
+          <div class="belcard-number-row">
+            <div class="belcard-number" data-copy-card>4255 1901 3916 7251</div>
+            <div class="belcard-visa">VISA</div>
+          </div>
+
+          <div class="belcard-bottom">
+            <div class="belcard-name" data-copy-name>TOM TOT</div>
+            <div class="belcard-currencies">USD / EUR / BYN</div>
+          </div>
         </div>
       </div>
 
@@ -2753,8 +2842,6 @@ const UI = (() => {
 
     el.supportOverlay = document.getElementById('support-overlay');
     el.supportWindow  = document.getElementById('support-window');
-    el.supportCardNumber = document.getElementById('support-card-number');
-    el.supportName    = document.getElementById('support-name');
     el.supportCopied  = document.getElementById('support-copied');
     el.btnSupportPanel = document.getElementById('btn-support-panel');
     el.settingsHelpBtn = document.getElementById('settings-help-btn');
@@ -2762,6 +2849,7 @@ const UI = (() => {
     el.topRoundRow     = document.getElementById('top-round-row');
     el.gmailBtn        = document.getElementById('gmail-btn');
     el.tgBtn           = document.getElementById('tg-btn');
+    el.belcardStack    = document.getElementById('belcard-stack');
 
     el.setCardStyle      = document.getElementById('set-card-style');
     el.setStackDisplay   = document.getElementById('set-stack-display');
@@ -3611,6 +3699,64 @@ const UI = (() => {
     } catch (e) {}
   }
 
+  function resetBelcardSwap() {
+    if (el.belcardStack) el.belcardStack.classList.remove('swapped');
+  }
+
+  function toggleBelcardSwap() {
+    if (!el.belcardStack) return;
+    el.belcardStack.classList.toggle('swapped');
+  }
+
+  function bindBelcardSwipe() {
+    if (!el.belcardStack) return;
+    let startY = 0, startX = 0, tracking = false;
+    const MIN_DIST = 40;
+
+    el.belcardStack.addEventListener('touchstart', (e) => {
+      if (e.touches.length !== 1) return;
+      tracking = true;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    }, { passive: true });
+
+    el.belcardStack.addEventListener('touchend', (e) => {
+      if (!tracking) return;
+      tracking = false;
+      const endX = e.changedTouches[0].clientX;
+      const endY = e.changedTouches[0].clientY;
+      const dx = endX - startX;
+      const dy = endY - startY;
+      if (Math.abs(dy) < MIN_DIST) return;
+      if (Math.abs(dx) > Math.abs(dy)) return;
+      if (dy < 0) {
+        e.preventDefault();
+        toggleBelcardSwap();
+      }
+    }, { passive: false });
+
+    let mouseStartY = 0, mouseStartX = 0, mouseTracking = false;
+
+    el.belcardStack.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return;
+      mouseTracking = true;
+      mouseStartX = e.clientX;
+      mouseStartY = e.clientY;
+    });
+
+    el.belcardStack.addEventListener('mouseup', (e) => {
+      if (!mouseTracking) return;
+      mouseTracking = false;
+      const dx = e.clientX - mouseStartX;
+      const dy = e.clientY - mouseStartY;
+      if (Math.abs(dy) < MIN_DIST) return;
+      if (Math.abs(dx) > Math.abs(dy)) return;
+      if (dy < 0) {
+        toggleBelcardSwap();
+      }
+    });
+  }
+
   return {
     settings, init, el,
     renderTable, updateSeats, updateBoard, updatePot, updateLevel,
@@ -3628,7 +3774,8 @@ const UI = (() => {
     setReplayButtonState,
     showHeroTimer, hideHeroTimer, updateHeroTimer, placeHeroTimer,
     placeTopRoundRow,
-    showSupportOverlay, hideSupportOverlay, copySupportText
+    showSupportOverlay, hideSupportOverlay, copySupportText,
+    resetBelcardSwap, toggleBelcardSwap, bindBelcardSwipe
   };
 
 })();
@@ -3678,6 +3825,7 @@ const UI = (() => {
     cacheDom();
     bindGlobalHandlers();
     UI.applySettingsToUI();
+    UI.bindBelcardSwipe();
     bindDesktopDoubleClick();
     window.addEventListener('resize', () => {
       UI.placeHeroTimer();
@@ -3708,8 +3856,7 @@ const UI = (() => {
     el.heroTimerZone  = document.getElementById('hero-timer-zone');
     el.supportOverlay = document.getElementById('support-overlay');
     el.supportWindow  = document.getElementById('support-window');
-    el.supportCardNumber = document.getElementById('support-card-number');
-    el.supportName    = document.getElementById('support-name');
+    el.belcardStack   = document.getElementById('belcard-stack');
   }
 
   function bindDesktopDoubleClick() {
@@ -3857,29 +4004,33 @@ const UI = (() => {
       }, { passive: false });
     }
 
-    if (el.supportCardNumber) {
-      el.supportCardNumber.addEventListener('click', (e) => {
-        e.stopPropagation();
-        UI.copySupportText(el.supportCardNumber.textContent.trim());
-      });
-      el.supportCardNumber.addEventListener('touchend', (e) => {
-        e.stopPropagation();
-      }, { passive: false });
-    }
-
-    if (el.supportName) {
-      el.supportName.addEventListener('click', (e) => {
-        e.stopPropagation();
-        UI.copySupportText(el.supportName.textContent.trim());
-      });
-      el.supportName.addEventListener('touchend', (e) => {
-        e.stopPropagation();
-      }, { passive: false });
-    }
-
     if (el.supportWindow) {
-      el.supportWindow.addEventListener('click', (e) => { e.stopPropagation(); });
-      el.supportWindow.addEventListener('touchend', (e) => { e.stopPropagation(); }, { passive: false });
+      el.supportWindow.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const cardEl = e.target.closest('[data-copy-card]');
+        if (cardEl) {
+          UI.copySupportText(cardEl.textContent.trim());
+          return;
+        }
+        const nameEl = e.target.closest('[data-copy-name]');
+        if (nameEl) {
+          UI.copySupportText(nameEl.textContent.trim());
+          return;
+        }
+      });
+      el.supportWindow.addEventListener('touchend', (e) => {
+        e.stopPropagation();
+        const cardEl = e.target.closest('[data-copy-card]');
+        if (cardEl) {
+          UI.copySupportText(cardEl.textContent.trim());
+          return;
+        }
+        const nameEl = e.target.closest('[data-copy-name]');
+        if (nameEl) {
+          UI.copySupportText(nameEl.textContent.trim());
+          return;
+        }
+      }, { passive: false });
     }
 
     if (el.btnSupportPanel) {
@@ -4019,6 +4170,7 @@ const UI = (() => {
     if (session.supportPaused) return;
     session.supportPaused = true;
     pauseGame();
+    UI.resetBelcardSwap();
     UI.showSupportOverlay();
   }
 
@@ -4179,6 +4331,7 @@ const UI = (() => {
     session.panelsPaused = false;
 
     UI.hideSupportOverlay();
+    UI.resetBelcardSwap();
     UI.setHeroActionsActive(false);
     UI.updateHistoryInfo(0, 0, false);
     UI.clearWinnerHighlights();
