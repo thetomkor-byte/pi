@@ -400,21 +400,22 @@ button.disabled {
   white-space: nowrap;
   z-index: 15;
   transition: opacity .2s;
+  text-shadow: 0 1px 2px rgba(0,0,0,.55);
 }
 .seat .strat-badge.hidden { display: none; }
 .seat.folded .strat-badge { opacity: 0.35; }
 
-/* PRO — фиолетовый градиент: чем сильнее, тем темнее */
-.seat .strat-badge.pro-gto      { background: #9d7bd6; }
-.seat .strat-badge.pro-solver   { background: #7d55c4; }
-.seat .strat-badge.pro-icm      { background: #5f37a8; }
-.seat .strat-badge.pro-lag      { background: #3d1f76; }
+/* PRO — тёмно-фиолетовая тёплая гамма: чем сильнее, тем глубже */
+.seat .strat-badge.pro-gto      { background: #311f3b; }
+.seat .strat-badge.pro-solver   { background: #2f1a3b; }
+.seat .strat-badge.pro-icm      { background: #2c123b; }
+.seat .strat-badge.pro-lag      { background: #290a3b; }
 
-/* VIP — сиреневый градиент: чем слабее, тем светлее */
-.seat .strat-badge.vip-taglite  { background: #b28ad6; }
-.seat .strat-badge.vip-loose    { background: #c6a4e0; }
-.seat .strat-badge.vip-rock     { background: #d9c0ea; }
-.seat .strat-badge.vip-maniac   { background: #ecd9f4; color: #3d1f56; }
+/* VIP — тёмно-зелёная тёплая гамма: чем слабее, тем светлее (но в пределах тёмного) */
+.seat .strat-badge.vip-taglite  { background: #062a0a; }
+.seat .strat-badge.vip-loose    { background: #0e2f12; }
+.seat .strat-badge.vip-rock     { background: #13311a; }
+.seat .strat-badge.vip-maniac   { background: #18331b; }
 
 .seat .seat-cards {
   display: flex;
@@ -2542,30 +2543,20 @@ const Bots = (() => {
 
   const R = Engine.RANK_VALUE;
 
-  // Классы и подтипы
   const CLASS_PRO = 'PRO';
   const CLASS_VIP = 'VIP';
 
   const TYPES = {
-    // PRO — сильные игроки. Чем выше tier, тем сильнее.
     PRO_GTO:    { key: 'PRO_GTO',    cls: CLASS_PRO, badgeClass: 'pro-gto',    tier: 1, label: 'PRO' },
     PRO_SOLVER: { key: 'PRO_SOLVER', cls: CLASS_PRO, badgeClass: 'pro-solver', tier: 2, label: 'PRO' },
     PRO_ICM:    { key: 'PRO_ICM',    cls: CLASS_PRO, badgeClass: 'pro-icm',    tier: 3, label: 'PRO' },
     PRO_LAG:    { key: 'PRO_LAG',    cls: CLASS_PRO, badgeClass: 'pro-lag',    tier: 4, label: 'PRO' },
-    // VIP — слабые игроки. Чем ниже tier, тем слабее.
     VIP_TAGLITE:{ key: 'VIP_TAGLITE',cls: CLASS_VIP, badgeClass: 'vip-taglite',tier: 1, label: 'VIP' },
     VIP_LOOSE:  { key: 'VIP_LOOSE',  cls: CLASS_VIP, badgeClass: 'vip-loose',  tier: 2, label: 'VIP' },
     VIP_ROCK:   { key: 'VIP_ROCK',   cls: CLASS_VIP, badgeClass: 'vip-rock',   tier: 3, label: 'VIP' },
     VIP_MANIAC: { key: 'VIP_MANIAC', cls: CLASS_VIP, badgeClass: 'vip-maniac', tier: 4, label: 'VIP' }
   };
 
-  // Параметры поведения каждого подтипа
-  // aggression — насколько давит
-  // looseness — насколько широко входит
-  // bluff — доля блефов
-  // callThreshold — насколько сильная рука нужна для колла
-  // adaptivity — насколько подстраивается под стол (0..1)
-  // proThinking — использует ли продвинутую логику (этап 2+)
   const PROFILES = {
     PRO_GTO:    { aggression: 0.68, looseness: 0.42, bluff: 0.22, callThreshold: 0.55, adaptivity: 0.55, proThinking: true,  tightBubble: 0.6 },
     PRO_SOLVER: { aggression: 0.78, looseness: 0.55, bluff: 0.34, callThreshold: 0.45, adaptivity: 0.72, proThinking: true,  tightBubble: 0.7 },
@@ -2578,13 +2569,11 @@ const Bots = (() => {
     VIP_MANIAC: { aggression: 0.95, looseness: 0.92, bluff: 0.62, callThreshold: 0.22, adaptivity: 0.05, proThinking: false, tightBubble: 0.1 }
   };
 
-  // Веса посадки
   const WEIGHTS = {
     PRO_GTO: 22, PRO_SOLVER: 16, PRO_ICM: 10, PRO_LAG: 6,
     VIP_TAGLITE: 18, VIP_LOOSE: 14, VIP_ROCK: 8, VIP_MANIAC: 6
   };
 
-  // Чарты открытий — привязаны к подтипам
   const CHARTS = {
     OPEN_UTG:  ['22+','A2s+','K7s+','Q8s+','J8s+','T8s+','97s+','86s+','75s+','64s+','54s','ATo+','KJo+','QJo','JTo'],
     OPEN_UTG1: ['22+','A2s+','K6s+','Q8s+','J8s+','T8s+','97s+','86s+','75s+','64s+','54s','ATo+','KTo+','QTo+','JTo'],
@@ -2673,16 +2662,10 @@ const Bots = (() => {
     return weights[0].key;
   }
 
-  // ============================================================
-  // Назначение типов за столом по уровню сложности
-  // ============================================================
-  // difficulty: 'min' | 'mid' | 'max'
-  // Возвращает массив из 7 ключей подтипов для ботов.
   function assignBotTypes(difficulty) {
     const result = [];
 
     if (difficulty === 'min') {
-      // 1 GTO + 1 TAG-Lite + 5 случайных VIP
       result.push('PRO_GTO');
       result.push('VIP_TAGLITE');
       const vipPool = [
@@ -2706,7 +2689,6 @@ const Bots = (() => {
     }
 
     if (difficulty === 'max') {
-      // 4 PRO (минимум 2 LAG-Pro) + 3 VIP
       result.push('PRO_LAG');
       result.push('PRO_LAG');
       const proPool = [
@@ -2733,8 +2715,6 @@ const Bots = (() => {
       return result;
     }
 
-    // 'mid' — по умолчанию
-    // 3 PRO (включая ровно 1 LAG-Pro) + 4 VIP
     result.push('PRO_LAG');
     const proPool = [
       { key: 'PRO_GTO', weight: 22 },
@@ -2807,7 +2787,6 @@ const Bots = (() => {
     }
   }
 
-  // Основное решение бота
   function decide(ctx) {
     const profile = PROFILES[ctx.botType];
     if (!profile) return { action: 'fold', amount: 0 };
@@ -2821,7 +2800,6 @@ const Bots = (() => {
     const stackBB = myStack / bb;
     const strength = preflopStrength(card1, card2);
 
-    // Пузырь-коррекция: если игроков мало и следующий шаг — призы
     const bubbleTighten = (playersLeft <= 4) ? profile.tightBubble : 0;
     const effStrength = strength * (1 - 0.2 * bubbleTighten);
 
@@ -4719,7 +4697,6 @@ const UI = (() => {
     session.supportPaused = false;
     session.panelsPaused = false;
 
-    // Назначаем 7 ботов по текущему уровню сложности
     const botTypes = Bots.assignBotTypes(UI.settings.difficulty);
 
     const players = [{ id: 'hero', name: 'Ты', isHero: true, botType: null, botClass: null, stack: Engine.STARTING_STACK }];
