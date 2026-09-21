@@ -667,14 +667,6 @@ button.disabled {
   overflow: visible;
 }
 
-/* Контейнер для карт, чтобы тень карт не заходила на футер */
-.belcard-stage {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1.586 / 1;
-  overflow: hidden;
-}
-
 .belcard-stack .belcard {
   position: absolute;
   left: 0;
@@ -700,9 +692,10 @@ button.disabled {
   z-index: 2;
   transform: translateY(0);
   transition: transform .42s cubic-bezier(.22,.61,.36,1);
+  /* Тень мягкая, стелется вниз ровно до верхнего края иконок, плавно затухает */
   box-shadow:
-    0 14px 22px rgba(0,0,0,.8),
-    0 6px 10px rgba(0,0,0,.55),
+    0 12px 22px -8px rgba(0,0,0,.75),
+    0 6px 10px -4px rgba(0,0,0,.5),
     inset 0 1px 0 rgba(255,255,255,.25);
 }
 
@@ -713,8 +706,10 @@ button.disabled {
   z-index: 1;
   transform: translateY(var(--belcard-offset));
   transition: transform .42s cubic-bezier(.22,.61,.36,1);
+  /* Тень мягкая, стелется вниз ровно до верхнего края иконок, плавно затухает */
   box-shadow:
-    0 8px 18px rgba(0,0,0,.65),
+    0 12px 22px -8px rgba(0,0,0,.65),
+    0 6px 10px -4px rgba(0,0,0,.45),
     inset 0 1px 0 rgba(255,255,255,.25);
 }
 
@@ -728,15 +723,16 @@ button.disabled {
   z-index: 1;
   transform: translateY(var(--belcard-offset));
   box-shadow:
-    0 8px 18px rgba(0,0,0,.65),
+    0 12px 22px -8px rgba(0,0,0,.65),
+    0 6px 10px -4px rgba(0,0,0,.45),
     inset 0 1px 0 rgba(255,255,255,.25);
 }
 .belcard-stack.swapped .belcard-blue {
   z-index: 2;
   transform: translateY(0);
   box-shadow:
-    0 14px 22px rgba(0,0,0,.8),
-    0 6px 10px rgba(0,0,0,.55),
+    0 12px 22px -8px rgba(0,0,0,.75),
+    0 6px 10px -4px rgba(0,0,0,.5),
     inset 0 1px 0 rgba(255,255,255,.25);
 }
 
@@ -900,16 +896,17 @@ button.disabled {
   padding: 0;
   background: transparent;
   cursor: pointer;
+  /* Тень чуть длиннее вниз, плавная и мягкая */
   box-shadow:
-    0 3px 8px rgba(0,0,0,.55),
-    0 1px 3px rgba(0,0,0,.4);
+    0 6px 14px rgba(0,0,0,.6),
+    0 2px 5px rgba(0,0,0,.45);
 }
 .icon-btn:active {
   transform: scale(0.94);
   filter: brightness(1.15);
   box-shadow:
-    0 1px 3px rgba(0,0,0,.5),
-    0 0 2px rgba(0,0,0,.3);
+    0 3px 8px rgba(0,0,0,.55),
+    0 1px 3px rgba(0,0,0,.35);
 }
 .icon-btn svg { display: block; width: 100%; height: 100%; border-radius: 9px; }
 
@@ -1688,43 +1685,41 @@ button.disabled {
       <h3>ПОДДЕРЖИ АВТОРА</h3>
 
       <div class="belcard-stack" id="belcard-stack">
-        <div class="belcard-stage">
-          <div class="belcard belcard-blue">
-            <div class="belcard-top">
-              <div class="belcard-bank">BELARUSBANK</div>
-              <div class="belcard-club">Visa Classic</div>
-            </div>
-
-            <div class="belcard-chip"></div>
-
-            <div class="belcard-number-row">
-              <div class="belcard-number" data-copy-card>4255 1901 3916 7251</div>
-              <div class="belcard-visa">VISA</div>
-            </div>
-
-            <div class="belcard-bottom">
-              <div class="belcard-name" data-copy-name>TOM TOT</div>
-              <div class="belcard-currencies">USD / EUR / BYN</div>
-            </div>
+        <div class="belcard belcard-blue">
+          <div class="belcard-top">
+            <div class="belcard-bank">BELARUSBANK</div>
+            <div class="belcard-club">Visa Classic</div>
           </div>
 
-          <div class="belcard belcard-green">
-            <div class="belcard-top">
-              <div class="belcard-bank">BELARUSBANK</div>
-              <div class="belcard-club">Visa Classic</div>
-            </div>
+          <div class="belcard-chip"></div>
 
-            <div class="belcard-chip"></div>
+          <div class="belcard-number-row">
+            <div class="belcard-number" data-copy-card>4255 1901 3916 7251</div>
+            <div class="belcard-visa">VISA</div>
+          </div>
 
-            <div class="belcard-number-row">
-              <div class="belcard-number" data-copy-card>4255 1901 3916 7251</div>
-              <div class="belcard-visa">VISA</div>
-            </div>
+          <div class="belcard-bottom">
+            <div class="belcard-name" data-copy-name>TOM TOT</div>
+            <div class="belcard-currencies">USD / EUR / BYN</div>
+          </div>
+        </div>
 
-            <div class="belcard-bottom">
-              <div class="belcard-name" data-copy-name>TOM TOT</div>
-              <div class="belcard-currencies">USD / EUR / BYN</div>
-            </div>
+        <div class="belcard belcard-green">
+          <div class="belcard-top">
+            <div class="belcard-bank">BELARUSBANK</div>
+            <div class="belcard-club">Visa Classic</div>
+          </div>
+
+          <div class="belcard-chip"></div>
+
+          <div class="belcard-number-row">
+            <div class="belcard-number" data-copy-card>4255 1901 3916 7251</div>
+            <div class="belcard-visa">VISA</div>
+          </div>
+
+          <div class="belcard-bottom">
+            <div class="belcard-name" data-copy-name>TOM TOT</div>
+            <div class="belcard-currencies">USD / EUR / BYN</div>
           </div>
         </div>
       </div>
@@ -3723,7 +3718,7 @@ const UI = (() => {
       el.belcardStack.classList.remove('swapped');
       el.belcardStack.classList.remove('dragging');
       const cards = el.belcardStack.querySelectorAll('.belcard');
-      cards.forEach(c => { c.style.transform = ''; c.style.zIndex = ''; });
+      cards.forEach(c => { c.style.transform = ''; c.style.zIndex = ''; c.style.transition = ''; });
     }
   }
 
@@ -3744,136 +3739,23 @@ const UI = (() => {
     let isSwapped = false;
     let isAnimating = false;
 
-    function applyBasePositions() {
-      /* Базовая установка карт по состоянию isSwapped без анимации */
-      if (isSwapped) {
-        green.style.zIndex = '1';
-        blue.style.zIndex = '2';
-        green.style.transform = `translateY(${OFFSET}px)`;
-        blue.style.transform = 'translateY(0)';
-      } else {
-        green.style.zIndex = '2';
-        blue.style.zIndex = '1';
-        green.style.transform = 'translateY(0)';
-        blue.style.transform = `translateY(${OFFSET}px)`;
-      }
-    }
+    function getTopCard() { return isSwapped ? blue : green; }
+    function getBottomCard() { return isSwapped ? green : blue; }
 
-    function startAnimation() {
-      isAnimating = true;
-      el.belcardStack.classList.remove('dragging');
-    }
-
-    function endAnimation() {
-      isAnimating = false;
-    }
-
-    function doSwapAnimation() {
-      /* Красивая смена: сначала верхняя карта запрыгивает за верх нижней
-         (виден её верх на 8px сверху), затем обе карты одновременно
-         равномерно едут навстречу друг другу ровно на 8px. */
-      const top = isSwapped ? blue : green;
-      const bottom = isSwapped ? green : blue;
-
-      startAnimation();
-
-      /* Шаг 1. Верхняя карта запрыгивает за верхний край нижней:
-         её верхний край виден на 8px сверху. По вертикали это значит,
-         верхняя карта смещается вверх так, чтобы её верх был выше верхнего
-         края нижней на 8px — то есть translateY(-8px - OFFSET) не нужен;
-         нам нужно, чтобы верх верхней карты оказался на 8px ВЫШЕ, чем
-         у нижней. У нижней top=OFFSET. Значит верхняя должна быть на top = OFFSET - 8 = 0 ... в системе где 0 — верх стопки, а нижняя на OFFSET. Хм.
-         Упростим: нижняя карта стоит на translateY(OFFSET)=8px.
-         Чтобы верх верхней карты был на 8px выше верхнего края нижней,
-         нужно, чтобы верхняя карта оказалась на translateY(OFFSET - 8) = 0.
-         То есть верхняя карта возвращается на 0. Но это её текущее положение.
-         Тогда "запрыгивание" — это на самом деле не движение по вертикали,
-         а смена z-index: верхняя карта уходит за нижнюю.
-
-         Но пользователь хочет видеть верхний край верхней карты на 8px сверху.
-         Это значит, что верхняя карта должна быть ниже нижней на 8px по
-         верхнему краю, то есть её top = OFFSET + 8? Нет.
-
-         Читаю ещё раз: "запрыгнув под нижнюю верх запрыгнувшей должен быть виден на 8 пикселе сверху".
-         Значит после "запрыгивания" верхняя карта (та, что была сверху) лежит ПОД нижней,
-         и её верхний край виден сверху на 8px над верхним краем нижней карты.
-
-         Тогда её top = OFFSET (как у нижней) минус 8 = 0. То есть она
-         визуально на месте, но по z-index она ПОД нижней. Её верх не выше,
-         а совпадает. Но пользователь видит верхнюю полоску на 8px — потому
-         что она находится на той же высоте, но вылезает сверху? Нет.
-
-         Ещё раз: если карта A стоит на translateY(0), а карта B на translateY(8),
-         и B лежит ПОВЕРХ A, то сверху видна полоска A на 8px (её верх).
-         Снизу видна полоска B на 8px (её низ).
-
-         Значит, "запрыгнула под нижнюю" — значит B (бывшая верхняя) оказалась
-         под A, и её верхний край торчит на 8px сверху. А нижняя A торчит
-         снизу на 8px. Симметрия.
-
-         Но тогда обе карты уже на нужных местах, и движение 8px
-         — это как раз обмен: A поднимается с translateY(8) на translateY(0),
-         B опускается с translateY(0) на translateY(8). При этом z-index
-         меняется так, что теперь A сверху, а B снизу.
-
-         Реализуем: во время движения обе карты едут на 8px одновременно.
-      */
-
-      /* Фиксируем z-index для запрыгивания: бывшая верхняя теперь под нижней */
-      top.style.zIndex = '1';
-      bottom.style.zIndex = '2';
-
-      /* Стартовые позиции: top на месте (translateY(0)), bottom на translateY(OFFSET) */
-      top.style.transform = 'translateY(0)';
-      bottom.style.transform = `translateY(${OFFSET}px)`;
-
-      /* Через маленькую паузу запускаем одновременное движение */
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          /* Включаем transition на обеих картах */
-          el.belcardStack.classList.remove('dragging');
-          top.style.transition = 'transform .36s cubic-bezier(.22,.61,.36,1)';
-          bottom.style.transition = 'transform .36s cubic-bezier(.22,.61,.36,1)';
-
-          /* Верхняя (теперь под нижней) едет вниз на 8px — на место нижней */
-          top.style.transform = `translateY(${OFFSET}px)`;
-          /* Нижняя (теперь над верхней) едет вверх на 8px — на место верхней */
-          bottom.style.transform = 'translateY(0)';
-
-          /* Сбрасываем inline-transition после завершения */
-          setTimeout(() => {
-            top.style.transition = '';
-            bottom.style.transition = '';
-            isSwapped = !isSwapped;
-            el.belcardStack.classList.toggle('swapped', isSwapped);
-            /* Убираем inline-стили, чтобы классы управляли */
-            green.style.transform = '';
-            blue.style.transform = '';
-            green.style.zIndex = '';
-            blue.style.zIndex = '';
-            endAnimation();
-          }, 380);
-        });
-      });
-    }
-
+    /* Верхняя карта поднимается на lift пикселей вверх */
     function applyDrag(offset) {
-      /* offset — положительное значение, насколько пользователь потянул вверх */
       const lift = Math.max(0, Math.min(LIFT, offset));
-      const top = isSwapped ? blue : green;
-      const bottom = isSwapped ? green : blue;
-
-      /* Верхняя карта поднимается вверх на lift пикселей */
+      const top = getTopCard();
+      const bottom = getBottomCard();
       top.style.transform = `translateY(${-lift}px)`;
-      /* Нижняя карта остаётся на месте */
       bottom.style.transform = `translateY(${OFFSET}px)`;
     }
 
     function returnToStart() {
-      const top = isSwapped ? blue : green;
-      const bottom = isSwapped ? green : blue;
-      top.style.transition = 'transform .24s cubic-bezier(.22,.61,.36,1)';
-      bottom.style.transition = 'transform .24s cubic-bezier(.22,.61,.36,1)';
+      const top = getTopCard();
+      const bottom = getBottomCard();
+      top.style.transition = 'transform .26s cubic-bezier(.22,.61,.36,1)';
+      bottom.style.transition = 'transform .26s cubic-bezier(.22,.61,.36,1)';
       top.style.transform = 'translateY(0)';
       bottom.style.transform = `translateY(${OFFSET}px)`;
       setTimeout(() => {
@@ -3881,8 +3763,53 @@ const UI = (() => {
         bottom.style.transition = '';
         green.style.transform = '';
         blue.style.transform = '';
-      }, 260);
+      }, 280);
       el.belcardStack.classList.remove('dragging');
+    }
+
+    /* Красивая смена местами.
+       Шаг 1. Верхняя карта запрыгивает за верхний край нижней
+               (z-index меняется, её верх виден на 8px сверху).
+       Шаг 2. Обе карты одновременно и равномерно едут навстречу
+               друг другу ровно на 8 пикселей. */
+    function doSwapAnimation() {
+      const top = getTopCard();
+      const bottom = getBottomCard();
+      isAnimating = true;
+      el.belcardStack.classList.remove('dragging');
+
+      /* Шаг 1: верхняя карта мгновенно оказывается за верхним краем
+         нижней (z-index меняется), её верхний край виден на 8px сверху.
+         По вертикали это значит, что теперь верхняя карта должна
+         стоять так, чтобы её верхний край был выше на 8px, чем
+         был у нижней. Нижняя стоит на translateY(OFFSET)=8.
+         Значит верхняя должна оказаться на translateY(OFFSET - LIFT) = 0.
+         То есть визуально она на месте, но z-index изменён. */
+
+      /* Резко меняем z-index и сразу едем навстречу друг другу */
+      top.style.zIndex = '1';
+      bottom.style.zIndex = '2';
+
+      top.style.transition = 'transform .38s cubic-bezier(.22,.61,.36,1)';
+      bottom.style.transition = 'transform .38s cubic-bezier(.22,.61,.36,1)';
+
+      /* Верхняя едет вниз на 8px — на место нижней */
+      top.style.transform = `translateY(${OFFSET}px)`;
+      /* Нижняя едет вверх на 8px — на место верхней */
+      bottom.style.transform = 'translateY(0)';
+
+      setTimeout(() => {
+        top.style.transition = '';
+        bottom.style.transition = '';
+        isSwapped = !isSwapped;
+        el.belcardStack.classList.toggle('swapped', isSwapped);
+        /* Возвращаем стили классам */
+        green.style.transform = '';
+        blue.style.transform = '';
+        green.style.zIndex = '';
+        blue.style.zIndex = '';
+        isAnimating = false;
+      }, 400);
     }
 
     /* ===== TOUCH ===== */
@@ -3899,10 +3826,10 @@ const UI = (() => {
       if (isAnimating) return;
       if (e.touches.length !== 1) return;
       const y = e.touches[0].clientY;
-      const dy = startY - y; // положительное — движение вверх
+      const dy = startY - y;
 
       if (!dragging) {
-        if (Math.abs(dy) < 4) return;
+        if (Math.abs(dy) < 3) return;
         dragging = true;
       }
 
@@ -3958,7 +3885,7 @@ const UI = (() => {
       const y = e.clientY;
       const dy = mouseStartY - y;
       if (!mouseDragging) {
-        if (Math.abs(dy) < 4) return;
+        if (Math.abs(dy) < 3) return;
         mouseDragging = true;
       }
       mouseLift = Math.max(0, Math.min(LIFT, dy));
@@ -3983,9 +3910,6 @@ const UI = (() => {
       }
       mouseLift = 0;
     });
-
-    /* Применяем базовые позиции сразу */
-    applyBasePositions();
   }
 
   return {
@@ -4048,7 +3972,6 @@ const UI = (() => {
 
   const el = {};
 
-  /* Двойной тап / двойной клик: окно в миллисекундах между касаниями. */
   const DOUBLE_TAP_WINDOW = 500;
 
   window.addEventListener('DOMContentLoaded', () => {
@@ -4184,7 +4107,6 @@ const UI = (() => {
 
     el.tapClose.addEventListener('click', () => closeAllPanelsAndResume());
 
-    /* Свайп вниз внутри панели настроек — закрывает её. */
     let bpStartY = 0, bpTracking = false;
     el.bottomPanel.addEventListener('touchstart', (e) => {
       if (e.touches.length !== 1) return;
@@ -4303,7 +4225,6 @@ const UI = (() => {
       }, { passive: false });
     }
 
-    /* Ссылки на почту и Телеграм — собираются в момент клика, в HTML их нет. */
     if (el.gmailBtn) {
       const openMail = (e) => {
         e.preventDefault();
