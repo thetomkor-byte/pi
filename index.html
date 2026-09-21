@@ -648,7 +648,6 @@ button.disabled {
   text-align: center;
 }
 
-/* ===== Стопка карт Беларусбанка ===== */
 .belcard-stack {
   position: relative;
   width: 100%;
@@ -822,7 +821,6 @@ button.disabled {
 }
 .belcard-name:active { color: var(--gold); }
 
-/* Стиль для текста справа от номера карты (BYN / RUB, USD / EUR) */
 .belcard-currencies-top {
   font-size: clamp(8px, 1.3vmin, 10px);
   font-weight: 700;
@@ -833,8 +831,6 @@ button.disabled {
   align-self: flex-end;
 }
 
-/* Стиль для надписи в правом верхнем углу (БЕЛКАРТ, VISA)
-   — ровный, без наклона */
 .belcard-club-top {
   font-size: clamp(9px, 1.4vmin, 12px);
   font-weight: 900;
@@ -1299,11 +1295,14 @@ button.disabled {
   text-align: center;
 }
 
+/* Круглые кнопки-символы над блоком истории раздач.
+   Подняты выше панели руководства — z-index 130.
+   Ниже оверлея поддержки (z-index 300). */
 #top-round-row {
   position: absolute;
   display: flex;
   gap: 4px;
-  z-index: 46;
+  z-index: 130;
   pointer-events: auto;
   left: 0;
   top: 0;
@@ -1404,7 +1403,7 @@ button.disabled {
   border-bottom-right-radius: 14px;
   padding: calc(24px + var(--safe-top)) 20px 30px;
   transition: transform .28s ease;
-  z-index: 110;
+  z-index: 120;
   max-height: 72vh;
   overflow-y: auto;
   touch-action: pan-y;
@@ -3751,7 +3750,6 @@ const UI = (() => {
       }, 400);
     }
 
-    /* ===== TOUCH ===== */
     el.belcardStack.addEventListener('touchstart', (e) => {
       if (isAnimating) return;
       if (e.touches.length !== 1) return;
@@ -3802,7 +3800,6 @@ const UI = (() => {
       currentLift = 0;
     }, { passive: true });
 
-    /* ===== MOUSE — протяжка ===== */
     let mouseDown = false;
     let mouseStartY = 0;
     let mouseLift = 0;
@@ -3850,7 +3847,6 @@ const UI = (() => {
       mouseLift = 0;
     });
 
-    /* ===== ДВОЙНОЙ КЛИК МЫШЬЮ на десктопе ===== */
     el.belcardStack.addEventListener('click', (e) => {
       if (isAnimating) return;
       if (e.detail !== 2) return;
