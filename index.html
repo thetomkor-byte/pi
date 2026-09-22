@@ -38,7 +38,6 @@
   --pct-block-w: clamp(88px, 13vmin, 110px);
   --dash-inset: clamp(10px, 2vmin, 18px);
   --small-text: clamp(11px, 1.4vmin, 13px);
-  --place-text-size: clamp(13px, 1.7vmin, 16px);
 
   --nav-btn: clamp(32px, 4.4vmin, 38px);
   --nav-icon-size: clamp(16px, 2.4vmin, 19px);
@@ -283,7 +282,7 @@ button.disabled {
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  font-size: var(--place-text-size);
+  font-size: clamp(13px, 1.7vmin, 16px);
   color: var(--text);
   font-weight: 700;
   text-shadow: 0 1px 4px rgba(0,0,0,.95);
@@ -317,10 +316,12 @@ button.disabled {
 }
 #place-center.hidden { display: none; }
 #place-center .place-line,
-#place-center .prize-line {
-  font-size: var(--place-text-size);
+#place-center .prize-line,
+#place-center .heads-up-line {
+  font-size: clamp(13px, 1.7vmin, 16px);
   line-height: 1.2;
 }
+#place-center .heads-up-line.hidden { display: none; }
 
 .card {
   width: var(--card-w);
@@ -685,43 +686,6 @@ button.disabled {
   text-align: center;
 }
 
-/* Окно «Тренировка» — стиль как у поддержки, но свой слой */
-#training-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.72);
-  z-index: 160;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  touch-action: none;
-}
-#training-overlay.visible { display: flex; }
-
-#training-window {
-  position: relative;
-  width: 100%;
-  max-width: 100%;
-  background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
-  border: 2px solid #3a3530;
-  border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0,0,0,.9), 0 0 80px rgba(255,203,43,.08);
-  padding: clamp(20px, 4vmin, 28px) clamp(18px, 3.6vmin, 26px);
-  text-align: center;
-  min-height: 40vh;
-}
-
-#training-window h3 {
-  color: var(--gold);
-  font-size: clamp(12px, 1.8vmin, 15px);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 18px;
-  font-weight: 900;
-  text-align: center;
-}
-
 .belcard-stack {
   position: relative;
   width: 100%;
@@ -1011,6 +975,53 @@ button.disabled {
 #support-copied.visible {
   opacity: 1;
   transform: translate(-50%, -50%) scale(1);
+}
+
+#training-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 150;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  touch-action: none;
+}
+#training-overlay.visible { display: flex; }
+
+#training-window {
+  position: relative;
+  width: calc(100% - var(--table-border-w) * 2 - 12px);
+  max-width: calc(100% - var(--table-border-w) * 2 - 12px);
+  background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
+  border: 2px solid #3a3530;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.9), 0 0 80px rgba(255,203,43,.08);
+  padding: clamp(20px, 4vmin, 28px) clamp(18px, 3.6vmin, 26px);
+  text-align: left;
+  max-height: 85%;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+#training-window::-webkit-scrollbar { display: none; }
+
+#training-window h3 {
+  color: var(--gold);
+  font-size: clamp(12px, 1.8vmin, 15px);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 18px;
+  font-weight: 900;
+  text-align: center;
+}
+
+.training-text {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+  margin-bottom: 10px;
+  text-align: left;
 }
 
 #hero-timer {
@@ -1380,7 +1391,7 @@ button.disabled {
   padding: 24px 20px calc(30px + var(--safe-bottom));
   transition: transform .28s ease;
   z-index: 140;
-  max-height: calc(100dvh - var(--safe-top) - 12px);
+  max-height: calc(100dvh - var(--safe-top) - 4px);
   overflow-y: auto;
   touch-action: pan-y;
   scrollbar-width: none;
@@ -1647,6 +1658,7 @@ button.disabled {
         <div id="place-center">
           <div class="place-line" id="place-line">Моё место: 1/8</div>
           <div class="prize-line" id="prize-line">Призовые места: 3</div>
+          <div class="heads-up-line hidden" id="heads-up-line">Один на Один</div>
         </div>
 
         <div id="hero-timer-zone"></div>
@@ -1662,7 +1674,7 @@ button.disabled {
         <div id="top-round-row">
           <button id="settings-card-btn" class="round-help-btn" type="button" aria-label="Поддержать">$</button>
           <button id="settings-help-btn" class="round-help-btn" type="button" aria-label="Руководство">?</button>
-          <button id="settings-training-btn" class="round-help-btn" type="button" aria-label="Тренировка">!</button>
+          <button id="settings-train-btn" class="round-help-btn" type="button" aria-label="Тренировка">!</button>
         </div>
 
         <div id="hero-actions" class="inactive">
@@ -1714,6 +1726,27 @@ button.disabled {
       Любое открытое окошко ставит игру на паузу. Закрыть окошко — тап за его пределами.
     </p>
     <button id="btn-support-panel" type="button">Поддержать</button>
+  </div>
+
+  <div id="training-overlay">
+    <div id="training-window">
+      <h3>ТРЕНИРОВКА</h3>
+      <p class="training-text">
+        Без сложной математики, без запутанной теории — только простая и понятная логика.
+      </p>
+      <p class="training-text">
+        Логика покера — это система мышления, при которой каждый твой ход является осознанным ответом на вопрос:
+        «Что я пытаюсь заставить оппонента подумать, почувствовать и сделать — и зачем?»
+      </p>
+      <p class="training-text">
+        Ты не играешь карты. Ты играешь против мышления конкретного оппонента в конкретной ситуации.
+        Карты — лишь инструмент, которым ты управляешь его решениями.
+      </p>
+      <p class="training-text">
+        Ключевая идея: у каждого действия должна быть причина, которую ты можешь сформулировать словами.
+        Если не можешь — ты не играешь, а угадываешь.
+      </p>
+    </div>
   </div>
 
   <div id="bottom-panel">
@@ -1849,12 +1882,6 @@ button.disabled {
     </div>
 
     <div id="support-copied">Скопировано</div>
-  </div>
-
-  <div id="training-overlay">
-    <div id="training-window">
-      <h3>ТРЕНИРОВКА</h3>
-    </div>
   </div>
 
   <div id="start-overlay">
@@ -2048,15 +2075,16 @@ const Engine = (() => {
   const SEATS = 8;
   const STREETS = ['preflop', 'flop', 'turn', 'river'];
 
+  // Позиции по количеству живых игроков. Убираем самую раннюю при уменьшении.
   const POSITION_LABELS = {
-    8: ['BTN','SB','BB','UTG','UTG1','LJ','HJ','CO'],
-    7: ['BTN','SB','BB','UTG','LJ','HJ','CO'],
-    6: ['BTN','SB','BB','UTG','HJ','CO'],
-    5: ['BTN','SB','BB','UTG','CO'],
-    4: ['BTN','SB','BB','UTG'],
+    8: ['UTG','UTG1','LJ','HJ','CO','BTN','SB','BB'],
+    7: ['UTG1','LJ','HJ','CO','BTN','SB','BB'],
+    6: ['LJ','HJ','CO','BTN','SB','BB'],
+    5: ['HJ','CO','BTN','SB','BB'],
+    4: ['CO','BTN','SB','BB'],
     3: ['BTN','SB','BB'],
-    2: ['BTN','SB'],
-    1: ['BTN']
+    2: ['BTN','BB'],
+    1: []
   };
 
   function cryptoRandomInt(maxExclusive) {
@@ -2221,7 +2249,14 @@ const Engine = (() => {
     let alive = 0;
     for (const p of state.players) if (!p.eliminated) alive++;
 
-    const labels = POSITION_LABELS[alive] || POSITION_LABELS[POSITION_LABELS.length - 1] || ['BTN'];
+    const labels = POSITION_LABELS[alive] || [];
+    if (alive <= 1) {
+      for (const p of state.players) {
+        if (p.eliminated) p.position = null;
+        else p.position = '—';
+      }
+      return;
+    }
 
     const aliveOrder = [];
     for (let i = 0; i < n; i++) {
@@ -2239,6 +2274,23 @@ const Engine = (() => {
 
   function preflopOrder(state) {
     const n = state.players.length;
+    const alive = state.players.filter(p => !p.eliminated).length;
+
+    // В хедз-апе (2 игрока) BTN он же SB ходит первым
+    if (alive === 2) {
+      const btnIdx = state.buttonIndex;
+      const bbIdx = (btnIdx + 1) % n;
+      const order = [];
+      // BTN/SB первый
+      let cur = btnIdx;
+      for (let i = 0; i < n; i++) {
+        if (!state.players[cur].eliminated) order.push(cur);
+        cur = (cur + 1) % n;
+      }
+      return order;
+    }
+
+    // Обычный порядок: UTG первый (после BB)
     const order = [];
     for (let i = 0; i < n; i++) order.push((state.buttonIndex + 3 + i) % n);
     return order;
@@ -2253,6 +2305,8 @@ const Engine = (() => {
 
   function postBlinds(state) {
     const n = state.players.length;
+    const alive = state.players.filter(p => !p.eliminated).length;
+
     let sbIndex = (state.buttonIndex + 1) % n;
     let guard = 0;
     while (state.players[sbIndex].eliminated && guard < n) { sbIndex = (sbIndex + 1) % n; guard++; }
@@ -2268,6 +2322,31 @@ const Engine = (() => {
         const pay = Math.min(ante, p.stack);
         p.stack -= pay; p.committedTotal += pay; state.pot += pay;
       }
+    }
+
+    // В хедз-апе BTN = SB
+    if (alive === 2) {
+      const btnPlayer = state.players[state.buttonIndex];
+      if (!btnPlayer.eliminated) {
+        const pay = Math.min(sb, btnPlayer.stack);
+        btnPlayer.stack -= pay; btnPlayer.committedThisStreet += pay;
+        btnPlayer.committedTotal += pay; state.pot += pay;
+        btnPlayer.lastAction = 'sb';
+        btnPlayer.blindPaid = pay;
+        if (btnPlayer.stack === 0) btnPlayer.allIn = true;
+      }
+      const bbPlayer = state.players[bbIndex];
+      if (!bbPlayer.eliminated) {
+        const pay = Math.min(bb, bbPlayer.stack);
+        bbPlayer.stack -= pay; bbPlayer.committedThisStreet += pay;
+        bbPlayer.committedTotal += pay; state.pot += pay;
+        bbPlayer.lastAction = 'bb';
+        bbPlayer.blindPaid = pay;
+        if (bbPlayer.stack === 0) bbPlayer.allIn = true;
+      }
+      state.currentBet = bb;
+      state.minRaise = bb;
+      return { sbIndex: state.buttonIndex, bbIndex };
     }
 
     const sbPlayer = state.players[sbIndex];
@@ -3147,6 +3226,7 @@ const Meta = (() => {
 
   function thinBluffCatch(ctx, profile) {
     if (!profile.proThinking) return false;
+
     const board = ctx.board || [];
     if (board.length < 4) return false;
 
@@ -3155,6 +3235,7 @@ const Meta = (() => {
 
     const heroHole = [ctx.card1, ctx.card2];
     const blockers = Math2.blockerEffect(heroHole, oppRange);
+
     const alph = Math2.alpha(ctx.toCall, ctx.pot);
 
     if (blockers > 0.15 && alph > 0.25) return true;
@@ -3731,30 +3812,44 @@ const UI = (() => {
 
   const el = {};
 
+  // Базовые позиции мест за столом. Место 0 — герой снизу.
+  // Место 4 — верхнее центральное.
+  // Для мест 1 и 7 — подъём на 6 px (в translateY).
+  // Для остальных — как было.
   const SEAT_POSITIONS = [
-    { x: 50, y: 70, side: 'bottom' },
-    { x: 14, y: 56, side: 'left'   },
-    { x: 14, y: 32, side: 'left'   },
-    { x: 14, y: 9,  side: 'left'   },
-    { x: 50, y: 9,  side: 'top'    },
-    { x: 86, y: 9,  side: 'right'  },
-    { x: 86, y: 32, side: 'right'  },
-    { x: 86, y: 56, side: 'right'  }
+    { x: 50, y: 70, side: 'bottom', offsetY: -18 },   // 0 герой
+    { x: 14, y: 56, side: 'left',   offsetY: -1 - 6 }, // 1: было -1 + 1, теперь -1 - 6 + 1
+    { x: 14, y: 32, side: 'left',   offsetY: 4 + 1 },  // 2: как было
+    { x: 14, y: 9,  side: 'left',   offsetY: 2 + 1 },  // 3
+    { x: 50, y: 9,  side: 'top',    offsetY: 2 + 1 },  // 4
+    { x: 86, y: 9,  side: 'right',  offsetY: 2 + 1 },  // 5
+    { x: 86, y: 32, side: 'right',  offsetY: 3 + 1 },  // 6: как было
+    { x: 86, y: 56, side: 'right',  offsetY: 1 + 1 - 6 } // 7: было 1 + 1, теперь минус 6
   ];
 
   const SUIT_CLASS = { s: 'suit-spades', h: 'suit-hearts', d: 'suit-diamonds', c: 'suit-clubs' };
   const SUIT_SYMBOL = { s: '♠', h: '♥', d: '♦', c: '♣' };
   const RANK_DISPLAY = { T: '10' };
 
-  // Дополнительные вертикальные сдвиги (после общего transform).
-  // Место 1 — вверх на 6px, место 2 — вверх на 2px, место 6 — вверх на 2px, место 7 — вверх на 6px.
-  // Остальные — без изменений.
-  const SEAT_Y_OFFSETS = {
-    1: -6,
-    2: -2,
-    6: -2,
-    7: -6
-  };
+  // Карта соответствия "внутренний seatIndex" -> "визуальный seatIndex"
+  // Нужна для пересадки в хедз-апе и для пустых мест при вылете.
+  // Ключ — id игрока, значение — индекс позиции в SEAT_POSITIONS.
+  const seatAssignments = new Map();
+
+  function resetSeatAssignments() {
+    seatAssignments.clear();
+  }
+
+  function getVisualSeatIndex(player) {
+    if (seatAssignments.has(player.id)) {
+      return seatAssignments.get(player.id);
+    }
+    return player.seatIndex;
+  }
+
+  function setVisualSeatIndex(playerId, visualIndex) {
+    seatAssignments.set(playerId, visualIndex);
+  }
 
   function init() {
     el.seats          = document.getElementById('seats');
@@ -3766,6 +3861,7 @@ const UI = (() => {
     el.placeCenter    = document.getElementById('place-center');
     el.placeLine      = document.getElementById('place-line');
     el.prizeLine      = document.getElementById('prize-line');
+    el.headsUpLine    = document.getElementById('heads-up-line');
 
     el.heroActions    = document.getElementById('hero-actions');
     el.heroButtons    = document.getElementById('hero-buttons');
@@ -3779,6 +3875,8 @@ const UI = (() => {
 
     el.bottomPanel    = document.getElementById('bottom-panel');
     el.guidePanel     = document.getElementById('guide-panel');
+    el.trainingOverlay= document.getElementById('training-overlay');
+    el.trainingWindow = document.getElementById('training-window');
     el.tapClose       = document.getElementById('tap-close');
 
     el.hnPrev         = document.getElementById('hn-prev');
@@ -3799,12 +3897,11 @@ const UI = (() => {
     el.btnSupportPanel = document.getElementById('btn-support-panel');
     el.settingsHelpBtn = document.getElementById('settings-help-btn');
     el.settingsCardBtn = document.getElementById('settings-card-btn');
-    el.settingsTrainingBtn = document.getElementById('settings-training-btn');
+    el.settingsTrainBtn = document.getElementById('settings-train-btn');
     el.topRoundRow     = document.getElementById('top-round-row');
     el.gmailBtn        = document.getElementById('gmail-btn');
     el.tgBtn           = document.getElementById('tg-btn');
     el.belcardStack    = document.getElementById('belcard-stack');
-    el.trainingOverlay = document.getElementById('training-overlay');
 
     el.setLanguage       = document.getElementById('set-language');
     el.setDifficulty     = document.getElementById('set-difficulty');
@@ -3845,11 +3942,6 @@ const UI = (() => {
     el.guidePanel.classList.add('open');
     updateOverlayState();
   }
-  function openGuideInsteadOfSettings() {
-    el.bottomPanel.classList.remove('open');
-    el.guidePanel.classList.add('open');
-    updateOverlayState();
-  }
   function closeGuidePanel() {
     el.guidePanel.classList.remove('open');
     updateOverlayState();
@@ -3860,6 +3952,18 @@ const UI = (() => {
     updateOverlayState();
   }
 
+  function openTraining() {
+    if (!el.trainingOverlay) return;
+    el.trainingOverlay.classList.add('visible');
+  }
+  function closeTraining() {
+    if (!el.trainingOverlay) return;
+    el.trainingOverlay.classList.remove('visible');
+  }
+  function anyTrainingOpen() {
+    return el.trainingOverlay && el.trainingOverlay.classList.contains('visible');
+  }
+
   function anyPanelOpen() {
     return el.bottomPanel.classList.contains('open') ||
            el.guidePanel.classList.contains('open');
@@ -3867,8 +3971,8 @@ const UI = (() => {
 
   function anyOverlayOpen() {
     return anyPanelOpen() ||
-           (el.supportOverlay && el.supportOverlay.classList.contains('visible')) ||
-           (el.trainingOverlay && el.trainingOverlay.classList.contains('visible'));
+           anyTrainingOpen() ||
+           (el.supportOverlay && el.supportOverlay.classList.contains('visible'));
   }
 
   function setReplayButtonState(state) {
@@ -3959,36 +4063,17 @@ const UI = (() => {
     fill.style.strokeDashoffset = String(circumference * (1 - ratio));
   }
 
-  // Возвращает "виртуальный" номер места для отображения (для хедз-апа)
-  function displaySeatIndexFor(player, state) {
-    const alive = (state.players || []).filter(p => !p.eliminated);
-    if (alive.length === 2) {
-      // Хедз-ап
-      if (player.isHero) return 0;
-      const hero = state.players.find(p => p.isHero);
-      if (hero && !hero.eliminated) {
-        // Герой жив — второй игрок на место 4
-        return 4;
-      }
-      // Герой вылетел — два бота: левый на 2, правый на 6
-      const bots = alive.filter(p => !p.isHero);
-      if (bots.length === 2) {
-        // Сортируем по x-координате исходного места
-        const sorted = bots.slice().sort((a, b) => {
-          const ax = SEAT_POSITIONS[a.seatIndex] ? SEAT_POSITIONS[a.seatIndex].x : 0;
-          const bx = SEAT_POSITIONS[b.seatIndex] ? SEAT_POSITIONS[b.seatIndex].x : 0;
-          return ax - bx;
-        });
-        if (player.id === sorted[0].id) return 2;
-        if (player.id === sorted[1].id) return 6;
-      }
-      return 4;
-    }
-    return player.seatIndex;
-  }
-
   function renderTable(state) {
     el.seats.innerHTML = '';
+
+    // Пересчитываем визуальные посадки для текущего состояния:
+    // 1) Вылетевшие игроки — их места освобождаются.
+    // 2) Если в игре 2 игрока (хедз-ап):
+    //    - если герой жив: он на 0, второй игрок на 4.
+    //    - если герой вылетел: боты на 2 и 6 (левее → 2, правее → 6).
+    // 3) Иначе — игроки сидят на своих местах.
+    recalcSeatAssignments(state);
+
     for (const p of state.players) {
       const seat = createSeatElement(p, state);
       if (seat) el.seats.appendChild(seat);
@@ -3996,53 +4081,59 @@ const UI = (() => {
     updateStacks(state);
     updatePot(state);
     updateLevel(state);
-    updatePlaceCenter(state);
     placeHeroTimer();
     placeTopRoundRow();
   }
 
+  function recalcSeatAssignments(state) {
+    resetSeatAssignments();
+    const alive = state.players.filter(p => !p.eliminated);
+
+    // 2 игрока — хедз-ап
+    if (alive.length === 2) {
+      const hero = alive.find(p => p.isHero);
+      if (hero) {
+        // герой внизу на 0, второй на 4
+        setVisualSeatIndex(hero.id, 0);
+        const other = alive.find(p => !p.isHero);
+        if (other) setVisualSeatIndex(other.id, 4);
+      } else {
+        // оба бота: левее → 2, правее → 6
+        const sorted = alive.slice().sort((a, b) => a.seatIndex - b.seatIndex);
+        setVisualSeatIndex(sorted[0].id, 2);
+        setVisualSeatIndex(sorted[1].id, 6);
+      }
+      return;
+    }
+
+    // Остальные случаи — игроки на своих местах
+    for (const p of alive) {
+      setVisualSeatIndex(p.id, p.seatIndex);
+    }
+  }
+
   function createSeatElement(player, state) {
-    const wasEliminatedBeforeHand = player.eliminated && !player.inHand;
-    if (wasEliminatedBeforeHand) return null;
+    if (player.eliminated && !player.inHand) return null;
 
-    const displaySeat = displaySeatIndexFor(player, state);
-    const pos = SEAT_POSITIONS[displaySeat] || { x: 50, y: 50, side: 'middle' };
-    const yOffset = SEAT_Y_OFFSETS[displaySeat] || 0;
-
+    const visualIndex = getVisualSeatIndex(player);
+    const pos = SEAT_POSITIONS[visualIndex] || { x: 50, y: 50, side: 'middle', offsetY: 0 };
     const seat = document.createElement('div');
     seat.className = 'seat';
     seat.id = `seat-${player.id}`;
+    seat.dataset.visualIndex = String(visualIndex);
     seat.style.left = pos.x + '%';
     seat.style.top  = pos.y + '%';
 
-    // Базовый transform как у этого места.
-    // Для мест 1, 2, 6, 7 добавляется вертикальный сдвиг yOffset (в px).
-    // Для остальных мест yOffset = 0.
-    let baseTransform;
-    if (displaySeat === 0) {
-      baseTransform = 'translate(-50%, calc(-50% - 18px))';
-    } else if (displaySeat === 1) {
-      baseTransform = 'translate(-50%, calc(-50% - 1px + 1px))';
-    } else if (displaySeat === 2) {
-      baseTransform = 'translate(-50%, calc(-50% + 4px + 1px))';
-    } else if (displaySeat === 6) {
-      baseTransform = 'translate(-50%, calc(-50% + 3px + 1px))';
-    } else if (displaySeat === 7) {
-      baseTransform = 'translate(-50%, calc(-50% + 1px + 1px))';
-    } else {
-      baseTransform = 'translate(-50%, calc(-50% + 2px + 1px))';
-    }
-
-    if (yOffset !== 0) {
-      seat.style.transform = `translate(-50%, calc(-50% + ${yOffset}px))`;
-    } else {
-      seat.style.transform = baseTransform;
-    }
+    const oy = (pos.offsetY !== undefined) ? pos.offsetY : 0;
+    seat.style.transform = `translate(-50%, calc(-50% + ${oy}px))`;
 
     if (pos.side) seat.classList.add(pos.side);
     if (player.isHero) seat.classList.add('hero');
 
-    if (player.isHero || pos.side === 'top') {
+    // Разметка зависит от стороны. Верх/герой/хедз-ап место 4 — верхний вариант.
+    const isTopLayout = player.isHero || pos.side === 'top';
+
+    if (isTopLayout) {
       seat.innerHTML = `
         <div class="strat-badge hidden" data-role="strat"></div>
         <div class="dealer-chip hidden" data-role="btn">D</div>
@@ -4079,112 +4170,63 @@ const UI = (() => {
   }
 
   function updateSeats(state, revealAll) {
-    const alive = state.players.filter(p => !p.eliminated);
-    const isHeadsUp = alive.length === 2;
-
-    // Удаляем те места, которые в текущем состоянии не должны существовать
+    // Убираем места вылетевших полностью
     for (const p of state.players) {
-      const seat = document.getElementById(`seat-${p.id}`);
-      const wasEliminatedBeforeHand = p.eliminated && !p.inHand;
-      if (wasEliminatedBeforeHand) {
+      if (p.eliminated && !p.inHand) {
+        const seat = document.getElementById(`seat-${p.id}`);
         if (seat && seat.parentNode) seat.parentNode.removeChild(seat);
       }
     }
 
-    // Перерисовываем полностью, чтобы корректно применить пересадку в хедз-апе
-    if (isHeadsUp) {
-      for (const p of state.players) {
-        const existing = document.getElementById(`seat-${p.id}`);
-        if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
-      }
-      for (const p of state.players) {
-        const wasEliminatedBeforeHand = p.eliminated && !p.inHand;
-        if (wasEliminatedBeforeHand) continue;
-        const newSeat = createSeatElement(p, state);
-        if (newSeat) el.seats.appendChild(newSeat);
-      }
-      for (const p of state.players) {
-        const wasEliminatedBeforeHand = p.eliminated && !p.inHand;
-        if (wasEliminatedBeforeHand) continue;
-        updateSeatContent(p, state, revealAll);
-      }
-      updateStacks(state);
-      updateActiveHighlight(state);
-      updatePlaceCenter(state);
-      placeHeroTimer();
-      placeTopRoundRow();
-      return;
-    }
-
-    // Обычный режим: обновляем места на месте
     for (const p of state.players) {
+      if (p.eliminated && !p.inHand) continue;
+
       const seat = document.getElementById(`seat-${p.id}`);
-      const wasEliminatedBeforeHand = p.eliminated && !p.inHand;
-
-      if (wasEliminatedBeforeHand) continue;
-
       if (!seat) {
+        // Игрок жив, но места нет — пересоздаём (например, после пересадки)
         const newSeat = createSeatElement(p, state);
         if (newSeat) el.seats.appendChild(newSeat);
         continue;
       }
 
-      // Проверяем, что место визуально стоит там, где нужно. Если нет — пересоздаём.
-      const displaySeat = displaySeatIndexFor(p, state);
-      const currentLeft = parseFloat(seat.style.left || '0');
-      const currentTop = parseFloat(seat.style.top || '0');
-      const expectedPos = SEAT_POSITIONS[displaySeat] || SEAT_POSITIONS[0];
-      if (Math.abs(currentLeft - expectedPos.x) > 0.5 || Math.abs(currentTop - expectedPos.y) > 0.5) {
-        if (seat.parentNode) seat.parentNode.removeChild(seat);
-        const newSeat = createSeatElement(p, state);
-        if (newSeat) el.seats.appendChild(newSeat);
-        continue;
-      }
+      // Позиция
+      seat.querySelector('[data-role="pos"]').textContent = p.position || '—';
+      seat.classList.toggle('folded', p.folded && !p.eliminated);
 
-      updateSeatContent(p, state, revealAll);
+      const btn = seat.querySelector('[data-role="btn"]');
+      if (p.position === 'BTN') btn.classList.remove('hidden');
+      else btn.classList.add('hidden');
+
+      // Тип игрока
+      const stratBadge = seat.querySelector('[data-role="strat"]');
+      if (settings.showStrategies && p.botType && !p.isHero) {
+        const t = Bots.TYPES[p.botType];
+        if (t) {
+          stratBadge.textContent = t.label;
+          stratBadge.className = 'strat-badge ' + t.badgeClass;
+          stratBadge.classList.remove('hidden');
+        } else {
+          stratBadge.classList.add('hidden');
+        }
+      } else stratBadge.classList.add('hidden');
+
+      renderSeatCards(p, state, revealAll);
+
+      const betEl = seat.querySelector('[data-role="bet"]');
+      if (p.committedThisStreet > 0 && !p.folded && !state.handOver) {
+        betEl.textContent = formatChips(p.committedThisStreet, state);
+        betEl.classList.remove('hidden');
+      } else betEl.classList.add('hidden');
+
+      renderActionBadge(p, seat);
+      renderWinnerBadge(p, seat, state);
+      renderDelta(p, seat, state);
     }
-
     updateStacks(state);
     updateActiveHighlight(state);
     updatePlaceCenter(state);
     placeHeroTimer();
     placeTopRoundRow();
-  }
-
-  function updateSeatContent(p, state, revealAll) {
-    const seat = document.getElementById(`seat-${p.id}`);
-    if (!seat) return;
-
-    seat.querySelector('[data-role="pos"]').textContent = p.position || '—';
-    seat.classList.toggle('folded', p.folded && !p.eliminated);
-
-    const btn = seat.querySelector('[data-role="btn"]');
-    if (p.position === 'BTN') btn.classList.remove('hidden');
-    else btn.classList.add('hidden');
-
-    const stratBadge = seat.querySelector('[data-role="strat"]');
-    if (settings.showStrategies && p.botType && !p.isHero) {
-      const t = Bots.TYPES[p.botType];
-      if (t) {
-        stratBadge.textContent = t.label;
-        stratBadge.className = 'strat-badge ' + t.badgeClass;
-        stratBadge.classList.remove('hidden');
-      } else {
-        stratBadge.classList.add('hidden');
-      }
-    } else stratBadge.classList.add('hidden');
-
-    renderSeatCards(p, state, revealAll);
-
-    const betEl = seat.querySelector('[data-role="bet"]');
-    if (p.committedThisStreet > 0 && !p.folded && !state.handOver) {
-      betEl.textContent = formatChips(p.committedThisStreet, state);
-      betEl.classList.remove('hidden');
-    } else betEl.classList.add('hidden');
-
-    renderActionBadge(p, seat);
-    renderWinnerBadge(p, seat, state);
-    renderDelta(p, seat, state);
   }
 
   function renderActionBadge(p, seat) {
@@ -4326,25 +4368,34 @@ const UI = (() => {
     const players = state.players || [];
     const alive = players.filter(p => !p.eliminated);
     const total = alive.length;
-    if (total <= 0) { el.placeCenter.classList.add('hidden'); return; }
+
+    if (total <= 0) {
+      el.placeCenter.classList.add('hidden');
+      return;
+    }
 
     if (total === 1) {
+      // Чемпион
       if (el.placeLine) el.placeLine.textContent = 'ЧЕМПИОН';
       if (el.prizeLine) el.prizeLine.textContent = '';
-      if (el.prizeLine) el.prizeLine.style.display = 'none';
+      if (el.headsUpLine) el.headsUpLine.classList.add('hidden');
       el.placeCenter.classList.remove('hidden');
       return;
     }
-
-    if (el.prizeLine) el.prizeLine.style.display = '';
 
     if (total === 2) {
-      if (el.placeLine) el.placeLine.textContent = 'Один на Один';
+      // Один на один
+      if (el.placeLine) el.placeLine.textContent = '';
       if (el.prizeLine) el.prizeLine.textContent = '';
+      if (el.headsUpLine) {
+        el.headsUpLine.textContent = 'Один на Один';
+        el.headsUpLine.classList.remove('hidden');
+      }
       el.placeCenter.classList.remove('hidden');
       return;
     }
 
+    // 3 и больше игроков
     const hero = players.find(p => p.isHero);
     let heroPlace = null;
     if (hero && !hero.eliminated) {
@@ -4357,7 +4408,7 @@ const UI = (() => {
 
     if (el.placeLine) el.placeLine.textContent = `Моё место: ${heroPlace}/${total}`;
     if (el.prizeLine) el.prizeLine.textContent = 'Призовые места: 3';
-
+    if (el.headsUpLine) el.headsUpLine.classList.add('hidden');
     el.placeCenter.classList.remove('hidden');
   }
 
@@ -4768,16 +4819,6 @@ const UI = (() => {
     el.supportOverlay.classList.remove('visible');
   }
 
-  function showTrainingOverlay() {
-    if (!el.trainingOverlay) return;
-    el.trainingOverlay.classList.add('visible');
-  }
-
-  function hideTrainingOverlay() {
-    if (!el.trainingOverlay) return;
-    el.trainingOverlay.classList.remove('visible');
-  }
-
   function showSupportCopiedHint() {
     if (!el.supportCopied) return;
     el.supportCopied.classList.add('visible');
@@ -5012,7 +5053,8 @@ const UI = (() => {
     renderTable, updateSeats, updateBoard, updatePot, updateLevel,
     updateStacks, updateActiveHighlight, updatePlaceCenter,
     showActions, setHeroActionsActive,
-    openBottomPanel, closeBottomPanel, openGuidePanel, openGuideInsteadOfSettings, closeGuidePanel,
+    openBottomPanel, closeBottomPanel, openGuidePanel, closeGuidePanel,
+    openTraining, closeTraining, anyTrainingOpen,
     closeAllPanels, anyPanelOpen, anyOverlayOpen,
     updateHistoryInfo,
     readSettingsFromUI, applySettingsToUI,
@@ -5025,8 +5067,8 @@ const UI = (() => {
     showHeroTimer, hideHeroTimer, updateHeroTimer, placeHeroTimer,
     placeTopRoundRow,
     showSupportOverlay, hideSupportOverlay, copySupportText,
-    showTrainingOverlay, hideTrainingOverlay,
-    resetBelcardSwap, bindBelcardDrag
+    resetBelcardSwap, bindBelcardDrag,
+    recalcSeatAssignments, resetSeatAssignments
   };
 
 })();
@@ -5088,6 +5130,8 @@ const UI = (() => {
     el.startOverlay   = document.getElementById('start-overlay');
     el.bottomPanel    = document.getElementById('bottom-panel');
     el.guidePanel     = document.getElementById('guide-panel');
+    el.trainingOverlay= document.getElementById('training-overlay');
+    el.trainingWindow = document.getElementById('training-window');
     el.tapClose       = document.getElementById('tap-close');
     el.hnPrev         = document.getElementById('hn-prev');
     el.hnNext         = document.getElementById('hn-next');
@@ -5098,7 +5142,7 @@ const UI = (() => {
     el.btnSupportPanel = document.getElementById('btn-support-panel');
     el.settingsHelpBtn = document.getElementById('settings-help-btn');
     el.settingsCardBtn = document.getElementById('settings-card-btn');
-    el.settingsTrainingBtn = document.getElementById('settings-training-btn');
+    el.settingsTrainBtn = document.getElementById('settings-train-btn');
     el.topRoundRow     = document.getElementById('top-round-row');
     el.gmailBtn        = document.getElementById('gmail-btn');
     el.tgBtn           = document.getElementById('tg-btn');
@@ -5109,8 +5153,6 @@ const UI = (() => {
     el.supportWindow  = document.getElementById('support-window');
     el.belcardStack   = document.getElementById('belcard-stack');
     el.placeCenter    = document.getElementById('place-center');
-    el.trainingOverlay = document.getElementById('training-overlay');
-    el.trainingWindow  = document.getElementById('training-window');
   }
 
   function bindDesktopDoubleClick() {
@@ -5168,12 +5210,12 @@ const UI = (() => {
               target.closest('a') ||
               target.closest('#bottom-panel') ||
               target.closest('#guide-panel') ||
+              target.closest('#training-overlay') ||
               target.closest('#start-overlay') ||
               target.closest('#hero-actions') ||
               target.closest('#quick-percent-list') ||
               target.closest('#hero-timer-zone') ||
               target.closest('#support-overlay') ||
-              target.closest('#training-overlay') ||
               target.closest('#top-round-row'));
   }
 
@@ -5274,6 +5316,13 @@ const UI = (() => {
       }, { passive: false });
     }
 
+    if (el.trainingWindow) {
+      el.trainingWindow.addEventListener('click', (e) => e.stopPropagation());
+      el.trainingWindow.addEventListener('touchend', (e) => e.stopPropagation(), { passive: false });
+      el.trainingWindow.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+      el.trainingWindow.addEventListener('touchmove', (e) => e.stopPropagation(), { passive: true });
+    }
+
     if (el.supportWindow) {
       el.supportWindow.addEventListener('click', (e) => {
         if (e.target.closest('.belcard-paysend')) {
@@ -5348,13 +5397,13 @@ const UI = (() => {
       }, { passive: false });
     }
 
-    if (el.settingsTrainingBtn) {
-      el.settingsTrainingBtn.addEventListener('click', (e) => {
+    if (el.settingsTrainBtn) {
+      el.settingsTrainBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
         openTrainingWindow();
       });
-      el.settingsTrainingBtn.addEventListener('touchend', (e) => {
+      el.settingsTrainBtn.addEventListener('touchend', (e) => {
         e.preventDefault();
         e.stopPropagation();
         openTrainingWindow();
@@ -5402,10 +5451,6 @@ const UI = (() => {
       el.guidePanel.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
       el.guidePanel.addEventListener('touchmove', (e) => e.stopPropagation(), { passive: true });
     }
-    if (el.trainingWindow) {
-      el.trainingWindow.addEventListener('click', (e) => e.stopPropagation());
-      el.trainingWindow.addEventListener('touchend', (e) => e.stopPropagation(), { passive: false });
-    }
 
     ['set-language','set-difficulty','set-card-style','set-stack-display','set-blind-growth','set-turn-time','set-show-strategies','set-show-all-hands','set-show-all-showdown'].forEach(id => {
       const node = document.getElementById(id);
@@ -5443,7 +5488,6 @@ const UI = (() => {
 
   function openPanelWithPause(openFn) {
     if (session.supportPaused) return;
-    if (session.trainingPaused) return;
     if (UI.anyOverlayOpen()) return;
     openFn();
     session.panelsPaused = true;
@@ -5501,13 +5545,13 @@ const UI = (() => {
     if (session.trainingPaused) return;
     session.trainingPaused = true;
     pauseGame();
-    UI.showTrainingOverlay();
+    UI.openTraining();
   }
 
   function closeTrainingWindow() {
     if (!session.trainingPaused) return;
     session.trainingPaused = false;
-    UI.hideTrainingOverlay();
+    UI.closeTraining();
     if (!session.panelsPaused && !session.supportPaused && !UI.anyPanelOpen()) {
       resumeGame();
     }
@@ -5661,9 +5705,10 @@ const UI = (() => {
 
     Model.reset();
     Meta.reset();
+    UI.resetSeatAssignments();
 
     UI.hideSupportOverlay();
-    UI.hideTrainingOverlay();
+    UI.closeTraining();
     UI.resetBelcardSwap();
     UI.setHeroActionsActive(false);
     UI.updateHistoryInfo(0, 0, false);
@@ -5693,6 +5738,7 @@ const UI = (() => {
 
     Model.reset();
     Meta.reset();
+    UI.resetSeatAssignments();
 
     const botTypes = Bots.assignBotTypes(UI.settings.difficulty);
 
