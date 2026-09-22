@@ -301,7 +301,7 @@ button.disabled {
 #place-center {
   position: absolute;
   left: 50%;
-  top: 29.5%;
+  top: 9%;
   transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
@@ -319,7 +319,6 @@ button.disabled {
 }
 #place-center.hidden { display: none; }
 #place-center .place-line,
-#place-center .prize-line,
 #place-center .heads-up-line {
   font-size: clamp(13px, 1.7vmin, 16px);
   line-height: 1.2;
@@ -1029,6 +1028,34 @@ button.disabled {
   text-align: left;
 }
 
+#training-test-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+#training-test-buttons button {
+  flex: 1;
+  padding: 12px 14px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #ffcb2b, #e0a800);
+  color: #1a1a1a;
+  font-weight: 900;
+  font-size: 13px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  box-shadow: 0 3px 0 #8a6508, inset 0 1px 0 rgba(255,255,255,.35);
+  touch-action: manipulation;
+  min-height: 44px;
+  font-family: inherit;
+  transition: transform .08s ease, filter .08s ease;
+}
+#training-test-buttons button:active {
+  transform: scale(0.97);
+  filter: brightness(1.1);
+  box-shadow: 0 1px 0 #8a6508, inset 0 1px 0 rgba(255,255,255,.35);
+}
+
 #hero-timer {
   position: absolute;
   width: var(--hero-timer-size);
@@ -1614,7 +1641,6 @@ button.disabled {
   letter-spacing: 1.5px;
   font-weight: 900;
 }
-.start-card h1 .spade { color: var(--gold); }
 .start-card p {
   color: var(--muted);
   margin-bottom: 28px;
@@ -1636,6 +1662,138 @@ button.disabled {
   min-height: 52px;
 }
 #btn-start:active { transform: translateY(2px); box-shadow: 0 1px 0 #8a6508; }
+
+#final-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 400;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow: hidden;
+}
+#final-overlay.visible { display: flex; }
+
+#final-window {
+  position: relative;
+  width: min(90%, 380px);
+  background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
+  border: 2px solid #3a3530;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.9), 0 0 80px rgba(255,203,43,.08);
+  padding: clamp(28px, 5vmin, 40px) clamp(22px, 4vmin, 32px);
+  text-align: center;
+  overflow: visible;
+}
+#final-window.winner {
+  border: 2px solid #8a6508;
+  animation: winnerGlow 2.2s ease-in-out infinite;
+}
+@keyframes winnerGlow {
+  0%, 100% {
+    box-shadow:
+      0 20px 60px rgba(0,0,0,.9),
+      0 0 20px rgba(255,203,43,.25),
+      0 0 60px rgba(255,203,43,.15);
+  }
+  50% {
+    box-shadow:
+      0 20px 60px rgba(0,0,0,.9),
+      0 0 45px rgba(255,203,43,.65),
+      0 0 120px rgba(255,203,43,.45);
+  }
+}
+
+#final-window .final-top-label {
+  color: var(--gold);
+  font-size: clamp(22px, 3.4vmin, 30px);
+  font-weight: 900;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+  text-shadow: 0 2px 10px rgba(255,203,43,.5);
+  text-transform: uppercase;
+}
+#final-window .final-trophy {
+  font-size: clamp(80px, 14vmin, 130px);
+  line-height: 1;
+  margin: 6px 0 12px;
+  filter: drop-shadow(0 6px 20px rgba(255,203,43,.55));
+}
+#final-window .final-you-win {
+  color: #fff;
+  font-size: clamp(20px, 3vmin, 26px);
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-shadow: 0 2px 8px rgba(0,0,0,.85), 0 0 20px rgba(255,203,43,.5);
+  margin-top: 6px;
+}
+#final-window .final-place-big {
+  color: var(--gold);
+  font-size: clamp(48px, 10vmin, 84px);
+  font-weight: 900;
+  letter-spacing: 4px;
+  margin: 18px 0 22px;
+  text-shadow: 0 3px 12px rgba(255,203,43,.55), 0 2px 6px rgba(0,0,0,.85);
+}
+#final-window .final-restart-btn {
+  display: block;
+  width: 100%;
+  padding: 14px 16px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ffcb2b, #e0a800);
+  color: #1a1a1a;
+  font-weight: 900;
+  font-size: 15px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-align: center;
+  box-shadow: 0 3px 0 #8a6508, inset 0 1px 0 rgba(255,255,255,.35);
+  touch-action: manipulation;
+  min-height: 48px;
+  font-family: inherit;
+  transition: transform .08s ease, filter .08s ease;
+  cursor: pointer;
+}
+#final-window .final-restart-btn:active {
+  transform: scale(0.97);
+  filter: brightness(1.1);
+  box-shadow: 0 1px 0 #8a6508, inset 0 1px 0 rgba(255,255,255,.35);
+}
+
+.firework {
+  position: absolute;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+  z-index: 401;
+}
+.firework .spark {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  animation: sparkFly 1.6s ease-out forwards;
+}
+@keyframes sparkFly {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy)) scale(0.2);
+  }
+}
 </style>
 </head>
 <body>
@@ -1662,7 +1820,7 @@ button.disabled {
 
         <div id="place-center">
           <div class="place-line" id="place-line">Rank: 1/8 | ITM: 3</div>
-          <div class="heads-up-line hidden" id="heads-up-line">Один на Один</div>
+          <div class="heads-up-line hidden" id="heads-up-line">Heads-Up</div>
         </div>
 
         <div id="hero-timer-zone"></div>
@@ -1737,9 +1895,6 @@ button.disabled {
     <div id="training-window">
       <h3>ТРЕНИРОВКА</h3>
       <p class="training-text">
-        Без сложной математики, без запутанной теории — только простая и понятная логика.
-      </p>
-      <p class="training-text">
         Логика покера — это система мышления, при которой каждый твой ход является осознанным ответом на вопрос:
         «Что я пытаюсь заставить оппонента подумать, почувствовать и сделать — и зачем?»
       </p>
@@ -1751,6 +1906,10 @@ button.disabled {
         Ключевая идея: у каждого действия должна быть причина, которую ты можешь сформулировать словами.
         Если не можешь — ты не играешь, а угадываешь.
       </p>
+      <div id="training-test-buttons">
+        <button id="btn-test-top1" type="button">TOP-1</button>
+        <button id="btn-test-top8" type="button">TOP-8</button>
+      </div>
     </div>
   </div>
 
@@ -1889,10 +2048,14 @@ button.disabled {
     <div id="support-copied">Скопировано</div>
   </div>
 
+  <div id="final-overlay">
+    <div id="final-window"></div>
+  </div>
+
   <div id="start-overlay">
     <div class="start-card">
-      <h1><span class="spade">♠</span> Poker Trainer</h1>
-      <p>Тренируй интуицию: выиграешь ты на вскрытии или нет.</p>
+      <h1>Poker Trainer</h1>
+      <p>Тренируй свои покерные навыки</p>
       <button id="btn-start">Начать игру</button>
     </div>
   </div>
@@ -3463,6 +3626,15 @@ const Bots = (() => {
     return result;
   }
 
+  function assignBotsToSeats(botTypes) {
+    const arr = botTypes.slice();
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Engine.cryptoRandomInt(i + 1);
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
   function preflopStrength(card1, card2) {
     const v1 = R[card1.rank], v2 = R[card2.rank];
     const hi = Math.max(v1, v2), lo = Math.min(v1, v2);
@@ -3783,7 +3955,7 @@ const Bots = (() => {
 
   return {
     CLASS_PRO, CLASS_VIP, TYPES, PROFILES,
-    assignBotTypes,
+    assignBotTypes, assignBotsToSeats,
     decide, preflopStrength, postflopStrength,
     handInChart, normalizeHand, getChart
   };
@@ -3814,7 +3986,7 @@ const UI = (() => {
   const SEAT_POSITIONS = [
     { x: 50, y: 70, side: 'bottom', offsetY: -18 },
     { x: 14, y: 56, side: 'left',   offsetY: -1 - 6 },
-    { x: 14, y: 32, side: 'left',   offsetY: 4 + 1 - 2 },
+    { x: 14, y: 32, side: 'left',   offsetY: 4 + 1 - 2 - 2 },
     { x: 14, y: 9,  side: 'left',   offsetY: 2 + 1 },
     { x: 50, y: 9,  side: 'top',    offsetY: 2 + 1 },
     { x: 86, y: 9,  side: 'right',  offsetY: 2 + 1 },
@@ -3853,7 +4025,6 @@ const UI = (() => {
     el.infoNextBlinds = document.getElementById('info-next-blinds-row');
     el.placeCenter    = document.getElementById('place-center');
     el.placeLine      = document.getElementById('place-line');
-    el.prizeLine      = document.getElementById('prize-line');
     el.headsUpLine    = document.getElementById('heads-up-line');
 
     el.heroActions    = document.getElementById('hero-actions');
@@ -3895,6 +4066,11 @@ const UI = (() => {
     el.gmailBtn        = document.getElementById('gmail-btn');
     el.tgBtn           = document.getElementById('tg-btn');
     el.belcardStack    = document.getElementById('belcard-stack');
+
+    el.finalOverlay    = document.getElementById('final-overlay');
+    el.finalWindow     = document.getElementById('final-window');
+    el.btnTestTop1     = document.getElementById('btn-test-top1');
+    el.btnTestTop8     = document.getElementById('btn-test-top8');
 
     el.setLanguage       = document.getElementById('set-language');
     el.setDifficulty     = document.getElementById('set-difficulty');
@@ -3965,7 +4141,8 @@ const UI = (() => {
   function anyOverlayOpen() {
     return anyPanelOpen() ||
            anyTrainingOpen() ||
-           (el.supportOverlay && el.supportOverlay.classList.contains('visible'));
+           (el.supportOverlay && el.supportOverlay.classList.contains('visible')) ||
+           (el.finalOverlay && el.finalOverlay.classList.contains('visible'));
   }
 
   function setReplayButtonState(state) {
@@ -4352,7 +4529,7 @@ const UI = (() => {
     }
 
     if (total === 1) {
-      if (el.placeLine) el.placeLine.textContent = 'CHAMPION';
+      if (el.placeLine) el.placeLine.textContent = '';
       if (el.headsUpLine) el.headsUpLine.classList.add('hidden');
       el.placeCenter.classList.remove('hidden');
       return;
@@ -5018,6 +5195,119 @@ const UI = (() => {
     });
   }
 
+  function showFinalOverlay() {
+    if (!el.finalOverlay) return;
+    el.finalOverlay.classList.add('visible');
+  }
+
+  function hideFinalOverlay() {
+    if (!el.finalOverlay) return;
+    el.finalOverlay.classList.remove('visible');
+    if (el.finalWindow) {
+      el.finalWindow.classList.remove('winner');
+      el.finalWindow.innerHTML = '';
+    }
+    clearFireworks();
+  }
+
+  let fireworkTimers = [];
+
+  function clearFireworks() {
+    for (const t of fireworkTimers) clearTimeout(t);
+    fireworkTimers = [];
+    document.querySelectorAll('.firework').forEach(f => f.remove());
+  }
+
+  function spawnFirework(container, centerX, centerY, colors) {
+    const fw = document.createElement('div');
+    fw.className = 'firework';
+    fw.style.left = centerX + 'px';
+    fw.style.top = centerY + 'px';
+    container.appendChild(fw);
+
+    const count = 18;
+    for (let i = 0; i < count; i++) {
+      const spark = document.createElement('div');
+      spark.className = 'spark';
+      const angle = (Math.PI * 2 * i) / count + (Math.random() * 0.35 - 0.175);
+      const dist = 60 + Math.random() * 90;
+      const dx = Math.cos(angle) * dist;
+      const dy = Math.sin(angle) * dist - 30;
+      spark.style.setProperty('--dx', dx.toFixed(1) + 'px');
+      spark.style.setProperty('--dy', dy.toFixed(1) + 'px');
+      spark.style.background = colors[Engine.cryptoRandomInt(colors.length)];
+      spark.style.boxShadow = `0 0 8px 2px ${spark.style.background}`;
+      spark.style.animationDelay = (Math.random() * 0.25).toFixed(2) + 's';
+      fw.appendChild(spark);
+    }
+
+    const cleanup = setTimeout(() => { fw.remove(); }, 2000);
+    fireworkTimers.push(cleanup);
+  }
+
+  function launchFinaleFireworks() {
+    clearFireworks();
+    if (!el.finalOverlay) return;
+
+    const overlayRect = el.finalOverlay.getBoundingClientRect();
+    const cx = overlayRect.width / 2;
+    const cy = overlayRect.height / 2;
+
+    const colors = ['#ffcb2b', '#ffe680', '#ffffff', '#e0a800', '#ff4f8b', '#4fd6ff'];
+
+    for (let burst = 0; burst < 10; burst++) {
+      const t = setTimeout(() => {
+        const ox = (Math.random() * 2 - 1) * overlayRect.width * 0.42;
+        const oy = (Math.random() * 2 - 1) * overlayRect.height * 0.42;
+        spawnFirework(el.finalOverlay, cx + ox, cy + oy, colors);
+      }, burst * 320);
+      fireworkTimers.push(t);
+    }
+
+    const repeat = setInterval(() => {
+      if (!el.finalOverlay.classList.contains('visible')) {
+        clearInterval(repeat);
+        return;
+      }
+      const ox = (Math.random() * 2 - 1) * overlayRect.width * 0.42;
+      const oy = (Math.random() * 2 - 1) * overlayRect.height * 0.42;
+      spawnFirework(el.finalOverlay, cx + ox, cy + oy, colors);
+    }, 700);
+
+    fireworkTimers.push(setTimeout(() => clearInterval(repeat), 60000));
+  }
+
+  function showWinnerFinal() {
+    if (!el.finalWindow || !el.finalOverlay) return;
+    el.finalWindow.classList.add('winner');
+    el.finalWindow.innerHTML = `
+      <div class="final-top-label">TOP-1</div>
+      <div class="final-trophy">🏆</div>
+      <div class="final-you-win">YOU WIN</div>
+    `;
+    showFinalOverlay();
+    launchFinaleFireworks();
+  }
+
+  function showLoserFinal(place) {
+    if (!el.finalWindow || !el.finalOverlay) return;
+    const placeText = 'TOP-' + (place || 8);
+    el.finalWindow.classList.remove('winner');
+    el.finalWindow.innerHTML = `
+      <div class="final-place-big">${placeText}</div>
+      <button class="final-restart-btn" id="final-restart-btn" type="button">Начать заново</button>
+    `;
+    const btn = el.finalWindow.querySelector('#final-restart-btn');
+    if (btn) {
+      btn.addEventListener('click', () => {
+        if (typeof window.__ptRestartCallback === 'function') {
+          window.__ptRestartCallback();
+        }
+      });
+    }
+    showFinalOverlay();
+  }
+
   return {
     settings, init, el,
     renderTable, updateSeats, updateBoard, updatePot, updateLevel,
@@ -5038,7 +5328,8 @@ const UI = (() => {
     placeTopRoundRow,
     showSupportOverlay, hideSupportOverlay, copySupportText,
     resetBelcardSwap, bindBelcardDrag,
-    recalcSeatAssignments, resetSeatAssignments
+    recalcSeatAssignments, resetSeatAssignments,
+    showWinnerFinal, showLoserFinal, hideFinalOverlay
   };
 
 })();
@@ -5055,6 +5346,7 @@ const UI = (() => {
     waitingForHero: false, active: false,
     heroEntered: false,
     heroEliminated: false,
+    heroFinishPlace: 0,
     tournamentOver: false,
     history: [], viewingIndex: -1, autoNextTimerId: null,
     botTimerId: null, revealTimerId: null,
@@ -5062,6 +5354,7 @@ const UI = (() => {
     supportPaused: false,
     panelsPaused: false,
     trainingPaused: false,
+    finalShown: false,
 
     heroTimerIntervalId: null,
     heroTimerTimeoutId: null,
@@ -5081,6 +5374,12 @@ const UI = (() => {
   const el = {};
 
   const DOUBLE_TAP_WINDOW = 500;
+
+  window.__ptRestartCallback = () => {
+    UI.hideFinalOverlay();
+    session.finalShown = false;
+    restartSession();
+  };
 
   window.addEventListener('DOMContentLoaded', () => {
     UI.init();
@@ -5124,6 +5423,10 @@ const UI = (() => {
     el.belcardStack   = document.getElementById('belcard-stack');
     el.placeCenter    = document.getElementById('place-center');
     el.guidePanel     = document.getElementById('guide-panel');
+    el.finalOverlay   = document.getElementById('final-overlay');
+    el.finalWindow    = document.getElementById('final-window');
+    el.btnTestTop1    = document.getElementById('btn-test-top1');
+    el.btnTestTop8    = document.getElementById('btn-test-top8');
   }
 
   function bindDesktopDoubleClick() {
@@ -5187,6 +5490,7 @@ const UI = (() => {
               target.closest('#quick-percent-list') ||
               target.closest('#hero-timer-zone') ||
               target.closest('#support-overlay') ||
+              target.closest('#final-overlay') ||
               target.closest('#top-round-row'));
   }
 
@@ -5308,6 +5612,23 @@ const UI = (() => {
       el.trainingWindow.addEventListener('touchend', (e) => e.stopPropagation(), { passive: false });
       el.trainingWindow.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
       el.trainingWindow.addEventListener('touchmove', (e) => e.stopPropagation(), { passive: true });
+    }
+
+    if (el.btnTestTop1) {
+      el.btnTestTop1.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        closeTrainingWindow();
+        UI.showWinnerFinal();
+      });
+    }
+    if (el.btnTestTop8) {
+      el.btnTestTop8.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        closeTrainingWindow();
+        UI.showLoserFinal(8);
+      });
     }
 
     if (el.supportWindow) {
@@ -5684,11 +6005,13 @@ const UI = (() => {
     session.waitingForHero = false;
     session.heroEntered = false;
     session.heroEliminated = false;
+    session.heroFinishPlace = 0;
     session.tournamentOver = false;
     session.isPaused = false;
     session.supportPaused = false;
     session.panelsPaused = false;
     session.trainingPaused = false;
+    session.finalShown = false;
 
     Model.reset();
     Meta.reset();
@@ -5696,6 +6019,7 @@ const UI = (() => {
 
     UI.hideSupportOverlay();
     UI.closeTraining();
+    UI.hideFinalOverlay();
     UI.resetBelcardSwap();
     UI.setHeroActionsActive(false);
     UI.updateHistoryInfo(0, 0, false);
@@ -5715,6 +6039,7 @@ const UI = (() => {
     session.waitingForHero = false;
     session.heroEntered = false;
     session.heroEliminated = false;
+    session.heroFinishPlace = 0;
     session.tournamentOver = false;
     session.history = [];
     session.viewingIndex = -1;
@@ -5722,21 +6047,23 @@ const UI = (() => {
     session.supportPaused = false;
     session.panelsPaused = false;
     session.trainingPaused = false;
+    session.finalShown = false;
 
     Model.reset();
     Meta.reset();
     UI.resetSeatAssignments();
 
     const botTypes = Bots.assignBotTypes(UI.settings.difficulty);
+    const shuffledTypes = Bots.assignBotsToSeats(botTypes);
 
     const players = [{ id: 'hero', name: 'Ты', isHero: true, botType: null, botClass: null, stack: Engine.STARTING_STACK }];
     for (let i = 0; i < 7; i++) {
-      const t = Bots.TYPES[botTypes[i]];
+      const t = Bots.TYPES[shuffledTypes[i]];
       players.push({
         id: 'bot' + (i + 1),
         name: 'Бот ' + (i + 1),
         isHero: false,
-        botType: botTypes[i],
+        botType: shuffledTypes[i],
         botClass: t ? t.cls : null,
         stack: Engine.STARTING_STACK
       });
@@ -5775,6 +6102,7 @@ const UI = (() => {
       UI.setHeroActionsActive(false);
       UI.hideHeroTimer();
       UI.updatePlaceCenter(session.state);
+      handleTournamentEnd(alive);
       return;
     }
 
@@ -5798,6 +6126,21 @@ const UI = (() => {
     refreshQuickPercentList();
     UI.setHeroActionsActive(false);
     processTurn();
+  }
+
+  function handleTournamentEnd(alive) {
+    if (session.finalShown) return;
+    session.finalShown = true;
+
+    const winner = alive[0];
+    const heroIsWinner = winner && winner.isHero;
+
+    if (heroIsWinner) {
+      UI.showWinnerFinal();
+    } else {
+      const place = session.heroFinishPlace || session.state.players.filter(p => !p.eliminated).length + 1;
+      UI.showLoserFinal(place);
+    }
   }
 
   function refreshQuickPercentList() {
@@ -6116,7 +6459,10 @@ const UI = (() => {
 
     const heroP = state.players[session.heroIndex];
     if (heroP.eliminated || heroP.stack <= 0) {
-      session.heroEliminated = true;
+      if (!session.heroEliminated) {
+        session.heroEliminated = true;
+        session.heroFinishPlace = state.players.filter(p => !p.eliminated).length + 1;
+      }
     }
 
     UI.updateBoard(state);
@@ -6164,6 +6510,7 @@ const UI = (() => {
         UI.setHeroActionsActive(false);
         UI.hideHeroTimer();
         UI.updatePlaceCenter(state);
+        handleTournamentEnd(alive);
         return;
       }
       startHand();
@@ -6558,6 +6905,7 @@ const UI = (() => {
             session.tournamentOver = true;
             UI.setHeroActionsActive(false);
             UI.updatePlaceCenter(state);
+            handleTournamentEnd(alive);
             return;
           }
           startHand();
