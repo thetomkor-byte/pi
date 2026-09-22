@@ -325,6 +325,12 @@ button.disabled {
   font-size: var(--place-text);
   line-height: 1.2;
 }
+#place-center .place-sep {
+  display: inline-block;
+  width: 0.45em;
+  color: transparent;
+  visibility: hidden;
+}
 #place-center .heads-up-line.hidden { display: none; }
 
 .card {
@@ -1000,7 +1006,8 @@ button.disabled {
   position: relative;
   width: var(--table-col-w);
   max-width: 94vw;
-  height: 85%;
+  height: 60vh;
+  height: 60dvh;
   background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
   border: 2px solid #3a3530;
   border-radius: 16px;
@@ -1008,9 +1015,9 @@ button.disabled {
   padding: clamp(20px, 4vmin, 28px) clamp(18px, 3.6vmin, 26px);
   text-align: left;
   overflow: hidden;
-  scrollbar-width: none;
   display: flex;
   flex-direction: column;
+  scrollbar-width: none;
 }
 #training-window::-webkit-scrollbar { display: none; }
 
@@ -1020,6 +1027,7 @@ button.disabled {
   justify-content: space-between;
   gap: 8px;
   margin-bottom: 18px;
+  flex-shrink: 0;
 }
 #training-header-row h3 {
   color: var(--gold);
@@ -1033,59 +1041,64 @@ button.disabled {
 }
 
 .training-nav-btn {
-  width: clamp(28px, 3.8vmin, 36px);
-  height: clamp(28px, 3.8vmin, 36px);
-  border-radius: 0;
   background: transparent;
   border: none;
-  color: var(--gold);
+  padding: 0;
+  margin: 0;
+  color: transparent;
+  font-family: inherit;
   font-weight: 900;
   font-size: clamp(18px, 2.4vmin, 22px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   line-height: 1;
   cursor: pointer;
   touch-action: manipulation;
-  transition: transform .08s ease, filter .08s ease, opacity .2s ease;
-  font-family: inherit;
-  padding: 0;
   flex-shrink: 0;
-  box-shadow: none;
-}
-.training-nav-btn:active:not(:disabled) {
-  transform: scale(0.9);
-  filter: brightness(1.35);
+  width: 1em;
+  height: 1em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
 }
 .training-nav-btn:disabled {
-  opacity: 0.25;
   cursor: default;
 }
 
 #training-text-viewport {
   position: relative;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   flex: 1;
   min-height: 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
 }
+#training-text-viewport::-webkit-scrollbar { display: none; width: 0; height: 0; }
 
 .training-text-page {
   transition: transform 0.5s ease, opacity 0.5s ease;
   will-change: transform, opacity;
-  position: absolute;
-  top: 0; left: 0; right: 0;
 }
 .training-text-page.offscreen-left {
   transform: translateX(-110%);
   opacity: 0;
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  pointer-events: none;
 }
 .training-text-page.offscreen-right {
   transform: translateX(110%);
   opacity: 0;
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  pointer-events: none;
 }
 .training-text-page.active {
   transform: translateX(0);
   opacity: 1;
+  position: relative;
 }
 
 .training-text {
@@ -1870,7 +1883,7 @@ button.disabled {
         <div id="seats"></div>
 
         <div id="place-center">
-          <div class="place-line" id="place-line">Rank: 1/8  ITM: 3</div>
+          <div class="place-line" id="place-line">Rank: 1/8 <span class="place-sep">|</span> ITM: 3</div>
           <div class="heads-up-line hidden" id="heads-up-line">Heads-Up</div>
         </div>
 
@@ -4196,6 +4209,8 @@ const UI = (() => {
   function openTraining() {
     if (!el.trainingOverlay) return;
     el.trainingOverlay.classList.add('visible');
+    const vp = document.getElementById('training-text-viewport');
+    if (vp) vp.scrollTop = 0;
   }
   function closeTraining() {
     if (!el.trainingOverlay) return;
@@ -4601,14 +4616,14 @@ const UI = (() => {
     }
 
     if (total === 1) {
-      if (el.placeLine) el.placeLine.textContent = '';
+      if (el.placeLine) el.placeLine.innerHTML = '';
       if (el.headsUpLine) el.headsUpLine.classList.add('hidden');
       el.placeCenter.classList.remove('hidden');
       return;
     }
 
     if (total === 2) {
-      if (el.placeLine) el.placeLine.textContent = '';
+      if (el.placeLine) el.placeLine.innerHTML = '';
       if (el.headsUpLine) {
         el.headsUpLine.textContent = 'Heads-Up';
         el.headsUpLine.classList.remove('hidden');
@@ -4627,7 +4642,9 @@ const UI = (() => {
       heroPlace = total;
     }
 
-    if (el.placeLine) el.placeLine.textContent = `Rank: ${heroPlace}/${total}  ITM: 3`;
+    if (el.placeLine) {
+      el.placeLine.innerHTML = `Rank: ${heroPlace}/${total} <span class="place-sep">|</span> ITM: 3`;
+    }
     if (el.headsUpLine) el.headsUpLine.classList.add('hidden');
     el.placeCenter.classList.remove('hidden');
   }
@@ -5383,6 +5400,9 @@ const UI = (() => {
       }
     }
 
+    const vp = document.getElementById('training-text-viewport');
+    if (vp) vp.scrollTop = 0;
+
     if (el.trainingPrevBtn) el.trainingPrevBtn.disabled = (index <= 0);
     if (el.trainingNextBtn) el.trainingNextBtn.disabled = (index >= pages.length - 1);
   }
@@ -5407,6 +5427,8 @@ const UI = (() => {
       if (i === 0) p.classList.add('active');
       else p.classList.add('offscreen-right');
     }
+    const vp = document.getElementById('training-text-viewport');
+    if (vp) vp.scrollTop = 0;
     if (el.trainingPrevBtn) el.trainingPrevBtn.disabled = true;
     if (el.trainingNextBtn) el.trainingNextBtn.disabled = (pages.length <= 1);
   }
