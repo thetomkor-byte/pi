@@ -1054,6 +1054,7 @@ button.disabled {
   justify-content: center;
   -webkit-tap-highlight-color: transparent;
   outline: none;
+  caret-color: transparent;
 }
 .training-nav-btn:disabled {
   cursor: default;
@@ -1632,14 +1633,7 @@ button.disabled {
 #guide-panel::-webkit-scrollbar { display: none; }
 #guide-panel.open { transform: translate(-50%, 0); }
 
-#guide-panel #guide-header-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 14px;
-}
-#guide-panel #guide-header-row h3 {
+#guide-panel h3 {
   color: var(--gold);
   font-size: 12px;
   text-transform: uppercase;
@@ -1648,6 +1642,14 @@ button.disabled {
   text-align: center;
   flex: 1;
   margin: 0;
+}
+
+#guide-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 14px;
 }
 
 .guide-nav-btn {
@@ -1671,14 +1673,11 @@ button.disabled {
   -webkit-tap-highlight-color: transparent;
   outline: none;
 }
-.guide-nav-btn:disabled {
-  cursor: default;
-}
 
 #guide-text-viewport {
   position: relative;
   overflow: hidden;
-  min-height: 200px;
+  min-height: 60px;
 }
 
 .guide-text-page {
@@ -1913,7 +1912,7 @@ button.disabled {
         <div id="seats"></div>
 
         <div id="place-center">
-          <div class="place-line" id="place-line">Rank: 1/8&nbsp;&nbsp;ITM: 3</div>
+          <div class="place-line" id="place-line">Rank: 1/8  ITM: 3</div>
           <div class="heads-up-line hidden" id="heads-up-line">Heads-Up</div>
         </div>
 
@@ -1972,8 +1971,29 @@ button.disabled {
       <button id="guide-next-btn" class="guide-nav-btn" type="button" aria-label="Вперёд">▶︎</button>
     </div>
     <div id="guide-text-viewport">
-      <div class="guide-text-page active" data-page="0"></div>
-      <div class="guide-text-page offscreen-right" data-page="1"></div>
+      <div class="guide-text-page" data-page="0">
+        <!-- пустая страница слева -->
+      </div>
+      <div class="guide-text-page active" data-page="1">
+        <p class="guide-text">
+          Poker Trainer — это симулятор покерного стола Sit&nbsp;&amp;&nbsp;Go (Texas Hold'em, 8-max).
+          Он тренирует интуицию: ты должен нащупать чувством, выиграешь ты на вскрытии
+          или нет, и действовать в согласии с этим чувством.
+        </p>
+        <p class="guide-text">
+          Обратная связь здесь — только факт: совпало или не совпало. Никаких подсказок
+          по правильности решения, EV, диапазонам и прочему. После раздачи ты просто
+          видишь бейдж WIN или LOSS и сумму выигранных или проигранных фишек.
+        </p>
+        <p class="guide-text muted">
+          Свайп снизу вверх по столу — настройки. Свайп сверху вниз — это руководство.
+          Свайп снизу вверх по самому руководству — закрыть его.
+          Любое открытое окошко ставит игру на паузу. Закрыть окошко — тап за его пределами.
+        </p>
+      </div>
+      <div class="guide-text-page" data-page="2">
+        <!-- пустая страница справа -->
+      </div>
     </div>
     <button id="btn-support-panel" type="button">Поддержать</button>
   </div>
@@ -4183,6 +4203,7 @@ const UI = (() => {
     el.guidePrevBtn = document.getElementById('guide-prev-btn');
     el.guideNextBtn = document.getElementById('guide-next-btn');
     el.guideTextPages = document.querySelectorAll('.guide-text-page');
+    el.guideTextViewport = document.getElementById('guide-text-viewport');
 
     el.setLanguage       = document.getElementById('set-language');
     el.setDifficulty     = document.getElementById('set-difficulty');
@@ -4201,6 +4222,7 @@ const UI = (() => {
 
     applyCardStyle();
     applySettingsToUI();
+    initGuidePages();
   }
 
   function updateOverlayState() {
@@ -4221,6 +4243,7 @@ const UI = (() => {
   function openGuidePanel() {
     el.bottomPanel.classList.remove('open');
     el.guidePanel.classList.add('open');
+    resetGuidePage();
     updateOverlayState();
   }
   function closeGuidePanel() {
@@ -4231,6 +4254,63 @@ const UI = (() => {
     el.bottomPanel.classList.remove('open');
     el.guidePanel.classList.remove('open');
     updateOverlayState();
+  }
+
+  let guidePageIndex = 1;
+  const GUIDE_MIDDLE = 1;
+
+  function initGuidePages() {
+    const pages = el.guideTextPages;
+    if (!pages || pages.length === 0) return;
+    for (let i = 0; i < pages.length; i++) {
+      const p = pages[i];
+      p.classList.remove('active', 'offscreen-left', 'offscreen-right');
+      if (i < GUIDE_MIDDLE) p.classList.add('offscreen-left');
+      else if (i > GUIDE_MIDDLE) p.classList.add('offscreen-right');
+      else p.classList.add('active');
+    }
+    guidePageIndex = GUIDE_MIDDLE;
+  }
+
+  function setGuidePage(index) {
+    const pages = el.guideTextPages;
+    if (!pages || pages.length === 0) return;
+    if (index < 0) index = 0;
+    if (index > pages.length - 1) index = pages.length - 1;
+    if (index === guidePageIndex) return;
+
+    guidePageIndex = index;
+
+    for (let i = 0; i < pages.length; i++) {
+      const p = pages[i];
+      p.classList.remove('active', 'offscreen-left', 'offscreen-right');
+      if (i < index) p.classList.add('offscreen-left');
+      else if (i > index) p.classList.add('offscreen-right');
+      else p.classList.add('active');
+    }
+  }
+
+  function guideNext() {
+    const pages = el.guideTextPages;
+    if (!pages) return;
+    if (guidePageIndex >= pages.length - 1) return;
+    setGuidePage(guidePageIndex + 1);
+  }
+  function guidePrev() {
+    if (guidePageIndex <= 0) return;
+    setGuidePage(guidePageIndex - 1);
+  }
+  function resetGuidePage() {
+    guidePageIndex = GUIDE_MIDDLE;
+    const pages = el.guideTextPages;
+    if (!pages) return;
+    for (let i = 0; i < pages.length; i++) {
+      const p = pages[i];
+      p.classList.remove('active', 'offscreen-left', 'offscreen-right');
+      if (i < GUIDE_MIDDLE) p.classList.add('offscreen-left');
+      else if (i > GUIDE_MIDDLE) p.classList.add('offscreen-right');
+      else p.classList.add('active');
+    }
   }
 
   function openTraining() {
@@ -4643,14 +4723,14 @@ const UI = (() => {
     }
 
     if (total === 1) {
-      if (el.placeLine) el.placeLine.innerHTML = '';
+      if (el.placeLine) el.placeLine.textContent = '';
       if (el.headsUpLine) el.headsUpLine.classList.add('hidden');
       el.placeCenter.classList.remove('hidden');
       return;
     }
 
     if (total === 2) {
-      if (el.placeLine) el.placeLine.innerHTML = '';
+      if (el.placeLine) el.placeLine.textContent = '';
       if (el.headsUpLine) {
         el.headsUpLine.textContent = 'Heads-Up';
         el.headsUpLine.classList.remove('hidden');
@@ -4669,9 +4749,7 @@ const UI = (() => {
       heroPlace = total;
     }
 
-    if (el.placeLine) {
-      el.placeLine.textContent = `Rank: ${heroPlace}/${total}\u00A0\u00A0ITM: 3`;
-    }
+    if (el.placeLine) el.placeLine.textContent = 'Rank: ' + heroPlace + '/' + total + '\u00A0\u00A0ITM: 3';
     if (el.headsUpLine) el.headsUpLine.classList.add('hidden');
     el.placeCenter.classList.remove('hidden');
   }
@@ -5329,6 +5407,7 @@ const UI = (() => {
   }
 
   let fireworkTimers = [];
+  let finalAutoReloadTimer = null;
 
   function clearFireworks() {
     for (const t of fireworkTimers) clearTimeout(t);
@@ -5363,35 +5442,41 @@ const UI = (() => {
     fireworkTimers.push(cleanup);
   }
 
-  let fireworksRepeatTimer = null;
-
   function launchFinaleFireworks() {
     clearFireworks();
-    if (fireworksRepeatTimer) { clearInterval(fireworksRepeatTimer); fireworksRepeatTimer = null; }
     if (!el.finalOverlay) return;
 
-    const tableEl = document.getElementById('poker-table');
-    if (!tableEl) return;
-
-    const tableRect = tableEl.getBoundingClientRect();
+    const tableEl = document.getElementById('poker-table-wood') || document.getElementById('poker-table');
+    const tableRect = tableEl ? tableEl.getBoundingClientRect() : el.finalOverlay.getBoundingClientRect();
+    const overlayRect = el.finalOverlay.getBoundingClientRect();
 
     const colors = ['#ffcb2b', '#ffe680', '#ffffff', '#e0a800', '#ff4f8b', '#4fd6ff'];
 
-    function spawnRandomBurst() {
+    const spawnRandom = () => {
       if (!el.finalOverlay.classList.contains('visible')) return;
-      const ox = Math.random() * tableRect.width;
-      const oy = Math.random() * tableRect.height;
-      spawnFirework(el.finalOverlay, tableRect.left + ox, tableRect.top + oy, colors);
-    }
+      const oxInTable = Math.random() * tableRect.width;
+      const oyInTable = Math.random() * tableRect.height;
+      const pageX = tableRect.left + oxInTable;
+      const pageY = tableRect.top + oyInTable;
+      const localX = pageX - overlayRect.left;
+      const localY = pageY - overlayRect.top;
+      spawnFirework(el.finalOverlay, localX, localY, colors);
+    };
 
-    for (let burst = 0; burst < 6; burst++) {
-      const t = setTimeout(() => {
-        spawnRandomBurst();
-      }, burst * 260);
+    for (let burst = 0; burst < 10; burst++) {
+      const t = setTimeout(spawnRandom, burst * 320);
       fireworkTimers.push(t);
     }
 
-    fireworksRepeatTimer = setInterval(spawnRandomBurst, 500);
+    const repeat = setInterval(() => {
+      if (!el.finalOverlay.classList.contains('visible')) {
+        clearInterval(repeat);
+        return;
+      }
+      spawnRandom();
+    }, 550);
+
+    fireworkTimers.push(setTimeout(() => clearInterval(repeat), 60 * 60 * 1000));
   }
 
   function showWinnerFinal() {
@@ -5402,6 +5487,11 @@ const UI = (() => {
     `;
     showFinalOverlay();
     launchFinaleFireworks();
+
+    if (finalAutoReloadTimer) clearTimeout(finalAutoReloadTimer);
+    finalAutoReloadTimer = setTimeout(() => {
+      window.location.reload();
+    }, 60 * 1000);
   }
 
   let trainingPageIndex = 0;
@@ -5459,45 +5549,6 @@ const UI = (() => {
     if (el.trainingNextBtn) el.trainingNextBtn.disabled = (pages.length <= 1);
   }
 
-  let guidePageIndex = 0;
-  function setGuidePage(index) {
-    const pages = el.guideTextPages;
-    if (!pages || pages.length === 0) return;
-    if (index < 0) index = 0;
-    if (index > pages.length - 1) index = pages.length - 1;
-
-    guidePageIndex = index;
-
-    for (let i = 0; i < pages.length; i++) {
-      const p = pages[i];
-      p.classList.remove('active', 'offscreen-left', 'offscreen-right');
-      if (i < index) p.classList.add('offscreen-left');
-      else if (i > index) p.classList.add('offscreen-right');
-      else p.classList.add('active');
-    }
-  }
-  function guideNext() {
-    const pages = el.guideTextPages;
-    if (!pages) return;
-    if (guidePageIndex >= pages.length - 1) return;
-    setGuidePage(guidePageIndex + 1);
-  }
-  function guidePrev() {
-    if (guidePageIndex <= 0) return;
-    setGuidePage(guidePageIndex - 1);
-  }
-  function resetGuidePage() {
-    guidePageIndex = 0;
-    const pages = el.guideTextPages;
-    if (!pages) return;
-    for (let i = 0; i < pages.length; i++) {
-      const p = pages[i];
-      p.classList.remove('active', 'offscreen-left', 'offscreen-right');
-      if (i === 0) p.classList.add('active');
-      else p.classList.add('offscreen-right');
-    }
-  }
-
   return {
     settings, init, el,
     renderTable, updateSeats, updateBoard, updatePot, updateLevel,
@@ -5547,7 +5598,6 @@ const UI = (() => {
     panelsPaused: false,
     trainingPaused: false,
     finalShown: false,
-    reloadTimerId: null,
 
     heroTimerIntervalId: null,
     heroTimerTimeoutId: null,
@@ -5567,15 +5617,6 @@ const UI = (() => {
   const el = {};
 
   const DOUBLE_TAP_WINDOW = 500;
-
-  const RELOAD_DELAY_MS = 60000;
-
-  function reloadPageAfterDelay() {
-    if (session.reloadTimerId) clearTimeout(session.reloadTimerId);
-    session.reloadTimerId = setTimeout(() => {
-      try { window.location.reload(); } catch (e) {}
-    }, RELOAD_DELAY_MS);
-  }
 
   window.__ptRestartCallback = () => {
     UI.hideFinalOverlay();
@@ -5630,8 +5671,8 @@ const UI = (() => {
     el.btnTestTop1    = document.getElementById('btn-test-top1');
     el.trainingPrevBtn = document.getElementById('training-prev-btn');
     el.trainingNextBtn = document.getElementById('training-next-btn');
-    el.guidePrevBtn   = document.getElementById('guide-prev-btn');
-    el.guideNextBtn   = document.getElementById('guide-next-btn');
+    el.guidePrevBtn = document.getElementById('guide-prev-btn');
+    el.guideNextBtn = document.getElementById('guide-next-btn');
   }
 
   function bindDesktopDoubleClick() {
@@ -5890,7 +5931,6 @@ const UI = (() => {
         e.stopPropagation();
         closeTrainingWindow();
         UI.showWinnerFinal();
-        reloadPageAfterDelay();
       });
     }
 
@@ -6394,6 +6434,8 @@ const UI = (() => {
     processTurn();
   }
 
+  let botTournamentReloadTimer = null;
+
   function handleTournamentEnd(alive) {
     if (session.finalShown) return;
     session.finalShown = true;
@@ -6403,9 +6445,11 @@ const UI = (() => {
 
     if (heroIsWinner) {
       UI.showWinnerFinal();
-      reloadPageAfterDelay();
     } else {
-      reloadPageAfterDelay();
+      if (botTournamentReloadTimer) clearTimeout(botTournamentReloadTimer);
+      botTournamentReloadTimer = setTimeout(() => {
+        window.location.reload();
+      }, 60 * 1000);
     }
   }
 
