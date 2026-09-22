@@ -1647,24 +1647,21 @@ button.disabled {
         <div id="swipe-center"></div>
         <div id="board-area">
           <div id="top-info">
-            <div id="pot-display">Банк: 0</div>
+            <div id="pot-display">Pot: 0</div>
           </div>
           <div id="board-cards-wrap">
             <div id="board-brand-label">POKER TRAINER</div>
             <div id="board-cards"></div>
           </div>
           <div id="table-info">
-            <div class="info-row" id="info-blinds-row">Блайнды: 10/20</div>
-            <div class="info-row faded" id="info-ante-row"></div>
-            <div class="info-row faded" id="info-timer-row">Через 10 раздач</div>
-            <div class="info-row faded" id="info-next-blinds-row">15/30</div>
+            <div class="info-row" id="info-blinds-row">Blinds: 10/20</div>
+            <div class="info-row faded" id="info-timer-row">10 hands: 15/30</div>
           </div>
         </div>
         <div id="seats"></div>
 
         <div id="place-center">
-          <div class="place-line" id="place-line">Место: 1/8</div>
-          <div class="prize-line" id="prize-line">Призовые: 3</div>
+          <div class="place-line" id="place-line">Rank: 1/8 | ITM: 3</div>
           <div class="heads-up-line hidden" id="heads-up-line">Один на Один</div>
         </div>
 
@@ -3821,8 +3818,8 @@ const UI = (() => {
     { x: 14, y: 9,  side: 'left',   offsetY: 2 + 1 },
     { x: 50, y: 9,  side: 'top',    offsetY: 2 + 1 },
     { x: 86, y: 9,  side: 'right',  offsetY: 2 + 1 },
-    { x: 86, y: 32, side: 'right',  offsetY: 3 + 1 - 2 },
-    { x: 86, y: 56, side: 'right',  offsetY: 1 + 1 - 6 }
+    { x: 86, y: 32, side: 'right',  offsetY: 3 + 1 - 2 - 1 },
+    { x: 86, y: 56, side: 'right',  offsetY: 1 + 1 - 6 - 3 }
   ];
 
   const SUIT_CLASS = { s: 'suit-spades', h: 'suit-hearts', d: 'suit-diamonds', c: 'suit-clubs' };
@@ -4355,8 +4352,7 @@ const UI = (() => {
     }
 
     if (total === 1) {
-      if (el.placeLine) el.placeLine.textContent = 'ЧЕМПИОН';
-      if (el.prizeLine) el.prizeLine.textContent = '';
+      if (el.placeLine) el.placeLine.textContent = 'CHAMPION';
       if (el.headsUpLine) el.headsUpLine.classList.add('hidden');
       el.placeCenter.classList.remove('hidden');
       return;
@@ -4364,9 +4360,8 @@ const UI = (() => {
 
     if (total === 2) {
       if (el.placeLine) el.placeLine.textContent = '';
-      if (el.prizeLine) el.prizeLine.textContent = '';
       if (el.headsUpLine) {
-        el.headsUpLine.textContent = 'Один на Один';
+        el.headsUpLine.textContent = 'Heads-Up';
         el.headsUpLine.classList.remove('hidden');
       }
       el.placeCenter.classList.remove('hidden');
@@ -4383,8 +4378,7 @@ const UI = (() => {
       heroPlace = total;
     }
 
-    if (el.placeLine) el.placeLine.textContent = `Место: ${heroPlace}/${total}`;
-    if (el.prizeLine) el.prizeLine.textContent = 'Призовые: 3';
+    if (el.placeLine) el.placeLine.textContent = `Rank: ${heroPlace}/${total} | ITM: 3`;
     if (el.headsUpLine) el.headsUpLine.classList.add('hidden');
     el.placeCenter.classList.remove('hidden');
   }
@@ -4417,29 +4411,20 @@ const UI = (() => {
   }
 
   function updatePot(state) {
-    el.potDisplay.textContent = 'Банк: ' + formatChips(state.pot, state);
+    el.potDisplay.textContent = 'Pot: ' + formatChips(state.pot, state);
   }
 
   function updateLevel(state) {
     const b = state.blinds || Engine.getBlindLevel(state.levelIndex);
-    el.infoBlindsRow.textContent = `Блайнды: ${b.sb}/${b.bb}`;
-    if (b.ante > 0) {
-      el.infoAnteRow.textContent = `Анте: ${b.ante}`;
-      el.infoAnteRow.classList.remove('faded');
-      el.infoAnteRow.style.opacity = '1';
-    } else {
-      el.infoAnteRow.textContent = '';
-      el.infoAnteRow.classList.add('faded');
-      el.infoAnteRow.style.opacity = '0.45';
-    }
+    const anteStr = (b.ante > 0) ? ` (${b.ante})` : '';
+    el.infoBlindsRow.textContent = `Blinds: ${b.sb}/${b.bb}${anteStr}`;
 
     const period = settings.blindGrowthHands || 10;
     const left = period - (state.handsAtLevel || 0);
-    el.infoTimerRow.textContent = `Через ${left} раздач`;
     const nextIdx = Math.min(state.levelIndex + 1, Engine.BLIND_LEVELS.length - 1);
     const next = Engine.BLIND_LEVELS[nextIdx];
-    const nextAnte = next.ante > 0 ? ` (${next.ante})` : '';
-    el.infoNextBlinds.textContent = `${next.sb}/${next.bb}${nextAnte}`;
+    const nextAnteStr = (next.ante > 0) ? ` (${next.ante})` : '';
+    el.infoTimerRow.textContent = `${left} hands: ${next.sb}/${next.bb}${nextAnteStr}`;
   }
 
   function createCardElement(card) {
@@ -5759,7 +5744,7 @@ const UI = (() => {
 
     session.heroIndex = 0;
     session.state = Engine.createInitialState(players);
-    session.state.buttonIndex = 7;
+    session.state.buttonIndex = Engine.cryptoRandomInt(8);
 
     UI.renderTable(session.state);
     UI.updateHistoryInfo(0, 0, false);
