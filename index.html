@@ -39,6 +39,7 @@
   --dash-inset: clamp(10px, 2vmin, 18px);
   --small-text: clamp(11px, 1.4vmin, 13px);
   --info-row-text: clamp(12px, 1.6vmin, 15px);
+  --place-text: clamp(12px, 1.6vmin, 15px);
 
   --nav-btn: clamp(32px, 4.4vmin, 38px);
   --nav-icon-size: clamp(16px, 2.4vmin, 19px);
@@ -302,7 +303,7 @@ button.disabled {
 #place-center {
   position: absolute;
   left: 50%;
-  top: calc(26% + 6px);
+  top: calc(26% + 6px + 2px);
   transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
@@ -321,7 +322,7 @@ button.disabled {
 #place-center.hidden { display: none; }
 #place-center .place-line,
 #place-center .heads-up-line {
-  font-size: clamp(13px, 1.7vmin, 16px);
+  font-size: var(--place-text);
   line-height: 1.2;
 }
 #place-center .heads-up-line.hidden { display: none; }
@@ -999,15 +1000,17 @@ button.disabled {
   position: relative;
   width: var(--table-col-w);
   max-width: 94vw;
+  height: 85%;
   background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
   border: 2px solid #3a3530;
   border-radius: 16px;
   box-shadow: 0 20px 60px rgba(0,0,0,.9), 0 0 80px rgba(255,203,43,.08);
   padding: clamp(20px, 4vmin, 28px) clamp(18px, 3.6vmin, 26px);
   text-align: left;
-  max-height: 85%;
   overflow: hidden;
   scrollbar-width: none;
+  display: flex;
+  flex-direction: column;
 }
 #training-window::-webkit-scrollbar { display: none; }
 
@@ -1030,11 +1033,11 @@ button.disabled {
 }
 
 .training-nav-btn {
-  width: calc(var(--hero-timer-size) - 8px);
-  height: calc(var(--hero-timer-size) - 8px);
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #3a3530, #1a1a1a 70%);
-  border: 1px solid #8a6508;
+  width: clamp(28px, 3.8vmin, 36px);
+  height: clamp(28px, 3.8vmin, 36px);
+  border-radius: 0;
+  background: transparent;
+  border: none;
   color: var(--gold);
   font-weight: 900;
   font-size: clamp(18px, 2.4vmin, 22px);
@@ -1048,42 +1051,41 @@ button.disabled {
   font-family: inherit;
   padding: 0;
   flex-shrink: 0;
+  box-shadow: none;
 }
 .training-nav-btn:active:not(:disabled) {
-  transform: scale(0.96);
+  transform: scale(0.9);
   filter: brightness(1.35);
 }
 .training-nav-btn:disabled {
-  opacity: 0.35;
+  opacity: 0.25;
   cursor: default;
 }
 
 #training-text-viewport {
   position: relative;
   overflow: hidden;
-  min-height: 200px;
+  flex: 1;
+  min-height: 0;
 }
 
 .training-text-page {
   transition: transform 0.5s ease, opacity 0.5s ease;
   will-change: transform, opacity;
+  position: absolute;
+  top: 0; left: 0; right: 0;
 }
 .training-text-page.offscreen-left {
   transform: translateX(-110%);
   opacity: 0;
-  position: absolute;
-  top: 0; left: 0; right: 0;
 }
 .training-text-page.offscreen-right {
   transform: translateX(110%);
   opacity: 0;
-  position: absolute;
-  top: 0; left: 0; right: 0;
 }
 .training-text-page.active {
   transform: translateX(0);
   opacity: 1;
-  position: relative;
 }
 
 .training-text {
@@ -1098,6 +1100,7 @@ button.disabled {
   display: flex;
   gap: 10px;
   margin-top: 16px;
+  flex-shrink: 0;
 }
 #training-test-buttons button {
   flex: 1;
@@ -1860,7 +1863,8 @@ button.disabled {
           </div>
           <div id="table-info">
             <div class="info-row" id="info-blinds-row">Blinds: 10/20</div>
-            <div class="info-row faded" id="info-timer-row">10 hands: 15/30</div>
+            <div class="info-row faded" id="info-timer-row">After 10 hands</div>
+            <div class="info-row faded" id="info-next-blinds-row">15/30</div>
           </div>
         </div>
         <div id="seats"></div>
@@ -4666,10 +4670,12 @@ const UI = (() => {
 
     const period = settings.blindGrowthHands || 10;
     const left = period - (state.handsAtLevel || 0);
+    el.infoTimerRow.textContent = `After ${left} hands`;
+
     const nextIdx = Math.min(state.levelIndex + 1, Engine.BLIND_LEVELS.length - 1);
     const next = Engine.BLIND_LEVELS[nextIdx];
     const nextAnteStr = (next.ante > 0) ? ` (${next.ante})` : '';
-    el.infoTimerRow.textContent = `${left} hands: ${next.sb}/${next.bb}${nextAnteStr}`;
+    el.infoNextBlinds.textContent = `${next.sb}/${next.bb}${nextAnteStr}`;
   }
 
   function createCardElement(card) {
@@ -5363,7 +5369,6 @@ const UI = (() => {
     if (index > pages.length - 1) index = pages.length - 1;
     if (index === trainingPageIndex && pages[trainingPageIndex].classList.contains('active')) return;
 
-    const oldIndex = trainingPageIndex;
     trainingPageIndex = index;
 
     for (let i = 0; i < pages.length; i++) {
