@@ -38,7 +38,7 @@
   --pct-block-w: clamp(88px, 13vmin, 110px);
   --dash-inset: clamp(10px, 2vmin, 18px);
   --small-text: clamp(11px, 1.4vmin, 13px);
-  --info-row-text: clamp(12px, 1.6vmin, 15px);
+  --info-row-text: clamp(11px, 1.5vmin, 14px);
   --place-text: clamp(12px, 1.6vmin, 15px);
 
   --nav-btn: clamp(32px, 4.4vmin, 38px);
@@ -1657,7 +1657,7 @@ button.disabled {
   border: none;
   padding: 0;
   margin: 0;
-  color: var(--text);
+  color: var(--gold);
   font-family: inherit;
   font-weight: 900;
   font-size: clamp(18px, 2.4vmin, 22px);
@@ -1672,6 +1672,14 @@ button.disabled {
   justify-content: center;
   -webkit-tap-highlight-color: transparent;
   outline: none;
+  transition: transform .08s ease, filter .08s ease;
+}
+.guide-nav-btn:active:not(:disabled) {
+  transform: scale(0.9);
+  filter: brightness(1.35);
+}
+.guide-nav-btn:disabled {
+  cursor: default;
 }
 
 #guide-text-viewport {
@@ -1816,7 +1824,7 @@ button.disabled {
 
 #final-window {
   position: relative;
-  width: min(90%, 380px);
+  width: min(81%, 342px);
   aspect-ratio: 1 / 1;
   border-radius: 50%;
   background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
@@ -1850,7 +1858,7 @@ button.disabled {
 #final-window .final-trophy {
   position: relative;
   z-index: 1;
-  font-size: clamp(162px, 36vmin, 315px);
+  font-size: clamp(146px, 32.4vmin, 283px);
   line-height: 1;
   filter: drop-shadow(0 6px 22px rgba(255,203,43,.65));
 }
@@ -1905,8 +1913,7 @@ button.disabled {
           </div>
           <div id="table-info">
             <div class="info-row" id="info-blinds-row">Blinds: 10/20</div>
-            <div class="info-row faded" id="info-timer-row">After 10 hands</div>
-            <div class="info-row faded" id="info-next-blinds-row">15/30</div>
+            <div class="info-row faded" id="info-timer-row">10 hands: 15/30</div>
           </div>
         </div>
         <div id="seats"></div>
@@ -4792,12 +4799,10 @@ const UI = (() => {
 
     const period = settings.blindGrowthHands || 10;
     const left = period - (state.handsAtLevel || 0);
-    el.infoTimerRow.textContent = `After ${left} hands`;
-
     const nextIdx = Math.min(state.levelIndex + 1, Engine.BLIND_LEVELS.length - 1);
     const next = Engine.BLIND_LEVELS[nextIdx];
     const nextAnteStr = (next.ante > 0) ? ` (${next.ante})` : '';
-    el.infoNextBlinds.textContent = `${next.sb}/${next.bb}${nextAnteStr}`;
+    el.infoTimerRow.textContent = `${left} hands: ${next.sb}/${next.bb}${nextAnteStr}`;
   }
 
   function createCardElement(card) {
