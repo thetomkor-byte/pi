@@ -38,6 +38,7 @@
   --pct-block-w: clamp(88px, 13vmin, 110px);
   --dash-inset: clamp(10px, 2vmin, 18px);
   --small-text: clamp(11px, 1.4vmin, 13px);
+  --place-text-size: clamp(13px, 1.7vmin, 16px);
 
   --nav-btn: clamp(32px, 4.4vmin, 38px);
   --nav-icon-size: clamp(16px, 2.4vmin, 19px);
@@ -282,7 +283,7 @@ button.disabled {
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  font-size: clamp(11px, 1.4vmin, 14px);
+  font-size: var(--place-text-size);
   color: var(--text);
   font-weight: 700;
   text-shadow: 0 1px 4px rgba(0,0,0,.95);
@@ -317,7 +318,7 @@ button.disabled {
 #place-center.hidden { display: none; }
 #place-center .place-line,
 #place-center .prize-line {
-  font-size: clamp(13px, 1.7vmin, 16px);
+  font-size: var(--place-text-size);
   line-height: 1.2;
 }
 
@@ -675,6 +676,43 @@ button.disabled {
 }
 
 #support-window h3 {
+  color: var(--gold);
+  font-size: clamp(12px, 1.8vmin, 15px);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 18px;
+  font-weight: 900;
+  text-align: center;
+}
+
+/* Окно «Тренировка» — стиль как у поддержки, но свой слой */
+#training-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  z-index: 160;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  touch-action: none;
+}
+#training-overlay.visible { display: flex; }
+
+#training-window {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
+  border: 2px solid #3a3530;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.9), 0 0 80px rgba(255,203,43,.08);
+  padding: clamp(20px, 4vmin, 28px) clamp(18px, 3.6vmin, 26px);
+  text-align: center;
+  min-height: 40vh;
+}
+
+#training-window h3 {
   color: var(--gold);
   font-size: clamp(12px, 1.8vmin, 15px);
   text-transform: uppercase;
@@ -1342,7 +1380,7 @@ button.disabled {
   padding: 24px 20px calc(30px + var(--safe-bottom));
   transition: transform .28s ease;
   z-index: 140;
-  max-height: 72vh;
+  max-height: calc(100dvh - var(--safe-top) - 12px);
   overflow-y: auto;
   touch-action: pan-y;
   scrollbar-width: none;
@@ -1607,8 +1645,8 @@ button.disabled {
         <div id="seats"></div>
 
         <div id="place-center">
-          <div class="place-line" id="place-line">Место: 1/8</div>
-          <div class="prize-line" id="prize-line">Следующий приз: 3</div>
+          <div class="place-line" id="place-line">Моё место: 1/8</div>
+          <div class="prize-line" id="prize-line">Призовые места: 3</div>
         </div>
 
         <div id="hero-timer-zone"></div>
@@ -1624,6 +1662,7 @@ button.disabled {
         <div id="top-round-row">
           <button id="settings-card-btn" class="round-help-btn" type="button" aria-label="Поддержать">$</button>
           <button id="settings-help-btn" class="round-help-btn" type="button" aria-label="Руководство">?</button>
+          <button id="settings-training-btn" class="round-help-btn" type="button" aria-label="Тренировка">!</button>
         </div>
 
         <div id="hero-actions" class="inactive">
@@ -1812,6 +1851,12 @@ button.disabled {
     <div id="support-copied">Скопировано</div>
   </div>
 
+  <div id="training-overlay">
+    <div id="training-window">
+      <h3>ТРЕНИРОВКА</h3>
+    </div>
+  </div>
+
   <div id="start-overlay">
     <div class="start-card">
       <h1><span class="spade">♠</span> Poker Trainer</h1>
@@ -1977,6 +2022,7 @@ button.disabled {
   } catch (e) {}
 })();
 </script>
+
 <script>
 /* ============================================================
    ENGINE
@@ -3025,14 +3071,11 @@ const Model = (() => {
 
 
 /* ============================================================
-   META — мета-игра: level 3, level 4, смена образа, bluff timing
+   META
    ============================================================ */
 
 const Meta = (() => {
 
-  // Для каждого PRO-бота — счётчик раздач и текущий образ.
-  // Образ: 'tight' | 'normal' | 'aggressive'
-  // Меняется каждые N раздач у LAG-Pro (мета-игра).
   const botImages = new Map();
 
   function getBotImage(botId, profile) {
@@ -3040,57 +3083,44 @@ const Meta = (() => {
       botImages.set(botId, {
         image: 'normal',
         handsInImage: 0,
-        imageDuration: profile && profile.aggression > 0.85 ? 20 : 999 // LAG меняет образ каждые 20 рук
+        imageDuration: profile && profile.aggression > 0.85 ? 20 : 999
       });
     }
     return botImages.get(botId);
   }
 
-  // Обновляем образ по количеству раздач. Вызывается в конце каждой раздачи.
   function tickImage(botId, profile) {
     const img = getBotImage(botId, profile);
     img.handsInImage++;
     if (img.handsInImage >= img.imageDuration) {
       img.handsInImage = 0;
-      // LAG-Pro меняет образ: tight → aggressive → normal → tight …
       if (img.image === 'normal') img.image = 'aggressive';
       else if (img.image === 'aggressive') img.image = 'tight';
       else img.image = 'normal';
     }
   }
 
-  // Модификатор к агрессии и ширине по текущему образу
   function imageModifiers(image) {
     if (image === 'tight') return { aggression: -0.15, looseness: -0.12, bluff: -0.10 };
     if (image === 'aggressive') return { aggression: 0.15, looseness: 0.12, bluff: 0.12 };
     return { aggression: 0, looseness: 0, bluff: 0 };
   }
 
-  // Level 3: «он думает, что я думаю, что он думает».
-  // Простая модель: если соперник проявляет агрессию часто — значит, он думает, что мы слабы.
-  // Значит, у него может быть больше блефов. Наш bluff-catch расширяется.
   function level3BluffCatchModifier(oppRead) {
     if (!oppRead || oppRead.hands < 8) return 0;
-    // Чем агрессивнее соперник, тем больше у него блефов, тем шире ловим
     const aggr = oppRead.aggression;
-    // Чем чаще он фолдит, тем меньше у него блефов
     const fold = oppRead.foldTendency;
     return Math.max(-0.15, Math.min(0.25, aggr * 0.4 - fold * 0.2));
   }
 
-  // Level 4: «я знаю, что он знает мой образ».
-  // Если мы сами играем агрессивно последние N рук, соперник будет ловить нас шире.
-  // Значит, нам нужно сузить блеф-частоту.
   function level4BluffReduction(botId, profile) {
     const img = getBotImage(botId, profile);
     if (img.image === 'aggressive' && img.handsInImage > 10) {
-      return 0.4; // сокращаем блеф на 40%
+      return 0.4;
     }
     return 1.0;
   }
 
-  // Bluff timing: выбираем момент для блефа по ситуации.
-  // Возвращает true, если сейчас хороший момент.
   function goodBluffSpot(ctx, profile) {
     if (!profile.proThinking) return Math.random() < profile.bluff * 0.25;
 
@@ -3098,39 +3128,25 @@ const Meta = (() => {
     const board = ctx.board || [];
     if (board.length < 3) return false;
 
-    // Хорошие борды для блефа: сухие, с высокой картой, без пар
     let score = 0;
-
-    // Сухость борда
     score += (1 - texture.wet) * 0.3;
-
-    // Нет пары на борде — легче изобразить сильную руку
     if (!texture.paired) score += 0.2;
 
-    // Соперник часто фолдит — он сдастся
     if (ctx.oppRead && ctx.oppRead.hands >= 6) {
       score += ctx.oppRead.foldTendency * 0.4;
     } else {
       score += 0.15;
     }
 
-    // Мы в позиции — легче баррелить
     if (ctx.position === 'BTN' || ctx.position === 'CO') score += 0.1;
-
-    // Много игроков — хуже для блефа
     if (ctx.numActive > 2) score -= 0.2;
-
-    // Если у нас есть блокеры к сильным рукам — лучше
     if (ctx.heroBlockers && ctx.heroBlockers > 0.3) score += 0.15;
 
     return score > 0.55;
   }
 
-  // Тонкий bluff-catch: считаем, есть ли достаточно блефов в диапазоне соперника.
-  // Возвращает true, если колл оправдан по комбинаторике.
   function thinBluffCatch(ctx, profile) {
     if (!profile.proThinking) return false;
-
     const board = ctx.board || [];
     if (board.length < 4) return false;
 
@@ -3139,15 +3155,10 @@ const Meta = (() => {
 
     const heroHole = [ctx.card1, ctx.card2];
     const blockers = Math2.blockerEffect(heroHole, oppRange);
-
-    // Alpha — сколько блефов должно быть у соперника, чтобы наш колл был безразличен
     const alph = Math2.alpha(ctx.toCall, ctx.pot);
 
-    // Если у соперника по нашим картам меньше комбинаций сильных рук (мы блокируем натсы)
-    // и alpha достаточно высокая — колл оправдан
     if (blockers > 0.15 && alph > 0.25) return true;
 
-    // Если соперник агрессивный и у нас сильные блокеры — колл оправдан
     if (ctx.oppRead && ctx.oppRead.hands >= 8) {
       const aggr = ctx.oppRead.aggression;
       if (aggr > 0.5 && blockers > 0.1) return true;
@@ -3156,7 +3167,6 @@ const Meta = (() => {
     return false;
   }
 
-  // Сброс всей мета-статистики
   function reset() {
     botImages.clear();
   }
@@ -3419,17 +3429,11 @@ const Bots = (() => {
     }
   }
 
-  function applyICMToThreshold(ctx, baseThreshold) {
-    if (!ctx.icmBubbleFactor) return baseThreshold;
-    return ICM.adjustedCallThreshold(baseThreshold, ctx.icmBubbleFactor);
-  }
-
   function decide(ctx) {
     const profile = PROFILES[ctx.botType];
     if (!profile) return { action: 'fold', amount: 0 };
     const typeMeta = TYPES[ctx.botType] || {};
 
-    // Мета: получаем модификаторы образа для этого бота
     let effProfile = profile;
     if (typeMeta.useMeta) {
       const img = Meta.getBotImage(ctx.botId, profile);
@@ -3611,7 +3615,6 @@ const Bots = (() => {
     }
 
     if (toCall === 0) {
-      // Trap-игра
       if (profile.proThinking && profile.aggression > 0.6 && strength > 0.85 && street === 'flop') {
         if (Math.random() < 0.35 * profile.adaptivity) {
           return { action: 'check', amount: 0 };
@@ -3628,7 +3631,6 @@ const Bots = (() => {
         return { action: 'raise', amount: Math.min(myStack, Math.max(bb, betSize)) };
       }
 
-      // Bluff timing через Meta
       if (typeMeta.useMeta && profile.proThinking) {
         if (Meta.goodBluffSpot(ctx, profile)) {
           const bluffSize = Math.round(pot * 0.65);
@@ -3655,7 +3657,6 @@ const Bots = (() => {
       adjustedThreshold = Math.min(0.95, profile.callThreshold + (ctx.icmBubbleFactor - 1) * 0.2);
     }
 
-    // Level 3: расширяем bluff-catch против агрессивного соперника
     let bluffCatchBonus = 0;
     if (typeMeta.useMeta && profile.proThinking && ctx.oppRead) {
       bluffCatchBonus = Meta.level3BluffCatchModifier(ctx.oppRead);
@@ -3669,7 +3670,6 @@ const Bots = (() => {
       }
     }
 
-    // Тонкий bluff-catch через Meta
     if (typeMeta.useMeta && profile.proThinking && street === 'river') {
       if (Meta.thinBluffCatch(ctx, profile)) {
         return { action: 'call', amount: toCall };
@@ -3685,12 +3685,10 @@ const Bots = (() => {
       return { action: 'call', amount: toCall };
     }
 
-    // Применяем Level 3 модификатор к порогу
     const effectiveThreshold = adjustedThreshold - bluffCatchBonus;
 
     if (strength > effectiveThreshold && strength > potOdds * 1.5) return { action: 'call', amount: toCall };
 
-    // Level 4: сокращаем блефы, если наш образ читается
     let bluffFreq = profile.bluff * 0.15;
     if (typeMeta.useMeta) {
       bluffFreq *= Meta.level4BluffReduction(ctx.botId, profile);
@@ -3748,6 +3746,16 @@ const UI = (() => {
   const SUIT_SYMBOL = { s: '♠', h: '♥', d: '♦', c: '♣' };
   const RANK_DISPLAY = { T: '10' };
 
+  // Дополнительные вертикальные сдвиги (после общего transform).
+  // Место 1 — вверх на 6px, место 2 — вверх на 2px, место 6 — вверх на 2px, место 7 — вверх на 6px.
+  // Остальные — без изменений.
+  const SEAT_Y_OFFSETS = {
+    1: -6,
+    2: -2,
+    6: -2,
+    7: -6
+  };
+
   function init() {
     el.seats          = document.getElementById('seats');
     el.boardCards     = document.getElementById('board-cards');
@@ -3791,10 +3799,12 @@ const UI = (() => {
     el.btnSupportPanel = document.getElementById('btn-support-panel');
     el.settingsHelpBtn = document.getElementById('settings-help-btn');
     el.settingsCardBtn = document.getElementById('settings-card-btn');
+    el.settingsTrainingBtn = document.getElementById('settings-training-btn');
     el.topRoundRow     = document.getElementById('top-round-row');
     el.gmailBtn        = document.getElementById('gmail-btn');
     el.tgBtn           = document.getElementById('tg-btn');
     el.belcardStack    = document.getElementById('belcard-stack');
+    el.trainingOverlay = document.getElementById('training-overlay');
 
     el.setLanguage       = document.getElementById('set-language');
     el.setDifficulty     = document.getElementById('set-difficulty');
@@ -3857,7 +3867,8 @@ const UI = (() => {
 
   function anyOverlayOpen() {
     return anyPanelOpen() ||
-           (el.supportOverlay && el.supportOverlay.classList.contains('visible'));
+           (el.supportOverlay && el.supportOverlay.classList.contains('visible')) ||
+           (el.trainingOverlay && el.trainingOverlay.classList.contains('visible'));
   }
 
   function setReplayButtonState(state) {
@@ -3948,6 +3959,34 @@ const UI = (() => {
     fill.style.strokeDashoffset = String(circumference * (1 - ratio));
   }
 
+  // Возвращает "виртуальный" номер места для отображения (для хедз-апа)
+  function displaySeatIndexFor(player, state) {
+    const alive = (state.players || []).filter(p => !p.eliminated);
+    if (alive.length === 2) {
+      // Хедз-ап
+      if (player.isHero) return 0;
+      const hero = state.players.find(p => p.isHero);
+      if (hero && !hero.eliminated) {
+        // Герой жив — второй игрок на место 4
+        return 4;
+      }
+      // Герой вылетел — два бота: левый на 2, правый на 6
+      const bots = alive.filter(p => !p.isHero);
+      if (bots.length === 2) {
+        // Сортируем по x-координате исходного места
+        const sorted = bots.slice().sort((a, b) => {
+          const ax = SEAT_POSITIONS[a.seatIndex] ? SEAT_POSITIONS[a.seatIndex].x : 0;
+          const bx = SEAT_POSITIONS[b.seatIndex] ? SEAT_POSITIONS[b.seatIndex].x : 0;
+          return ax - bx;
+        });
+        if (player.id === sorted[0].id) return 2;
+        if (player.id === sorted[1].id) return 6;
+      }
+      return 4;
+    }
+    return player.seatIndex;
+  }
+
   function renderTable(state) {
     el.seats.innerHTML = '';
     for (const p of state.players) {
@@ -3957,6 +3996,7 @@ const UI = (() => {
     updateStacks(state);
     updatePot(state);
     updateLevel(state);
+    updatePlaceCenter(state);
     placeHeroTimer();
     placeTopRoundRow();
   }
@@ -3965,25 +4005,40 @@ const UI = (() => {
     const wasEliminatedBeforeHand = player.eliminated && !player.inHand;
     if (wasEliminatedBeforeHand) return null;
 
-    const pos = SEAT_POSITIONS[player.seatIndex] || { x: 50, y: 50, side: 'middle' };
+    const displaySeat = displaySeatIndexFor(player, state);
+    const pos = SEAT_POSITIONS[displaySeat] || { x: 50, y: 50, side: 'middle' };
+    const yOffset = SEAT_Y_OFFSETS[displaySeat] || 0;
+
     const seat = document.createElement('div');
     seat.className = 'seat';
     seat.id = `seat-${player.id}`;
     seat.style.left = pos.x + '%';
     seat.style.top  = pos.y + '%';
-    if (player.isHero) {
-      seat.style.transform = 'translate(-50%, calc(-50% - 18px))';
-    } else if (player.seatIndex === 1) {
-      seat.style.transform = 'translate(-50%, calc(-50% - 1px + 1px))';
-    } else if (player.seatIndex === 2) {
-      seat.style.transform = 'translate(-50%, calc(-50% + 4px + 1px))';
-    } else if (player.seatIndex === 6) {
-      seat.style.transform = 'translate(-50%, calc(-50% + 3px + 1px))';
-    } else if (player.seatIndex === 7) {
-      seat.style.transform = 'translate(-50%, calc(-50% + 1px + 1px))';
+
+    // Базовый transform как у этого места.
+    // Для мест 1, 2, 6, 7 добавляется вертикальный сдвиг yOffset (в px).
+    // Для остальных мест yOffset = 0.
+    let baseTransform;
+    if (displaySeat === 0) {
+      baseTransform = 'translate(-50%, calc(-50% - 18px))';
+    } else if (displaySeat === 1) {
+      baseTransform = 'translate(-50%, calc(-50% - 1px + 1px))';
+    } else if (displaySeat === 2) {
+      baseTransform = 'translate(-50%, calc(-50% + 4px + 1px))';
+    } else if (displaySeat === 6) {
+      baseTransform = 'translate(-50%, calc(-50% + 3px + 1px))';
+    } else if (displaySeat === 7) {
+      baseTransform = 'translate(-50%, calc(-50% + 1px + 1px))';
     } else {
-      seat.style.transform = 'translate(-50%, calc(-50% + 2px + 1px))';
+      baseTransform = 'translate(-50%, calc(-50% + 2px + 1px))';
     }
+
+    if (yOffset !== 0) {
+      seat.style.transform = `translate(-50%, calc(-50% + ${yOffset}px))`;
+    } else {
+      seat.style.transform = baseTransform;
+    }
+
     if (pos.side) seat.classList.add(pos.side);
     if (player.isHero) seat.classList.add('hero');
 
@@ -4024,14 +4079,49 @@ const UI = (() => {
   }
 
   function updateSeats(state, revealAll) {
+    const alive = state.players.filter(p => !p.eliminated);
+    const isHeadsUp = alive.length === 2;
+
+    // Удаляем те места, которые в текущем состоянии не должны существовать
+    for (const p of state.players) {
+      const seat = document.getElementById(`seat-${p.id}`);
+      const wasEliminatedBeforeHand = p.eliminated && !p.inHand;
+      if (wasEliminatedBeforeHand) {
+        if (seat && seat.parentNode) seat.parentNode.removeChild(seat);
+      }
+    }
+
+    // Перерисовываем полностью, чтобы корректно применить пересадку в хедз-апе
+    if (isHeadsUp) {
+      for (const p of state.players) {
+        const existing = document.getElementById(`seat-${p.id}`);
+        if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
+      }
+      for (const p of state.players) {
+        const wasEliminatedBeforeHand = p.eliminated && !p.inHand;
+        if (wasEliminatedBeforeHand) continue;
+        const newSeat = createSeatElement(p, state);
+        if (newSeat) el.seats.appendChild(newSeat);
+      }
+      for (const p of state.players) {
+        const wasEliminatedBeforeHand = p.eliminated && !p.inHand;
+        if (wasEliminatedBeforeHand) continue;
+        updateSeatContent(p, state, revealAll);
+      }
+      updateStacks(state);
+      updateActiveHighlight(state);
+      updatePlaceCenter(state);
+      placeHeroTimer();
+      placeTopRoundRow();
+      return;
+    }
+
+    // Обычный режим: обновляем места на месте
     for (const p of state.players) {
       const seat = document.getElementById(`seat-${p.id}`);
       const wasEliminatedBeforeHand = p.eliminated && !p.inHand;
 
-      if (wasEliminatedBeforeHand) {
-        if (seat && seat.parentNode) seat.parentNode.removeChild(seat);
-        continue;
-      }
+      if (wasEliminatedBeforeHand) continue;
 
       if (!seat) {
         const newSeat = createSeatElement(p, state);
@@ -4039,42 +4129,62 @@ const UI = (() => {
         continue;
       }
 
-      seat.querySelector('[data-role="pos"]').textContent = p.position || '—';
-      seat.classList.toggle('folded', p.folded && !p.eliminated);
+      // Проверяем, что место визуально стоит там, где нужно. Если нет — пересоздаём.
+      const displaySeat = displaySeatIndexFor(p, state);
+      const currentLeft = parseFloat(seat.style.left || '0');
+      const currentTop = parseFloat(seat.style.top || '0');
+      const expectedPos = SEAT_POSITIONS[displaySeat] || SEAT_POSITIONS[0];
+      if (Math.abs(currentLeft - expectedPos.x) > 0.5 || Math.abs(currentTop - expectedPos.y) > 0.5) {
+        if (seat.parentNode) seat.parentNode.removeChild(seat);
+        const newSeat = createSeatElement(p, state);
+        if (newSeat) el.seats.appendChild(newSeat);
+        continue;
+      }
 
-      const btn = seat.querySelector('[data-role="btn"]');
-      if (p.position === 'BTN') btn.classList.remove('hidden');
-      else btn.classList.add('hidden');
-
-      const stratBadge = seat.querySelector('[data-role="strat"]');
-      if (settings.showStrategies && p.botType && !p.isHero) {
-        const t = Bots.TYPES[p.botType];
-        if (t) {
-          stratBadge.textContent = t.label;
-          stratBadge.className = 'strat-badge ' + t.badgeClass;
-          stratBadge.classList.remove('hidden');
-        } else {
-          stratBadge.classList.add('hidden');
-        }
-      } else stratBadge.classList.add('hidden');
-
-      renderSeatCards(p, state, revealAll);
-
-      const betEl = seat.querySelector('[data-role="bet"]');
-      if (p.committedThisStreet > 0 && !p.folded && !state.handOver) {
-        betEl.textContent = formatChips(p.committedThisStreet, state);
-        betEl.classList.remove('hidden');
-      } else betEl.classList.add('hidden');
-
-      renderActionBadge(p, seat);
-      renderWinnerBadge(p, seat, state);
-      renderDelta(p, seat, state);
+      updateSeatContent(p, state, revealAll);
     }
+
     updateStacks(state);
     updateActiveHighlight(state);
     updatePlaceCenter(state);
     placeHeroTimer();
     placeTopRoundRow();
+  }
+
+  function updateSeatContent(p, state, revealAll) {
+    const seat = document.getElementById(`seat-${p.id}`);
+    if (!seat) return;
+
+    seat.querySelector('[data-role="pos"]').textContent = p.position || '—';
+    seat.classList.toggle('folded', p.folded && !p.eliminated);
+
+    const btn = seat.querySelector('[data-role="btn"]');
+    if (p.position === 'BTN') btn.classList.remove('hidden');
+    else btn.classList.add('hidden');
+
+    const stratBadge = seat.querySelector('[data-role="strat"]');
+    if (settings.showStrategies && p.botType && !p.isHero) {
+      const t = Bots.TYPES[p.botType];
+      if (t) {
+        stratBadge.textContent = t.label;
+        stratBadge.className = 'strat-badge ' + t.badgeClass;
+        stratBadge.classList.remove('hidden');
+      } else {
+        stratBadge.classList.add('hidden');
+      }
+    } else stratBadge.classList.add('hidden');
+
+    renderSeatCards(p, state, revealAll);
+
+    const betEl = seat.querySelector('[data-role="bet"]');
+    if (p.committedThisStreet > 0 && !p.folded && !state.handOver) {
+      betEl.textContent = formatChips(p.committedThisStreet, state);
+      betEl.classList.remove('hidden');
+    } else betEl.classList.add('hidden');
+
+    renderActionBadge(p, seat);
+    renderWinnerBadge(p, seat, state);
+    renderDelta(p, seat, state);
   }
 
   function renderActionBadge(p, seat) {
@@ -4218,6 +4328,23 @@ const UI = (() => {
     const total = alive.length;
     if (total <= 0) { el.placeCenter.classList.add('hidden'); return; }
 
+    if (total === 1) {
+      if (el.placeLine) el.placeLine.textContent = 'ЧЕМПИОН';
+      if (el.prizeLine) el.prizeLine.textContent = '';
+      if (el.prizeLine) el.prizeLine.style.display = 'none';
+      el.placeCenter.classList.remove('hidden');
+      return;
+    }
+
+    if (el.prizeLine) el.prizeLine.style.display = '';
+
+    if (total === 2) {
+      if (el.placeLine) el.placeLine.textContent = 'Один на Один';
+      if (el.prizeLine) el.prizeLine.textContent = '';
+      el.placeCenter.classList.remove('hidden');
+      return;
+    }
+
     const hero = players.find(p => p.isHero);
     let heroPlace = null;
     if (hero && !hero.eliminated) {
@@ -4228,17 +4355,8 @@ const UI = (() => {
       heroPlace = total;
     }
 
-    if (el.placeLine) el.placeLine.textContent = `Место: ${heroPlace}/${total}`;
-
-    if (el.prizeLine) {
-      if (total <= 1) {
-        el.prizeLine.textContent = 'ЧЕМПИОН';
-      } else if (total === 2) {
-        el.prizeLine.textContent = 'Следующий приз: 2';
-      } else {
-        el.prizeLine.textContent = 'Следующий приз: 3';
-      }
-    }
+    if (el.placeLine) el.placeLine.textContent = `Моё место: ${heroPlace}/${total}`;
+    if (el.prizeLine) el.prizeLine.textContent = 'Призовые места: 3';
 
     el.placeCenter.classList.remove('hidden');
   }
@@ -4650,6 +4768,16 @@ const UI = (() => {
     el.supportOverlay.classList.remove('visible');
   }
 
+  function showTrainingOverlay() {
+    if (!el.trainingOverlay) return;
+    el.trainingOverlay.classList.add('visible');
+  }
+
+  function hideTrainingOverlay() {
+    if (!el.trainingOverlay) return;
+    el.trainingOverlay.classList.remove('visible');
+  }
+
   function showSupportCopiedHint() {
     if (!el.supportCopied) return;
     el.supportCopied.classList.add('visible');
@@ -4897,6 +5025,7 @@ const UI = (() => {
     showHeroTimer, hideHeroTimer, updateHeroTimer, placeHeroTimer,
     placeTopRoundRow,
     showSupportOverlay, hideSupportOverlay, copySupportText,
+    showTrainingOverlay, hideTrainingOverlay,
     resetBelcardSwap, bindBelcardDrag
   };
 
@@ -4920,6 +5049,7 @@ const UI = (() => {
     isPaused: false,
     supportPaused: false,
     panelsPaused: false,
+    trainingPaused: false,
 
     heroTimerIntervalId: null,
     heroTimerTimeoutId: null,
@@ -4968,6 +5098,7 @@ const UI = (() => {
     el.btnSupportPanel = document.getElementById('btn-support-panel');
     el.settingsHelpBtn = document.getElementById('settings-help-btn');
     el.settingsCardBtn = document.getElementById('settings-card-btn');
+    el.settingsTrainingBtn = document.getElementById('settings-training-btn');
     el.topRoundRow     = document.getElementById('top-round-row');
     el.gmailBtn        = document.getElementById('gmail-btn');
     el.tgBtn           = document.getElementById('tg-btn');
@@ -4978,6 +5109,8 @@ const UI = (() => {
     el.supportWindow  = document.getElementById('support-window');
     el.belcardStack   = document.getElementById('belcard-stack');
     el.placeCenter    = document.getElementById('place-center');
+    el.trainingOverlay = document.getElementById('training-overlay');
+    el.trainingWindow  = document.getElementById('training-window');
   }
 
   function bindDesktopDoubleClick() {
@@ -5040,6 +5173,7 @@ const UI = (() => {
               target.closest('#quick-percent-list') ||
               target.closest('#hero-timer-zone') ||
               target.closest('#support-overlay') ||
+              target.closest('#training-overlay') ||
               target.closest('#top-round-row'));
   }
 
@@ -5125,6 +5259,21 @@ const UI = (() => {
       }, { passive: false });
     }
 
+    if (el.trainingOverlay) {
+      el.trainingOverlay.addEventListener('click', (e) => {
+        if (e.target === el.trainingOverlay) {
+          closeTrainingWindow();
+        }
+      });
+      el.trainingOverlay.addEventListener('touchend', (e) => {
+        if (e.target === el.trainingOverlay) {
+          e.preventDefault();
+          e.stopPropagation();
+          closeTrainingWindow();
+        }
+      }, { passive: false });
+    }
+
     if (el.supportWindow) {
       el.supportWindow.addEventListener('click', (e) => {
         if (e.target.closest('.belcard-paysend')) {
@@ -5199,6 +5348,19 @@ const UI = (() => {
       }, { passive: false });
     }
 
+    if (el.settingsTrainingBtn) {
+      el.settingsTrainingBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openTrainingWindow();
+      });
+      el.settingsTrainingBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openTrainingWindow();
+      }, { passive: false });
+    }
+
     if (el.gmailBtn) {
       const openMail = (e) => {
         e.preventDefault();
@@ -5240,6 +5402,10 @@ const UI = (() => {
       el.guidePanel.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
       el.guidePanel.addEventListener('touchmove', (e) => e.stopPropagation(), { passive: true });
     }
+    if (el.trainingWindow) {
+      el.trainingWindow.addEventListener('click', (e) => e.stopPropagation());
+      el.trainingWindow.addEventListener('touchend', (e) => e.stopPropagation(), { passive: false });
+    }
 
     ['set-language','set-difficulty','set-card-style','set-stack-display','set-blind-growth','set-turn-time','set-show-strategies','set-show-all-hands','set-show-all-showdown'].forEach(id => {
       const node = document.getElementById(id);
@@ -5277,6 +5443,7 @@ const UI = (() => {
 
   function openPanelWithPause(openFn) {
     if (session.supportPaused) return;
+    if (session.trainingPaused) return;
     if (UI.anyOverlayOpen()) return;
     openFn();
     session.panelsPaused = true;
@@ -5288,7 +5455,7 @@ const UI = (() => {
     UI.closeAllPanels();
     if (wasOpen && session.panelsPaused) {
       session.panelsPaused = false;
-      if (!session.supportPaused) {
+      if (!session.supportPaused && !session.trainingPaused) {
         resumeGame();
       }
     }
@@ -5299,7 +5466,7 @@ const UI = (() => {
     UI.el.bottomPanel.classList.remove('open');
     UI.el.guidePanel.classList.add('open');
     UI.el.tapClose.classList.toggle('active', true);
-    if (!session.supportPaused) {
+    if (!session.supportPaused && !session.trainingPaused) {
       pauseGame();
       session.panelsPaused = true;
     }
@@ -5325,7 +5492,23 @@ const UI = (() => {
     if (!session.supportPaused) return;
     session.supportPaused = false;
     UI.hideSupportOverlay();
-    if (!session.panelsPaused && !UI.anyPanelOpen()) {
+    if (!session.panelsPaused && !session.trainingPaused && !UI.anyPanelOpen()) {
+      resumeGame();
+    }
+  }
+
+  function openTrainingWindow() {
+    if (session.trainingPaused) return;
+    session.trainingPaused = true;
+    pauseGame();
+    UI.showTrainingOverlay();
+  }
+
+  function closeTrainingWindow() {
+    if (!session.trainingPaused) return;
+    session.trainingPaused = false;
+    UI.hideTrainingOverlay();
+    if (!session.panelsPaused && !session.supportPaused && !UI.anyPanelOpen()) {
       resumeGame();
     }
   }
@@ -5474,11 +5657,13 @@ const UI = (() => {
     session.isPaused = false;
     session.supportPaused = false;
     session.panelsPaused = false;
+    session.trainingPaused = false;
 
     Model.reset();
     Meta.reset();
 
     UI.hideSupportOverlay();
+    UI.hideTrainingOverlay();
     UI.resetBelcardSwap();
     UI.setHeroActionsActive(false);
     UI.updateHistoryInfo(0, 0, false);
@@ -5504,6 +5689,7 @@ const UI = (() => {
     session.isPaused = false;
     session.supportPaused = false;
     session.panelsPaused = false;
+    session.trainingPaused = false;
 
     Model.reset();
     Meta.reset();
@@ -5787,7 +5973,6 @@ const UI = (() => {
     const texture = Texture.analyze(state.board);
     const isAggressor = state.lastAggressorIndex === idx;
 
-    // Blockers: считаем для bluff-catch логики
     let heroBlockers = 0;
     if (prof && prof.proThinking && oppLastAction) {
       const oppRange = Math2.buildOpponentRange(oppLastAction, state.street, oppPosition, oppStackBB);
@@ -5890,7 +6075,6 @@ const UI = (() => {
       const prof = Bots.PROFILES[p.botType];
       if (!prof || !prof.proThinking) continue;
       try { Model.updateFromHand(p.id, snapForModel); } catch (e) {}
-      // Мета: обновляем образ
       try { Meta.tickImage(p.id, prof); } catch (e) {}
     }
 
@@ -5932,6 +6116,7 @@ const UI = (() => {
       if (session.replay.active) return;
       if (session.supportPaused) return;
       if (session.panelsPaused) return;
+      if (session.trainingPaused) return;
 
       const period = UI.settings.blindGrowthHands || 10;
       state.handsAtLevel++;
@@ -6300,6 +6485,7 @@ const UI = (() => {
 
   function resumeGame() {
     if (session.supportPaused) return;
+    if (session.trainingPaused) return;
     if (UI.anyPanelOpen()) return;
 
     stopReplay(true);
@@ -6325,6 +6511,7 @@ const UI = (() => {
           if (session.replay.active) return;
           if (session.supportPaused) return;
           if (session.panelsPaused) return;
+          if (session.trainingPaused) return;
 
           const period = UI.settings.blindGrowthHands || 10;
           state.handsAtLevel++;
