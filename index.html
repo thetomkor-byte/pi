@@ -395,7 +395,7 @@ button.disabled {
   color: #fff;
   font-size: clamp(9px, 1.2vmin, 11px);
   font-weight: 800;
-  padding: 3px 8px;
+  padding: 3px 8px 3.5px 8px;
   border-radius: 4px;
   letter-spacing: .5px;
   white-space: nowrap;
@@ -403,6 +403,7 @@ button.disabled {
   transition: opacity .2s;
   text-shadow: 0 1px 2px rgba(0,0,0,.55);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+  line-height: 1;
 }
 .seat .strat-badge.hidden { display: none; }
 .seat.folded .strat-badge { opacity: 0.35; }
@@ -993,8 +994,8 @@ button.disabled {
 
 #training-window {
   position: relative;
-  width: calc(100% - var(--table-border-w) * 2 - 12px);
-  max-width: calc(100% - var(--table-border-w) * 2 - 12px);
+  width: min(94vw, calc((100vh - clamp(8px, 1.6vmin, 20px)) * 9 / 16));
+  max-width: 94vw;
   background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
   border: 2px solid #3a3530;
   border-radius: 16px;
@@ -1706,6 +1707,27 @@ button.disabled {
 
         <div id="quick-percent-list" class="inactive"></div>
       </div>
+
+      <div id="training-overlay">
+        <div id="training-window">
+          <h3>ТРЕНИРОВКА</h3>
+          <p class="training-text">
+            Без сложной математики, без запутанной теории — только простая и понятная логика.
+          </p>
+          <p class="training-text">
+            Логика покера — это система мышления, при которой каждый твой ход является осознанным ответом на вопрос:
+            «Что я пытаюсь заставить оппонента подумать, почувствовать и сделать — и зачем?»
+          </p>
+          <p class="training-text">
+            Ты не играешь карты. Ты играешь против мышления конкретного оппонента в конкретной ситуации.
+            Карты — лишь инструмент, которым ты управляешь его решениями.
+          </p>
+          <p class="training-text">
+            Ключевая идея: у каждого действия должна быть причина, которую ты можешь сформулировать словами.
+            Если не можешь — ты не играешь, а угадываешь.
+          </p>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1728,27 +1750,6 @@ button.disabled {
       Любое открытое окошко ставит игру на паузу. Закрыть окошко — тап за его пределами.
     </p>
     <button id="btn-support-panel" type="button">Поддержать</button>
-  </div>
-
-  <div id="training-overlay">
-    <div id="training-window">
-      <h3>ТРЕНИРОВКА</h3>
-      <p class="training-text">
-        Без сложной математики, без запутанной теории — только простая и понятная логика.
-      </p>
-      <p class="training-text">
-        Логика покера — это система мышления, при которой каждый твой ход является осознанным ответом на вопрос:
-        «Что я пытаюсь заставить оппонента подумать, почувствовать и сделать — и зачем?»
-      </p>
-      <p class="training-text">
-        Ты не играешь карты. Ты играешь против мышления конкретного оппонента в конкретной ситуации.
-        Карты — лишь инструмент, которым ты управляешь его решениями.
-      </p>
-      <p class="training-text">
-        Ключевая идея: у каждого действия должна быть причина, которую ты можешь сформулировать словами.
-        Если не можешь — ты не играешь, а угадываешь.
-      </p>
-    </div>
   </div>
 
   <div id="bottom-panel">
@@ -3811,11 +3812,11 @@ const UI = (() => {
   const SEAT_POSITIONS = [
     { x: 50, y: 70, side: 'bottom', offsetY: -18 },
     { x: 14, y: 56, side: 'left',   offsetY: -1 - 6 },
-    { x: 14, y: 32, side: 'left',   offsetY: 4 + 1 - 1 },
+    { x: 14, y: 32, side: 'left',   offsetY: 4 + 1 - 1 - 1 },
     { x: 14, y: 9,  side: 'left',   offsetY: 2 + 1 },
     { x: 50, y: 9,  side: 'top',    offsetY: 2 + 1 },
     { x: 86, y: 9,  side: 'right',  offsetY: 2 + 1 },
-    { x: 86, y: 32, side: 'right',  offsetY: 3 + 1 - 1 },
+    { x: 86, y: 32, side: 'right',  offsetY: 3 + 1 - 1 - 1 },
     { x: 86, y: 56, side: 'right',  offsetY: 1 + 1 - 6 }
   ];
 
