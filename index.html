@@ -325,12 +325,6 @@ button.disabled {
   font-size: var(--place-text);
   line-height: 1.2;
 }
-#place-center .place-sep {
-  display: inline-block;
-  width: 0.45em;
-  color: transparent;
-  visibility: hidden;
-}
 #place-center .heads-up-line.hidden { display: none; }
 
 .card {
@@ -1050,7 +1044,7 @@ button.disabled {
   font-weight: 900;
   font-size: clamp(18px, 2.4vmin, 22px);
   line-height: 1;
-  cursor: pointer;
+  cursor: default;
   touch-action: manipulation;
   flex-shrink: 0;
   width: 1em;
@@ -1638,14 +1632,77 @@ button.disabled {
 #guide-panel::-webkit-scrollbar { display: none; }
 #guide-panel.open { transform: translate(-50%, 0); }
 
-#guide-panel h3 {
+#guide-panel #guide-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+#guide-panel #guide-header-row h3 {
   color: var(--gold);
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 1px;
-  margin-bottom: 14px;
   font-weight: 800;
   text-align: center;
+  flex: 1;
+  margin: 0;
+}
+
+.guide-nav-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  color: var(--text);
+  font-family: inherit;
+  font-weight: 900;
+  font-size: clamp(18px, 2.4vmin, 22px);
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+  flex-shrink: 0;
+  width: 1em;
+  height: 1em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+.guide-nav-btn:disabled {
+  cursor: default;
+}
+
+#guide-text-viewport {
+  position: relative;
+  overflow: hidden;
+  min-height: 200px;
+}
+
+.guide-text-page {
+  transition: transform 0.5s ease, opacity 0.5s ease;
+  will-change: transform, opacity;
+}
+.guide-text-page.offscreen-left {
+  transform: translateX(-110%);
+  opacity: 0;
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  pointer-events: none;
+}
+.guide-text-page.offscreen-right {
+  transform: translateX(110%);
+  opacity: 0;
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  pointer-events: none;
+}
+.guide-text-page.active {
+  transform: translateX(0);
+  opacity: 1;
+  position: relative;
 }
 
 .guide-text {
@@ -1776,33 +1833,6 @@ button.disabled {
   touch-action: manipulation;
   padding: 0;
 }
-#final-window::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 50% 50%, rgba(255, 215, 100, 0.35) 0%, rgba(255, 203, 43, 0.18) 30%, transparent 65%),
-    conic-gradient(from 0deg at 50% 50%,
-      rgba(255, 203, 43, 0.35) 0deg, rgba(255, 203, 43, 0) 20deg,
-      rgba(255, 203, 43, 0.35) 40deg, rgba(255, 203, 43, 0) 60deg,
-      rgba(255, 203, 43, 0.35) 80deg, rgba(255, 203, 43, 0) 100deg,
-      rgba(255, 203, 43, 0.35) 120deg, rgba(255, 203, 43, 0) 140deg,
-      rgba(255, 203, 43, 0.35) 160deg, rgba(255, 203, 43, 0) 180deg,
-      rgba(255, 203, 43, 0.35) 200deg, rgba(255, 203, 43, 0) 220deg,
-      rgba(255, 203, 43, 0.35) 240deg, rgba(255, 203, 43, 0) 260deg,
-      rgba(255, 203, 43, 0.35) 280deg, rgba(255, 203, 43, 0) 300deg,
-      rgba(255, 203, 43, 0.35) 320deg, rgba(255, 203, 43, 0) 340deg,
-      rgba(255, 203, 43, 0.35) 360deg);
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.85;
-  animation: raysRotate 24s linear infinite;
-}
-@keyframes raysRotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
 @keyframes winnerGlow {
   0%, 100% {
     box-shadow:
@@ -1883,7 +1913,7 @@ button.disabled {
         <div id="seats"></div>
 
         <div id="place-center">
-          <div class="place-line" id="place-line">Rank: 1/8 <span class="place-sep">|</span> ITM: 3</div>
+          <div class="place-line" id="place-line">Rank: 1/8&nbsp;&nbsp;ITM: 3</div>
           <div class="heads-up-line hidden" id="heads-up-line">Heads-Up</div>
         </div>
 
@@ -1936,22 +1966,15 @@ button.disabled {
   <div id="tap-close"></div>
 
   <div id="guide-panel">
-    <h3>Руководство</h3>
-    <p class="guide-text">
-      Poker Trainer — это симулятор покерного стола Sit&nbsp;&amp;&nbsp;Go (Texas Hold'em, 8-max).
-      Он тренирует интуицию: ты должен нащупать чувством, выиграешь ты на вскрытии
-      или нет, и действовать в согласии с этим чувством.
-    </p>
-    <p class="guide-text">
-      Обратная связь здесь — только факт: совпало или не совпало. Никаких подсказок
-      по правильности решения, EV, диапазонам и прочему. После раздачи ты просто
-      видишь бейдж WIN или LOSS и сумму выигранных или проигранных фишек.
-    </p>
-    <p class="guide-text muted">
-      Свайп снизу вверх по столу — настройки. Свайп сверху вниз — это руководство.
-      Свайп снизу вверх по самому руководству — закрыть его.
-      Любое открытое окошко ставит игру на паузу. Закрыть окошко — тап за его пределами.
-    </p>
+    <div id="guide-header-row">
+      <button id="guide-prev-btn" class="guide-nav-btn" type="button" aria-label="Назад">◀︎</button>
+      <h3>Руководство</h3>
+      <button id="guide-next-btn" class="guide-nav-btn" type="button" aria-label="Вперёд">▶︎</button>
+    </div>
+    <div id="guide-text-viewport">
+      <div class="guide-text-page active" data-page="0"></div>
+      <div class="guide-text-page offscreen-right" data-page="1"></div>
+    </div>
     <button id="btn-support-panel" type="button">Поддержать</button>
   </div>
 
@@ -4157,6 +4180,10 @@ const UI = (() => {
     el.trainingNextBtn = document.getElementById('training-next-btn');
     el.trainingTextPages = document.querySelectorAll('.training-text-page');
 
+    el.guidePrevBtn = document.getElementById('guide-prev-btn');
+    el.guideNextBtn = document.getElementById('guide-next-btn');
+    el.guideTextPages = document.querySelectorAll('.guide-text-page');
+
     el.setLanguage       = document.getElementById('set-language');
     el.setDifficulty     = document.getElementById('set-difficulty');
     el.setCardStyle      = document.getElementById('set-card-style');
@@ -4643,7 +4670,7 @@ const UI = (() => {
     }
 
     if (el.placeLine) {
-      el.placeLine.innerHTML = `Rank: ${heroPlace}/${total} <span class="place-sep">|</span> ITM: 3`;
+      el.placeLine.textContent = `Rank: ${heroPlace}/${total}\u00A0\u00A0ITM: 3`;
     }
     if (el.headsUpLine) el.headsUpLine.classList.add('hidden');
     el.placeCenter.classList.remove('hidden');
@@ -5336,36 +5363,35 @@ const UI = (() => {
     fireworkTimers.push(cleanup);
   }
 
+  let fireworksRepeatTimer = null;
+
   function launchFinaleFireworks() {
     clearFireworks();
+    if (fireworksRepeatTimer) { clearInterval(fireworksRepeatTimer); fireworksRepeatTimer = null; }
     if (!el.finalOverlay) return;
 
-    const overlayRect = el.finalOverlay.getBoundingClientRect();
-    const cx = overlayRect.width / 2;
-    const cy = overlayRect.height / 2;
+    const tableEl = document.getElementById('poker-table');
+    if (!tableEl) return;
+
+    const tableRect = tableEl.getBoundingClientRect();
 
     const colors = ['#ffcb2b', '#ffe680', '#ffffff', '#e0a800', '#ff4f8b', '#4fd6ff'];
 
-    for (let burst = 0; burst < 10; burst++) {
+    function spawnRandomBurst() {
+      if (!el.finalOverlay.classList.contains('visible')) return;
+      const ox = Math.random() * tableRect.width;
+      const oy = Math.random() * tableRect.height;
+      spawnFirework(el.finalOverlay, tableRect.left + ox, tableRect.top + oy, colors);
+    }
+
+    for (let burst = 0; burst < 6; burst++) {
       const t = setTimeout(() => {
-        const ox = (Math.random() * 2 - 1) * overlayRect.width * 0.42;
-        const oy = (Math.random() * 2 - 1) * overlayRect.height * 0.42;
-        spawnFirework(el.finalOverlay, cx + ox, cy + oy, colors);
-      }, burst * 320);
+        spawnRandomBurst();
+      }, burst * 260);
       fireworkTimers.push(t);
     }
 
-    const repeat = setInterval(() => {
-      if (!el.finalOverlay.classList.contains('visible')) {
-        clearInterval(repeat);
-        return;
-      }
-      const ox = (Math.random() * 2 - 1) * overlayRect.width * 0.42;
-      const oy = (Math.random() * 2 - 1) * overlayRect.height * 0.42;
-      spawnFirework(el.finalOverlay, cx + ox, cy + oy, colors);
-    }, 700);
-
-    fireworkTimers.push(setTimeout(() => clearInterval(repeat), 60000));
+    fireworksRepeatTimer = setInterval(spawnRandomBurst, 500);
   }
 
   function showWinnerFinal() {
@@ -5433,6 +5459,45 @@ const UI = (() => {
     if (el.trainingNextBtn) el.trainingNextBtn.disabled = (pages.length <= 1);
   }
 
+  let guidePageIndex = 0;
+  function setGuidePage(index) {
+    const pages = el.guideTextPages;
+    if (!pages || pages.length === 0) return;
+    if (index < 0) index = 0;
+    if (index > pages.length - 1) index = pages.length - 1;
+
+    guidePageIndex = index;
+
+    for (let i = 0; i < pages.length; i++) {
+      const p = pages[i];
+      p.classList.remove('active', 'offscreen-left', 'offscreen-right');
+      if (i < index) p.classList.add('offscreen-left');
+      else if (i > index) p.classList.add('offscreen-right');
+      else p.classList.add('active');
+    }
+  }
+  function guideNext() {
+    const pages = el.guideTextPages;
+    if (!pages) return;
+    if (guidePageIndex >= pages.length - 1) return;
+    setGuidePage(guidePageIndex + 1);
+  }
+  function guidePrev() {
+    if (guidePageIndex <= 0) return;
+    setGuidePage(guidePageIndex - 1);
+  }
+  function resetGuidePage() {
+    guidePageIndex = 0;
+    const pages = el.guideTextPages;
+    if (!pages) return;
+    for (let i = 0; i < pages.length; i++) {
+      const p = pages[i];
+      p.classList.remove('active', 'offscreen-left', 'offscreen-right');
+      if (i === 0) p.classList.add('active');
+      else p.classList.add('offscreen-right');
+    }
+  }
+
   return {
     settings, init, el,
     renderTable, updateSeats, updateBoard, updatePot, updateLevel,
@@ -5455,7 +5520,8 @@ const UI = (() => {
     resetBelcardSwap, bindBelcardDrag,
     recalcSeatAssignments, resetSeatAssignments,
     showWinnerFinal, hideFinalOverlay,
-    trainingNext, trainingPrev, resetTrainingPage
+    trainingNext, trainingPrev, resetTrainingPage,
+    guideNext, guidePrev, resetGuidePage
   };
 
 })();
@@ -5481,6 +5547,7 @@ const UI = (() => {
     panelsPaused: false,
     trainingPaused: false,
     finalShown: false,
+    reloadTimerId: null,
 
     heroTimerIntervalId: null,
     heroTimerTimeoutId: null,
@@ -5500,6 +5567,15 @@ const UI = (() => {
   const el = {};
 
   const DOUBLE_TAP_WINDOW = 500;
+
+  const RELOAD_DELAY_MS = 60000;
+
+  function reloadPageAfterDelay() {
+    if (session.reloadTimerId) clearTimeout(session.reloadTimerId);
+    session.reloadTimerId = setTimeout(() => {
+      try { window.location.reload(); } catch (e) {}
+    }, RELOAD_DELAY_MS);
+  }
 
   window.__ptRestartCallback = () => {
     UI.hideFinalOverlay();
@@ -5554,6 +5630,8 @@ const UI = (() => {
     el.btnTestTop1    = document.getElementById('btn-test-top1');
     el.trainingPrevBtn = document.getElementById('training-prev-btn');
     el.trainingNextBtn = document.getElementById('training-next-btn');
+    el.guidePrevBtn   = document.getElementById('guide-prev-btn');
+    el.guideNextBtn   = document.getElementById('guide-next-btn');
   }
 
   function bindDesktopDoubleClick() {
@@ -5781,12 +5859,38 @@ const UI = (() => {
       }, { passive: false });
     }
 
+    if (el.guidePrevBtn) {
+      el.guidePrevBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        UI.guidePrev();
+      });
+      el.guidePrevBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        UI.guidePrev();
+      }, { passive: false });
+    }
+    if (el.guideNextBtn) {
+      el.guideNextBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        UI.guideNext();
+      });
+      el.guideNextBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        UI.guideNext();
+      }, { passive: false });
+    }
+
     if (el.btnTestTop1) {
       el.btnTestTop1.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
         closeTrainingWindow();
         UI.showWinnerFinal();
+        reloadPageAfterDelay();
       });
     }
 
@@ -5978,6 +6082,7 @@ const UI = (() => {
     UI.el.bottomPanel.classList.remove('open');
     UI.el.guidePanel.classList.add('open');
     UI.el.tapClose.classList.toggle('active', true);
+    UI.resetGuidePage();
     if (!session.supportPaused && !session.trainingPaused) {
       pauseGame();
       session.panelsPaused = true;
@@ -6298,6 +6403,9 @@ const UI = (() => {
 
     if (heroIsWinner) {
       UI.showWinnerFinal();
+      reloadPageAfterDelay();
+    } else {
+      reloadPageAfterDelay();
     }
   }
 
