@@ -302,7 +302,7 @@ button.disabled {
 #place-center {
   position: absolute;
   left: 50%;
-  top: 26%;
+  top: calc(26% + 6px);
   transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
@@ -1006,7 +1006,7 @@ button.disabled {
   padding: clamp(20px, 4vmin, 28px) clamp(18px, 3.6vmin, 26px);
   text-align: left;
   max-height: 85%;
-  overflow-y: auto;
+  overflow: hidden;
   scrollbar-width: none;
 }
 #training-window::-webkit-scrollbar { display: none; }
@@ -1044,7 +1044,7 @@ button.disabled {
   line-height: 1;
   cursor: pointer;
   touch-action: manipulation;
-  transition: transform .08s ease, filter .08s ease;
+  transition: transform .08s ease, filter .08s ease, opacity .2s ease;
   font-family: inherit;
   padding: 0;
   flex-shrink: 0;
@@ -1052,6 +1052,38 @@ button.disabled {
 .training-nav-btn:active:not(:disabled) {
   transform: scale(0.96);
   filter: brightness(1.35);
+}
+.training-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+#training-text-viewport {
+  position: relative;
+  overflow: hidden;
+  min-height: 200px;
+}
+
+.training-text-page {
+  transition: transform 0.5s ease, opacity 0.5s ease;
+  will-change: transform, opacity;
+}
+.training-text-page.offscreen-left {
+  transform: translateX(-110%);
+  opacity: 0;
+  position: absolute;
+  top: 0; left: 0; right: 0;
+}
+.training-text-page.offscreen-right {
+  transform: translateX(110%);
+  opacity: 0;
+  position: absolute;
+  top: 0; left: 0; right: 0;
+}
+.training-text-page.active {
+  transform: translateX(0);
+  opacity: 1;
+  position: relative;
 }
 
 .training-text {
@@ -1773,19 +1805,9 @@ button.disabled {
 #final-window .final-trophy {
   position: relative;
   z-index: 1;
-  font-size: clamp(108px, 24vmin, 210px);
+  font-size: clamp(162px, 36vmin, 315px);
   line-height: 1;
-  margin-bottom: clamp(4px, 1vmin, 10px);
   filter: drop-shadow(0 6px 22px rgba(255,203,43,.65));
-}
-#final-window .final-you-win {
-  position: relative;
-  z-index: 1;
-  color: var(--gold);
-  font-size: clamp(22px, 3.6vmin, 32px);
-  font-weight: 900;
-  letter-spacing: 4px;
-  text-shadow: 0 2px 8px rgba(0,0,0,.85), 0 0 22px rgba(255,203,43,.55);
 }
 
 .firework {
@@ -1844,7 +1866,7 @@ button.disabled {
         <div id="seats"></div>
 
         <div id="place-center">
-          <div class="place-line" id="place-line">Rank: 1/8 | ITM: 3</div>
+          <div class="place-line" id="place-line">Rank: 1/8  ITM: 3</div>
           <div class="heads-up-line hidden" id="heads-up-line">Heads-Up</div>
         </div>
 
@@ -1919,22 +1941,37 @@ button.disabled {
   <div id="training-overlay">
     <div id="training-window">
       <div id="training-header-row">
-        <button id="training-prev-btn" class="training-nav-btn" type="button" aria-label="Назад">◀︎</button>
+        <button id="training-prev-btn" class="training-nav-btn" type="button" aria-label="Назад" disabled>◀︎</button>
         <h3>ТРЕНИРОВКА</h3>
         <button id="training-next-btn" class="training-nav-btn" type="button" aria-label="Вперёд">▶︎</button>
       </div>
-      <p class="training-text">
-        Логика покера — это система мышления, при которой каждый твой ход является осознанным ответом на вопрос:
-        «Что я пытаюсь заставить оппонента подумать, почувствовать и сделать, а главное — зачем?»
-      </p>
-      <p class="training-text">
-        Ты не играешь карты. Ты играешь против мышления конкретного оппонента в конкретной ситуации.
-        Карты — лишь инструмент, которым ты управляешь его решениями.
-      </p>
-      <p class="training-text">
-        Ключевая идея: у каждого действия должна быть причина, которую ты можешь сформулировать словами.
-        Если не можешь — ты не играешь, а угадываешь.
-      </p>
+      <div id="training-text-viewport">
+        <div class="training-text-page active" data-page="0">
+          <p class="training-text">
+            Логика покера — это система мышления, при которой каждый твой ход является осознанным ответом на вопрос:
+            «Что я пытаюсь заставить оппонента подумать, почувствовать и сделать, а главное — зачем?»
+          </p>
+          <p class="training-text">
+            Ты не играешь карты. Ты играешь против мышления конкретного оппонента в конкретной ситуации.
+            Карты — лишь инструмент, которым ты управляешь его решениями.
+          </p>
+          <p class="training-text">
+            Ключевая идея: у каждого действия должна быть причина, которую ты можешь сформулировать словами.
+            Если не можешь — ты не играешь, а угадываешь.
+          </p>
+        </div>
+        <div class="training-text-page offscreen-right" data-page="1">
+          <p class="training-text">
+            Тренировка начинается с тишины: перед любым выбором — чай, встреча, звонок — на десять секунд закрой глаза и не думай, а просто отметь первое ощущение в теле. Не анализируй его, не спорь. Это и есть первый сигнал поля, который обычно заглушается мыслями.
+          </p>
+          <p class="training-text">
+            Дальше учись читать уже случившееся: вспомни событие дня и восстанови не логику, а состояние — что ты чувствовал за минуту до него. Повторяй это каждый вечер на трёх событиях. Так мозг начинает связывать внутренний сигнал с внешним результатом, и предчувствие перестаёт быть случайностью.
+          </p>
+          <p class="training-text">
+            Главный сдвиг — перестать ждать будущее и начать вспоминать его. Когда решение уже принято внутри, оно ощущается спокойно и буднично, как факт, который просто ещё не наступил. Тренируй это состояние на мелочах — какая очередь, кто позвонит, чем закончится разговор. Точность придёт не от усилия, а от доверия к первому тихому отклику.
+          </p>
+        </div>
+      </div>
       <div id="training-test-buttons">
         <button id="btn-test-top1" type="button">TOP-1</button>
       </div>
@@ -4013,13 +4050,13 @@ const UI = (() => {
 
   const SEAT_POSITIONS = [
     { x: 50, y: 70, side: 'bottom', offsetY: -18 },
-    { x: 14, y: 56, side: 'left',   offsetY: -1 - 6 },
-    { x: 14, y: 32, side: 'left',   offsetY: 4 + 1 - 2 - 2 },
+    { x: 14, y: 56, side: 'left',   offsetY: -1 - 6 - 4 },
+    { x: 14, y: 32, side: 'left',   offsetY: 4 + 1 - 2 - 2 - 2 },
     { x: 14, y: 9,  side: 'left',   offsetY: 2 + 1 },
     { x: 50, y: 9,  side: 'top',    offsetY: 2 + 1 },
     { x: 86, y: 9,  side: 'right',  offsetY: 2 + 1 },
-    { x: 86, y: 32, side: 'right',  offsetY: 3 + 1 - 2 - 1 },
-    { x: 86, y: 56, side: 'right',  offsetY: 1 + 1 - 6 - 3 }
+    { x: 86, y: 32, side: 'right',  offsetY: 3 + 1 - 2 - 1 - 2 },
+    { x: 86, y: 56, side: 'right',  offsetY: 1 + 1 - 6 - 3 - 4 }
   ];
 
   const SUIT_CLASS = { s: 'suit-spades', h: 'suit-hearts', d: 'suit-diamonds', c: 'suit-clubs' };
@@ -4101,6 +4138,7 @@ const UI = (() => {
 
     el.trainingPrevBtn = document.getElementById('training-prev-btn');
     el.trainingNextBtn = document.getElementById('training-next-btn');
+    el.trainingTextPages = document.querySelectorAll('.training-text-page');
 
     el.setLanguage       = document.getElementById('set-language');
     el.setDifficulty     = document.getElementById('set-difficulty');
@@ -4585,7 +4623,7 @@ const UI = (() => {
       heroPlace = total;
     }
 
-    if (el.placeLine) el.placeLine.textContent = `Rank: ${heroPlace}/${total} | ITM: 3`;
+    if (el.placeLine) el.placeLine.textContent = `Rank: ${heroPlace}/${total}  ITM: 3`;
     if (el.headsUpLine) el.headsUpLine.classList.add('hidden');
     el.placeCenter.classList.remove('hidden');
   }
@@ -5312,10 +5350,60 @@ const UI = (() => {
     el.finalWindow.classList.add('winner');
     el.finalWindow.innerHTML = `
       <div class="final-trophy">🏆</div>
-      <div class="final-you-win">YOU WIN</div>
     `;
     showFinalOverlay();
     launchFinaleFireworks();
+  }
+
+  let trainingPageIndex = 0;
+  function setTrainingPage(index) {
+    const pages = el.trainingTextPages;
+    if (!pages || pages.length === 0) return;
+    if (index < 0) index = 0;
+    if (index > pages.length - 1) index = pages.length - 1;
+    if (index === trainingPageIndex && pages[trainingPageIndex].classList.contains('active')) return;
+
+    const oldIndex = trainingPageIndex;
+    trainingPageIndex = index;
+
+    for (let i = 0; i < pages.length; i++) {
+      const p = pages[i];
+      p.classList.remove('active', 'offscreen-left', 'offscreen-right');
+      if (i < index) {
+        p.classList.add('offscreen-left');
+      } else if (i > index) {
+        p.classList.add('offscreen-right');
+      } else {
+        p.classList.add('active');
+      }
+    }
+
+    if (el.trainingPrevBtn) el.trainingPrevBtn.disabled = (index <= 0);
+    if (el.trainingNextBtn) el.trainingNextBtn.disabled = (index >= pages.length - 1);
+  }
+
+  function trainingNext() {
+    const pages = el.trainingTextPages;
+    if (!pages) return;
+    if (trainingPageIndex >= pages.length - 1) return;
+    setTrainingPage(trainingPageIndex + 1);
+  }
+  function trainingPrev() {
+    if (trainingPageIndex <= 0) return;
+    setTrainingPage(trainingPageIndex - 1);
+  }
+  function resetTrainingPage() {
+    trainingPageIndex = 0;
+    const pages = el.trainingTextPages;
+    if (!pages) return;
+    for (let i = 0; i < pages.length; i++) {
+      const p = pages[i];
+      p.classList.remove('active', 'offscreen-left', 'offscreen-right');
+      if (i === 0) p.classList.add('active');
+      else p.classList.add('offscreen-right');
+    }
+    if (el.trainingPrevBtn) el.trainingPrevBtn.disabled = true;
+    if (el.trainingNextBtn) el.trainingNextBtn.disabled = (pages.length <= 1);
   }
 
   return {
@@ -5339,7 +5427,8 @@ const UI = (() => {
     showSupportOverlay, hideSupportOverlay, copySupportText,
     resetBelcardSwap, bindBelcardDrag,
     recalcSeatAssignments, resetSeatAssignments,
-    showWinnerFinal, hideFinalOverlay
+    showWinnerFinal, hideFinalOverlay,
+    trainingNext, trainingPrev, resetTrainingPage
   };
 
 })();
@@ -5641,12 +5730,28 @@ const UI = (() => {
     }
 
     if (el.trainingPrevBtn) {
-      el.trainingPrevBtn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); });
-      el.trainingPrevBtn.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); }, { passive: false });
+      el.trainingPrevBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        UI.trainingPrev();
+      });
+      el.trainingPrevBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        UI.trainingPrev();
+      }, { passive: false });
     }
     if (el.trainingNextBtn) {
-      el.trainingNextBtn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); });
-      el.trainingNextBtn.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); }, { passive: false });
+      el.trainingNextBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        UI.trainingNext();
+      });
+      el.trainingNextBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        UI.trainingNext();
+      }, { passive: false });
     }
 
     if (el.btnTestTop1) {
@@ -5881,6 +5986,7 @@ const UI = (() => {
     if (session.trainingPaused) return;
     session.trainingPaused = true;
     pauseGame();
+    UI.resetTrainingPage();
     UI.openTraining();
   }
 
