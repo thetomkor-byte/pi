@@ -54,6 +54,8 @@
 
   --belcard-offset: 8px;
   --belcard-lift: 8px;
+
+  --table-col-w: min(94vw, calc((100vh - clamp(8px, 1.6vmin, 20px)) * 9 / 16));
 }
 
 html, body {
@@ -395,7 +397,7 @@ button.disabled {
   color: #fff;
   font-size: clamp(9px, 1.2vmin, 11px);
   font-weight: 800;
-  padding: 3px 8px 3.5px 8px;
+  padding: 3px 8px;
   border-radius: 4px;
   letter-spacing: .5px;
   white-space: nowrap;
@@ -403,10 +405,12 @@ button.disabled {
   transition: opacity .2s;
   text-shadow: 0 1px 2px rgba(0,0,0,.55);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
-  line-height: 1;
 }
 .seat .strat-badge.hidden { display: none; }
 .seat.folded .strat-badge { opacity: 0.35; }
+
+/* Внутренний сдвиг текста бейджа вниз на 0.5 px */
+.seat .strat-badge::first-line { line-height: 1.0; }
 
 .seat .strat-badge.pro-gto      { background: #311f3b; }
 .seat .strat-badge.pro-solver   { background: #2f1a3b; }
@@ -417,6 +421,17 @@ button.disabled {
 .seat .strat-badge.vip-loose    { background: #0e2f12; }
 .seat .strat-badge.vip-rock     { background: #13311a; }
 .seat .strat-badge.vip-maniac   { background: #18331b; }
+
+/* Текст внутри бейджа сдвинут на 0.5 px вниз, размеры бейджа и текста не меняются */
+.seat .strat-badge { display: inline-block; }
+.seat .strat-badge > span,
+.seat .strat-badge {
+  text-indent: 0;
+}
+.seat .strat-badge {
+  /* сохраняем внутренние отступы, сдвиг текста делаем через line-height */
+  line-height: 1;
+}
 
 .seat .seat-cards {
   display: flex;
@@ -994,7 +1009,7 @@ button.disabled {
 
 #training-window {
   position: relative;
-  width: min(94vw, calc((100vh - clamp(8px, 1.6vmin, 20px)) * 9 / 16));
+  width: var(--table-col-w);
   max-width: 94vw;
   background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
   border: 2px solid #3a3530;
@@ -1383,7 +1398,7 @@ button.disabled {
   bottom: 0;
   left: 50%;
   transform: translate(-50%, 110%);
-  width: min(94vw, calc((100vh - clamp(8px, 1.6vmin, 20px)) * 9 / 16));
+  width: var(--table-col-w);
   max-width: 94vw;
   background: linear-gradient(0deg, #000000 0%, #0d0d0d 50%, #1a1a1a 100%);
   border-top: 1px solid #2a2520;
@@ -1507,7 +1522,7 @@ button.disabled {
   top: 0;
   left: 50%;
   transform: translate(-50%, -110%);
-  width: min(94vw, calc((100vh - clamp(8px, 1.6vmin, 20px)) * 9 / 16));
+  width: var(--table-col-w);
   max-width: 94vw;
   background: linear-gradient(180deg, #000000 0%, #0d0d0d 50%, #1a1a1a 100%);
   border-bottom: 1px solid #2a2520;
@@ -1675,9 +1690,9 @@ button.disabled {
         </div>
 
         <div id="top-round-row">
-          <button id="settings-card-btn" class="round-help-btn" type="button" aria-label="Поддержать">$</button>
           <button id="settings-help-btn" class="round-help-btn" type="button" aria-label="Руководство">?</button>
           <button id="settings-train-btn" class="round-help-btn" type="button" aria-label="Тренировка">!</button>
+          <button id="settings-card-btn" class="round-help-btn" type="button" aria-label="Поддержать">$</button>
         </div>
 
         <div id="hero-actions" class="inactive">
@@ -1707,27 +1722,6 @@ button.disabled {
 
         <div id="quick-percent-list" class="inactive"></div>
       </div>
-
-      <div id="training-overlay">
-        <div id="training-window">
-          <h3>ТРЕНИРОВКА</h3>
-          <p class="training-text">
-            Без сложной математики, без запутанной теории — только простая и понятная логика.
-          </p>
-          <p class="training-text">
-            Логика покера — это система мышления, при которой каждый твой ход является осознанным ответом на вопрос:
-            «Что я пытаюсь заставить оппонента подумать, почувствовать и сделать — и зачем?»
-          </p>
-          <p class="training-text">
-            Ты не играешь карты. Ты играешь против мышления конкретного оппонента в конкретной ситуации.
-            Карты — лишь инструмент, которым ты управляешь его решениями.
-          </p>
-          <p class="training-text">
-            Ключевая идея: у каждого действия должна быть причина, которую ты можешь сформулировать словами.
-            Если не можешь — ты не играешь, а угадываешь.
-          </p>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -1750,6 +1744,27 @@ button.disabled {
       Любое открытое окошко ставит игру на паузу. Закрыть окошко — тап за его пределами.
     </p>
     <button id="btn-support-panel" type="button">Поддержать</button>
+  </div>
+
+  <div id="training-overlay">
+    <div id="training-window">
+      <h3>ТРЕНИРОВКА</h3>
+      <p class="training-text">
+        Без сложной математики, без запутанной теории — только простая и понятная логика.
+      </p>
+      <p class="training-text">
+        Логика покера — это система мышления, при которой каждый твой ход является осознанным ответом на вопрос:
+        «Что я пытаюсь заставить оппонента подумать, почувствовать и сделать — и зачем?»
+      </p>
+      <p class="training-text">
+        Ты не играешь карты. Ты играешь против мышления конкретного оппонента в конкретной ситуации.
+        Карты — лишь инструмент, которым ты управляешь его решениями.
+      </p>
+      <p class="training-text">
+        Ключевая идея: у каждого действия должна быть причина, которую ты можешь сформулировать словами.
+        Если не можешь — ты не играешь, а угадываешь.
+      </p>
+    </div>
   </div>
 
   <div id="bottom-panel">
@@ -3812,11 +3827,11 @@ const UI = (() => {
   const SEAT_POSITIONS = [
     { x: 50, y: 70, side: 'bottom', offsetY: -18 },
     { x: 14, y: 56, side: 'left',   offsetY: -1 - 6 },
-    { x: 14, y: 32, side: 'left',   offsetY: 4 + 1 - 1 - 1 },
+    { x: 14, y: 32, side: 'left',   offsetY: 4 + 1 - 2 },
     { x: 14, y: 9,  side: 'left',   offsetY: 2 + 1 },
     { x: 50, y: 9,  side: 'top',    offsetY: 2 + 1 },
     { x: 86, y: 9,  side: 'right',  offsetY: 2 + 1 },
-    { x: 86, y: 32, side: 'right',  offsetY: 3 + 1 - 1 - 1 },
+    { x: 86, y: 32, side: 'right',  offsetY: 3 + 1 - 2 },
     { x: 86, y: 56, side: 'right',  offsetY: 1 + 1 - 6 }
   ];
 
