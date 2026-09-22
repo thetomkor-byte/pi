@@ -295,7 +295,6 @@ button.disabled {
 }
 #table-info .info-row.faded { opacity: 0.45; }
 
-/* Надпись «Место» и «Следующий приз / ЧЕМПИОН» между местами 2 и 6 */
 #place-center {
   position: absolute;
   left: 50%;
@@ -405,13 +404,11 @@ button.disabled {
 .seat .strat-badge.hidden { display: none; }
 .seat.folded .strat-badge { opacity: 0.35; }
 
-/* PRO — тёмно-фиолетовая тёплая гамма: чем сильнее, тем глубже */
 .seat .strat-badge.pro-gto      { background: #311f3b; }
 .seat .strat-badge.pro-solver   { background: #2f1a3b; }
 .seat .strat-badge.pro-icm      { background: #2c123b; }
 .seat .strat-badge.pro-lag      { background: #290a3b; }
 
-/* VIP — тёмно-зелёная тёплая гамма: чем слабее, тем светлее (но в пределах тёмного) */
 .seat .strat-badge.vip-taglite  { background: #062a0a; }
 .seat .strat-badge.vip-loose    { background: #0e2f12; }
 .seat .strat-badge.vip-rock     { background: #13311a; }
@@ -882,7 +879,6 @@ button.disabled {
   text-shadow: 0 1px 2px rgba(0,0,0,.35);
 }
 
-/* Ссылка PAYSEND по центру карты — вид как у обычного текста */
 .belcard-paysend {
   position: absolute;
   left: 50%;
@@ -1330,9 +1326,6 @@ button.disabled {
 #quick-percent-list button.allin-btn .label { color: var(--allin); }
 #quick-percent-list button .value { color: var(--muted); font-weight: 600; font-size: clamp(9px, 1.2vmin, 11px); }
 
-/* Слои снизу вверх:
-   стол (0-45) -> руководство (120) -> кнопки Доллар и Вопрос (130)
-   -> настройки (140) -> поддержка (300). */
 #bottom-panel {
   position: absolute;
   bottom: 0;
@@ -1984,7 +1977,6 @@ button.disabled {
   } catch (e) {}
 })();
 </script>
-
 <script>
 /* ============================================================
    ENGINE
@@ -2536,7 +2528,342 @@ const Engine = (() => {
 
 
 /* ============================================================
-   BOTS — новая система: 8 подтипов в 2 классах (PRO / VIP)
+   MATH — этап 2: эквити, pot odds, MDF, alpha, SPR, combinatorics, blockers
+   ============================================================ */
+
+const Math2 = (() => {
+
+  const R = Engine.RANK_VALUE;
+
+  // --- Оценка эквити через Монте-Карло ---
+  // heroHole: 2 карты героя, board: 0..5 карт борда, oppRange: массив возможных рук соперника
+  // iterations: количество симуляций
+  // Возвращает вероятность победы героя (0..1), долю ничьих учитываем как половину.
+  function equityVsRange(heroHole, board, oppRange, iterations) {
+    if (!heroHole || heroHole.length !== 2) return 0.5;
+    const usedIds = new Set();
+    for (const c of heroHole) usedIds.add(c.rank + c.suit);
+    for (const c of board) usedIds.add(c.rank + c.suit);
+
+    // Определяем диапазон соперника: если не задан, берём случайные 2 карты из колоды
+    let range = oppRange;
+    if (!range || range.length === 0) {
+      range = null; // будем брать случайные карты
+    } else {
+      // фильтруем невозможные комбинации
+      range = range.filter(h => {
+        if (!h || h.length !== 2) return false;
+        if (usedIds.has(h[0].rank + h[0].suit)) return false;
+        if (usedIds.has(h[1].rank + h[1].suit)) return false;
+        return true;
+      });
+      if (range.length === 0) range = null;
+    }
+
+    // Собираем полную колоду без использованных карт
+    const fullDeck = [];
+    for (const s of Engine.SUITS) {
+      for (const r of Engine.RANKS) {
+        const key = r + s;
+        if (usedIds.has(key)) continue;
+        fullDeck.push({ rank: r, suit: s });
+      }
+    }
+
+    let wins = 0;
+    let ties = 0;
+    const needBoard = 5 - board.length;
+
+    for (let it = 0; it < iterations; it++) {
+      // Выбираем руку соперника
+      let oppHole;
+      if (range) {
+        const pick = range[Engine.cryptoRandomInt(range.length)];
+        oppHole = [pick[0], pick[1]];
+      } else {
+        // случайные 2 карты из колоды, не пересекающиеся
+        const i1 = Engine.cryptoRandomInt(fullDeck.length);
+        let i2 = Engine.cryptoRandomInt(fullDeck.length - 1);
+        if (i2 >= i1) i2++;
+        oppHole = [fullDeck[i1], fullDeck[i2]];
+      }
+
+      // Формируем пул оставшихся карт для борда
+      const oppKeys = new Set([oppHole[0].rank + oppHole[0].suit, oppHole[1].rank + oppHole[1].suit]);
+      const pool = [];
+      for (const c of fullDeck) {
+        if (oppKeys.has(c.rank + c.suit)) continue;
+        pool.push(c);
+      }
+
+      // Добираем недостающие карты борда
+      const simBoard = board.slice();
+      const poolCopy = pool.slice();
+      for (let i = 0; i < needBoard; i++) {
+        const idx = Engine.cryptoRandomInt(poolCopy.length);
+        simBoard.push(poolCopy[idx]);
+        poolCopy.splice(idx, 1);
+      }
+
+      const heroScore = Engine.evaluateHand([...heroHole, ...simBoard]);
+      const oppScore = Engine.evaluateHand([...oppHole, ...simBoard]);
+      if (!heroScore || !oppScore) continue;
+
+      const cmp = Engine.compareScores(heroScore, oppScore);
+      if (cmp > 0) wins++;
+      else if (cmp === 0) ties++;
+    }
+
+    return (wins + ties * 0.5) / iterations;
+  }
+
+  // --- Pot odds ---
+  // callAmount: сколько нужно доставить, pot: текущий банк без ставки соперника
+  function potOdds(callAmount, pot) {
+    const total = pot + callAmount;
+    if (total <= 0) return 0;
+    return callAmount / total;
+  }
+
+  // --- MDF: минимальная частота защиты против бета ---
+  // betSize: размер бета, potBeforeBet: банк до бета
+  function mdf(betSize, potBeforeBet) {
+    if (betSize <= 0) return 1;
+    return potBeforeBet / (potBeforeBet + betSize);
+  }
+
+  // --- Alpha: порог блефа ---
+  // betSize: размер бета, potBeforeBet: банк до бета
+  function alpha(betSize, potBeforeBet) {
+    const total = potBeforeBet + betSize;
+    if (total <= 0) return 0;
+    return betSize / total;
+  }
+
+  // --- SPR ---
+  // effStack: эффективный стек, pot: текущий банк
+  function spr(effStack, pot) {
+    if (pot <= 0) return 100;
+    return effStack / pot;
+  }
+
+  // --- Комбинаторика: число комбинаций конкретной руки в диапазоне ---
+  // range: массив карт-комбинаций, board и dead: карты, которые нельзя использовать
+  // Возвращает число комбинаций конкретной пары рангов/мастей в диапазоне
+  function countCombos(range, board, dead) {
+    const blocked = new Set();
+    for (const c of board) blocked.add(c.rank + c.suit);
+    for (const c of dead) blocked.add(c.rank + c.suit);
+    let count = 0;
+    for (const hand of range) {
+      if (!hand || hand.length !== 2) continue;
+      if (blocked.has(hand[0].rank + hand[0].suit)) continue;
+      if (blocked.has(hand[1].rank + hand[1].suit)) continue;
+      count++;
+    }
+    return count;
+  }
+
+  // --- Blockers: сколько карт у героя блокируют диапазон соперника ---
+  // heroHole: карты героя, oppRange: диапазон соперника
+  // Возвращает долю комбинаций соперника, которые заблокированы картами героя
+  function blockerEffect(heroHole, oppRange) {
+    if (!oppRange || oppRange.length === 0) return 0;
+    const heroKeys = new Set([heroHole[0].rank + heroHole[0].suit, heroHole[1].rank + heroHole[1].suit]);
+    let blocked = 0;
+    for (const hand of oppRange) {
+      if (!hand || hand.length !== 2) continue;
+      if (heroKeys.has(hand[0].rank + hand[0].suit) || heroKeys.has(hand[1].rank + hand[1].suit)) blocked++;
+    }
+    return blocked / oppRange.length;
+  }
+
+  // --- Построение приблизительного диапазона соперника по его действиям ---
+  // Это простой приблизитель: чем агрессивнее действие, тем уже и сильнее диапазон
+  // Возвращает массив двухкарточных комбинаций (все возможные руки, отфильтрованные по силе)
+  function buildOpponentRange(actionType, street, position, stackBB) {
+    const allHands = [];
+    for (let i = 0; i < Engine.RANKS.length; i++) {
+      for (let j = i; j < Engine.RANKS.length; j++) {
+        const r1 = Engine.RANKS[i], r2 = Engine.RANKS[j];
+        if (i === j) {
+          allHands.push([{ rank: r1, suit: 's' }, { rank: r2, suit: 'h' }]);
+          continue;
+        }
+        const v1 = R[r1], v2 = R[r2];
+        const hi = v1 > v2 ? r1 : r2;
+        const lo = v1 > v2 ? r2 : r1;
+        allHands.push([{ rank: hi, suit: 's' }, { rank: lo, suit: 's' }]);
+        allHands.push([{ rank: hi, suit: 's' }, { rank: lo, suit: 'h' }]);
+      }
+    }
+
+    // Порог силы: чем агрессивнее действие, тем выше порог
+    let threshold = 0.35;
+    if (actionType === 'raise' || actionType === 'allin') threshold = 0.65;
+    if (street === 'preflop' && actionType === 'raise') threshold = 0.72;
+    if (actionType === 'call') threshold = 0.30;
+    if (actionType === 'check') threshold = 0.10;
+
+    // Для коротких стеков диапазон шире
+    if (stackBB && stackBB < 15) threshold = Math.max(0.20, threshold - 0.25);
+
+    const filtered = [];
+    for (const hand of allHands) {
+      const s = Bots.preflopStrength(hand[0], hand[1]);
+      if (s >= threshold) filtered.push(hand);
+    }
+    return filtered.length > 0 ? filtered : allHands.slice(0, 20);
+  }
+
+  return {
+    equityVsRange,
+    potOdds,
+    mdf,
+    alpha,
+    spr,
+    countCombos,
+    blockerEffect,
+    buildOpponentRange
+  };
+
+})();
+
+
+/* ============================================================
+   MODEL — модель соперника и модель героя (этап 2)
+   ============================================================ */
+
+const Model = (() => {
+
+  // Для каждого бота — свой словарь моделей соперников.
+  // Структура: Map<botId, Map<oppId, Stats>>
+  // Stats: { vpip, pfr, hands, folds, cbetsFaced, foldsToCbet, turnBarrelsFaced, foldsToTurn,
+  //          riverBarrelsFaced, foldsToRiver, calls, raises, foldTo3bet, showsStrong, showsWeak,
+  //          showdowns, bubbleFolds, aggIndex }
+  const models = new Map();
+
+  function getModel(botId, oppId) {
+    if (!models.has(botId)) models.set(botId, new Map());
+    const botModels = models.get(botId);
+    if (!botModels.has(oppId)) {
+      botModels.set(oppId, {
+        hands: 0,
+        vpip: 0,
+        pfr: 0,
+        calls: 0,
+        raises: 0,
+        folds: 0,
+        cbetsFaced: 0,
+        foldsToCbet: 0,
+        turnFaced: 0,
+        foldsToTurn: 0,
+        riverFaced: 0,
+        foldsToRiver: 0,
+        foldTo3bet: 0,
+        faced3bet: 0,
+        showdowns: 0,
+        strongShows: 0,
+        weakShows: 0,
+        bubbleFolds: 0,
+        aggIndex: 0
+      });
+    }
+    return botModels.get(oppId);
+  }
+
+  // Обновить модель соперника по завершённой раздаче
+  function updateFromHand(botId, handData) {
+    if (!handData || !handData.players) return;
+    const bot = handData.players.find(p => p.id === botId);
+    if (!bot) return;
+
+    for (const opp of handData.players) {
+      if (opp.id === botId) continue;
+      if (opp.eliminated && !opp.inHand) continue;
+      const s = getModel(botId, opp.id);
+
+      // Одна раздача = одно наблюдение
+      s.hands++;
+
+      const actions = (handData.actionLog || []).filter(a => {
+        const p = handData.players.find(pl => pl.seatIndex === a.playerIndex);
+        return p && p.id === opp.id;
+      });
+
+      let entered = false;
+      let raised = false;
+      for (const a of actions) {
+        if (a.actionType === 'call') { s.calls++; entered = true; }
+        if (a.actionType === 'raise' || a.actionType === 'allin') { s.raises++; raised = true; entered = true; }
+        if (a.actionType === 'fold') {
+          s.folds++;
+          if (a.street === 'preflop' && (a.actionType === 'fold')) {
+            // фолд на 3-бет — приблизительно
+            if (bot && bot.hasActedThisStreet === false) { /* noop */ }
+          }
+        }
+      }
+      if (entered) s.vpip++;
+      if (raised) s.pfr++;
+
+      // Агрессия: соотношение рейзов к общему числу действий
+      const totalActions = actions.length || 1;
+      s.aggIndex = (s.raises * 2 + s.calls) / totalActions;
+
+      // Вскрытие
+      if (handData.handOver && handData.showdownResults && handData.showdownResults.scores) {
+        const sc = handData.showdownResults.scores[opp.id];
+        if (sc && opp.revealed) {
+          s.showdowns++;
+          if (sc.category >= 3) s.strongShows++;
+          if (sc.category <= 1) s.weakShows++;
+        }
+      }
+    }
+  }
+
+  // Получить «оценку типа» соперника по модели: 0..1, где 1 — очень агрессивный/лузовый
+  function getRead(botId, oppId) {
+    const botModels = models.get(botId);
+    if (!botModels || !botModels.has(oppId)) return null;
+    const s = botModels.get(oppId);
+    if (s.hands < 5) return null; // слишком мало данных
+
+    const vpipRate = s.vpip / s.hands;
+    const pfrRate = s.pfr / s.hands;
+    const foldRate = s.folds / Math.max(1, s.hands);
+
+    return {
+      vpipRate,
+      pfrRate,
+      foldRate,
+      aggIndex: s.aggIndex,
+      hands: s.hands,
+      // Производные: «насколько лузовый», «насколько агрессивный», «насколько склонен фолдить»
+      looseness: Math.min(1, vpipRate / 0.6),
+      aggression: Math.min(1, pfrRate / 0.5),
+      foldTendency: Math.min(1, foldRate / 0.8)
+    };
+  }
+
+  // Сбросить всю статистику при старте новой сессии
+  function reset() {
+    models.clear();
+  }
+
+  return {
+    getModel,
+    updateFromHand,
+    getRead,
+    reset
+  };
+
+})();
+
+
+/* ============================================================
+   BOTS — 8 подтипов в 2 классах, с математикой и моделью
    ============================================================ */
 
 const Bots = (() => {
@@ -2547,14 +2874,14 @@ const Bots = (() => {
   const CLASS_VIP = 'VIP';
 
   const TYPES = {
-    PRO_GTO:    { key: 'PRO_GTO',    cls: CLASS_PRO, badgeClass: 'pro-gto',    tier: 1, label: 'PRO' },
-    PRO_SOLVER: { key: 'PRO_SOLVER', cls: CLASS_PRO, badgeClass: 'pro-solver', tier: 2, label: 'PRO' },
-    PRO_ICM:    { key: 'PRO_ICM',    cls: CLASS_PRO, badgeClass: 'pro-icm',    tier: 3, label: 'PRO' },
-    PRO_LAG:    { key: 'PRO_LAG',    cls: CLASS_PRO, badgeClass: 'pro-lag',    tier: 4, label: 'PRO' },
-    VIP_TAGLITE:{ key: 'VIP_TAGLITE',cls: CLASS_VIP, badgeClass: 'vip-taglite',tier: 1, label: 'VIP' },
-    VIP_LOOSE:  { key: 'VIP_LOOSE',  cls: CLASS_VIP, badgeClass: 'vip-loose',  tier: 2, label: 'VIP' },
-    VIP_ROCK:   { key: 'VIP_ROCK',   cls: CLASS_VIP, badgeClass: 'vip-rock',   tier: 3, label: 'VIP' },
-    VIP_MANIAC: { key: 'VIP_MANIAC', cls: CLASS_VIP, badgeClass: 'vip-maniac', tier: 4, label: 'VIP' }
+    PRO_GTO:    { key: 'PRO_GTO',    cls: CLASS_PRO, badgeClass: 'pro-gto',    tier: 1, label: 'PRO', equityIters: 200 },
+    PRO_SOLVER: { key: 'PRO_SOLVER', cls: CLASS_PRO, badgeClass: 'pro-solver', tier: 2, label: 'PRO', equityIters: 300 },
+    PRO_ICM:    { key: 'PRO_ICM',    cls: CLASS_PRO, badgeClass: 'pro-icm',    tier: 3, label: 'PRO', equityIters: 350 },
+    PRO_LAG:    { key: 'PRO_LAG',    cls: CLASS_PRO, badgeClass: 'pro-lag',    tier: 4, label: 'PRO', equityIters: 400 },
+    VIP_TAGLITE:{ key: 'VIP_TAGLITE',cls: CLASS_VIP, badgeClass: 'vip-taglite',tier: 1, label: 'VIP', equityIters: 0 },
+    VIP_LOOSE:  { key: 'VIP_LOOSE',  cls: CLASS_VIP, badgeClass: 'vip-loose',  tier: 2, label: 'VIP', equityIters: 0 },
+    VIP_ROCK:   { key: 'VIP_ROCK',   cls: CLASS_VIP, badgeClass: 'vip-rock',   tier: 3, label: 'VIP', equityIters: 0 },
+    VIP_MANIAC: { key: 'VIP_MANIAC', cls: CLASS_VIP, badgeClass: 'vip-maniac', tier: 4, label: 'VIP', equityIters: 0 }
   };
 
   const PROFILES = {
@@ -2567,11 +2894,6 @@ const Bots = (() => {
     VIP_LOOSE:  { aggression: 0.22, looseness: 0.72, bluff: 0.06, callThreshold: 0.35, adaptivity: 0.05, proThinking: false, tightBubble: 0.2 },
     VIP_ROCK:   { aggression: 0.12, looseness: 0.14, bluff: 0.02, callThreshold: 0.85, adaptivity: 0.02, proThinking: false, tightBubble: 0.1 },
     VIP_MANIAC: { aggression: 0.95, looseness: 0.92, bluff: 0.62, callThreshold: 0.22, adaptivity: 0.05, proThinking: false, tightBubble: 0.1 }
-  };
-
-  const WEIGHTS = {
-    PRO_GTO: 22, PRO_SOLVER: 16, PRO_ICM: 10, PRO_LAG: 6,
-    VIP_TAGLITE: 18, VIP_LOOSE: 14, VIP_ROCK: 8, VIP_MANIAC: 6
   };
 
   const CHARTS = {
@@ -2676,10 +2998,7 @@ const Bots = (() => {
       ];
       const counts = { VIP_ROCK: 0, VIP_MANIAC: 0 };
       while (result.length < 7) {
-        const avail = vipPool.filter(w => {
-          if (w.max && counts[w.key] >= w.max) return false;
-          return true;
-        });
+        const avail = vipPool.filter(w => !w.max || counts[w.key] < w.max);
         const pick = pickWeighted(avail);
         if (pick === 'VIP_ROCK') counts.VIP_ROCK++;
         if (pick === 'VIP_MANIAC') counts.VIP_MANIAC++;
@@ -2787,21 +3106,62 @@ const Bots = (() => {
     }
   }
 
+  // ---- Основная точка входа ----
   function decide(ctx) {
     const profile = PROFILES[ctx.botType];
     if (!profile) return { action: 'fold', amount: 0 };
+    const typeMeta = TYPES[ctx.botType] || {};
     return ctx.street === 'preflop'
-      ? decidePreflop(ctx, profile)
-      : decidePostflop(ctx, profile);
+      ? decidePreflop(ctx, profile, typeMeta)
+      : decidePostflop(ctx, profile, typeMeta);
   }
 
-  function decidePreflop(ctx, profile) {
+  // Простая оценка «правильного» действия на основе математики (только для PRO)
+  function proMathAdjust(ctx, profile, typeMeta) {
+    // Считаем эквити только если есть 5 карт (борд 5 или 3+2)
+    if (!typeMeta.equityIters || typeMeta.equityIters <= 0) return null;
+
+    const board = ctx.board || [];
+    if (board.length < 3) return null; // префлоп отдельно
+
+    const toCall = ctx.toCall || 0;
+    if (toCall <= 0) return null;
+
+    const myHand = [ctx.card1, ctx.card2];
+    // Приблизительный диапазон соперника из его агрессии
+    const oppRange = Math2.buildOpponentRange(ctx.oppLastAction || 'check', ctx.street, ctx.oppPosition, ctx.oppStackBB);
+
+    const eq = Math2.equityVsRange(myHand, board, oppRange, typeMeta.equityIters);
+    const po = Math2.potOdds(toCall, ctx.pot);
+
+    // Если эквити меньше pot odds с запасом — фолд
+    if (eq < po - 0.03 && eq < profile.callThreshold * 0.9) {
+      return { action: 'fold', amount: 0 };
+    }
+    // Если эквити сильно выше — может быть рейз
+    if (eq > po + 0.20 && eq > 0.65 && profile.aggression > 0.5) {
+      return { action: 'raise', amount: Math.min(ctx.myStack, Math.round((ctx.pot + toCall) * 2)) };
+    }
+    // Иначе — колл
+    if (eq >= po - 0.05) {
+      return { action: 'call', amount: toCall };
+    }
+    return null;
+  }
+
+  function decidePreflop(ctx, profile, typeMeta) {
     const { card1, card2, position, myStack, bb, toCall, pot, numActive, playersLeft } = ctx;
     const stackBB = myStack / bb;
     const strength = preflopStrength(card1, card2);
 
     const bubbleTighten = (playersLeft <= 4) ? profile.tightBubble : 0;
     const effStrength = strength * (1 - 0.2 * bubbleTighten);
+
+    // Модель соперника: если он склонен фолдить, чаще стилим
+    let adaptBonus = 0;
+    if (profile.proThinking && ctx.oppRead && ctx.oppRead.hands >= 8) {
+      adaptBonus = profile.adaptivity * ctx.oppRead.foldTendency * 0.15;
+    }
 
     if (stackBB <= 15 && !ctx.facingRaise) {
       if (stackBB <= 10) {
@@ -2851,7 +3211,11 @@ const Bots = (() => {
       const openSize = Math.round(bb * (numActive > 5 ? 3 : 2.5));
       return { action: 'raise', amount: Math.min(myStack, openSize) };
     }
-    if (profile.looseness > 0.7 && effStrength > 0.25 && Math.random() < profile.bluff * 0.5) {
+    if (profile.looseness > 0.7 && effStrength > 0.25 && Math.random() < profile.bluff * 0.5 + adaptBonus) {
+      const openSize = Math.round(bb * 2.5);
+      return { action: 'raise', amount: Math.min(myStack, openSize) };
+    }
+    if (profile.proThinking && adaptBonus > 0.05 && toCall === 0 && numActive <= 3) {
       const openSize = Math.round(bb * 2.5);
       return { action: 'raise', amount: Math.min(myStack, openSize) };
     }
@@ -2859,12 +3223,29 @@ const Bots = (() => {
     return { action: 'fold', amount: 0 };
   }
 
-  function decidePostflop(ctx, profile) {
+  function decidePostflop(ctx, profile, typeMeta) {
     const { card1, card2, board, toCall, pot, myStack, bb, street } = ctx;
+
+    // Для PRO — сначала попробуем математическое решение на основе эквити
+    if (profile.proThinking) {
+      const mathDecision = proMathAdjust(ctx, profile, typeMeta);
+      if (mathDecision) {
+        // Математическое решение принимаем с вероятностью, зависящей от тира
+        const trust = Math.min(1, 0.5 + profile.adaptivity * 0.5);
+        if (Math.random() < trust) return mathDecision;
+      }
+    }
+
     const allCards = [card1, card2, ...board];
     const handScore = Engine.evaluateHand(allCards);
     const strength = postflopStrength(handScore);
     const streetBonus = street === 'river' ? 0.05 : 0;
+
+    // Модель соперника: если он часто фолдит на c-bet — давим чаще
+    let adaptBonus = 0;
+    if (profile.proThinking && ctx.oppRead && ctx.oppRead.hands >= 8) {
+      adaptBonus = profile.adaptivity * ctx.oppRead.foldTendency * 0.2;
+    }
 
     if (toCall === 0) {
       if (strength + streetBonus > 0.65) {
@@ -2875,7 +3256,7 @@ const Bots = (() => {
         const betSize = Math.round(pot * 0.5);
         return { action: 'raise', amount: Math.min(myStack, Math.max(bb, betSize)) };
       }
-      if (Math.random() < profile.bluff * 0.25) {
+      if (Math.random() < profile.bluff * 0.25 + adaptBonus) {
         const betSize = Math.round(pot * 0.6);
         return { action: 'raise', amount: Math.min(myStack, Math.max(bb, betSize)) };
       }
@@ -2883,6 +3264,17 @@ const Bots = (() => {
     }
 
     const potOdds = toCall / (pot + toCall);
+
+    // MDF — если нас часто эксплойтят, защищаемся шире
+    if (profile.proThinking && ctx.oppRead && ctx.oppRead.hands >= 10) {
+      const mdfVal = Math2.mdf(toCall, pot);
+      // Если наша защита ниже MDF — коллим шире
+      const ourDefense = strength;
+      if (ourDefense < mdfVal * 0.8 && strength > 0.25 && Math.random() < 0.5) {
+        return { action: 'call', amount: toCall };
+      }
+    }
+
     if (strength + streetBonus > 0.75) {
       if (profile.aggression > 0.5 && Math.random() < profile.aggression) {
         const raiseSize = Math.min(myStack, Math.round((pot + toCall) * 2.5));
@@ -2899,7 +3291,7 @@ const Bots = (() => {
   }
 
   return {
-    CLASS_PRO, CLASS_VIP, TYPES, PROFILES, WEIGHTS,
+    CLASS_PRO, CLASS_VIP, TYPES, PROFILES,
     assignBotTypes,
     decide, preflopStrength, postflopStrength,
     handInChart, normalizeHand, getChart
@@ -4670,6 +5062,8 @@ const UI = (() => {
     session.supportPaused = false;
     session.panelsPaused = false;
 
+    Model.reset();
+
     UI.hideSupportOverlay();
     UI.resetBelcardSwap();
     UI.setHeroActionsActive(false);
@@ -4696,6 +5090,8 @@ const UI = (() => {
     session.isPaused = false;
     session.supportPaused = false;
     session.panelsPaused = false;
+
+    Model.reset();
 
     const botTypes = Bots.assignBotTypes(UI.settings.difficulty);
 
@@ -4948,6 +5344,28 @@ const UI = (() => {
     const facing3Bet = state.street === 'preflop' && state.currentBet > state.blinds.bb * 3;
     const facingAllin = state.players.some(p => p !== bot && !p.folded && p.allIn && p.committedThisStreet >= state.currentBet);
 
+    // Модель соперника: попробуем получить прочтение последнего агрессора или случайного активного
+    let oppRead = null;
+    let oppLastAction = null;
+    let oppPosition = null;
+    let oppStackBB = 0;
+    let oppId = null;
+    if (raiser && !raiser.isHero) {
+      oppId = raiser.id;
+      oppPosition = raiser.position;
+      oppStackBB = raiser.stack / state.blinds.bb;
+      oppLastAction = raiser.lastAction;
+    } else if (raiser && raiser.isHero) {
+      oppId = 'hero';
+      oppPosition = raiser.position;
+      oppStackBB = raiser.stack / state.blinds.bb;
+      oppLastAction = raiser.lastAction;
+    }
+
+    if (oppId && PROFILES[bot.botType] && PROFILES[bot.botType].proThinking) {
+      oppRead = Model.getRead(bot.id, oppId);
+    }
+
     return {
       card1: bot.holeCards[0], card2: bot.holeCards[1], board: state.board,
       street: state.street, pot: state.pot, toCall, minRaise: state.minRaise,
@@ -4956,7 +5374,11 @@ const UI = (() => {
       facingRaise, facing3Bet, facingAllin,
       raiserPosition: raiser ? raiser.position : null,
       botType: bot.botType,
-      playersLeft: state.players.filter(p => !p.eliminated).length
+      playersLeft: state.players.filter(p => !p.eliminated).length,
+      oppRead,
+      oppLastAction,
+      oppPosition,
+      oppStackBB
     };
   }
 
@@ -5012,6 +5434,29 @@ const UI = (() => {
     stopHeroTimer();
     const state = session.state;
     Engine.finalizeHand(state);
+
+    // Обновляем модель для PRO-ботов по завершённой раздаче
+    const snapForModel = {
+      players: state.players.map(p => ({
+        id: p.id, seatIndex: p.seatIndex, name: p.name, isHero: p.isHero,
+        botType: p.botType, botClass: p.botClass, stack: p.stack, position: p.position,
+        holeCards: p.holeCards.map(c => ({ ...c })),
+        folded: p.folded, eliminated: p.eliminated, revealed: p.revealed,
+        acted: p.acted, lastAction: p.lastAction,
+        committedTotal: p.committedTotal, blindPaid: p.blindPaid,
+        inHand: p.inHand
+      })),
+      handOver: state.handOver,
+      showdownResults: state.showdownResults,
+      actionLog: (state.actionLog || []).map(a => ({ ...a }))
+    };
+
+    for (const p of state.players) {
+      if (!p.botType) continue;
+      const prof = Bots.PROFILES[p.botType];
+      if (!prof || !prof.proThinking) continue;
+      try { Model.updateFromHand(p.id, snapForModel); } catch (e) {}
+    }
 
     session.history.push(snapshotState(state));
     if (session.history.length > 1000) session.history.shift();
