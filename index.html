@@ -38,6 +38,7 @@
   --pct-block-w: clamp(88px, 13vmin, 110px);
   --dash-inset: clamp(10px, 2vmin, 18px);
   --small-text: clamp(11px, 1.4vmin, 13px);
+  --info-row-text: clamp(12px, 1.6vmin, 15px);
 
   --nav-btn: clamp(32px, 4.4vmin, 38px);
   --nav-icon-size: clamp(16px, 2.4vmin, 19px);
@@ -284,7 +285,7 @@ button.disabled {
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  font-size: clamp(13px, 1.7vmin, 16px);
+  font-size: var(--info-row-text);
   color: var(--text);
   font-weight: 700;
   text-shadow: 0 1px 4px rgba(0,0,0,.95);
@@ -301,7 +302,7 @@ button.disabled {
 #place-center {
   position: absolute;
   left: 50%;
-  top: 32%;
+  top: 26%;
   transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
@@ -1010,14 +1011,47 @@ button.disabled {
 }
 #training-window::-webkit-scrollbar { display: none; }
 
-#training-window h3 {
+#training-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+#training-header-row h3 {
   color: var(--gold);
   font-size: clamp(12px, 1.8vmin, 15px);
   text-transform: uppercase;
   letter-spacing: 1px;
-  margin-bottom: 18px;
   font-weight: 900;
   text-align: center;
+  flex: 1;
+  margin: 0;
+}
+
+.training-nav-btn {
+  width: calc(var(--hero-timer-size) - 8px);
+  height: calc(var(--hero-timer-size) - 8px);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #3a3530, #1a1a1a 70%);
+  border: 1px solid #8a6508;
+  color: var(--gold);
+  font-weight: 900;
+  font-size: clamp(18px, 2.4vmin, 22px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform .08s ease, filter .08s ease;
+  font-family: inherit;
+  padding: 0;
+  flex-shrink: 0;
+}
+.training-nav-btn:active:not(:disabled) {
+  transform: scale(0.96);
+  filter: brightness(1.35);
 }
 
 .training-text {
@@ -1678,8 +1712,8 @@ button.disabled {
 
 #final-window {
   position: relative;
-  width: min(72vmin, 78vw);
-  height: min(72vmin, 78vw);
+  width: min(90%, 380px);
+  aspect-ratio: 1 / 1;
   border-radius: 50%;
   background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
   border: 2px solid #8a6508;
@@ -1688,10 +1722,38 @@ button.disabled {
   align-items: center;
   justify-content: center;
   text-align: center;
-  overflow: visible;
+  overflow: hidden;
   cursor: pointer;
   animation: winnerGlow 2.2s ease-in-out infinite;
   touch-action: manipulation;
+  padding: 0;
+}
+#final-window::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 215, 100, 0.35) 0%, rgba(255, 203, 43, 0.18) 30%, transparent 65%),
+    conic-gradient(from 0deg at 50% 50%,
+      rgba(255, 203, 43, 0.35) 0deg, rgba(255, 203, 43, 0) 20deg,
+      rgba(255, 203, 43, 0.35) 40deg, rgba(255, 203, 43, 0) 60deg,
+      rgba(255, 203, 43, 0.35) 80deg, rgba(255, 203, 43, 0) 100deg,
+      rgba(255, 203, 43, 0.35) 120deg, rgba(255, 203, 43, 0) 140deg,
+      rgba(255, 203, 43, 0.35) 160deg, rgba(255, 203, 43, 0) 180deg,
+      rgba(255, 203, 43, 0.35) 200deg, rgba(255, 203, 43, 0) 220deg,
+      rgba(255, 203, 43, 0.35) 240deg, rgba(255, 203, 43, 0) 260deg,
+      rgba(255, 203, 43, 0.35) 280deg, rgba(255, 203, 43, 0) 300deg,
+      rgba(255, 203, 43, 0.35) 320deg, rgba(255, 203, 43, 0) 340deg,
+      rgba(255, 203, 43, 0.35) 360deg);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.85;
+  animation: raysRotate 24s linear infinite;
+}
+@keyframes raysRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 @keyframes winnerGlow {
   0%, 100% {
@@ -1709,12 +1771,16 @@ button.disabled {
 }
 
 #final-window .final-trophy {
-  font-size: clamp(72px, 16vmin, 140px);
+  position: relative;
+  z-index: 1;
+  font-size: clamp(108px, 24vmin, 210px);
   line-height: 1;
-  margin-bottom: clamp(6px, 1.2vmin, 12px);
-  filter: drop-shadow(0 6px 20px rgba(255,203,43,.55));
+  margin-bottom: clamp(4px, 1vmin, 10px);
+  filter: drop-shadow(0 6px 22px rgba(255,203,43,.65));
 }
 #final-window .final-you-win {
+  position: relative;
+  z-index: 1;
   color: var(--gold);
   font-size: clamp(22px, 3.6vmin, 32px);
   font-weight: 900;
@@ -1852,10 +1918,14 @@ button.disabled {
 
   <div id="training-overlay">
     <div id="training-window">
-      <h3>ТРЕНИРОВКА</h3>
+      <div id="training-header-row">
+        <button id="training-prev-btn" class="training-nav-btn" type="button" aria-label="Назад">◀︎</button>
+        <h3>ТРЕНИРОВКА</h3>
+        <button id="training-next-btn" class="training-nav-btn" type="button" aria-label="Вперёд">▶︎</button>
+      </div>
       <p class="training-text">
         Логика покера — это система мышления, при которой каждый твой ход является осознанным ответом на вопрос:
-        «Что я пытаюсь заставить оппонента подумать, почувствовать и сделать — и зачем?»
+        «Что я пытаюсь заставить оппонента подумать, почувствовать и сделать, а главное — зачем?»
       </p>
       <p class="training-text">
         Ты не играешь карты. Ты играешь против мышления конкретного оппонента в конкретной ситуации.
@@ -4029,6 +4099,9 @@ const UI = (() => {
     el.finalWindow     = document.getElementById('final-window');
     el.btnTestTop1     = document.getElementById('btn-test-top1');
 
+    el.trainingPrevBtn = document.getElementById('training-prev-btn');
+    el.trainingNextBtn = document.getElementById('training-next-btn');
+
     el.setLanguage       = document.getElementById('set-language');
     el.setDifficulty     = document.getElementById('set-difficulty');
     el.setCardStyle      = document.getElementById('set-card-style');
@@ -5363,6 +5436,8 @@ const UI = (() => {
     el.finalOverlay   = document.getElementById('final-overlay');
     el.finalWindow    = document.getElementById('final-window');
     el.btnTestTop1    = document.getElementById('btn-test-top1');
+    el.trainingPrevBtn = document.getElementById('training-prev-btn');
+    el.trainingNextBtn = document.getElementById('training-next-btn');
   }
 
   function bindDesktopDoubleClick() {
@@ -5563,6 +5638,15 @@ const UI = (() => {
       el.trainingWindow.addEventListener('touchend', (e) => e.stopPropagation(), { passive: false });
       el.trainingWindow.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
       el.trainingWindow.addEventListener('touchmove', (e) => e.stopPropagation(), { passive: true });
+    }
+
+    if (el.trainingPrevBtn) {
+      el.trainingPrevBtn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); });
+      el.trainingPrevBtn.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); }, { passive: false });
+    }
+    if (el.trainingNextBtn) {
+      el.trainingNextBtn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); });
+      el.trainingNextBtn.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); }, { passive: false });
     }
 
     if (el.btnTestTop1) {
