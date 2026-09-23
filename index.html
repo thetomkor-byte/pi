@@ -873,10 +873,10 @@ button.disabled {
 }
 
 .belcard-club-top {
-  font-size: clamp(12px, 1.9vmin, 17px);
+  font-size: clamp(9px, 1.4vmin, 12px);
   font-weight: 900;
   font-style: normal;
-  letter-spacing: 1.5px;
+  letter-spacing: 1px;
   text-transform: uppercase;
   opacity: 0.95;
   text-align: right;
@@ -1456,7 +1456,7 @@ button.disabled {
   gap: clamp(4px, 0.7vmin, 8px);
   white-space: nowrap;
   touch-action: manipulation;
-  min-height: 33px;
+  min-height: calc(32px + 2px);
   width: 100%;
   transition: transform .08s ease, filter .08s ease;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
@@ -1475,6 +1475,10 @@ button.disabled {
 #quick-percent-list button .label { color: var(--gold); font-weight: 800; }
 #quick-percent-list button.allin-btn .label { color: var(--allin); }
 #quick-percent-list button .value { color: var(--muted); font-weight: 600; font-size: clamp(9px, 1.2vmin, 11px); }
+
+#quick-percent-list {
+  bottom: calc(var(--dash-inset) + var(--edge) - 1px + 10px);
+}
 
 #bottom-panel {
   position: absolute;
@@ -4218,8 +4222,7 @@ const UI = (() => {
     if (!el.boardArea || !el.placeCenter) return;
     const rankH = el.placeCenter.offsetHeight || 0;
     const gapVal = 2;
-    const baseShift = 4;
-    const totalShift = rankH + gapVal - baseShift;
+    const totalShift = rankH + gapVal - 6;
     placeRankOffset = totalShift;
     const baseTop = 'calc(46% - 8px)';
     el.boardArea.style.top = `calc(${baseTop} - ${totalShift}px)`;
