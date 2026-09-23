@@ -873,10 +873,10 @@ button.disabled {
 }
 
 .belcard-club-top {
-  font-size: clamp(9px, 1.4vmin, 12px);
+  font-size: clamp(12px, 1.9vmin, 17px);
   font-weight: 900;
   font-style: normal;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   opacity: 0.95;
   text-align: right;
@@ -1456,7 +1456,7 @@ button.disabled {
   gap: clamp(4px, 0.7vmin, 8px);
   white-space: nowrap;
   touch-action: manipulation;
-  min-height: 32px;
+  min-height: 33px;
   width: 100%;
   transition: transform .08s ease, filter .08s ease;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
@@ -4218,7 +4218,8 @@ const UI = (() => {
     if (!el.boardArea || !el.placeCenter) return;
     const rankH = el.placeCenter.offsetHeight || 0;
     const gapVal = 2;
-    const totalShift = rankH + gapVal;
+    const baseShift = 4;
+    const totalShift = rankH + gapVal - baseShift;
     placeRankOffset = totalShift;
     const baseTop = 'calc(46% - 8px)';
     el.boardArea.style.top = `calc(${baseTop} - ${totalShift}px)`;
