@@ -792,7 +792,7 @@ button.disabled {
 }
 
 .belcard-bank {
-  font-size: clamp(8px, 1.3vmin, 10px);
+  font-size: clamp(10px, 1.5vmin, 12px);
   font-weight: 800;
   letter-spacing: 1.2px;
   text-transform: uppercase;
@@ -863,20 +863,21 @@ button.disabled {
 .belcard-name:active { color: var(--gold); }
 
 .belcard-currencies-top {
-  font-size: clamp(8px, 1.3vmin, 10px);
+  font-size: clamp(10px, 1.5vmin, 12px);
   font-weight: 700;
   letter-spacing: .6px;
   text-align: right;
   opacity: 0.95;
   white-space: nowrap;
   align-self: flex-end;
+  line-height: 1;
 }
 
 .belcard-club-top {
-  font-size: clamp(9px, 1.4vmin, 12px);
+  font-size: clamp(12px, 1.9vmin, 17px);
   font-weight: 900;
   font-style: normal;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   opacity: 0.95;
   text-align: right;
@@ -1475,10 +1476,6 @@ button.disabled {
 #quick-percent-list button .label { color: var(--gold); font-weight: 800; }
 #quick-percent-list button.allin-btn .label { color: var(--allin); }
 #quick-percent-list button .value { color: var(--muted); font-weight: 600; font-size: clamp(9px, 1.2vmin, 11px); }
-
-#quick-percent-list {
-  bottom: calc(var(--dash-inset) + var(--edge) - 1px + 10px);
-}
 
 #bottom-panel {
   position: absolute;
@@ -4215,17 +4212,28 @@ const UI = (() => {
     applyCardStyle();
     applySettingsToUI();
     initGuidePages();
-    requestAnimationFrame(() => requestAnimationFrame(updateBoardAreaOffset));
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      updateBoardAreaOffset();
+      alignPercentBlockBottom();
+    }));
   }
 
   function updateBoardAreaOffset() {
     if (!el.boardArea || !el.placeCenter) return;
     const rankH = el.placeCenter.offsetHeight || 0;
     const gapVal = 2;
-    const totalShift = rankH + gapVal - 6;
+    const totalShift = rankH + gapVal - 6 - 2;
     placeRankOffset = totalShift;
     const baseTop = 'calc(46% - 8px)';
     el.boardArea.style.top = `calc(${baseTop} - ${totalShift}px)`;
+  }
+
+  function alignPercentBlockBottom() {
+    if (!el.heroActions || !el.quickPercentList) return;
+    const haRect = el.heroActions.getBoundingClientRect();
+    const tableRect = document.getElementById('poker-table').getBoundingClientRect();
+    const bottomPx = tableRect.bottom - haRect.bottom;
+    el.quickPercentList.style.bottom = bottomPx + 'px';
   }
 
   function updateOverlayState() {
@@ -4443,6 +4451,7 @@ const UI = (() => {
     updateLevel(state);
     updatePlaceCenter(state);
     updateBoardAreaOffset();
+    alignPercentBlockBottom();
     placeHeroTimer();
     placeTopRoundRow();
   }
@@ -4579,6 +4588,7 @@ const UI = (() => {
     updateActiveHighlight(state);
     updatePlaceCenter(state);
     updateBoardAreaOffset();
+    alignPercentBlockBottom();
     placeHeroTimer();
     placeTopRoundRow();
   }
@@ -5557,6 +5567,7 @@ const UI = (() => {
     settings, init, el,
     renderTable, updateSeats, updateBoard, updatePot, updateLevel,
     updateStacks, updateActiveHighlight, updatePlaceCenter, updateBoardAreaOffset,
+    alignPercentBlockBottom,
     showActions, setHeroActionsActive,
     openBottomPanel, closeBottomPanel, openGuidePanel, closeGuidePanel,
     openTraining, closeTraining, anyTrainingOpen,
@@ -5637,12 +5648,14 @@ const UI = (() => {
     bindDesktopDoubleClick();
     window.addEventListener('resize', () => {
       UI.updateBoardAreaOffset();
+      UI.alignPercentBlockBottom();
       UI.placeHeroTimer();
       UI.placeTopRoundRow();
     });
     window.addEventListener('orientationchange', () => {
       setTimeout(() => {
         UI.updateBoardAreaOffset();
+        UI.alignPercentBlockBottom();
         UI.placeHeroTimer();
         UI.placeTopRoundRow();
       }, 250);
@@ -6439,6 +6452,7 @@ const UI = (() => {
     UI.updateLevel(session.state);
     UI.updatePlaceCenter(session.state);
     UI.updateBoardAreaOffset();
+    UI.alignPercentBlockBottom();
     UI.updateHistoryInfo(session.history.length, session.history.length, false);
 
     UI.resetSliderToStart();
@@ -6473,6 +6487,7 @@ const UI = (() => {
     if (!hero) return;
     const toCall = Math.max(0, state.currentBet - hero.committedThisStreet);
     UI.renderQuickRaiseOptions(state, hero, toCall, null);
+    UI.alignPercentBlockBottom();
   }
 
   function processTurn() {
@@ -6512,6 +6527,7 @@ const UI = (() => {
       onAllIn: () => heroAct({ type: 'allin' })
     });
     startHeroTimerIfNeeded();
+    UI.alignPercentBlockBottom();
   }
 
   function startHeroTimerIfNeeded() {
@@ -6810,6 +6826,7 @@ const UI = (() => {
       UI.updateSeats(state, true);
       UI.updatePlaceCenter(state);
       UI.updateBoardAreaOffset();
+      UI.alignPercentBlockBottom();
     }, 1000);
 
     clearTimeout(session.autoNextTimerId);
@@ -7207,6 +7224,7 @@ const UI = (() => {
       UI.updateLevel(state);
       UI.updatePlaceCenter(state);
       UI.updateBoardAreaOffset();
+      UI.alignPercentBlockBottom();
       highlightWinners(state);
       UI.setHeroActionsActive(false);
       refreshQuickPercentList();
@@ -7248,6 +7266,7 @@ const UI = (() => {
       UI.updateActiveHighlight(state);
       UI.updatePlaceCenter(state);
       UI.updateBoardAreaOffset();
+      UI.alignPercentBlockBottom();
       UI.resetSliderToStart();
       refreshQuickPercentList();
       if (session.waitingForHero && !session.heroEliminated) {
