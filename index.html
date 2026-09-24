@@ -721,7 +721,7 @@ button.disabled {
 .belcard-stack .belcard.belcard-blue {
   background:
     linear-gradient(135deg, #18387e 0%, #224ba1 45%, #4373c1 100%);
-  z-index: 2;
+  z-index: 3;
   transform: translateY(0);
   transition: transform .42s cubic-bezier(.22,.61,.36,1);
   box-shadow:
@@ -733,7 +733,7 @@ button.disabled {
 .belcard-stack .belcard.belcard-green {
   background:
     linear-gradient(135deg, #195630 0%, #246b41 45%, #3d8c55 100%);
-  z-index: 1;
+  z-index: 2;
   transform: translateY(var(--belcard-offset));
   transition: transform .42s cubic-bezier(.22,.61,.36,1);
   box-shadow:
@@ -742,12 +742,24 @@ button.disabled {
     inset 0 1px 0 rgba(255,255,255,.25);
 }
 
+.belcard-stack .belcard.belcard-gray {
+  background:
+    linear-gradient(135deg, #3d3548 0%, #4a3f57 45%, #5b4e6b 100%);
+  z-index: 1;
+  transform: translateY(calc(var(--belcard-offset) * 2));
+  transition: transform .42s cubic-bezier(.22,.61,.36,1);
+  box-shadow:
+    0 12px 22px -8px rgba(0,0,0,.55),
+    0 6px 10px -4px rgba(0,0,0,.4),
+    inset 0 1px 0 rgba(255,255,255,.2);
+}
+
 .belcard-stack.dragging .belcard {
   transition: none;
 }
 
 .belcard-stack.swapped .belcard-blue {
-  z-index: 1;
+  z-index: 2;
   transform: translateY(var(--belcard-offset));
   box-shadow:
     0 12px 22px -8px rgba(0,0,0,.65),
@@ -755,7 +767,15 @@ button.disabled {
     inset 0 1px 0 rgba(255,255,255,.25);
 }
 .belcard-stack.swapped .belcard-green {
-  z-index: 2;
+  z-index: 1;
+  transform: translateY(calc(var(--belcard-offset) * 2));
+  box-shadow:
+    0 12px 22px -8px rgba(0,0,0,.55),
+    0 6px 10px -4px rgba(0,0,0,.4),
+    inset 0 1px 0 rgba(255,255,255,.2);
+}
+.belcard-stack.swapped .belcard-gray {
+  z-index: 3;
   transform: translateY(0);
   box-shadow:
     0 12px 22px -8px rgba(0,0,0,.75),
@@ -799,11 +819,16 @@ button.disabled {
   opacity: 0.9;
 }
 
-.belcard-club-col {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 1px;
+.belcard-club-top {
+  font-size: clamp(12px, 1.9vmin, 17px);
+  font-weight: 900;
+  font-style: normal;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  opacity: 0.95;
+  text-align: right;
+  line-height: 1.2;
+  text-shadow: 0 1px 2px rgba(0,0,0,.35);
 }
 
 .belcard-chip {
@@ -881,18 +906,6 @@ button.disabled {
   transform: translateY(-2px);
 }
 
-.belcard-club-top {
-  font-size: clamp(12px, 1.9vmin, 17px);
-  font-weight: 900;
-  font-style: normal;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  opacity: 0.95;
-  text-align: right;
-  line-height: 1.2;
-  text-shadow: 0 1px 2px rgba(0,0,0,.35);
-}
-
 .belcard-paysend {
   position: absolute;
   left: 50%;
@@ -920,6 +933,31 @@ button.disabled {
 .belcard-paysend:active {
   color: #ffffff;
   text-decoration: none;
+}
+
+.belcard-usdt-line {
+  position: relative;
+  z-index: 2;
+  margin-top: auto;
+  margin-bottom: clamp(6px, 1.2vmin, 10px);
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+  font-size: clamp(10px, 1.5vmin, 12px);
+  font-weight: 700;
+  letter-spacing: .4px;
+  text-shadow: 0 1px 2px rgba(0,0,0,.4);
+}
+
+.belcard-bottom-line {
+  position: relative;
+  z-index: 2;
+  white-space: nowrap;
+  font-size: clamp(11px, 1.7vmin, 14px);
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
 #support-footer {
@@ -2112,6 +2150,21 @@ button.disabled {
       <h3>ПОДДЕРЖИ АВТОРА</h3>
 
       <div class="belcard-stack" id="belcard-stack">
+        <div class="belcard belcard-gray">
+          <div class="belcard-top">
+            <div class="belcard-bank" translate="no">Cryptocurrency</div>
+            <div class="belcard-club-top" translate="no">Tether</div>
+          </div>
+
+          <div class="belcard-chip"></div>
+
+          <div class="belcard-usdt-line" translate="no">Tether USDT: TNxHP8tVZUFhFyAxGGtmKEqEm9Cjhbck3A</div>
+
+          <div class="belcard-bottom">
+            <div class="belcard-bottom-line" translate="no">TRX TRON (TRC20)</div>
+          </div>
+        </div>
+
         <div class="belcard belcard-green">
           <div class="belcard-top">
             <div class="belcard-bank" translate="no">БЕЛАРУСБАНК</div>
@@ -5230,6 +5283,8 @@ const UI = (() => {
     if (el.belcardStack) {
       el.belcardStack.classList.remove('swapped');
       el.belcardStack.classList.remove('dragging');
+      el.belcardStack.classList.remove('swapped-2');
+      el.belcardStack.classList.remove('swapped-3');
       const cards = el.belcardStack.querySelectorAll('.belcard');
       cards.forEach(c => { c.style.transform = ''; c.style.zIndex = ''; c.style.transition = ''; });
     }
@@ -5244,65 +5299,113 @@ const UI = (() => {
 
     const green = el.belcardStack.querySelector('.belcard-green');
     const blue = el.belcardStack.querySelector('.belcard-blue');
-    if (!green || !blue) return;
+    const gray = el.belcardStack.querySelector('.belcard-gray');
+    if (!green || !blue || !gray) return;
 
     let startY = 0;
     let dragging = false;
     let currentLift = 0;
-    let isSwapped = false;
+    let rotation = 0;
     let isAnimating = false;
-
-    function getTopCard() { return isSwapped ? green : blue; }
-    function getBottomCard() { return isSwapped ? blue : green; }
 
     function applyDrag(offset) {
       const lift = Math.max(0, Math.min(LIFT, offset));
       const top = getTopCard();
+      const middle = getMiddleCard();
       const bottom = getBottomCard();
       top.style.transform = `translateY(${-lift}px)`;
-      bottom.style.transform = `translateY(${OFFSET}px)`;
+      middle.style.transform = `translateY(${OFFSET}px)`;
+      bottom.style.transform = `translateY(${OFFSET * 2}px)`;
+    }
+
+    function getTopCard() {
+      if (rotation === 0) return blue;
+      if (rotation === 1) return green;
+      return gray;
+    }
+    function getMiddleCard() {
+      if (rotation === 0) return green;
+      if (rotation === 1) return gray;
+      return blue;
+    }
+    function getBottomCard() {
+      if (rotation === 0) return gray;
+      if (rotation === 1) return blue;
+      return green;
     }
 
     function returnToStart() {
       const top = getTopCard();
+      const middle = getMiddleCard();
       const bottom = getBottomCard();
       top.style.transition = 'transform .26s cubic-bezier(.22,.61,.36,1)';
+      middle.style.transition = 'transform .26s cubic-bezier(.22,.61,.36,1)';
       bottom.style.transition = 'transform .26s cubic-bezier(.22,.61,.36,1)';
       top.style.transform = 'translateY(0)';
-      bottom.style.transform = `translateY(${OFFSET}px)`;
+      middle.style.transform = `translateY(${OFFSET}px)`;
+      bottom.style.transform = `translateY(${OFFSET * 2}px)`;
       setTimeout(() => {
         top.style.transition = '';
+        middle.style.transition = '';
         bottom.style.transition = '';
-        green.style.transform = '';
-        blue.style.transform = '';
       }, 280);
       el.belcardStack.classList.remove('dragging');
     }
 
     function doSwapAnimation() {
-      const top = getTopCard();
-      const bottom = getBottomCard();
       isAnimating = true;
       el.belcardStack.classList.remove('dragging');
 
-      top.style.zIndex = '1';
-      bottom.style.zIndex = '2';
+      const top = getTopCard();
+      const middle = getMiddleCard();
+      const bottom = getBottomCard();
 
-      top.style.transition = 'transform .38s cubic-bezier(.22,.61,.36,1)';
-      bottom.style.transition = 'transform .38s cubic-bezier(.22,.61,.36,1)';
+      const nextRotation = (rotation + 1) % 3;
 
-      top.style.transform = `translateY(${OFFSET}px)`;
-      bottom.style.transform = 'translateY(0)';
+      function cardZIndexFor(r) {
+        if (r === 0) return { blue: 3, green: 2, gray: 1 };
+        if (r === 1) return { green: 3, gray: 2, blue: 1 };
+        return { gray: 3, blue: 2, green: 1 };
+      }
+
+      const nextZ = cardZIndexFor(nextRotation);
+      blue.style.zIndex = String(nextZ.blue);
+      green.style.zIndex = String(nextZ.green);
+      gray.style.zIndex = String(nextZ.gray);
+
+      blue.style.transition = 'transform .38s cubic-bezier(.22,.61,.36,1)';
+      green.style.transition = 'transform .38s cubic-bezier(.22,.61,.36,1)';
+      gray.style.transition = 'transform .38s cubic-bezier(.22,.61,.36,1)';
+
+      top.style.transform = `translateY(${OFFSET * 2}px)`;
+      middle.style.transform = 'translateY(0)';
+      bottom.style.transform = `translateY(${OFFSET}px)`;
 
       setTimeout(() => {
-        top.style.transition = '';
-        bottom.style.transition = '';
-        isSwapped = !isSwapped;
-        el.belcardStack.classList.toggle('swapped', isSwapped);
-        green.style.transform = '';
+        blue.style.transition = '';
+        green.style.transition = '';
+        gray.style.transition = '';
+
+        rotation = nextRotation;
+
+        if (rotation === 0) {
+          el.belcardStack.classList.remove('swapped');
+          el.belcardStack.classList.remove('swapped-2');
+        } else if (rotation === 1) {
+          el.belcardStack.classList.add('swapped');
+          el.belcardStack.classList.remove('swapped-2');
+        } else {
+          el.belcardStack.classList.remove('swapped');
+          el.belcardStack.classList.add('swapped-2');
+        }
+
         blue.style.transform = '';
-        green.style.zIndex = '';
+        green.style.transform = '';
+        gray.style.transform = '';
         blue.style.zIndex = '';
+        green.style.zIndex = '';
+        gray.style.zIndex = '';
+
         isAnimating = false;
       }, 400);
     }
