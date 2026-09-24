@@ -799,6 +799,13 @@ button.disabled {
   opacity: 0.9;
 }
 
+.belcard-club-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+}
+
 .belcard-chip {
   position: absolute;
   top: clamp(28px, 4.5vmin, 38px);
@@ -886,12 +893,24 @@ button.disabled {
   text-shadow: 0 1px 2px rgba(0,0,0,.35);
 }
 
+.belcard-club-sub {
+  font-size: clamp(12px, 1.9vmin, 17px);
+  font-weight: 900;
+  font-style: normal;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  opacity: 0.95;
+  text-align: right;
+  line-height: 1.2;
+  text-shadow: 0 1px 2px rgba(0,0,0,.35);
+}
+
 .belcard-paysend {
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  font-size: clamp(12px, 1.9vmin, 17px);
+  font-size: clamp(14px, 2.1vmin, 19px);
   font-weight: 900;
   font-style: normal;
   letter-spacing: 1.5px;
@@ -920,6 +939,7 @@ button.disabled {
   letter-spacing: .6px;
   text-transform: none;
   opacity: 0.95;
+  text-shadow: none;
 }
 
 #support-footer {
@@ -2115,12 +2135,15 @@ button.disabled {
         <div class="belcard belcard-green">
           <div class="belcard-top">
             <div class="belcard-bank" translate="no">БЕЛАРУСБАНК</div>
-            <div class="belcard-club-top" translate="no">БЕЛКАРТ</div>
+            <div class="belcard-club-col">
+              <div class="belcard-club-top" translate="no">БЕЛКАРТ</div>
+              <div class="belcard-club-sub" translate="no">МИР</div>
+            </div>
           </div>
 
           <div class="belcard-chip"></div>
 
-          <a class="belcard-paysend" href="https://paysend.com/send" target="_blank" rel="noopener noreferrer" translate="no"><span class="paysend-side">click on ➜ </span>PAYSEND<span class="paysend-side"> ➜ to donate</span></a>
+          <a class="belcard-paysend" href="https://paysend.com/send" target="_blank" rel="noopener noreferrer" translate="no"><span class="paysend-side">нажми на ⟶ </span>PAYSEND<span class="paysend-side"> ⟶ отправь донат</span></a>
 
           <div class="belcard-number-row">
             <div class="belcard-number" data-copy-card translate="no">9112 3801 6012 8254</div>
@@ -2140,7 +2163,7 @@ button.disabled {
 
           <div class="belcard-chip"></div>
 
-          <a class="belcard-paysend" href="https://paysend.com/send" target="_blank" rel="noopener noreferrer" translate="no"><span class="paysend-side">click on ➜ </span>PAYSEND<span class="paysend-side"> ➜ to donate</span></a>
+          <a class="belcard-paysend" href="https://paysend.com/send" target="_blank" rel="noopener noreferrer" translate="no"><span class="paysend-side">click on ⟶ </span>PAYSEND<span class="paysend-side"> ⟶ to donate</span></a>
 
           <div class="belcard-number-row">
             <div class="belcard-number" data-copy-card translate="no">4255 1901 3916 7251</div>
