@@ -838,27 +838,28 @@ button.disabled {
   margin-bottom: clamp(6px, 1.2vmin, 10px);
 }
 
-/* Копируемый текст номера карты */
+/* Копируемый текст */
 .copy-text {
   position: relative;
   display: inline-block;
-  padding-right: 16px;
+  padding-right: 14px;
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
 }
 .copy-text:active { color: var(--gold); }
 
-/* Значок копирования — вынесен в абсолют, не участвует в кликах и в переносе строки */
+/* Значок копирования — 6px, полностью белый, 100% непрозрачный */
 .copy-icon {
   position: absolute;
   right: 0;
   top: 50%;
   transform: translateY(-50%);
-  width: 10px;
-  height: 10px;
-  pointer-events: none;
-  opacity: 0.8;
+  width: 6px;
+  height: 6px;
+  pointer-events: auto;
+  opacity: 1;
+  cursor: pointer;
 }
 .copy-icon::before,
 .copy-icon::after {
@@ -866,30 +867,19 @@ button.disabled {
   position: absolute;
   border: 1px solid #ffffff;
   border-radius: 1px;
+  background: transparent;
 }
 .copy-icon::before {
-  width: 6px;
-  height: 6px;
+  width: 4px;
+  height: 4px;
   left: 0;
-  top: 3px;
+  top: 2px;
 }
 .copy-icon::after {
-  width: 6px;
-  height: 6px;
-  left: 3px;
+  width: 4px;
+  height: 4px;
+  left: 2px;
   top: 0;
-}
-.belcard-gold .copy-icon::before,
-.belcard-gold .copy-icon::after,
-.belcard-gray .copy-icon::before,
-.belcard-gray .copy-icon::after {
-  border-color: #ffe6b0;
-}
-.belcard-blue .copy-icon::before,
-.belcard-blue .copy-icon::after,
-.belcard-green .copy-icon::before,
-.belcard-green .copy-icon::after {
-  border-color: #ffffff;
 }
 
 .belcard-number {
@@ -960,7 +950,6 @@ button.disabled {
   text-decoration: none;
 }
 
-/* Строка USDT на фиолетовой */
 .belcard-usdt-line {
   position: relative;
   z-index: 2;
@@ -1012,7 +1001,6 @@ button.disabled {
   font-size: calc(clamp(10px, 1.5vmin, 12px) + 2px);
 }
 
-/* Nickname: обычный текст, как Balance: $ */
 .gold-name-label {
   font-size: clamp(11px, 1.7vmin, 14px);
   font-weight: 700;
@@ -1022,16 +1010,15 @@ button.disabled {
   display: inline;
 }
 
-/* Lucky Light — копируемый текст, крупнее на 4px, с тенью */
+/* Lucky Light — на 2px меньше предыдущего варианта (было +4, стало +2) */
 .gold-name-value {
-  font-size: calc(clamp(11px, 1.7vmin, 14px) + 4px);
+  font-size: calc(clamp(11px, 1.7vmin, 14px) + 2px);
   font-weight: 800;
   letter-spacing: 1px;
   text-shadow: 0 1px 2px rgba(0,0,0,.55);
   display: inline-block;
 }
 
-/* Строка с Nickname + Lucky Light */
 .gold-nickname-row {
   position: relative;
   z-index: 2;
@@ -5889,6 +5876,7 @@ const UI = (() => {
     UI.applySettingsToUI();
     UI.bindBelcardDrag();
     bindDesktopDoubleClick();
+    bindCopyHandlers();
     window.addEventListener('resize', () => {
       UI.updateBoardAreaOffset();
       UI.alignPercentBlockBottom();
@@ -5941,6 +5929,45 @@ const UI = (() => {
     el.trainingNextBtn = document.getElementById('training-next-btn');
     el.guidePrevBtn = document.getElementById('guide-prev-btn');
     el.guideNextBtn = document.getElementById('guide-next-btn');
+  }
+
+  function bindCopyHandlers() {
+    if (!el.supportWindow) return;
+
+    let lastCopyTs = 0;
+    const COPY_COOLDOWN = 400;
+
+    function tryCopyFromEvent(e) {
+      const target = e.target;
+      if (!target) return;
+      if (target.closest('.belcard-paysend')) return;
+
+      const copyEl = target.closest('.copy-text');
+      if (!copyEl) return;
+
+      const card = copyEl.closest('.belcard');
+      if (!card) return;
+      if (!UI.isTopBelcard(card)) return;
+
+      const now = Date.now();
+      if (now - lastCopyTs < COPY_COOLDOWN) return;
+      lastCopyTs = now;
+
+      const text = copyEl.getAttribute('data-copy-value') || copyEl.textContent.trim();
+      UI.copySupportText(text, card);
+    }
+
+    el.supportWindow.addEventListener('pointerdown', (e) => {
+      tryCopyFromEvent(e);
+    }, { capture: true });
+
+    el.supportWindow.addEventListener('click', (e) => {
+      tryCopyFromEvent(e);
+    }, { capture: true });
+
+    el.supportWindow.addEventListener('touchend', (e) => {
+      tryCopyFromEvent(e);
+    }, { capture: true, passive: true });
   }
 
   function bindDesktopDoubleClick() {
@@ -6200,25 +6227,6 @@ const UI = (() => {
         closeTrainingWindow();
         UI.showWinnerFinal();
       });
-    }
-
-    if (el.supportWindow) {
-      const tryCopy = (e) => {
-        if (e.target.closest('.belcard-paysend')) return;
-        const copyEl = e.target.closest('.copy-text');
-        if (!copyEl) return;
-        e.stopPropagation();
-        e.preventDefault();
-        const card = copyEl.closest('.belcard');
-        if (!card) return;
-        if (!UI.isTopBelcard(card)) return;
-        const text = copyEl.getAttribute('data-copy-value') || copyEl.textContent.trim();
-        UI.copySupportText(text, card);
-      };
-      el.supportWindow.addEventListener('click', tryCopy);
-      el.supportWindow.addEventListener('touchend', (e) => {
-        tryCopy(e);
-      }, { passive: false });
     }
 
     if (el.btnSupportPanel) {
