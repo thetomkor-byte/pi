@@ -5961,17 +5961,9 @@ const UI = (() => {
       UI.copySupportText(text, card);
     }
 
-    el.supportWindow.addEventListener('pointerdown', (e) => {
-      tryCopyFromEvent(e);
-    }, { capture: true });
-
     el.supportWindow.addEventListener('click', (e) => {
       tryCopyFromEvent(e);
     }, { capture: true });
-
-    el.supportWindow.addEventListener('touchend', (e) => {
-      tryCopyFromEvent(e);
-    }, { capture: true, passive: true });
   }
 
   function bindDesktopDoubleClick() {
