@@ -838,7 +838,6 @@ button.disabled {
   margin-bottom: clamp(6px, 1.2vmin, 10px);
 }
 
-/* Копируемый текст */
 .copy-text {
   position: relative;
   display: inline-block;
@@ -850,7 +849,6 @@ button.disabled {
 }
 .copy-text:active { color: var(--gold); }
 
-/* Значок копирования — «прозрачный» для клика */
 .copy-icon {
   position: absolute;
   right: 0;
@@ -1054,11 +1052,11 @@ button.disabled {
   text-align: center;
 }
 
-/* На мобильной версии: нижний край окна «Поддержать автора» — на 4 px ниже */
+/* На мобильной версии: нижний край окна «Поддержать автора» — на 6 px ниже */
 @media (max-width: 767px) {
   #support-window {
-    padding-bottom: calc(clamp(20px, 4vmin, 28px) + 4px);
-    transform: translateY(-2px);
+    padding-bottom: calc(clamp(20px, 4vmin, 28px) + 6px);
+    transform: translateY(-3px);
   }
 }
 
