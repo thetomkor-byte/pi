@@ -849,7 +849,7 @@ button.disabled {
 }
 .copy-text:active { color: var(--gold); }
 
-/* Значок копирования — 6px, полностью белый, 100% непрозрачный, выровнен по верху строки */
+/* Значок копирования — 6px, полностью белый, выровнен по верху строки */
 .copy-icon {
   position: absolute;
   right: 0;
@@ -881,9 +881,9 @@ button.disabled {
   top: 0;
 }
 
-/* Номер карты: 14–18px плавное масштабирование */
+/* Номер карты: 13–17px плавное масштабирование */
 .belcard-number {
-  font-size: clamp(14px, 2.2vmin, 18px);
+  font-size: clamp(13px, 2.1vmin, 17px);
   font-weight: 700;
   letter-spacing: 1.5px;
   text-shadow: 0 1px 2px rgba(0,0,0,.4);
@@ -1007,7 +1007,9 @@ button.disabled {
   letter-spacing: 1px;
   text-transform: none;
   text-shadow: none;
-  display: inline;
+  display: inline-block;
+  vertical-align: bottom;
+  line-height: 1;
 }
 
 .gold-name-value {
@@ -1016,6 +1018,8 @@ button.disabled {
   letter-spacing: 1px;
   text-shadow: 0 1px 2px rgba(0,0,0,.55);
   display: inline-block;
+  vertical-align: bottom;
+  line-height: 1;
 }
 
 .gold-nickname-row {
@@ -1029,6 +1033,7 @@ button.disabled {
   letter-spacing: 0.2px;
   display: block;
   width: 100%;
+  line-height: 1;
 }
 
 #support-footer {
