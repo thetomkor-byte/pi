@@ -1920,30 +1920,53 @@ button.disabled {
 }
 #final-overlay.visible { display: flex; }
 
-#champion-icon {
+#champion-wrap {
   position: relative;
   width: min(81%, 333px);
   aspect-ratio: 1 / 1;
-  border-radius: 50%;
-  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   z-index: 402;
-  animation: championGlow 2.2s ease-in-out infinite;
-  touch-action: manipulation;
-  padding: 0;
+  pointer-events: none;
 }
-@keyframes championGlow {
+
+#champion-wrap::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow:
+    0 0 25px rgba(255,203,43,.40),
+    0 0 70px rgba(255,203,43,.25),
+    0 0 130px rgba(255,203,43,.12);
+  animation: championHalo 2.4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes championHalo {
   0%, 100% {
     box-shadow:
-      0 0 20px rgba(255,203,43,.35),
-      0 0 60px rgba(255,203,43,.20),
-      0 0 110px rgba(255,203,43,.10);
+      0 0 25px rgba(255,203,43,.40),
+      0 0 70px rgba(255,203,43,.25),
+      0 0 130px rgba(255,203,43,.12);
   }
   50% {
     box-shadow:
       0 0 55px rgba(255,203,43,.85),
-      0 0 130px rgba(255,203,43,.55),
-      0 0 200px rgba(255,203,43,.30);
+      0 0 140px rgba(255,203,43,.55),
+      0 0 220px rgba(255,203,43,.30);
   }
+}
+
+#champion-icon {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #ffffff;
+  z-index: 1;
 }
 
 .firework {
@@ -1952,6 +1975,7 @@ button.disabled {
   width: 0;
   height: 0;
   z-index: 401;
+  transform: translateZ(0);
 }
 .firework .spark {
   position: absolute;
@@ -1963,6 +1987,7 @@ button.disabled {
   pointer-events: none;
   opacity: 0;
   animation: sparkFly 1.6s ease-out forwards;
+  will-change: transform, opacity;
 }
 @keyframes sparkFly {
   0% {
@@ -2298,7 +2323,9 @@ button.disabled {
   </div>
 
   <div id="final-overlay">
-    <div id="champion-icon"></div>
+    <div id="champion-wrap">
+      <div id="champion-icon"></div>
+    </div>
   </div>
 
   <div id="start-overlay">
@@ -4304,6 +4331,7 @@ const UI = (() => {
     el.belcardStack    = document.getElementById('belcard-stack');
 
     el.finalOverlay    = document.getElementById('final-overlay');
+    el.championWrap    = document.getElementById('champion-wrap');
     el.championIcon    = document.getElementById('champion-icon');
     el.btnTestTop1     = document.getElementById('btn-test-top1');
 
@@ -5627,9 +5655,6 @@ const UI = (() => {
   function hideFinalOverlay() {
     if (!el.finalOverlay) return;
     el.finalOverlay.classList.remove('visible');
-    if (el.championIcon) {
-      el.championIcon.classList.remove('winner');
-    }
     clearFireworks();
   }
 
@@ -5649,7 +5674,7 @@ const UI = (() => {
     fw.style.top = centerY + 'px';
     container.appendChild(fw);
 
-    const count = 18;
+    const count = 14;
     for (let i = 0; i < count; i++) {
       const spark = document.createElement('div');
       spark.className = 'spark';
@@ -5690,8 +5715,8 @@ const UI = (() => {
       spawnFirework(el.finalOverlay, localX, localY, colors);
     };
 
-    for (let burst = 0; burst < 10; burst++) {
-      const t = setTimeout(spawnRandom, burst * 320);
+    for (let burst = 0; burst < 8; burst++) {
+      const t = setTimeout(spawnRandom, burst * 400);
       fireworkTimers.push(t);
     }
 
@@ -5701,7 +5726,7 @@ const UI = (() => {
         return;
       }
       spawnRandom();
-    }, 550);
+    }, 900);
 
     fireworkTimers.push(setTimeout(() => clearInterval(repeat), 60 * 60 * 1000));
   }
@@ -5911,6 +5936,7 @@ const UI = (() => {
     el.placeCenter    = document.getElementById('place-center');
     el.guidePanel     = document.getElementById('guide-panel');
     el.finalOverlay   = document.getElementById('final-overlay');
+    el.championWrap   = document.getElementById('champion-wrap');
     el.championIcon   = document.getElementById('champion-icon');
     el.btnTestTop1    = document.getElementById('btn-test-top1');
     el.trainingPrevBtn = document.getElementById('training-prev-btn');
