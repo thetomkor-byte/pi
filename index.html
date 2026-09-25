@@ -716,14 +716,16 @@ button.disabled {
   color: #ffffff;
   font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   will-change: transform;
+  transition: transform .38s cubic-bezier(.22,.61,.36,1);
+}
+
+.belcard-stack.dragging .belcard {
+  transition: none;
 }
 
 .belcard-stack .belcard.belcard-blue {
   background:
     linear-gradient(135deg, #18387e 0%, #224ba1 45%, #4373c1 100%);
-  z-index: 3;
-  transform: translateY(0);
-  transition: transform .42s cubic-bezier(.22,.61,.36,1);
   box-shadow:
     0 12px 22px -8px rgba(0,0,0,.75),
     0 6px 10px -4px rgba(0,0,0,.5),
@@ -733,9 +735,6 @@ button.disabled {
 .belcard-stack .belcard.belcard-green {
   background:
     linear-gradient(135deg, #195630 0%, #246b41 45%, #3d8c55 100%);
-  z-index: 2;
-  transform: translateY(var(--belcard-offset));
-  transition: transform .42s cubic-bezier(.22,.61,.36,1);
   box-shadow:
     0 12px 22px -8px rgba(0,0,0,.65),
     0 6px 10px -4px rgba(0,0,0,.45),
@@ -745,42 +744,10 @@ button.disabled {
 .belcard-stack .belcard.belcard-gray {
   background:
     linear-gradient(135deg, #3d3548 0%, #4a3f57 45%, #5b4e6b 100%);
-  z-index: 1;
-  transform: translateY(calc(var(--belcard-offset) * 2));
-  transition: transform .42s cubic-bezier(.22,.61,.36,1);
   box-shadow:
     0 12px 22px -8px rgba(0,0,0,.55),
     0 6px 10px -4px rgba(0,0,0,.4),
     inset 0 1px 0 rgba(255,255,255,.2);
-}
-
-.belcard-stack.dragging .belcard {
-  transition: none;
-}
-
-.belcard-stack.swapped .belcard-blue {
-  z-index: 2;
-  transform: translateY(var(--belcard-offset));
-  box-shadow:
-    0 12px 22px -8px rgba(0,0,0,.65),
-    0 6px 10px -4px rgba(0,0,0,.45),
-    inset 0 1px 0 rgba(255,255,255,.25);
-}
-.belcard-stack.swapped .belcard-green {
-  z-index: 1;
-  transform: translateY(calc(var(--belcard-offset) * 2));
-  box-shadow:
-    0 12px 22px -8px rgba(0,0,0,.55),
-    0 6px 10px -4px rgba(0,0,0,.4),
-    inset 0 1px 0 rgba(255,255,255,.2);
-}
-.belcard-stack.swapped .belcard-gray {
-  z-index: 3;
-  transform: translateY(0);
-  box-shadow:
-    0 12px 22px -8px rgba(0,0,0,.75),
-    0 6px 10px -4px rgba(0,0,0,.5),
-    inset 0 1px 0 rgba(255,255,255,.25);
 }
 
 .belcard::before {
@@ -975,6 +942,7 @@ button.disabled {
   justify-content: space-between;
   align-items: center;
   gap: 10px;
+  transform: translateY(2px);
 }
 
 #support-footer .foot-center {
@@ -2155,7 +2123,7 @@ button.disabled {
       <h3>ПОДДЕРЖИ АВТОРА</h3>
 
       <div class="belcard-stack" id="belcard-stack">
-        <div class="belcard belcard-gray">
+        <div class="belcard belcard-gray" data-card="gray">
           <div class="belcard-top">
             <div class="belcard-bank" translate="no">Cryptocurrency</div>
             <div class="belcard-club-top" translate="no">Tether</div>
@@ -2170,7 +2138,7 @@ button.disabled {
           </div>
         </div>
 
-        <div class="belcard belcard-green">
+        <div class="belcard belcard-green" data-card="green">
           <div class="belcard-top">
             <div class="belcard-bank" translate="no">БЕЛАРУСБАНК</div>
             <div class="belcard-club-top" translate="no">БЕЛКАРТ</div>
@@ -2188,7 +2156,7 @@ button.disabled {
           </div>
         </div>
 
-        <div class="belcard belcard-blue">
+        <div class="belcard belcard-blue" data-card="blue">
           <div class="belcard-top">
             <div class="belcard-bank" translate="no">BELARUSBANK</div>
             <div class="belcard-club-top" translate="no">VISA</div>
@@ -4523,7 +4491,7 @@ const UI = (() => {
     const baseW = line.scrollWidth;
     if (baseW <= 0) return;
 
-    let newFs = baseFs * (cardW / baseW) + 1;
+    let newFs = baseFs * (cardW / baseW) + 2;
     const minFs = 4;
     const maxFs = 30;
     if (newFs > maxFs) newFs = maxFs;
@@ -5317,10 +5285,7 @@ const UI = (() => {
 
   function resetBelcardSwap() {
     if (el.belcardStack) {
-      el.belcardStack.classList.remove('swapped');
       el.belcardStack.classList.remove('dragging');
-      el.belcardStack.classList.remove('swapped-2');
-      el.belcardStack.classList.remove('swapped-3');
       const cards = el.belcardStack.querySelectorAll('.belcard');
       cards.forEach(c => { c.style.transform = ''; c.style.zIndex = ''; c.style.transition = ''; });
     }
@@ -5331,119 +5296,108 @@ const UI = (() => {
 
     const OFFSET = 8;
     const LIFT = 8;
-    const SWIPE_THRESHOLD = 40;
+    const SWIPE_THRESHOLD = 8;
 
+    const gray = el.belcardStack.querySelector('.belcard-gray');
     const green = el.belcardStack.querySelector('.belcard-green');
     const blue = el.belcardStack.querySelector('.belcard-blue');
-    const gray = el.belcardStack.querySelector('.belcard-gray');
-    if (!green || !blue || !gray) return;
+    if (!gray || !green || !blue) return;
+
+    const cards = { gray, green, blue };
+
+    let order = ['blue', 'green', 'gray'];
 
     let startY = 0;
     let dragging = false;
     let currentLift = 0;
-    let rotation = 0;
     let isAnimating = false;
 
-    function applyDrag(offset) {
-      const lift = Math.max(0, Math.min(LIFT, offset));
-      const top = getTopCard();
-      const middle = getMiddleCard();
-      const bottom = getBottomCard();
-      top.style.transform = `translateY(${-lift}px)`;
-      middle.style.transform = `translateY(${OFFSET}px)`;
-      bottom.style.transform = `translateY(${OFFSET * 2}px)`;
+    function topKey() { return order[0]; }
+    function midKey() { return order[1]; }
+    function botKey() { return order[2]; }
+
+    function zFor(pos) {
+      if (pos === 0) return 3;
+      if (pos === 1) return 2;
+      return 1;
     }
 
-    function getTopCard() {
-      if (rotation === 0) return blue;
-      if (rotation === 1) return green;
-      return gray;
-    }
-    function getMiddleCard() {
-      if (rotation === 0) return green;
-      if (rotation === 1) return gray;
-      return blue;
-    }
-    function getBottomCard() {
-      if (rotation === 0) return gray;
-      if (rotation === 1) return blue;
-      return green;
+    function yFor(pos) {
+      if (pos === 0) return 0;
+      if (pos === 1) return OFFSET;
+      return OFFSET * 2;
     }
 
-    function returnToStart() {
-      const top = getTopCard();
-      const middle = getMiddleCard();
-      const bottom = getBottomCard();
-      top.style.transition = 'transform .26s cubic-bezier(.22,.61,.36,1)';
-      middle.style.transition = 'transform .26s cubic-bezier(.22,.61,.36,1)';
-      bottom.style.transition = 'transform .26s cubic-bezier(.22,.61,.36,1)';
-      top.style.transform = 'translateY(0)';
-      middle.style.transform = `translateY(${OFFSET}px)`;
-      bottom.style.transform = `translateY(${OFFSET * 2}px)`;
-      setTimeout(() => {
-        top.style.transition = '';
-        middle.style.transition = '';
-        bottom.style.transition = '';
-      }, 280);
-      el.belcardStack.classList.remove('dragging');
-    }
-
-    function doSwapAnimation() {
-      isAnimating = true;
-      el.belcardStack.classList.remove('dragging');
-
-      const top = getTopCard();
-      const middle = getMiddleCard();
-      const bottom = getBottomCard();
-
-      const nextRotation = (rotation + 1) % 3;
-
-      function cardZIndexFor(r) {
-        if (r === 0) return { blue: 3, green: 2, gray: 1 };
-        if (r === 1) return { green: 3, gray: 2, blue: 1 };
-        return { gray: 3, blue: 2, green: 1 };
+    function applyPositions(animated) {
+      for (let i = 0; i < 3; i++) {
+        const key = order[i];
+        const node = cards[key];
+        if (!node) continue;
+        if (!animated) node.style.transition = 'none';
+        else node.style.transition = 'transform .38s cubic-bezier(.22,.61,.36,1)';
+        node.style.transform = `translateY(${yFor(i)}px)`;
+        node.style.zIndex = String(zFor(i));
       }
+      if (!animated) {
+        requestAnimationFrame(() => {
+          for (const key of order) {
+            const node = cards[key];
+            if (!node) continue;
+            node.style.transition = '';
+          }
+        });
+      }
+    }
 
-      const nextZ = cardZIndexFor(nextRotation);
-      blue.style.zIndex = String(nextZ.blue);
-      green.style.zIndex = String(nextZ.green);
-      gray.style.zIndex = String(nextZ.gray);
+    function beginDragLift() {
+      const node = cards[topKey()];
+      if (!node) return;
+      node.style.transition = 'none';
+      node.style.transform = `translateY(${-currentLift}px)`;
+    }
 
-      blue.style.transition = 'transform .38s cubic-bezier(.22,.61,.36,1)';
-      green.style.transition = 'transform .38s cubic-bezier(.22,.61,.36,1)';
-      gray.style.transition = 'transform .38s cubic-bezier(.22,.61,.36,1)';
+    function snapBackTop() {
+      const node = cards[topKey()];
+      if (!node) return;
+      node.style.transition = 'transform .26s cubic-bezier(.22,.61,.36,1)';
+      node.style.transform = `translateY(${yFor(0)}px)`;
+    }
 
-      top.style.transform = `translateY(${OFFSET * 2}px)`;
-      middle.style.transform = 'translateY(0)';
-      bottom.style.transform = `translateY(${OFFSET}px)`;
+    function rotateOnce() {
+      if (isAnimating) return;
+      isAnimating = true;
+
+      const topNode = cards[topKey()];
+      const midNode = cards[midKey()];
+      const botNode = cards[botKey()];
+
+      const newOrder = [order[1], order[2], order[0]];
+
+      topNode.style.transition = 'transform .38s cubic-bezier(.22,.61,.36,1)';
+      midNode.style.transition = 'transform .38s cubic-bezier(.22,.61,.36,1)';
+      botNode.style.transition = 'transform .38s cubic-bezier(.22,.61,.36,1)';
+
+      topNode.style.transform = `translateY(${OFFSET * 2}px)`;
+      midNode.style.transform = `translateY(0px)`;
+      botNode.style.transform = `translateY(${OFFSET}px)`;
+
+      topNode.style.zIndex = '1';
+      midNode.style.zIndex = '3';
+      botNode.style.zIndex = '2';
+
+      order = newOrder;
 
       setTimeout(() => {
-        blue.style.transition = '';
-        green.style.transition = '';
-        gray.style.transition = '';
-
-        rotation = nextRotation;
-
-        if (rotation === 0) {
-          el.belcardStack.classList.remove('swapped');
-          el.belcardStack.classList.remove('swapped-2');
-        } else if (rotation === 1) {
-          el.belcardStack.classList.add('swapped');
-          el.belcardStack.classList.remove('swapped-2');
-        } else {
-          el.belcardStack.classList.remove('swapped');
-          el.belcardStack.classList.add('swapped-2');
+        for (const key of order) {
+          const node = cards[key];
+          if (!node) continue;
+          node.style.transition = '';
         }
-
-        blue.style.transform = '';
-        green.style.transform = '';
-        gray.style.transform = '';
-        blue.style.zIndex = '';
-        green.style.zIndex = '';
-        gray.style.zIndex = '';
-
+        applyPositions(false);
         isAnimating = false;
-      }, 400);
+      }, 390);
+
+      currentLift = 0;
     }
 
     el.belcardStack.addEventListener('touchstart', (e) => {
@@ -5453,6 +5407,8 @@ const UI = (() => {
       dragging = false;
       currentLift = 0;
       el.belcardStack.classList.add('dragging');
+      const node = cards[topKey()];
+      if (node) node.style.transition = 'none';
     }, { passive: true });
 
     el.belcardStack.addEventListener('touchmove', (e) => {
@@ -5462,43 +5418,61 @@ const UI = (() => {
       const dy = startY - y;
 
       if (!dragging) {
-        if (Math.abs(dy) < 3) return;
-        dragging = true;
+        if (dy < -3) {
+          dragging = true;
+        } else if (dy > 3) {
+          dragging = true;
+        } else {
+          return;
+        }
       }
 
-      currentLift = Math.max(0, Math.min(LIFT, dy));
-      applyDrag(currentLift);
+      if (dy > 0) {
+        currentLift = Math.max(0, Math.min(LIFT, dy));
+      } else {
+        currentLift = 0;
+      }
+
+      beginDragLift();
       e.preventDefault();
     }, { passive: false });
 
     el.belcardStack.addEventListener('touchend', (e) => {
       if (isAnimating) return;
       el.belcardStack.classList.remove('dragging');
-      if (!dragging) {
-        returnToStart();
-        return;
-      }
+      const wasDragging = dragging;
       dragging = false;
 
-      if (currentLift >= LIFT || currentLift >= SWIPE_THRESHOLD) {
-        doSwapAnimation();
-      } else {
-        returnToStart();
+      if (!wasDragging) {
+        return;
       }
-      currentLift = 0;
+
+      if (currentLift >= SWIPE_THRESHOLD) {
+        rotateOnce();
+      } else {
+        snapBackTop();
+        currentLift = 0;
+        setTimeout(() => {
+          const node = cards[topKey()];
+          if (node) node.style.transition = '';
+        }, 280);
+      }
     }, { passive: false });
 
     el.belcardStack.addEventListener('touchcancel', () => {
       if (isAnimating) return;
       el.belcardStack.classList.remove('dragging');
       dragging = false;
-      returnToStart();
+      snapBackTop();
       currentLift = 0;
+      setTimeout(() => {
+        const node = cards[topKey()];
+        if (node) node.style.transition = '';
+      }, 280);
     }, { passive: true });
 
     let mouseDown = false;
     let mouseStartY = 0;
-    let mouseLift = 0;
     let mouseDragging = false;
 
     el.belcardStack.addEventListener('mousedown', (e) => {
@@ -5506,9 +5480,11 @@ const UI = (() => {
       if (e.button !== 0) return;
       mouseDown = true;
       mouseStartY = e.clientY;
-      mouseLift = 0;
       mouseDragging = false;
+      currentLift = 0;
       el.belcardStack.classList.add('dragging');
+      const node = cards[topKey()];
+      if (node) node.style.transition = 'none';
       e.preventDefault();
     });
 
@@ -5520,8 +5496,9 @@ const UI = (() => {
         if (Math.abs(dy) < 3) return;
         mouseDragging = true;
       }
-      mouseLift = Math.max(0, Math.min(LIFT, dy));
-      applyDrag(mouseLift);
+      if (dy > 0) currentLift = Math.max(0, Math.min(LIFT, dy));
+      else currentLift = 0;
+      beginDragLift();
     });
 
     window.addEventListener('mouseup', (e) => {
@@ -5530,17 +5507,22 @@ const UI = (() => {
       el.belcardStack.classList.remove('dragging');
       if (isAnimating) return;
       if (!mouseDragging) {
-        returnToStart();
+        const node = cards[topKey()];
+        if (node) node.style.transition = '';
         return;
       }
       mouseDragging = false;
 
-      if (mouseLift >= LIFT || mouseLift >= SWIPE_THRESHOLD) {
-        doSwapAnimation();
+      if (currentLift >= SWIPE_THRESHOLD) {
+        rotateOnce();
       } else {
-        returnToStart();
+        snapBackTop();
+        currentLift = 0;
+        setTimeout(() => {
+          const node = cards[topKey()];
+          if (node) node.style.transition = '';
+        }, 280);
       }
-      mouseLift = 0;
     });
 
     el.belcardStack.addEventListener('click', (e) => {
@@ -5548,8 +5530,10 @@ const UI = (() => {
       if (e.detail !== 2) return;
       e.preventDefault();
       e.stopPropagation();
-      doSwapAnimation();
+      rotateOnce();
     });
+
+    applyPositions(false);
   }
 
   function showFinalOverlay() {
