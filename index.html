@@ -758,7 +758,7 @@ button.disabled {
     0 6px 10px -4px rgba(0,0,0,.4),
     inset 0 1px 0 rgba(255,255,255,.2);
 }
-  
+
 .belcard::before {
   content: "";
   position: absolute;
@@ -983,7 +983,7 @@ button.disabled {
 #support-copied {
   position: absolute;
   left: 50%;
-  top: calc(50% - 8px);
+  top: 50%;
   transform: translate(-50%, -50%) scale(0.9);
   background: rgba(20, 18, 16, 0.95);
   color: var(--gold);
@@ -2132,7 +2132,7 @@ button.disabled {
       <h3>ПОДДЕРЖИ АВТОРА</h3>
 
       <div class="belcard-stack" id="belcard-stack">
-        <div class="belcard belcard-gray" data-card="gray">
+        <div class="belcard belcard-gold" data-card="gold">
           <div class="belcard-top">
             <div class="belcard-bank" translate="no">Cryptocurrency</div>
             <div class="belcard-club-top" translate="no">Tether</div>
@@ -2147,7 +2147,7 @@ button.disabled {
           </div>
         </div>
 
-        <div class="belcard belcard-gold" data-card="gold">
+        <div class="belcard belcard-gray" data-card="gray">
           <div class="belcard-top">
             <div class="belcard-bank" translate="no">Cryptocurrency</div>
             <div class="belcard-club-top" translate="no">Tether</div>
@@ -2159,24 +2159,6 @@ button.disabled {
 
           <div class="belcard-bottom">
             <div class="belcard-bottom-line" translate="no">USDT Tether → TRON (TRC20)</div>
-          </div>
-        </div>
-
-        <div class="belcard belcard-green" data-card="green">
-          <div class="belcard-top">
-            <div class="belcard-bank" translate="no">БЕЛАРУСБАНК</div>
-            <div class="belcard-club-top" translate="no">БЕЛКАРТ</div>
-          </div>
-
-          <div class="belcard-chip"></div>
-
-          <div class="belcard-number-row">
-            <div class="belcard-number" data-copy-card="ru" translate="no">9112 3801 6012 8254</div>
-            <div class="belcard-currencies-top" translate="no">BYN / RUB</div>
-          </div>
-
-          <div class="belcard-bottom">
-            <div class="belcard-name" data-copy-name="ru" translate="no">TOM TOT</div>
           </div>
         </div>
 
@@ -2197,6 +2179,24 @@ button.disabled {
 
           <div class="belcard-bottom">
             <div class="belcard-name" data-copy-name="en" translate="no">TOM TOT</div>
+          </div>
+        </div>
+
+        <div class="belcard belcard-green" data-card="green">
+          <div class="belcard-top">
+            <div class="belcard-bank" translate="no">БЕЛАРУСБАНК</div>
+            <div class="belcard-club-top" translate="no">БЕЛКАРТ</div>
+          </div>
+
+          <div class="belcard-chip"></div>
+
+          <div class="belcard-number-row">
+            <div class="belcard-number" data-copy-card="ru" translate="no">9112 3801 6012 8254</div>
+            <div class="belcard-currencies-top" translate="no">BYN / RUB</div>
+          </div>
+
+          <div class="belcard-bottom">
+            <div class="belcard-name" data-copy-name="ru" translate="no">TOM TOT</div>
           </div>
         </div>
       </div>
@@ -4128,7 +4128,7 @@ const Bots = (() => {
   };
 
 })();
-  
+
 
 /* ============================================================
    UI
@@ -5255,10 +5255,17 @@ const UI = (() => {
     document.querySelectorAll('.seat.winner').forEach(s => s.classList.remove('winner'));
   }
 
+  let belcardApplyPositionsFn = null;
+
   function showSupportOverlay() {
     if (!el.supportOverlay) return;
     el.supportOverlay.classList.add('visible');
-    requestAnimationFrame(() => requestAnimationFrame(fitUsdtAddresses));
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      fitUsdtAddresses();
+      if (typeof belcardApplyPositionsFn === 'function') {
+        belcardApplyPositionsFn();
+      }
+    }));
   }
 
   function hideSupportOverlay() {
@@ -5266,9 +5273,24 @@ const UI = (() => {
     el.supportOverlay.classList.remove('visible');
   }
 
-  function showSupportCopiedHint(lang) {
+  function showSupportCopiedHint(lang, anchorEl) {
     if (!el.supportCopied) return;
     el.supportCopied.textContent = (lang === 'en') ? 'Copied' : 'Скопировано';
+
+    let centerX = window.innerWidth / 2;
+    let centerY = window.innerHeight / 2;
+
+    if (anchorEl && anchorEl.getBoundingClientRect) {
+      const r = anchorEl.getBoundingClientRect();
+      if (r.width > 0 && r.height > 0) {
+        centerX = r.left + r.width / 2;
+        centerY = r.top + r.height / 2;
+      }
+    }
+
+    el.supportCopied.style.left = centerX + 'px';
+    el.supportCopied.style.top = centerY + 'px';
+
     el.supportCopied.classList.add('visible');
     clearTimeout(el.supportCopied._timer);
     el.supportCopied._timer = setTimeout(() => {
@@ -5276,23 +5298,23 @@ const UI = (() => {
     }, 1200);
   }
 
-  function copySupportText(text, lang) {
+  function copySupportText(text, lang, anchorEl) {
     try {
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(() => {
-          showSupportCopiedHint(lang);
+          showSupportCopiedHint(lang, anchorEl);
         }).catch(() => {
-          fallbackCopy(text, lang);
+          fallbackCopy(text, lang, anchorEl);
         });
       } else {
-        fallbackCopy(text, lang);
+        fallbackCopy(text, lang, anchorEl);
       }
     } catch (e) {
-      fallbackCopy(text, lang);
+      fallbackCopy(text, lang, anchorEl);
     }
   }
 
-  function fallbackCopy(text, lang) {
+  function fallbackCopy(text, lang, anchorEl) {
     try {
       const ta = document.createElement('textarea');
       ta.value = text;
@@ -5305,7 +5327,7 @@ const UI = (() => {
       ta.setSelectionRange(0, ta.value.length);
       const ok = document.execCommand && document.execCommand('copy');
       document.body.removeChild(ta);
-      if (ok) showSupportCopiedHint(lang);
+      if (ok) showSupportCopiedHint(lang, anchorEl);
     } catch (e) {}
   }
 
@@ -5313,7 +5335,10 @@ const UI = (() => {
     if (el.belcardStack) {
       el.belcardStack.classList.remove('dragging');
       const cards = el.belcardStack.querySelectorAll('.belcard');
-      cards.forEach(c => { c.style.transform = ''; c.style.zIndex = ''; c.style.transition = ''; });
+      cards.forEach(c => { c.style.transition = ''; });
+      if (typeof belcardApplyPositionsFn === 'function') {
+        belcardApplyPositionsFn();
+      }
     }
   }
 
@@ -5324,15 +5349,15 @@ const UI = (() => {
     const LIFT = 8;
     const SWIPE_THRESHOLD = 8;
 
-    const gray = el.belcardStack.querySelector('.belcard-gray');
     const gold = el.belcardStack.querySelector('.belcard-gold');
-    const green = el.belcardStack.querySelector('.belcard-green');
+    const gray = el.belcardStack.querySelector('.belcard-gray');
     const blue = el.belcardStack.querySelector('.belcard-blue');
-    if (!gray || !gold || !green || !blue) return;
+    const green = el.belcardStack.querySelector('.belcard-green');
+    if (!gold || !gray || !blue || !green) return;
 
-    const cards = { gray, gold, green, blue };
+    const cards = { gold, gray, blue, green };
 
-    let order = ['blue', 'green', 'gray', 'gold'];
+    let order = ['gold', 'gray', 'blue', 'green'];
 
     let startY = 0;
     let dragging = false;
@@ -5369,6 +5394,10 @@ const UI = (() => {
         });
       }
     }
+
+    belcardApplyPositionsFn = function() {
+      applyPositions(false);
+    };
 
     function beginDragLift() {
       const node = cards[topKey()];
@@ -6127,13 +6156,15 @@ const UI = (() => {
         const cardEl = e.target.closest('[data-copy-card]');
         if (cardEl) {
           const lang = cardEl.dataset.copyCard;
-          UI.copySupportText(cardEl.textContent.trim(), lang);
+          const top = el.belcardStack ? el.belcardStack.querySelector('.belcard') : null;
+          UI.copySupportText(cardEl.textContent.trim(), lang, top);
           return;
         }
         const nameEl = e.target.closest('[data-copy-name]');
         if (nameEl) {
           const lang = nameEl.dataset.copyName;
-          UI.copySupportText(nameEl.textContent.trim(), lang);
+          const top = el.belcardStack ? el.belcardStack.querySelector('.belcard') : null;
+          UI.copySupportText(nameEl.textContent.trim(), lang, top);
           return;
         }
       });
@@ -6145,13 +6176,15 @@ const UI = (() => {
         const cardEl = e.target.closest('[data-copy-card]');
         if (cardEl) {
           const lang = cardEl.dataset.copyCard;
-          UI.copySupportText(cardEl.textContent.trim(), lang);
+          const top = el.belcardStack ? el.belcardStack.querySelector('.belcard') : null;
+          UI.copySupportText(cardEl.textContent.trim(), lang, top);
           return;
         }
         const nameEl = e.target.closest('[data-copy-name]');
         if (nameEl) {
           const lang = nameEl.dataset.copyName;
-          UI.copySupportText(nameEl.textContent.trim(), lang);
+          const top = el.belcardStack ? el.belcardStack.querySelector('.belcard') : null;
+          UI.copySupportText(nameEl.textContent.trim(), lang, top);
           return;
         }
       }, { passive: false });
