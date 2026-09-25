@@ -1910,7 +1910,7 @@ button.disabled {
 #final-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(0, 0, 0, 0.65);
   z-index: 400;
   display: none;
   align-items: center;
@@ -1920,45 +1920,30 @@ button.disabled {
 }
 #final-overlay.visible { display: flex; }
 
-#final-window {
+#champion-icon {
   position: relative;
-  width: min(81%, 342px);
+  width: min(81%, 333px);
   aspect-ratio: 1 / 1;
   border-radius: 50%;
-  background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
-  border: 2px solid #8a6508;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  overflow: hidden;
-  cursor: pointer;
-  animation: winnerGlow 2.2s ease-in-out infinite;
+  background: #ffffff;
+  z-index: 402;
+  animation: championGlow 2.2s ease-in-out infinite;
   touch-action: manipulation;
   padding: 0;
 }
-@keyframes winnerGlow {
+@keyframes championGlow {
   0%, 100% {
     box-shadow:
-      0 20px 60px rgba(0,0,0,.9),
-      0 0 20px rgba(255,203,43,.25),
-      0 0 60px rgba(255,203,43,.15);
+      0 0 20px rgba(255,203,43,.35),
+      0 0 60px rgba(255,203,43,.20),
+      0 0 110px rgba(255,203,43,.10);
   }
   50% {
     box-shadow:
-      0 20px 60px rgba(0,0,0,.9),
-      0 0 45px rgba(255,203,43,.65),
-      0 0 120px rgba(255,203,43,.45);
+      0 0 55px rgba(255,203,43,.85),
+      0 0 130px rgba(255,203,43,.55),
+      0 0 200px rgba(255,203,43,.30);
   }
-}
-
-#final-window .final-trophy {
-  position: relative;
-  z-index: 1;
-  font-size: clamp(146px, 32.4vmin, 283px);
-  line-height: 1;
-  filter: drop-shadow(0 6px 22px rgba(255,203,43,.65));
 }
 
 .firework {
@@ -2313,7 +2298,7 @@ button.disabled {
   </div>
 
   <div id="final-overlay">
-    <div id="final-window"></div>
+    <div id="champion-icon"></div>
   </div>
 
   <div id="start-overlay">
@@ -4319,7 +4304,7 @@ const UI = (() => {
     el.belcardStack    = document.getElementById('belcard-stack');
 
     el.finalOverlay    = document.getElementById('final-overlay');
-    el.finalWindow     = document.getElementById('final-window');
+    el.championIcon    = document.getElementById('champion-icon');
     el.btnTestTop1     = document.getElementById('btn-test-top1');
 
     el.trainingPrevBtn = document.getElementById('training-prev-btn');
@@ -5642,9 +5627,8 @@ const UI = (() => {
   function hideFinalOverlay() {
     if (!el.finalOverlay) return;
     el.finalOverlay.classList.remove('visible');
-    if (el.finalWindow) {
-      el.finalWindow.classList.remove('winner');
-      el.finalWindow.innerHTML = '';
+    if (el.championIcon) {
+      el.championIcon.classList.remove('winner');
     }
     clearFireworks();
   }
@@ -5723,11 +5707,7 @@ const UI = (() => {
   }
 
   function showWinnerFinal() {
-    if (!el.finalWindow || !el.finalOverlay) return;
-    el.finalWindow.classList.add('winner');
-    el.finalWindow.innerHTML = `
-      <div class="final-trophy">🏆</div>
-    `;
+    if (!el.championIcon || !el.finalOverlay) return;
     showFinalOverlay();
     launchFinaleFireworks();
 
@@ -5735,6 +5715,13 @@ const UI = (() => {
     finalAutoReloadTimer = setTimeout(() => {
       window.location.reload();
     }, 60 * 1000);
+  }
+
+  function cancelFinalAutoReload() {
+    if (finalAutoReloadTimer) {
+      clearTimeout(finalAutoReloadTimer);
+      finalAutoReloadTimer = null;
+    }
   }
 
   let trainingPageIndex = 0;
@@ -5815,7 +5802,7 @@ const UI = (() => {
     resetBelcardSwap, bindBelcardDrag,
     isTopBelcard,
     recalcSeatAssignments, resetSeatAssignments,
-    showWinnerFinal, hideFinalOverlay,
+    showWinnerFinal, hideFinalOverlay, cancelFinalAutoReload,
     trainingNext, trainingPrev, resetTrainingPage,
     guideNext, guidePrev, resetGuidePage
   };
@@ -5865,6 +5852,7 @@ const UI = (() => {
 
   window.__ptRestartCallback = () => {
     UI.hideFinalOverlay();
+    UI.cancelFinalAutoReload();
     session.finalShown = false;
     restartSession();
   };
@@ -5923,7 +5911,7 @@ const UI = (() => {
     el.placeCenter    = document.getElementById('place-center');
     el.guidePanel     = document.getElementById('guide-panel');
     el.finalOverlay   = document.getElementById('final-overlay');
-    el.finalWindow    = document.getElementById('final-window');
+    el.championIcon   = document.getElementById('champion-icon');
     el.btnTestTop1    = document.getElementById('btn-test-top1');
     el.trainingPrevBtn = document.getElementById('training-prev-btn');
     el.trainingNextBtn = document.getElementById('training-next-btn');
@@ -6123,18 +6111,17 @@ const UI = (() => {
     }
 
     if (el.finalOverlay) {
-      el.finalOverlay.addEventListener('click', (e) => {
-        if (e.target === el.finalWindow) {
-          UI.hideFinalOverlay();
+      const dismissFinal = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        UI.hideFinalOverlay();
+        UI.cancelFinalAutoReload();
+        if (!session.panelsPaused && !session.supportPaused && !session.trainingPaused && !UI.anyPanelOpen()) {
+          resumeGame();
         }
-      });
-      el.finalOverlay.addEventListener('touchend', (e) => {
-        if (e.target === el.finalWindow) {
-          e.preventDefault();
-          e.stopPropagation();
-          UI.hideFinalOverlay();
-        }
-      }, { passive: false });
+      };
+      el.finalOverlay.addEventListener('click', dismissFinal);
+      el.finalOverlay.addEventListener('touchend', dismissFinal, { passive: false });
     }
 
     if (el.trainingOverlay) {
@@ -6341,6 +6328,7 @@ const UI = (() => {
     el.btnRestartPanel.addEventListener('click', () => {
       closeAllPanelsAndResume();
       UI.hideFinalOverlay();
+      UI.cancelFinalAutoReload();
       restartSession();
     });
 
@@ -6575,6 +6563,7 @@ const UI = (() => {
     UI.hideSupportOverlay();
     UI.closeTraining();
     UI.hideFinalOverlay();
+    UI.cancelFinalAutoReload();
     UI.resetBelcardSwap();
     UI.setHeroActionsActive(false);
     UI.updateHistoryInfo(0, 0, false);
