@@ -846,17 +846,18 @@ button.disabled {
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
+  -webkit-user-drag: none;
 }
 .copy-text:active { color: var(--gold); }
 
-/* Значок копирования — 6px, полностью белый, выровнен по верху строки */
+/* Значок копирования — «прозрачный» для клика, чтобы клик всегда попадал в текст */
 .copy-icon {
   position: absolute;
   right: 0;
   top: 0;
   width: 6px;
   height: 6px;
-  pointer-events: auto;
+  pointer-events: none;
   opacity: 1;
   cursor: pointer;
 }
@@ -936,7 +937,7 @@ button.disabled {
   text-decoration: none;
   line-height: 1.2;
   text-shadow: 0 1px 2px rgba(0,0,0,.35);
-  z-index: 3;
+  z-index: 4;
   white-space: nowrap;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -2335,9 +2336,6 @@ button.disabled {
     document.addEventListener('contextmenu', (e) => { e.preventDefault(); return false; }, { capture: true });
     document.addEventListener('selectstart', (e) => { e.preventDefault(); return false; }, { capture: true });
     document.addEventListener('dragstart', (e) => { e.preventDefault(); return false; }, { capture: true });
-    document.addEventListener('copy', (e) => { e.preventDefault(); return false; }, { capture: true });
-    document.addEventListener('cut', (e) => { e.preventDefault(); return false; }, { capture: true });
-    document.addEventListener('paste', (e) => { e.preventDefault(); return false; }, { capture: true });
 
     document.addEventListener('keydown', (e) => {
       const k = (e.key || '').toLowerCase();
@@ -2347,7 +2345,6 @@ button.disabled {
       if ((e.ctrlKey || e.metaKey) && k === 'u') { e.preventDefault(); return false; }
       if ((e.ctrlKey || e.metaKey) && k === 's') { e.preventDefault(); return false; }
       if ((e.ctrlKey || e.metaKey) && k === 'a') { e.preventDefault(); return false; }
-      if ((e.ctrlKey || e.metaKey) && (k === 'c' || k === 'x' || k === 'v')) { e.preventDefault(); return false; }
     }, { capture: true });
   } catch (e) {}
 })();
@@ -2422,17 +2419,6 @@ button.disabled {
     document.addEventListener('gesturestart', (e) => { e.preventDefault(); return false; }, { passive: false, capture: true });
     document.addEventListener('gesturechange', (e) => { e.preventDefault(); return false; }, { passive: false, capture: true });
     document.addEventListener('gestureend', (e) => { e.preventDefault(); return false; }, { passive: false, capture: true });
-
-    let lastTapTs = 0;
-    document.addEventListener('touchend', (e) => {
-      const now = Date.now();
-      if (now - lastTapTs < 350) {
-        if (e.cancelable) { e.preventDefault(); }
-        lastTapTs = 0;
-      } else {
-        lastTapTs = now;
-      }
-    }, { passive: false, capture: true });
 
     document.addEventListener('dblclick', (e) => { e.preventDefault(); return false; }, { passive: false, capture: true });
 
@@ -5334,22 +5320,11 @@ const UI = (() => {
   }
 
   function copySupportText(text, cardEl) {
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(() => {
-          showCardCopiedHint(cardEl);
-        }).catch(() => {
-          fallbackCopy(text, cardEl);
-        });
-      } else {
-        fallbackCopy(text, cardEl);
-      }
-    } catch (e) {
-      fallbackCopy(text, cardEl);
-    }
-  }
+    if (!text) { return; }
+    if (!cardEl) { return; }
 
-  function fallbackCopy(text, cardEl) {
+    let succeeded = false;
+
     try {
       const ta = document.createElement('textarea');
       ta.value = text;
@@ -5357,12 +5332,28 @@ const UI = (() => {
       ta.style.position = 'fixed';
       ta.style.top = '-1000px';
       ta.style.left = '-1000px';
+      ta.style.opacity = '0';
       document.body.appendChild(ta);
+      ta.focus();
       ta.select();
       ta.setSelectionRange(0, ta.value.length);
-      const ok = document.execCommand && document.execCommand('copy');
+      succeeded = document.execCommand && document.execCommand('copy');
       document.body.removeChild(ta);
-      if (ok) showCardCopiedHint(cardEl);
+    } catch (e) {
+      succeeded = false;
+    }
+
+    if (succeeded) {
+      showCardCopiedHint(cardEl);
+      return;
+    }
+
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          showCardCopiedHint(cardEl);
+        }).catch(() => {});
+      }
     } catch (e) {}
   }
 
@@ -5941,9 +5932,10 @@ const UI = (() => {
     let lastCopyTs = 0;
     const COPY_COOLDOWN = 400;
 
-    function tryCopyFromEvent(e) {
+    el.supportWindow.addEventListener('click', (e) => {
       const target = e.target;
       if (!target) return;
+
       if (target.closest('.belcard-paysend')) return;
 
       const copyEl = target.closest('.copy-text');
@@ -5959,11 +5951,7 @@ const UI = (() => {
 
       const text = copyEl.getAttribute('data-copy-value') || copyEl.textContent.trim();
       UI.copySupportText(text, card);
-    }
-
-    el.supportWindow.addEventListener('click', (e) => {
-      tryCopyFromEvent(e);
-    }, { capture: true });
+    }, { passive: true });
   }
 
   function bindDesktopDoubleClick() {
