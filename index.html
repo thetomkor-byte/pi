@@ -1920,53 +1920,50 @@ button.disabled {
 }
 #final-overlay.visible { display: flex; }
 
-#champion-wrap {
-  position: relative;
-  width: min(81%, 333px);
-  aspect-ratio: 1 / 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 402;
-  pointer-events: none;
-}
-
-#champion-wrap::before {
-  content: "";
+#champion-halo {
   position: absolute;
-  inset: 0;
+  left: 50%;
+  top: 50%;
+  width: min(135%, 540px);
+  aspect-ratio: 1 / 1;
+  transform: translate(-50%, -50%);
   border-radius: 50%;
-  box-shadow:
-    0 0 25px rgba(255,203,43,.40),
-    0 0 70px rgba(255,203,43,.25),
-    0 0 130px rgba(255,203,43,.12);
-  animation: championHalo 2.4s ease-in-out infinite;
+  background: radial-gradient(circle,
+    rgba(255,203,43,0.00) 30%,
+    rgba(255,203,43,0.18) 45%,
+    rgba(255,203,43,0.42) 55%,
+    rgba(255,203,43,0.18) 65%,
+    rgba(255,203,43,0.00) 78%);
+  animation: championHaloPulse 2.4s ease-in-out infinite;
   pointer-events: none;
-  z-index: -1;
+  z-index: 401;
+  filter: blur(6px);
+  will-change: transform, opacity;
 }
 
-@keyframes championHalo {
+@keyframes championHaloPulse {
   0%, 100% {
-    box-shadow:
-      0 0 25px rgba(255,203,43,.40),
-      0 0 70px rgba(255,203,43,.25),
-      0 0 130px rgba(255,203,43,.12);
+    transform: translate(-50%, -50%) scale(0.95);
+    opacity: 0.65;
   }
   50% {
-    box-shadow:
-      0 0 55px rgba(255,203,43,.85),
-      0 0 140px rgba(255,203,43,.55),
-      0 0 220px rgba(255,203,43,.30);
+    transform: translate(-50%, -50%) scale(1.08);
+    opacity: 1;
   }
 }
 
 #champion-icon {
   position: relative;
-  width: 100%;
-  height: 100%;
+  width: min(81%, 333px);
+  aspect-ratio: 1 / 1;
   border-radius: 50%;
   background: #ffffff;
-  z-index: 1;
+  z-index: 402;
+  pointer-events: none;
+  box-shadow:
+    0 0 30px rgba(255,203,43,.45),
+    0 0 90px rgba(255,203,43,.30),
+    0 0 160px rgba(255,203,43,.18);
 }
 
 .firework {
@@ -1974,7 +1971,7 @@ button.disabled {
   pointer-events: none;
   width: 0;
   height: 0;
-  z-index: 401;
+  z-index: 403;
   transform: translateZ(0);
 }
 .firework .spark {
@@ -2323,9 +2320,8 @@ button.disabled {
   </div>
 
   <div id="final-overlay">
-    <div id="champion-wrap">
-      <div id="champion-icon"></div>
-    </div>
+    <div id="champion-halo"></div>
+    <div id="champion-icon"></div>
   </div>
 
   <div id="start-overlay">
@@ -4331,7 +4327,7 @@ const UI = (() => {
     el.belcardStack    = document.getElementById('belcard-stack');
 
     el.finalOverlay    = document.getElementById('final-overlay');
-    el.championWrap    = document.getElementById('champion-wrap');
+    el.championHalo    = document.getElementById('champion-halo');
     el.championIcon    = document.getElementById('champion-icon');
     el.btnTestTop1     = document.getElementById('btn-test-top1');
 
@@ -5674,7 +5670,7 @@ const UI = (() => {
     fw.style.top = centerY + 'px';
     container.appendChild(fw);
 
-    const count = 14;
+    const count = 18;
     for (let i = 0; i < count; i++) {
       const spark = document.createElement('div');
       spark.className = 'spark';
@@ -5715,8 +5711,8 @@ const UI = (() => {
       spawnFirework(el.finalOverlay, localX, localY, colors);
     };
 
-    for (let burst = 0; burst < 8; burst++) {
-      const t = setTimeout(spawnRandom, burst * 400);
+    for (let burst = 0; burst < 10; burst++) {
+      const t = setTimeout(spawnRandom, burst * 320);
       fireworkTimers.push(t);
     }
 
@@ -5726,7 +5722,7 @@ const UI = (() => {
         return;
       }
       spawnRandom();
-    }, 900);
+    }, 550);
 
     fireworkTimers.push(setTimeout(() => clearInterval(repeat), 60 * 60 * 1000));
   }
@@ -5936,7 +5932,7 @@ const UI = (() => {
     el.placeCenter    = document.getElementById('place-center');
     el.guidePanel     = document.getElementById('guide-panel');
     el.finalOverlay   = document.getElementById('final-overlay');
-    el.championWrap   = document.getElementById('champion-wrap');
+    el.championHalo   = document.getElementById('champion-halo');
     el.championIcon   = document.getElementById('champion-icon');
     el.btnTestTop1    = document.getElementById('btn-test-top1');
     el.trainingPrevBtn = document.getElementById('training-prev-btn');
