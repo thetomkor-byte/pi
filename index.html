@@ -693,7 +693,7 @@ button.disabled {
   position: relative;
   width: 100%;
   aspect-ratio: 1.586 / 1;
-  margin-bottom: calc(clamp(14px, 2.4vmin, 20px) + var(--belcard-offset));
+  margin-bottom: calc(clamp(14px, 2.4vmin, 20px) + var(--belcard-offset) + var(--belcard-offset));
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
@@ -750,6 +750,15 @@ button.disabled {
     inset 0 1px 0 rgba(255,255,255,.2);
 }
 
+.belcard-stack .belcard.belcard-gold {
+  background:
+    linear-gradient(135deg, #4a3a10 0%, #6b5418 45%, #8a6f24 100%);
+  box-shadow:
+    0 12px 22px -8px rgba(0,0,0,.55),
+    0 6px 10px -4px rgba(0,0,0,.4),
+    inset 0 1px 0 rgba(255,255,255,.2);
+}
+  
 .belcard::before {
   content: "";
   position: absolute;
@@ -942,7 +951,7 @@ button.disabled {
   justify-content: space-between;
   align-items: center;
   gap: 10px;
-  transform: translateY(2px);
+  transform: translateY(10px);
 }
 
 #support-footer .foot-center {
@@ -2132,6 +2141,21 @@ button.disabled {
           <div class="belcard-chip"></div>
 
           <div class="belcard-usdt-line" id="belcard-usdt-address" data-copy-card="en" translate="no">TNxHP8tVZUFhFyAxGGtmKEqEm9Cjhbck3A</div>
+
+          <div class="belcard-bottom">
+            <div class="belcard-bottom-line" translate="no">USDT Tether → TRON (TRC20)</div>
+          </div>
+        </div>
+
+        <div class="belcard belcard-gold" data-card="gold">
+          <div class="belcard-top">
+            <div class="belcard-bank" translate="no">Cryptocurrency</div>
+            <div class="belcard-club-top" translate="no">Tether</div>
+          </div>
+
+          <div class="belcard-chip"></div>
+
+          <div class="belcard-usdt-line belcard-usdt-line-2" data-copy-card="en" translate="no">TNxHP8tVZUFhFyAxGGtmKEqEm9Cjhbck3A</div>
 
           <div class="belcard-bottom">
             <div class="belcard-bottom-line" translate="no">USDT Tether → TRON (TRC20)</div>
@@ -4104,7 +4128,7 @@ const Bots = (() => {
   };
 
 })();
-
+  
 
 /* ============================================================
    UI
@@ -4470,34 +4494,36 @@ const UI = (() => {
     fill.style.strokeDashoffset = String(circumference * (1 - ratio));
   }
 
-  function fitUsdtAddress() {
-    const line = document.getElementById('belcard-usdt-address');
-    if (!line) return;
-    const card = line.closest('.belcard');
-    if (!card) return;
+  function fitUsdtAddresses() {
+    const lines = document.querySelectorAll('.belcard-usdt-line');
+    if (!lines || lines.length === 0) return;
+    lines.forEach(function(line) {
+      const card = line.closest('.belcard');
+      if (!card) return;
 
-    const cs = window.getComputedStyle(card);
-    const padL = parseFloat(cs.paddingLeft) || 0;
-    const padR = parseFloat(cs.paddingRight) || 0;
-    const cardW = card.clientWidth - padL - padR;
-    if (cardW <= 0) return;
+      const cs = window.getComputedStyle(card);
+      const padL = parseFloat(cs.paddingLeft) || 0;
+      const padR = parseFloat(cs.paddingRight) || 0;
+      const cardW = card.clientWidth - padL - padR;
+      if (cardW <= 0) return;
 
-    line.style.fontSize = '';
-    line.style.letterSpacing = '0px';
-    line.style.width = cardW + 'px';
-    line.style.display = 'block';
+      line.style.fontSize = '';
+      line.style.letterSpacing = '0px';
+      line.style.width = cardW + 'px';
+      line.style.display = 'block';
 
-    const baseFs = parseFloat(window.getComputedStyle(line).fontSize) || 12;
-    const baseW = line.scrollWidth;
-    if (baseW <= 0) return;
+      const baseFs = parseFloat(window.getComputedStyle(line).fontSize) || 12;
+      const baseW = line.scrollWidth;
+      if (baseW <= 0) return;
 
-    let newFs = baseFs * (cardW / baseW) + 2;
-    const minFs = 4;
-    const maxFs = 30;
-    if (newFs > maxFs) newFs = maxFs;
-    if (newFs < minFs) newFs = minFs;
+      let newFs = baseFs * (cardW / baseW) * 0.96;
+      const minFs = 4;
+      const maxFs = 30;
+      if (newFs > maxFs) newFs = maxFs;
+      if (newFs < minFs) newFs = minFs;
 
-    line.style.fontSize = newFs.toFixed(2) + 'px';
+      line.style.fontSize = newFs.toFixed(2) + 'px';
+    });
   }
 
   function renderTable(state) {
@@ -4516,7 +4542,7 @@ const UI = (() => {
     alignPercentBlockBottom();
     placeHeroTimer();
     placeTopRoundRow();
-    fitUsdtAddress();
+    fitUsdtAddresses();
   }
 
   function recalcSeatAssignments(state) {
@@ -5232,7 +5258,7 @@ const UI = (() => {
   function showSupportOverlay() {
     if (!el.supportOverlay) return;
     el.supportOverlay.classList.add('visible');
-    requestAnimationFrame(() => requestAnimationFrame(fitUsdtAddress));
+    requestAnimationFrame(() => requestAnimationFrame(fitUsdtAddresses));
   }
 
   function hideSupportOverlay() {
@@ -5299,13 +5325,14 @@ const UI = (() => {
     const SWIPE_THRESHOLD = 8;
 
     const gray = el.belcardStack.querySelector('.belcard-gray');
+    const gold = el.belcardStack.querySelector('.belcard-gold');
     const green = el.belcardStack.querySelector('.belcard-green');
     const blue = el.belcardStack.querySelector('.belcard-blue');
-    if (!gray || !green || !blue) return;
+    if (!gray || !gold || !green || !blue) return;
 
-    const cards = { gray, green, blue };
+    const cards = { gray, gold, green, blue };
 
-    let order = ['blue', 'green', 'gray'];
+    let order = ['blue', 'green', 'gray', 'gold'];
 
     let startY = 0;
     let dragging = false;
@@ -5313,23 +5340,17 @@ const UI = (() => {
     let isAnimating = false;
 
     function topKey() { return order[0]; }
-    function midKey() { return order[1]; }
-    function botKey() { return order[2]; }
 
     function zFor(pos) {
-      if (pos === 0) return 3;
-      if (pos === 1) return 2;
-      return 1;
+      return 4 - pos;
     }
 
     function yFor(pos) {
-      if (pos === 0) return 0;
-      if (pos === 1) return OFFSET;
-      return OFFSET * 2;
+      return OFFSET * pos;
     }
 
     function applyPositions(animated) {
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < order.length; i++) {
         const key = order[i];
         const node = cards[key];
         if (!node) continue;
@@ -5367,23 +5388,27 @@ const UI = (() => {
       if (isAnimating) return;
       isAnimating = true;
 
-      const topNode = cards[topKey()];
-      const midNode = cards[midKey()];
-      const botNode = cards[botKey()];
+      const topNode = cards[order[0]];
+      const secondNode = cards[order[1]];
+      const thirdNode = cards[order[2]];
+      const fourthNode = cards[order[3]];
 
-      const newOrder = [order[1], order[2], order[0]];
+      const newOrder = [order[1], order[2], order[3], order[0]];
 
       topNode.style.transition = 'transform .38s cubic-bezier(.22,.61,.36,1)';
-      midNode.style.transition = 'transform .38s cubic-bezier(.22,.61,.36,1)';
-      botNode.style.transition = 'transform .38s cubic-bezier(.22,.61,.36,1)';
+      secondNode.style.transition = 'transform .38s cubic-bezier(.22,.61,.36,1)';
+      thirdNode.style.transition = 'transform .38s cubic-bezier(.22,.61,.36,1)';
+      fourthNode.style.transition = 'transform .38s cubic-bezier(.22,.61,.36,1)';
 
-      topNode.style.transform = `translateY(${OFFSET * 2}px)`;
-      midNode.style.transform = `translateY(0px)`;
-      botNode.style.transform = `translateY(${OFFSET}px)`;
+      topNode.style.transform = `translateY(${OFFSET * 3}px)`;
+      secondNode.style.transform = `translateY(0px)`;
+      thirdNode.style.transform = `translateY(${OFFSET}px)`;
+      fourthNode.style.transform = `translateY(${OFFSET * 2}px)`;
 
       topNode.style.zIndex = '1';
-      midNode.style.zIndex = '3';
-      botNode.style.zIndex = '2';
+      secondNode.style.zIndex = '4';
+      thirdNode.style.zIndex = '3';
+      fourthNode.style.zIndex = '2';
 
       order = newOrder;
 
@@ -5719,7 +5744,7 @@ const UI = (() => {
     showWinnerFinal, hideFinalOverlay,
     trainingNext, trainingPrev, resetTrainingPage,
     guideNext, guidePrev, resetGuidePage,
-    fitUsdtAddress
+    fitUsdtAddresses
   };
 
 })();
@@ -5783,7 +5808,7 @@ const UI = (() => {
       UI.alignPercentBlockBottom();
       UI.placeHeroTimer();
       UI.placeTopRoundRow();
-      UI.fitUsdtAddress();
+      UI.fitUsdtAddresses();
     });
     window.addEventListener('orientationchange', () => {
       setTimeout(() => {
@@ -5791,7 +5816,7 @@ const UI = (() => {
         UI.alignPercentBlockBottom();
         UI.placeHeroTimer();
         UI.placeTopRoundRow();
-        UI.fitUsdtAddress();
+        UI.fitUsdtAddresses();
       }, 250);
     });
   });
