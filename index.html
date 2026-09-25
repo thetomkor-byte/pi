@@ -920,7 +920,7 @@ button.disabled {
   text-align: left;
   white-space: nowrap;
   overflow: hidden;
-  font-size: clamp(9px, 1.35vmin, 11.5px);
+  font-size: clamp(10px, 1.9vmin, 12.5px);
   font-weight: 700;
   letter-spacing: 0.2px;
   text-shadow: 0 1px 2px rgba(0,0,0,.4);
@@ -945,7 +945,7 @@ button.disabled {
   position: absolute;
   left: 50%;
   top: 50%;
-  transform: translate(-50%, -50%) scale(0.9);
+  transform: translate(-50%, -50%);
   background: rgba(20, 18, 16, 0.95);
   color: var(--gold);
   font-weight: 800;
@@ -956,13 +956,28 @@ button.disabled {
   box-shadow: 0 4px 12px rgba(0,0,0,.8);
   opacity: 0;
   pointer-events: none;
-  transition: opacity .2s ease, transform .2s ease;
+  transition: opacity .18s ease;
   z-index: 5;
   white-space: nowrap;
 }
 .belcard-copied.visible {
   opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
+}
+
+.gold-gg {
+  font-size: calc(clamp(10px, 1.5vmin, 12px) + 2px);
+}
+.gold-name-label {
+  text-shadow: none;
+  font-size: clamp(10px, 1.5vmin, 12px);
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+.gold-name-value {
+  text-shadow: 0 1px 2px rgba(0,0,0,.55);
+  font-size: calc(clamp(10px, 1.5vmin, 12px) + 2px);
+  font-weight: 800;
+  letter-spacing: 0.2px;
 }
 
 #support-footer {
@@ -2135,16 +2150,16 @@ button.disabled {
       <div class="belcard-stack" id="belcard-stack">
         <div class="belcard belcard-gold" data-card="gold">
           <div class="belcard-top">
-            <div class="belcard-bank" translate="no">Cryptocurrency</div>
-            <div class="belcard-club-top" translate="no">Tether</div>
+            <div class="belcard-bank" translate="no"><span class="gold-gg">GG</span>POKER</div>
+            <div class="belcard-club-top" translate="no">Transfer</div>
           </div>
 
           <div class="belcard-chip"></div>
 
-          <div class="belcard-usdt-line" data-copy-card="en" translate="no">TNxHP8tVZUFhFyAxGGtmKEqEm9Cjhbck3A</div>
+          <div class="belcard-usdt-line" data-copy-card="en" translate="no"><span class="gold-name-label">Nickname:</span> <span class="gold-name-value">Lucky Light</span></div>
 
           <div class="belcard-bottom">
-            <div class="belcard-bottom-line" translate="no">USDT Tether → TRON (TRC20)</div>
+            <div class="belcard-bottom-line" translate="no">Balance: $</div>
           </div>
 
           <div class="belcard-copied" data-copied="en">Copied</div>
@@ -5355,6 +5370,7 @@ const UI = (() => {
     }
 
     belcardApplyPositionsFn = function() {
+      order = ['gold', 'gray', 'blue', 'green'];
       applyPositions(false);
     };
 
