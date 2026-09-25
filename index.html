@@ -1907,49 +1907,49 @@ button.disabled {
 }
 #btn-start:active { transform: translateY(2px); box-shadow: 0 1px 0 #8a6508; }
 
+/* ============================================================
+   ФИНАЛЬНЫЙ ЭКРАН ЧЕМПИОНА
+   Три независимых слоя: dim (затемнение), champ (иконка), fx (салюты)
+   ============================================================ */
+
 #final-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.65);
   z-index: 400;
   display: none;
+  overflow: hidden;
+  isolation: isolate;
+}
+#final-overlay.visible { display: block; }
+
+#final-dim {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 0;
+  pointer-events: none;
+  transform: translateZ(0);
+  contain: strict;
+}
+
+#final-champ {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  transform: translateZ(0);
+  display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
-  overflow: hidden;
 }
-#final-overlay.visible { display: flex; }
 
-#champion-halo {
+#final-fx {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  width: min(135%, 540px);
-  aspect-ratio: 1 / 1;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  background: radial-gradient(circle,
-    rgba(255,203,43,0.00) 30%,
-    rgba(255,203,43,0.18) 45%,
-    rgba(255,203,43,0.42) 55%,
-    rgba(255,203,43,0.18) 65%,
-    rgba(255,203,43,0.00) 78%);
-  animation: championHaloPulse 2.4s ease-in-out infinite;
+  inset: 0;
+  z-index: 2;
   pointer-events: none;
-  z-index: 401;
-  filter: blur(6px);
-  will-change: transform, opacity;
-}
-
-@keyframes championHaloPulse {
-  0%, 100% {
-    transform: translate(-50%, -50%) scale(0.95);
-    opacity: 0.65;
-  }
-  50% {
-    transform: translate(-50%, -50%) scale(1.08);
-    opacity: 1;
-  }
+  transform: translateZ(0);
+  contain: strict;
 }
 
 #champion-icon {
@@ -1958,12 +1958,24 @@ button.disabled {
   aspect-ratio: 1 / 1;
   border-radius: 50%;
   background: #ffffff;
-  z-index: 402;
   pointer-events: none;
-  box-shadow:
-    0 0 30px rgba(255,203,43,.45),
-    0 0 90px rgba(255,203,43,.30),
-    0 0 160px rgba(255,203,43,.18);
+  animation: championGlow 2.4s ease-in-out infinite;
+  will-change: box-shadow;
+}
+
+@keyframes championGlow {
+  0%, 100% {
+    box-shadow:
+      0 0 18px rgba(255,203,43,.35),
+      0 0 55px rgba(255,203,43,.22),
+      0 0 110px rgba(255,203,43,.12);
+  }
+  50% {
+    box-shadow:
+      0 0 48px rgba(255,203,43,.85),
+      0 0 120px rgba(255,203,43,.55),
+      0 0 200px rgba(255,203,43,.30);
+  }
 }
 
 .firework {
@@ -1971,8 +1983,6 @@ button.disabled {
   pointer-events: none;
   width: 0;
   height: 0;
-  z-index: 403;
-  transform: translateZ(0);
 }
 .firework .spark {
   position: absolute;
@@ -2320,8 +2330,11 @@ button.disabled {
   </div>
 
   <div id="final-overlay">
-    <div id="champion-halo"></div>
-    <div id="champion-icon"></div>
+    <div id="final-dim"></div>
+    <div id="final-champ">
+      <div id="champion-icon"></div>
+    </div>
+    <div id="final-fx"></div>
   </div>
 
   <div id="start-overlay">
@@ -4327,7 +4340,9 @@ const UI = (() => {
     el.belcardStack    = document.getElementById('belcard-stack');
 
     el.finalOverlay    = document.getElementById('final-overlay');
-    el.championHalo    = document.getElementById('champion-halo');
+    el.finalDim        = document.getElementById('final-dim');
+    el.finalChamp      = document.getElementById('final-champ');
+    el.finalFx         = document.getElementById('final-fx');
     el.championIcon    = document.getElementById('champion-icon');
     el.btnTestTop1     = document.getElementById('btn-test-top1');
 
@@ -5660,7 +5675,11 @@ const UI = (() => {
   function clearFireworks() {
     for (const t of fireworkTimers) clearTimeout(t);
     fireworkTimers = [];
-    document.querySelectorAll('.firework').forEach(f => f.remove());
+    if (el.finalFx) {
+      el.finalFx.innerHTML = '';
+    } else {
+      document.querySelectorAll('.firework').forEach(f => f.remove());
+    }
   }
 
   function spawnFirework(container, centerX, centerY, colors) {
@@ -5692,7 +5711,7 @@ const UI = (() => {
 
   function launchFinaleFireworks() {
     clearFireworks();
-    if (!el.finalOverlay) return;
+    if (!el.finalOverlay || !el.finalFx) return;
 
     const tableEl = document.getElementById('poker-table-wood') || document.getElementById('poker-table');
     const tableRect = tableEl ? tableEl.getBoundingClientRect() : el.finalOverlay.getBoundingClientRect();
@@ -5708,7 +5727,7 @@ const UI = (() => {
       const pageY = tableRect.top + oyInTable;
       const localX = pageX - overlayRect.left;
       const localY = pageY - overlayRect.top;
-      spawnFirework(el.finalOverlay, localX, localY, colors);
+      spawnFirework(el.finalFx, localX, localY, colors);
     };
 
     for (let burst = 0; burst < 10; burst++) {
@@ -5932,7 +5951,9 @@ const UI = (() => {
     el.placeCenter    = document.getElementById('place-center');
     el.guidePanel     = document.getElementById('guide-panel');
     el.finalOverlay   = document.getElementById('final-overlay');
-    el.championHalo   = document.getElementById('champion-halo');
+    el.finalDim       = document.getElementById('final-dim');
+    el.finalChamp     = document.getElementById('final-champ');
+    el.finalFx        = document.getElementById('final-fx');
     el.championIcon   = document.getElementById('champion-icon');
     el.btnTestTop1    = document.getElementById('btn-test-top1');
     el.trainingPrevBtn = document.getElementById('training-prev-btn');
