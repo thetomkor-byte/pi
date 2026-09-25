@@ -847,6 +847,7 @@ button.disabled {
   user-select: none;
   -webkit-user-select: none;
   align-self: flex-end;
+  position: relative;
 }
 .belcard-number:active { color: var(--gold); }
 
@@ -867,6 +868,7 @@ button.disabled {
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
+  position: relative;
 }
 .belcard-name:active { color: var(--gold); }
 
@@ -926,7 +928,6 @@ button.disabled {
   text-shadow: 0 1px 2px rgba(0,0,0,.4);
   display: block;
   width: 100%;
-  cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
 }
@@ -959,9 +960,42 @@ button.disabled {
   transition: opacity .18s ease;
   z-index: 5;
   white-space: nowrap;
+  will-change: opacity;
 }
 .belcard-copied.visible {
   opacity: 1;
+}
+
+.copy-icon {
+  display: inline-block;
+  width: clamp(11px, 1.6vmin, 14px);
+  height: clamp(11px, 1.6vmin, 14px);
+  margin-left: 6px;
+  vertical-align: middle;
+  position: relative;
+  top: -0.14em;
+  pointer-events: none;
+  opacity: 0.85;
+  flex-shrink: 0;
+}
+.copy-icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.copy-icon svg rect {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.belcard-usdt-line .copy-icon,
+.belcard-number .copy-icon,
+.belcard-name .copy-icon,
+.gold-name-value .copy-icon {
+  position: relative;
 }
 
 .gold-gg {
@@ -972,6 +1006,8 @@ button.disabled {
   font-size: clamp(10px, 1.5vmin, 12px);
   font-weight: 700;
   letter-spacing: 0.2px;
+  cursor: default;
+  pointer-events: none;
 }
 .gold-name-value {
   text-shadow: 0 1px 2px rgba(0,0,0,.55);
@@ -2156,7 +2192,10 @@ button.disabled {
 
           <div class="belcard-chip"></div>
 
-          <div class="belcard-usdt-line" data-copy-card="en" translate="no"><span class="gold-name-label">Nickname:</span> <span class="gold-name-value">Lucky Light</span></div>
+          <div class="belcard-usdt-line" translate="no">
+            <span class="gold-name-label">Nickname:</span>
+            <span class="gold-name-value" data-copy-card="en">Lucky Light</span><span class="copy-icon" data-copy-icon><svg viewBox="0 0 20 20"><rect x="3" y="3" width="11" height="11" rx="1.5"/><rect x="6.5" y="6.5" width="11" height="11" rx="1.5"/></svg></span>
+          </div>
 
           <div class="belcard-bottom">
             <div class="belcard-bottom-line" translate="no">Balance: $</div>
@@ -2173,7 +2212,9 @@ button.disabled {
 
           <div class="belcard-chip"></div>
 
-          <div class="belcard-usdt-line belcard-usdt-line-2" data-copy-card="en" translate="no">TNxHP8tVZUFhFyAxGGtmKEqEm9Cjhbck3A</div>
+          <div class="belcard-usdt-line belcard-usdt-line-2" translate="no">
+            <span data-copy-card="en">TNxHP8tVZUFhFyAxGGtmKEqEm9Cjhbck3A</span><span class="copy-icon" data-copy-icon><svg viewBox="0 0 20 20"><rect x="3" y="3" width="11" height="11" rx="1.5"/><rect x="6.5" y="6.5" width="11" height="11" rx="1.5"/></svg></span>
+          </div>
 
           <div class="belcard-bottom">
             <div class="belcard-bottom-line" translate="no">USDT Tether → TRON (TRC20)</div>
@@ -2193,12 +2234,16 @@ button.disabled {
           <a class="belcard-paysend" href="https://paysend.com/send" target="_blank" rel="noopener noreferrer" translate="no">PAYSEND</a>
 
           <div class="belcard-number-row">
-            <div class="belcard-number" data-copy-card="en" translate="no">4255 1901 3916 7251</div>
+            <div class="belcard-number" translate="no">
+              <span data-copy-card="en">4255 1901 3916 7251</span><span class="copy-icon" data-copy-icon><svg viewBox="0 0 20 20"><rect x="3" y="3" width="11" height="11" rx="1.5"/><rect x="6.5" y="6.5" width="11" height="11" rx="1.5"/></svg></span>
+            </div>
             <div class="belcard-currencies-top" translate="no">USD / EUR</div>
           </div>
 
           <div class="belcard-bottom">
-            <div class="belcard-name" data-copy-name="en" translate="no">TOM TOT</div>
+            <div class="belcard-name" translate="no">
+              <span data-copy-name="en">TOM TOT</span><span class="copy-icon" data-copy-icon><svg viewBox="0 0 20 20"><rect x="3" y="3" width="11" height="11" rx="1.5"/><rect x="6.5" y="6.5" width="11" height="11" rx="1.5"/></svg></span>
+            </div>
           </div>
 
           <div class="belcard-copied" data-copied="en">Copied</div>
@@ -2213,12 +2258,16 @@ button.disabled {
           <div class="belcard-chip"></div>
 
           <div class="belcard-number-row">
-            <div class="belcard-number" data-copy-card="ru" translate="no">9112 3801 6012 8254</div>
+            <div class="belcard-number" translate="no">
+              <span data-copy-card="ru">9112 3801 6012 8254</span><span class="copy-icon" data-copy-icon><svg viewBox="0 0 20 20"><rect x="3" y="3" width="11" height="11" rx="1.5"/><rect x="6.5" y="6.5" width="11" height="11" rx="1.5"/></svg></span>
+            </div>
             <div class="belcard-currencies-top" translate="no">BYN / RUB</div>
           </div>
 
           <div class="belcard-bottom">
-            <div class="belcard-name" data-copy-name="ru" translate="no">TOM TOT</div>
+            <div class="belcard-name" translate="no">
+              <span data-copy-name="ru">TOM TOT</span><span class="copy-icon" data-copy-icon><svg viewBox="0 0 20 20"><rect x="3" y="3" width="11" height="11" rx="1.5"/><rect x="6.5" y="6.5" width="11" height="11" rx="1.5"/></svg></span>
+            </div>
           </div>
 
           <div class="belcard-copied" data-copied="ru">Скопировано</div>
