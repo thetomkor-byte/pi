@@ -920,9 +920,9 @@ button.disabled {
   text-align: left;
   white-space: nowrap;
   overflow: hidden;
-  font-size: clamp(10px, 1.5vmin, 12px);
+  font-size: clamp(9px, 1.35vmin, 11.5px);
   font-weight: 700;
-  letter-spacing: 0;
+  letter-spacing: 0.2px;
   text-shadow: 0 1px 2px rgba(0,0,0,.4);
   display: block;
   width: 100%;
@@ -939,6 +939,30 @@ button.disabled {
   font-size: clamp(11px, 1.7vmin, 14px);
   font-weight: 700;
   letter-spacing: 1px;
+}
+
+.belcard-copied {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  background: rgba(20, 18, 16, 0.95);
+  color: var(--gold);
+  font-weight: 800;
+  font-size: clamp(13px, 1.8vmin, 16px);
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: 1px solid #8a6508;
+  box-shadow: 0 4px 12px rgba(0,0,0,.8);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s ease, transform .2s ease;
+  z-index: 5;
+  white-space: nowrap;
+}
+.belcard-copied.visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
 }
 
 #support-footer {
@@ -979,29 +1003,6 @@ button.disabled {
   filter: brightness(1.15);
 }
 .icon-btn img { display: block; width: 100%; height: 100%; }
-
-#support-copied {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%) scale(0.9);
-  background: rgba(20, 18, 16, 0.95);
-  color: var(--gold);
-  font-weight: 800;
-  font-size: clamp(13px, 1.8vmin, 16px);
-  padding: 10px 18px;
-  border-radius: 10px;
-  border: 1px solid #8a6508;
-  box-shadow: 0 4px 12px rgba(0,0,0,.8);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .2s ease, transform .2s ease;
-  z-index: 310;
-}
-#support-copied.visible {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
-}
 
 #training-overlay {
   position: absolute;
@@ -2140,11 +2141,13 @@ button.disabled {
 
           <div class="belcard-chip"></div>
 
-          <div class="belcard-usdt-line" id="belcard-usdt-address" data-copy-card="en" translate="no">TNxHP8tVZUFhFyAxGGtmKEqEm9Cjhbck3A</div>
+          <div class="belcard-usdt-line" data-copy-card="en" translate="no">TNxHP8tVZUFhFyAxGGtmKEqEm9Cjhbck3A</div>
 
           <div class="belcard-bottom">
             <div class="belcard-bottom-line" translate="no">USDT Tether → TRON (TRC20)</div>
           </div>
+
+          <div class="belcard-copied" data-copied="en">Copied</div>
         </div>
 
         <div class="belcard belcard-gray" data-card="gray">
@@ -2160,6 +2163,8 @@ button.disabled {
           <div class="belcard-bottom">
             <div class="belcard-bottom-line" translate="no">USDT Tether → TRON (TRC20)</div>
           </div>
+
+          <div class="belcard-copied" data-copied="en">Copied</div>
         </div>
 
         <div class="belcard belcard-blue" data-card="blue">
@@ -2180,6 +2185,8 @@ button.disabled {
           <div class="belcard-bottom">
             <div class="belcard-name" data-copy-name="en" translate="no">TOM TOT</div>
           </div>
+
+          <div class="belcard-copied" data-copied="en">Copied</div>
         </div>
 
         <div class="belcard belcard-green" data-card="green">
@@ -2198,6 +2205,8 @@ button.disabled {
           <div class="belcard-bottom">
             <div class="belcard-name" data-copy-name="ru" translate="no">TOM TOT</div>
           </div>
+
+          <div class="belcard-copied" data-copied="ru">Скопировано</div>
         </div>
       </div>
 
@@ -2211,8 +2220,6 @@ button.disabled {
         </a>
       </div>
     </div>
-
-    <div id="support-copied">Скопировано</div>
   </div>
 
   <div id="final-overlay">
@@ -4227,7 +4234,6 @@ const UI = (() => {
 
     el.supportOverlay = document.getElementById('support-overlay');
     el.supportWindow  = document.getElementById('support-window');
-    el.supportCopied  = document.getElementById('support-copied');
     el.btnSupportPanel = document.getElementById('btn-support-panel');
     el.settingsHelpBtn = document.getElementById('settings-help-btn');
     el.settingsCardBtn = document.getElementById('settings-card-btn');
@@ -4494,38 +4500,6 @@ const UI = (() => {
     fill.style.strokeDashoffset = String(circumference * (1 - ratio));
   }
 
-  function fitUsdtAddresses() {
-    const lines = document.querySelectorAll('.belcard-usdt-line');
-    if (!lines || lines.length === 0) return;
-    lines.forEach(function(line) {
-      const card = line.closest('.belcard');
-      if (!card) return;
-
-      const cs = window.getComputedStyle(card);
-      const padL = parseFloat(cs.paddingLeft) || 0;
-      const padR = parseFloat(cs.paddingRight) || 0;
-      const cardW = card.clientWidth - padL - padR;
-      if (cardW <= 0) return;
-
-      line.style.fontSize = '';
-      line.style.letterSpacing = '0px';
-      line.style.width = cardW + 'px';
-      line.style.display = 'block';
-
-      const baseFs = parseFloat(window.getComputedStyle(line).fontSize) || 12;
-      const baseW = line.scrollWidth;
-      if (baseW <= 0) return;
-
-      let newFs = baseFs * (cardW / baseW) * 0.96;
-      const minFs = 4;
-      const maxFs = 30;
-      if (newFs > maxFs) newFs = maxFs;
-      if (newFs < minFs) newFs = minFs;
-
-      line.style.fontSize = newFs.toFixed(2) + 'px';
-    });
-  }
-
   function renderTable(state) {
     el.seats.innerHTML = '';
     recalcSeatAssignments(state);
@@ -4542,7 +4516,6 @@ const UI = (() => {
     alignPercentBlockBottom();
     placeHeroTimer();
     placeTopRoundRow();
-    fitUsdtAddresses();
   }
 
   function recalcSeatAssignments(state) {
@@ -5255,17 +5228,9 @@ const UI = (() => {
     document.querySelectorAll('.seat.winner').forEach(s => s.classList.remove('winner'));
   }
 
-  let belcardApplyPositionsFn = null;
-
   function showSupportOverlay() {
     if (!el.supportOverlay) return;
     el.supportOverlay.classList.add('visible');
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      fitUsdtAddresses();
-      if (typeof belcardApplyPositionsFn === 'function') {
-        belcardApplyPositionsFn();
-      }
-    }));
   }
 
   function hideSupportOverlay() {
@@ -5273,48 +5238,34 @@ const UI = (() => {
     el.supportOverlay.classList.remove('visible');
   }
 
-  function showSupportCopiedHint(lang, anchorEl) {
-    if (!el.supportCopied) return;
-    el.supportCopied.textContent = (lang === 'en') ? 'Copied' : 'Скопировано';
-
-    let centerX = window.innerWidth / 2;
-    let centerY = window.innerHeight / 2;
-
-    if (anchorEl && anchorEl.getBoundingClientRect) {
-      const r = anchorEl.getBoundingClientRect();
-      if (r.width > 0 && r.height > 0) {
-        centerX = r.left + r.width / 2;
-        centerY = r.top + r.height / 2;
-      }
-    }
-
-    el.supportCopied.style.left = centerX + 'px';
-    el.supportCopied.style.top = centerY + 'px';
-
-    el.supportCopied.classList.add('visible');
-    clearTimeout(el.supportCopied._timer);
-    el.supportCopied._timer = setTimeout(() => {
-      el.supportCopied.classList.remove('visible');
+  function showCardCopiedHint(cardEl) {
+    if (!cardEl) return;
+    const hint = cardEl.querySelector('.belcard-copied');
+    if (!hint) return;
+    hint.classList.add('visible');
+    clearTimeout(hint._timer);
+    hint._timer = setTimeout(() => {
+      hint.classList.remove('visible');
     }, 1200);
   }
 
-  function copySupportText(text, lang, anchorEl) {
+  function copySupportText(text, cardEl) {
     try {
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(() => {
-          showSupportCopiedHint(lang, anchorEl);
+          showCardCopiedHint(cardEl);
         }).catch(() => {
-          fallbackCopy(text, lang, anchorEl);
+          fallbackCopy(text, cardEl);
         });
       } else {
-        fallbackCopy(text, lang, anchorEl);
+        fallbackCopy(text, cardEl);
       }
     } catch (e) {
-      fallbackCopy(text, lang, anchorEl);
+      fallbackCopy(text, cardEl);
     }
   }
 
-  function fallbackCopy(text, lang, anchorEl) {
+  function fallbackCopy(text, cardEl) {
     try {
       const ta = document.createElement('textarea');
       ta.value = text;
@@ -5327,8 +5278,16 @@ const UI = (() => {
       ta.setSelectionRange(0, ta.value.length);
       const ok = document.execCommand && document.execCommand('copy');
       document.body.removeChild(ta);
-      if (ok) showSupportCopiedHint(lang, anchorEl);
+      if (ok) showCardCopiedHint(cardEl);
     } catch (e) {}
+  }
+
+  let belcardApplyPositionsFn = null;
+  let belcardTopCardGetter = null;
+
+  function isTopBelcard(cardEl) {
+    if (!belcardTopCardGetter) return true;
+    return belcardTopCardGetter() === cardEl;
   }
 
   function resetBelcardSwap() {
@@ -5397,6 +5356,10 @@ const UI = (() => {
 
     belcardApplyPositionsFn = function() {
       applyPositions(false);
+    };
+
+    belcardTopCardGetter = function() {
+      return cards[order[0]];
     };
 
     function beginDragLift() {
@@ -5769,11 +5732,11 @@ const UI = (() => {
     placeTopRoundRow,
     showSupportOverlay, hideSupportOverlay, copySupportText,
     resetBelcardSwap, bindBelcardDrag,
+    isTopBelcard,
     recalcSeatAssignments, resetSeatAssignments,
     showWinnerFinal, hideFinalOverlay,
     trainingNext, trainingPrev, resetTrainingPage,
-    guideNext, guidePrev, resetGuidePage,
-    fitUsdtAddresses
+    guideNext, guidePrev, resetGuidePage
   };
 
 })();
@@ -5837,7 +5800,6 @@ const UI = (() => {
       UI.alignPercentBlockBottom();
       UI.placeHeroTimer();
       UI.placeTopRoundRow();
-      UI.fitUsdtAddresses();
     });
     window.addEventListener('orientationchange', () => {
       setTimeout(() => {
@@ -5845,7 +5807,6 @@ const UI = (() => {
         UI.alignPercentBlockBottom();
         UI.placeHeroTimer();
         UI.placeTopRoundRow();
-        UI.fitUsdtAddresses();
       }, 250);
     });
   });
@@ -6148,45 +6109,29 @@ const UI = (() => {
     }
 
     if (el.supportWindow) {
-      el.supportWindow.addEventListener('click', (e) => {
+      const tryCopy = (e) => {
         if (e.target.closest('.belcard-paysend')) {
           return;
         }
         e.stopPropagation();
         const cardEl = e.target.closest('[data-copy-card]');
         if (cardEl) {
-          const lang = cardEl.dataset.copyCard;
-          const top = el.belcardStack ? el.belcardStack.querySelector('.belcard') : null;
-          UI.copySupportText(cardEl.textContent.trim(), lang, top);
+          const card = cardEl.closest('.belcard');
+          if (!UI.isTopBelcard(card)) return;
+          UI.copySupportText(cardEl.textContent.trim(), card);
           return;
         }
         const nameEl = e.target.closest('[data-copy-name]');
         if (nameEl) {
-          const lang = nameEl.dataset.copyName;
-          const top = el.belcardStack ? el.belcardStack.querySelector('.belcard') : null;
-          UI.copySupportText(nameEl.textContent.trim(), lang, top);
+          const card = nameEl.closest('.belcard');
+          if (!UI.isTopBelcard(card)) return;
+          UI.copySupportText(nameEl.textContent.trim(), card);
           return;
         }
-      });
+      };
+      el.supportWindow.addEventListener('click', tryCopy);
       el.supportWindow.addEventListener('touchend', (e) => {
-        if (e.target.closest('.belcard-paysend')) {
-          return;
-        }
-        e.stopPropagation();
-        const cardEl = e.target.closest('[data-copy-card]');
-        if (cardEl) {
-          const lang = cardEl.dataset.copyCard;
-          const top = el.belcardStack ? el.belcardStack.querySelector('.belcard') : null;
-          UI.copySupportText(cardEl.textContent.trim(), lang, top);
-          return;
-        }
-        const nameEl = e.target.closest('[data-copy-name]');
-        if (nameEl) {
-          const lang = nameEl.dataset.copyName;
-          const top = el.belcardStack ? el.belcardStack.querySelector('.belcard') : null;
-          UI.copySupportText(nameEl.textContent.trim(), lang, top);
-          return;
-        }
+        tryCopy(e);
       }, { passive: false });
     }
 
