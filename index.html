@@ -58,6 +58,9 @@
   --belcard-lift: 8px;
 
   --table-col-w: min(94vw, calc((100vh - clamp(8px, 1.6vmin, 20px)) * 9 / 16));
+
+  /* Диаметр иконки чемпиона: на мобильной 323, на десктопе 333 */
+  --champ-size: min(81%, 323px);
 }
 
 html, body {
@@ -1909,7 +1912,7 @@ button.disabled {
 
 /* ============================================================
    ФИНАЛЬНЫЙ ЭКРАН ЧЕМПИОНА
-   Три независимых слоя: dim (затемнение), champ (иконка), fx (салюты)
+   Три независимых слоя: dim (затемнение), champ (иконка+ореол), fx (салюты)
    ============================================================ */
 
 #final-overlay {
@@ -1952,30 +1955,47 @@ button.disabled {
   contain: strict;
 }
 
+/* Круглый ореол: рисуется отдельным круглым слоем, прямых углов нет */
+#champion-halo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--champ-size);
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle at center,
+    rgba(255,203,43,0.00) 38%,
+    rgba(255,203,43,0.18) 52%,
+    rgba(255,203,43,0.42) 62%,
+    rgba(255,203,43,0.18) 72%,
+    rgba(255,203,43,0.00) 84%);
+  filter: blur(4px);
+  pointer-events: none;
+  animation: championHalo 2.4s ease-in-out infinite;
+  will-change: transform, opacity;
+  z-index: 0;
+}
+
+@keyframes championHalo {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(0.95);
+    opacity: 0.65;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.20);
+    opacity: 1;
+  }
+}
+
 #champion-icon {
   position: relative;
-  width: min(81%, 333px);
+  width: var(--champ-size);
   aspect-ratio: 1 / 1;
   border-radius: 50%;
   background: #ffffff;
   pointer-events: none;
-  animation: championGlow 2.4s ease-in-out infinite;
-  will-change: box-shadow;
-}
-
-@keyframes championGlow {
-  0%, 100% {
-    box-shadow:
-      0 0 18px rgba(255,203,43,.35),
-      0 0 55px rgba(255,203,43,.22),
-      0 0 110px rgba(255,203,43,.12);
-  }
-  50% {
-    box-shadow:
-      0 0 48px rgba(255,203,43,.85),
-      0 0 120px rgba(255,203,43,.55),
-      0 0 200px rgba(255,203,43,.30);
-  }
+  z-index: 1;
 }
 
 .firework {
@@ -2007,6 +2027,13 @@ button.disabled {
   100% {
     opacity: 0;
     transform: translate(var(--dx), var(--dy)) scale(0.2);
+  }
+}
+
+/* На десктопе диаметр иконки чемпиона — 333 */
+@media (min-width: 768px) {
+  :root {
+    --champ-size: min(81%, 333px);
   }
 }
 </style>
@@ -2332,6 +2359,7 @@ button.disabled {
   <div id="final-overlay">
     <div id="final-dim"></div>
     <div id="final-champ">
+      <div id="champion-halo"></div>
       <div id="champion-icon"></div>
     </div>
     <div id="final-fx"></div>
@@ -4343,6 +4371,7 @@ const UI = (() => {
     el.finalDim        = document.getElementById('final-dim');
     el.finalChamp      = document.getElementById('final-champ');
     el.finalFx         = document.getElementById('final-fx');
+    el.championHalo    = document.getElementById('champion-halo');
     el.championIcon    = document.getElementById('champion-icon');
     el.btnTestTop1     = document.getElementById('btn-test-top1');
 
@@ -5954,6 +5983,7 @@ const UI = (() => {
     el.finalDim       = document.getElementById('final-dim');
     el.finalChamp     = document.getElementById('final-champ');
     el.finalFx        = document.getElementById('final-fx');
+    el.championHalo   = document.getElementById('champion-halo');
     el.championIcon   = document.getElementById('champion-icon');
     el.btnTestTop1    = document.getElementById('btn-test-top1');
     el.trainingPrevBtn = document.getElementById('training-prev-btn');
