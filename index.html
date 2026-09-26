@@ -59,7 +59,6 @@
 
   --table-col-w: min(94vw, calc((100vh - clamp(8px, 1.6vmin, 20px)) * 9 / 16));
 
-  /* Диаметр иконки чемпиона: на мобильной — 65%, на десктопе — 333 */
   --champ-size: min(65%, 323px);
 }
 
@@ -1055,7 +1054,6 @@ button.disabled {
   text-align: center;
 }
 
-/* На мобильной версии: нижний край окна «Поддержать автора» — на 6 px ниже */
 @media (max-width: 767px) {
   #support-window {
     padding-bottom: calc(clamp(20px, 4vmin, 28px) + 6px);
@@ -1710,10 +1708,17 @@ button.disabled {
   box-shadow: 0 1px 0 #8a6508, inset 0 1px 0 rgba(255,255,255,.35);
 }
 
+/* ============================================================
+   ОКНО РУКОВОДСТВА
+   Верх прижат к верху экрана, низ привязан к верхнему краю
+   кнопок ? ! $ с отступом 4 пикселя (задаётся через bottom)
+   ============================================================ */
+
 #guide-panel {
   position: absolute;
   top: 0;
   left: 50%;
+  bottom: 0;
   transform: translate(-50%, -110%);
   width: var(--table-col-w);
   max-width: 94vw;
@@ -1729,6 +1734,8 @@ button.disabled {
   overflow-y: auto;
   touch-action: pan-y;
   scrollbar-width: none;
+  display: flex;
+  flex-direction: column;
 }
 #guide-panel::-webkit-scrollbar { display: none; }
 #guide-panel.open { transform: translate(-50%, 0); }
@@ -1750,6 +1757,7 @@ button.disabled {
   justify-content: space-between;
   gap: 8px;
   margin-bottom: 14px;
+  flex-shrink: 0;
 }
 
 .guide-nav-btn {
@@ -1786,6 +1794,7 @@ button.disabled {
   position: relative;
   overflow: hidden;
   min-height: 60px;
+  flex: 1;
 }
 
 .guide-text-page {
@@ -1843,6 +1852,7 @@ button.disabled {
   min-height: 48px;
   transition: transform .08s ease, filter .08s ease;
   font-family: inherit;
+  flex-shrink: 0;
 }
 #btn-support-panel:active:not(:disabled) {
   transform: scale(0.97);
@@ -1911,7 +1921,6 @@ button.disabled {
 
 /* ============================================================
    ФИНАЛЬНЫЙ ЭКРАН ЧЕМПИОНА
-   Три независимых слоя: dim (затемнение), champ (иконка), fx (салюты)
    ============================================================ */
 
 #final-overlay {
@@ -4429,6 +4438,7 @@ const UI = (() => {
     el.bottomPanel.classList.remove('open');
     el.guidePanel.classList.add('open');
     resetGuidePage();
+    applyGuidePanelBottom();
     updateOverlayState();
   }
   function closeGuidePanel() {
@@ -4497,6 +4507,20 @@ const UI = (() => {
     renderGuidePage(GUIDE_START_INDEX);
   }
 
+  function applyGuidePanelBottom() {
+    if (!el.guidePanel || !el.topRoundRow) return;
+    const rowRect = el.topRoundRow.getBoundingClientRect();
+    const appRect = document.getElementById('app').getBoundingClientRect();
+    if (rowRect.height <= 0) {
+      el.guidePanel.style.bottom = '';
+      return;
+    }
+    const bottomPx = appRect.bottom - rowRect.top + 4;
+    if (bottomPx > 0) {
+      el.guidePanel.style.bottom = bottomPx + 'px';
+    }
+  }
+
   function openTraining() {
     if (!el.trainingOverlay) return;
     el.trainingOverlay.classList.add('visible');
@@ -4552,16 +4576,7 @@ const UI = (() => {
   }
 
   function placeGuidePanel() {
-    if (!el.guidePanel || !el.topRoundRow) return;
-    const tableRect = document.getElementById('poker-table').getBoundingClientRect();
-    const rowRect = el.topRoundRow.getBoundingClientRect();
-    if (rowRect.height <= 0) return;
-    const panelTopPx = rowRect.top - tableRect.top - 4;
-    if (panelTopPx > 0) {
-      el.guidePanel.style.setProperty('--guide-bottom-gap', panelTopPx + 'px');
-    } else {
-      el.guidePanel.style.setProperty('--guide-bottom-gap', '0px');
-    }
+    applyGuidePanelBottom();
   }
 
   function placeHeroTimer() {
@@ -6134,9 +6149,6 @@ const UI = (() => {
       }
     }, { passive: true });
 
-    // Окно руководства: закрытие по тапу за пределами (обрабатывается через #tap-close),
-    // свайп вверх для закрытия убран.
-    // Свайп влево/вправо листает страницы по кругу.
     if (el.guidePanel) {
       let gpStartX = 0, gpStartY = 0, gpTracking = false;
       el.guidePanel.addEventListener('touchstart', (e) => {
@@ -6380,7 +6392,6 @@ const UI = (() => {
     if (el.guidePanel) {
       el.guidePanel.addEventListener('click', (e) => e.stopPropagation());
       el.guidePanel.addEventListener('touchend', (e) => e.stopPropagation(), { passive: false });
-      el.guidePanel.addEventListener('touchmove', (e) => e.stopPropagation(), { passive: true });
     }
 
     ['set-language','set-difficulty','set-card-style','set-stack-display','set-blind-growth','set-turn-time','set-show-strategies','set-show-all-hands','set-show-all-showdown'].forEach(id => {
