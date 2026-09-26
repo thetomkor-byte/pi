@@ -61,9 +61,6 @@
 
   /* Диаметр иконки чемпиона: на мобильной — 65%, на десктопе — 333 */
   --champ-size: min(65%, 323px);
-
-  /* Зазор между низом руководства и верхом блока кнопок истории */
-  --guide-gap: 2px;
 }
 
 html, body {
@@ -1713,9 +1710,6 @@ button.disabled {
   box-shadow: 0 1px 0 #8a6508, inset 0 1px 0 rgba(255,255,255,.35);
 }
 
-/* ============================================================
-   РУКОВОДСТВО
-   ============================================================ */
 #guide-panel {
   position: absolute;
   top: 0;
@@ -1729,13 +1723,11 @@ button.disabled {
   border-right: 1px solid #2a2520;
   border-bottom-left-radius: 14px;
   border-bottom-right-radius: 14px;
-  padding: calc(24px + var(--safe-top)) 20px 20px;
+  padding: calc(24px + var(--safe-top)) 20px 30px;
   transition: transform .28s ease;
   z-index: 120;
-  overflow: hidden;
-  touch-action: none;
-  display: flex;
-  flex-direction: column;
+  overflow-y: auto;
+  touch-action: pan-y;
   scrollbar-width: none;
 }
 #guide-panel::-webkit-scrollbar { display: none; }
@@ -1758,7 +1750,6 @@ button.disabled {
   justify-content: space-between;
   gap: 8px;
   margin-bottom: 14px;
-  flex-shrink: 0;
 }
 
 .guide-nav-btn {
@@ -1793,15 +1784,9 @@ button.disabled {
 
 #guide-text-viewport {
   position: relative;
-  overflow-y: auto;
-  overflow-x: hidden;
-  flex: 1;
-  min-height: 0;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  -webkit-overflow-scrolling: touch;
+  overflow: hidden;
+  min-height: 60px;
 }
-#guide-text-viewport::-webkit-scrollbar { display: none; width: 0; height: 0; }
 
 .guide-text-page {
   transition: transform 0.5s ease, opacity 0.5s ease;
@@ -2028,7 +2013,6 @@ button.disabled {
   }
 }
 
-/* На десктопе диаметр иконки чемпиона — 333 */
 @media (min-width: 768px) {
   :root {
     --champ-size: min(81%, 333px);
@@ -2118,24 +2102,6 @@ button.disabled {
     </div>
     <div id="guide-text-viewport">
       <div class="guide-text-page" data-page="0">
-        <p class="guide-text">
-          УПРАВЛЕНИЕ
-        </p>
-        <p class="guide-text">
-          Свайп снизу вверх по столу — открыть настройки.
-        </p>
-        <p class="guide-text">
-          Свайп сверху вниз по столу — открыть руководство.
-        </p>
-        <p class="guide-text">
-          Свайп снизу вверх по самому руководству — закрыть его.
-        </p>
-        <p class="guide-text">
-          Любое открытое окошко ставит игру на паузу. Закрыть окошко — тап за его пределами.
-        </p>
-        <p class="guide-text">
-          Свайп влево и вправо по руководству — перелистывание страниц.
-        </p>
       </div>
       <div class="guide-text-page active" data-page="1">
         <p class="guide-text">
@@ -2155,18 +2121,6 @@ button.disabled {
         </p>
       </div>
       <div class="guide-text-page" data-page="2">
-        <p class="guide-text">
-          ВОЗМОЖНОСТИ
-        </p>
-        <p class="guide-text">
-          Настройка уровня сложности, стиля карт, роста блайндов и времени на ход.
-        </p>
-        <p class="guide-text">
-          Открытие карт игроков и показ типов оппонентов.
-        </p>
-        <p class="guide-text">
-          Реплей раздачи и просмотр истории.
-        </p>
       </div>
     </div>
     <button id="btn-support-panel" type="button">Поддержать</button>
@@ -4323,86 +4277,12 @@ const UI = (() => {
   const SUIT_SYMBOL = { s: '♠', h: '♥', d: '♦', c: '♣' };
   const RANK_DISPLAY = { T: '10' };
 
+  const GUIDE_TITLES = ['ВОЗМОЖНОСТИ', 'РУКОВОДСТВО', 'УПРАВЛЕНИЕ'];
+  const GUIDE_START_INDEX = 1;
+
   const seatAssignments = new Map();
 
   let placeRankOffset = 0;
-
-  /* -------- Руководство: страницы по кругу -------- */
-  const GUIDE_TITLES = ['УПРАВЛЕНИЕ', 'РУКОВОДСТВО', 'ВОЗМОЖНОСТИ'];
-  const GUIDE_COUNT = GUIDE_TITLES.length;
-  const GUIDE_START = 1; // центральная = РУКОВОДСТВО
-  let guidePageIndex = GUIDE_START;
-
-  function guideApplyPage(animated) {
-    const pages = el.guideTextPages;
-    if (!pages || pages.length === 0) return;
-
-    // определяем для каждой страницы: left / active / right (по кругу)
-    for (let i = 0; i < pages.length; i++) {
-      const p = pages[i];
-      const diff = ((i - guidePageIndex) % GUIDE_COUNT + GUIDE_COUNT) % GUIDE_COUNT;
-      // diff = 0 → активна, diff = 1 → справа, diff = GUIDE_COUNT-1 → слева, остальные скрыты
-      p.classList.remove('active', 'offscreen-left', 'offscreen-right');
-      if (diff === 0) {
-        p.classList.add('active');
-      } else if (diff === 1) {
-        p.classList.add('offscreen-right');
-      } else if (diff === GUIDE_COUNT - 1) {
-        p.classList.add('offscreen-left');
-      } else {
-        p.classList.add('offscreen-right');
-        p.style.opacity = '0';
-        p.style.pointerEvents = 'none';
-      }
-      if (diff !== 0 && diff !== 1 && diff !== GUIDE_COUNT - 1) {
-        p.style.display = 'none';
-      } else {
-        p.style.display = '';
-      }
-    }
-
-    // заголовок
-    if (el.guideTitle) {
-      el.guideTitle.textContent = GUIDE_TITLES[guidePageIndex] || 'РУКОВОДСТВО';
-    }
-  }
-
-  function guideNext() {
-    guidePageIndex = (guidePageIndex + 1) % GUIDE_COUNT;
-    guideApplyPage(true);
-  }
-
-  function guidePrev() {
-    guidePageIndex = (guidePageIndex - 1 + GUIDE_COUNT) % GUIDE_COUNT;
-    guideApplyPage(true);
-  }
-
-  function resetGuidePage() {
-    guidePageIndex = GUIDE_START;
-    guideApplyPage(false);
-  }
-
-  /* Позиционирование низа руководства над блоком истории */
-  function positionGuidePanel() {
-    if (!el.guidePanel) return;
-    const tableEl = document.getElementById('poker-table');
-    const actionsEl = document.getElementById('hero-actions');
-    if (!tableEl || !actionsEl) return;
-
-    const tableRect = tableEl.getBoundingClientRect();
-    const actionsRect = actionsEl.getBoundingClientRect();
-
-    // низ панели = верх hero-actions минус 2px, относительно низа таблицы (панель привязана к верх=0)
-    const topOffset = actionsRect.top - tableRect.top - 2;
-    // задаём высоту панели так, чтобы её низ оказался в нужной точке
-    // панель выезжает сверху; верх = 0 от верха таблицы, значит height = topOffset
-    if (topOffset > 80) {
-      el.guidePanel.style.maxHeight = 'none';
-      el.guidePanel.style.height = topOffset + 'px';
-    } else {
-      el.guidePanel.style.height = '72vh';
-    }
-  }
 
   function resetSeatAssignments() {
     seatAssignments.clear();
@@ -4505,7 +4385,7 @@ const UI = (() => {
 
     applyCardStyle();
     applySettingsToUI();
-    resetGuidePage();
+    initGuidePages();
     requestAnimationFrame(() => requestAnimationFrame(() => {
       updateBoardAreaOffset();
       alignPercentBlockBottom();
@@ -4547,9 +4427,8 @@ const UI = (() => {
   }
   function openGuidePanel() {
     el.bottomPanel.classList.remove('open');
-    resetGuidePage();
-    positionGuidePanel();
     el.guidePanel.classList.add('open');
+    resetGuidePage();
     updateOverlayState();
   }
   function closeGuidePanel() {
@@ -4560,6 +4439,62 @@ const UI = (() => {
     el.bottomPanel.classList.remove('open');
     el.guidePanel.classList.remove('open');
     updateOverlayState();
+  }
+
+  let guidePageIndex = GUIDE_START_INDEX;
+
+  function applyGuideTitle() {
+    if (!el.guideTitle) return;
+    const t = GUIDE_TITLES[guidePageIndex] || '';
+    if (el.guideTitle.textContent !== t) el.guideTitle.textContent = t;
+  }
+
+  function renderGuidePage(index) {
+    const pages = el.guideTextPages;
+    if (!pages || pages.length === 0) return;
+    const total = pages.length;
+    let center = index;
+    if (total > 0) {
+      center = ((index % total) + total) % total;
+    } else {
+      center = 0;
+    }
+
+    for (let i = 0; i < total; i++) {
+      const p = pages[i];
+      p.classList.remove('active', 'offscreen-left', 'offscreen-right');
+      if (i === center) {
+        p.classList.add('active');
+      } else if (i < center) {
+        p.classList.add('offscreen-left');
+      } else {
+        p.classList.add('offscreen-right');
+      }
+    }
+
+    guidePageIndex = center;
+    applyGuideTitle();
+  }
+
+  function initGuidePages() {
+    guidePageIndex = GUIDE_START_INDEX;
+    renderGuidePage(GUIDE_START_INDEX);
+  }
+
+  function guideNext() {
+    const pages = el.guideTextPages;
+    if (!pages || pages.length === 0) return;
+    renderGuidePage(guidePageIndex + 1);
+  }
+
+  function guidePrev() {
+    const pages = el.guideTextPages;
+    if (!pages || pages.length === 0) return;
+    renderGuidePage(guidePageIndex - 1);
+  }
+
+  function resetGuidePage() {
+    renderGuidePage(GUIDE_START_INDEX);
   }
 
   function openTraining() {
@@ -4614,6 +4549,19 @@ const UI = (() => {
 
     el.topRoundRow.style.left = left + 'px';
     el.topRoundRow.style.top = top + 'px';
+  }
+
+  function placeGuidePanel() {
+    if (!el.guidePanel || !el.topRoundRow) return;
+    const tableRect = document.getElementById('poker-table').getBoundingClientRect();
+    const rowRect = el.topRoundRow.getBoundingClientRect();
+    if (rowRect.height <= 0) return;
+    const panelTopPx = rowRect.top - tableRect.top - 4;
+    if (panelTopPx > 0) {
+      el.guidePanel.style.setProperty('--guide-bottom-gap', panelTopPx + 'px');
+    } else {
+      el.guidePanel.style.setProperty('--guide-bottom-gap', '0px');
+    }
   }
 
   function placeHeroTimer() {
@@ -4692,6 +4640,7 @@ const UI = (() => {
     alignPercentBlockBottom();
     placeHeroTimer();
     placeTopRoundRow();
+    placeGuidePanel();
   }
 
   function recalcSeatAssignments(state) {
@@ -4829,6 +4778,7 @@ const UI = (() => {
     alignPercentBlockBottom();
     placeHeroTimer();
     placeTopRoundRow();
+    placeGuidePanel();
   }
 
   function renderActionBadge(p, seat) {
@@ -5914,14 +5864,14 @@ const UI = (() => {
     resetSliderToStart,
     setReplayButtonState,
     showHeroTimer, hideHeroTimer, updateHeroTimer, placeHeroTimer,
-    placeTopRoundRow,
+    placeTopRoundRow, placeGuidePanel,
     showSupportOverlay, hideSupportOverlay, copySupportText,
     resetBelcardSwap, bindBelcardDrag,
     isTopBelcard,
     recalcSeatAssignments, resetSeatAssignments,
     showWinnerFinal, hideFinalOverlay, cancelFinalAutoReload,
     trainingNext, trainingPrev, resetTrainingPage,
-    guideNext, guidePrev, resetGuidePage, positionGuidePanel
+    guideNext, guidePrev, resetGuidePage
   };
 
 })();
@@ -5987,7 +5937,7 @@ const UI = (() => {
       UI.alignPercentBlockBottom();
       UI.placeHeroTimer();
       UI.placeTopRoundRow();
-      UI.positionGuidePanel();
+      UI.placeGuidePanel();
     });
     window.addEventListener('orientationchange', () => {
       setTimeout(() => {
@@ -5995,7 +5945,7 @@ const UI = (() => {
         UI.alignPercentBlockBottom();
         UI.placeHeroTimer();
         UI.placeTopRoundRow();
-        UI.positionGuidePanel();
+        UI.placeGuidePanel();
       }, 250);
     });
   });
@@ -6028,6 +5978,7 @@ const UI = (() => {
     el.supportWindow  = document.getElementById('support-window');
     el.belcardStack   = document.getElementById('belcard-stack');
     el.placeCenter    = document.getElementById('place-center');
+    el.guidePanel     = document.getElementById('guide-panel');
     el.finalOverlay   = document.getElementById('final-overlay');
     el.finalDim       = document.getElementById('final-dim');
     el.finalChamp     = document.getElementById('final-champ');
@@ -6183,35 +6134,34 @@ const UI = (() => {
       }
     }, { passive: true });
 
-    let gpStartY = 0, gpTracking = false;
-    el.guidePanel.addEventListener('touchstart', (e) => {
-      if (e.touches.length !== 1) return;
-      gpTracking = true;
-      gpStartY = e.touches[0].clientY;
-      UI._guideSwipeStartX = e.touches[0].clientX;
-      UI._guideSwipeStartY = e.touches[0].clientY;
-    }, { passive: true });
-    el.guidePanel.addEventListener('touchend', (e) => {
-      if (!gpTracking) return;
-      gpTracking = false;
-      const endY = e.changedTouches[0].clientY;
-      const dy = endY - gpStartY;
-      if (dy < -60) {
-        closeAllPanelsAndResume();
-        return;
-      }
-      // свайп влево/вправо
-      const startSwipeX = UI._guideSwipeStartX || 0;
-      const startSwipeY = UI._guideSwipeStartY || 0;
-      const endX = e.changedTouches[0].clientX;
-      const endY2 = e.changedTouches[0].clientY;
-      const dx = endX - startSwipeX;
-      const dy2 = endY2 - startSwipeY;
-      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy2)) {
-        if (dx < 0) UI.guideNext();
-        else UI.guidePrev();
-      }
-    }, { passive: true });
+    // Окно руководства: закрытие по тапу за пределами (обрабатывается через #tap-close),
+    // свайп вверх для закрытия убран.
+    // Свайп влево/вправо листает страницы по кругу.
+    if (el.guidePanel) {
+      let gpStartX = 0, gpStartY = 0, gpTracking = false;
+      el.guidePanel.addEventListener('touchstart', (e) => {
+        if (e.touches.length !== 1) { gpTracking = false; return; }
+        gpTracking = true;
+        gpStartX = e.touches[0].clientX;
+        gpStartY = e.touches[0].clientY;
+      }, { passive: true });
+      el.guidePanel.addEventListener('touchend', (e) => {
+        if (!gpTracking) return;
+        gpTracking = false;
+        const endX = e.changedTouches[0].clientX;
+        const endY = e.changedTouches[0].clientY;
+        const dx = endX - gpStartX;
+        const dy = endY - gpStartY;
+        const minDist = 40;
+        if (Math.abs(dx) < minDist) return;
+        if (Math.abs(dy) > Math.abs(dx)) return;
+        if (dx < 0) {
+          UI.guideNext();
+        } else {
+          UI.guidePrev();
+        }
+      }, { passive: true });
+    }
 
     if (el.heroTimerZone) {
       el.heroTimerZone.addEventListener('touchend', (e) => {
@@ -6429,6 +6379,7 @@ const UI = (() => {
     }
     if (el.guidePanel) {
       el.guidePanel.addEventListener('click', (e) => e.stopPropagation());
+      el.guidePanel.addEventListener('touchend', (e) => e.stopPropagation(), { passive: false });
       el.guidePanel.addEventListener('touchmove', (e) => e.stopPropagation(), { passive: true });
     }
 
@@ -6490,10 +6441,10 @@ const UI = (() => {
   function openGuideWithoutClosing() {
     if (UI.el.guidePanel.classList.contains('open')) return;
     UI.el.bottomPanel.classList.remove('open');
-    UI.resetGuidePage();
-    UI.positionGuidePanel();
     UI.el.guidePanel.classList.add('open');
     UI.el.tapClose.classList.toggle('active', true);
+    UI.resetGuidePage();
+    UI.placeGuidePanel();
     if (!session.supportPaused && !session.trainingPaused) {
       pauseGame();
       session.panelsPaused = true;
