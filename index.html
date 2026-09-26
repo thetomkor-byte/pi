@@ -1811,24 +1811,21 @@ button.disabled {
 }
 #guide-text-viewport::-webkit-scrollbar { display: none; width: 0; height: 0; }
 
-#guide-fade {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 3.4em;
-  pointer-events: none;
-  z-index: 5;
-  opacity: 0;
-  transition: opacity .25s ease;
-  background: linear-gradient(to bottom,
-    rgba(13,13,13,0) 0%,
-    rgba(13,13,13,0.55) 40%,
-    rgba(13,13,13,0.92) 75%,
-    rgba(13,13,13,1) 100%);
-}
-#guide-fade.visible {
-  opacity: 1;
+/* Растворение нижних строк текста за счёт прозрачности.
+   Маска активна только когда снизу есть ещё текст (класс has-more). */
+#guide-text-viewport.has-more {
+  -webkit-mask-image: linear-gradient(to bottom,
+    #000000 0%,
+    #000000 calc(100% - 4.2em),
+    rgba(0,0,0,0.65) calc(100% - 2.8em),
+    rgba(0,0,0,0.25) calc(100% - 1.4em),
+    rgba(0,0,0,0) 100%);
+  mask-image: linear-gradient(to bottom,
+    #000000 0%,
+    #000000 calc(100% - 4.2em),
+    rgba(0,0,0,0.65) calc(100% - 2.8em),
+    rgba(0,0,0,0.25) calc(100% - 1.4em),
+    rgba(0,0,0,0) 100%);
 }
 
 .guide-text-page {
@@ -2178,7 +2175,6 @@ button.disabled {
         <div class="guide-text-page" data-page="2">
         </div>
       </div>
-      <div id="guide-fade"></div>
     </div>
     <button id="btn-support-panel" type="button">Поддержать</button>
   </div>
@@ -4573,7 +4569,7 @@ const UI = (() => {
   }
 
   function updateGuideFade() {
-    if (!el.guideFade || !el.guideViewport) return;
+    if (!el.guideViewport) return;
     const vp = el.guideViewport;
     const scrollHeight = vp.scrollHeight;
     const clientHeight = vp.clientHeight;
@@ -4581,9 +4577,9 @@ const UI = (() => {
 
     const hasMoreBelow = (scrollTop + clientHeight) < (scrollHeight - 2);
     if (hasMoreBelow) {
-      el.guideFade.classList.add('visible');
+      vp.classList.add('has-more');
     } else {
-      el.guideFade.classList.remove('visible');
+      vp.classList.remove('has-more');
     }
   }
 
