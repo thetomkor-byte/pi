@@ -1710,8 +1710,7 @@ button.disabled {
 
 /* ============================================================
    ОКНО РУКОВОДСТВА
-   Верх прижат к верху экрана, низ привязан к верхнему краю
-   кнопок ? ! $ с отступом 4 пикселя (задаётся через bottom)
+   Низ привязан к верхнему краю кнопок ? ! $ с отступом 4px
    ============================================================ */
 
 #guide-panel {
@@ -1731,7 +1730,7 @@ button.disabled {
   padding: calc(24px + var(--safe-top)) 20px 30px;
   transition: transform .28s ease;
   z-index: 120;
-  overflow-y: auto;
+  overflow: hidden;
   touch-action: pan-y;
   scrollbar-width: none;
   display: flex;
@@ -1765,10 +1764,10 @@ button.disabled {
   border: none;
   padding: 0;
   margin: 0;
-  color: var(--gold);
+  color: var(--muted);
   font-family: inherit;
   font-weight: 900;
-  font-size: clamp(18px, 2.4vmin, 22px);
+  font-size: calc(clamp(18px, 2.4vmin, 22px) - 2px);
   line-height: 1;
   cursor: pointer;
   touch-action: manipulation;
@@ -1780,21 +1779,56 @@ button.disabled {
   justify-content: center;
   -webkit-tap-highlight-color: transparent;
   outline: none;
-  transition: transform .08s ease, filter .08s ease;
+  transition: transform .08s ease, color .12s ease, filter .12s ease;
+  align-self: center;
 }
 .guide-nav-btn:active:not(:disabled) {
   transform: scale(0.9);
-  filter: brightness(1.35);
+  color: var(--text);
+  filter: brightness(1.3);
 }
 .guide-nav-btn:disabled {
   cursor: default;
+  opacity: 0.35;
+  color: var(--muted);
+}
+
+#guide-scroll-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 #guide-text-viewport {
   position: relative;
-  overflow: hidden;
-  min-height: 60px;
-  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100%;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+#guide-text-viewport::-webkit-scrollbar { display: none; width: 0; height: 0; }
+
+#guide-fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3.4em;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0;
+  transition: opacity .25s ease;
+  background: linear-gradient(to bottom,
+    rgba(13,13,13,0) 0%,
+    rgba(13,13,13,0.55) 40%,
+    rgba(13,13,13,0.92) 75%,
+    rgba(13,13,13,1) 100%);
+}
+#guide-fade.visible {
+  opacity: 1;
 }
 
 .guide-text-page {
@@ -1831,6 +1865,9 @@ button.disabled {
 .guide-text.muted {
   color: var(--muted);
   font-size: 12px;
+}
+.guide-text:last-child {
+  margin-bottom: 0;
 }
 
 #btn-support-panel {
@@ -1918,10 +1955,6 @@ button.disabled {
   min-height: 52px;
 }
 #btn-start:active { transform: translateY(2px); box-shadow: 0 1px 0 #8a6508; }
-
-/* ============================================================
-   ФИНАЛЬНЫЙ ЭКРАН ЧЕМПИОНА
-   ============================================================ */
 
 #final-overlay {
   position: absolute;
@@ -2109,28 +2142,43 @@ button.disabled {
       <h3 id="guide-title">РУКОВОДСТВО</h3>
       <button id="guide-next-btn" class="guide-nav-btn" type="button" aria-label="Вперёд">▶︎</button>
     </div>
-    <div id="guide-text-viewport">
-      <div class="guide-text-page" data-page="0">
+    <div id="guide-scroll-wrap">
+      <div id="guide-text-viewport">
+        <div class="guide-text-page" data-page="0">
+        </div>
+        <div class="guide-text-page active" data-page="1">
+          <p class="guide-text">
+            Poker Trainer — это симулятор покерного стола Sit&nbsp;&amp;&nbsp;Go (Texas Hold'em, 8-max).
+            Он тренирует интуицию: ты должен нащупать чувством, выиграешь ты на вскрытии
+            или нет, и действовать в согласии с этим чувством.
+          </p>
+          <p class="guide-text">
+            Обратная связь здесь — только факт: совпало или не совпало. Никаких подсказок
+            по правильности решения, EV, диапазонам и прочему. После раздачи ты просто
+            видишь бейдж WIN или LOSS и сумму выигранных или проигранных фишек.
+          </p>
+          <p class="guide-text muted">
+            Свайп снизу вверх по столу — настройки. Свайп сверху вниз — это руководство.
+            Свайп снизу вверх по самому руководству — закрыть его.
+            Любое открытое окошко ставит игру на паузу. Закрыть окошко — тап за его пределами.
+          </p>
+          <p class="guide-text">
+            1. Кнопки ◀︎ ▶︎ в окне руководства — цветом как текст. Теперь они светло-серо-белые, как и основной текст. При нажатии — плавно подсвечиваются (становятся ярче). Отключённые кнопки чуть тусклее.
+          </p>
+          <p class="guide-text">
+            2. Плавное затенение трёх нижних строк. Когда содержимое страницы руководства не влезает в окно, у нижнего края появляется мягкая тёмная дымка высотой примерно три строки текста — снизу темнее, вверх растворяется. Это показывает, что ниже ещё есть текст и его нужно пролистать.
+          </p>
+          <p class="guide-text">
+            3. Затенение убирается, когда текст закончился. Как только доскроллил до конца страницы и ниже ничего нет — дымка полностью исчезает. Становится видно, что текст закончился.
+          </p>
+          <p class="guide-text">
+            4. Конец текста у нижнего края. Если текста много — последняя строка стоит у нижнего края окна без пустоты под ней. Если текста мало — он лежит сверху, а низ окна остаётся пустым, как и должно быть.
+          </p>
+        </div>
+        <div class="guide-text-page" data-page="2">
+        </div>
       </div>
-      <div class="guide-text-page active" data-page="1">
-        <p class="guide-text">
-          Poker Trainer — это симулятор покерного стола Sit&nbsp;&amp;&nbsp;Go (Texas Hold'em, 8-max).
-          Он тренирует интуицию: ты должен нащупать чувством, выиграешь ты на вскрытии
-          или нет, и действовать в согласии с этим чувством.
-        </p>
-        <p class="guide-text">
-          Обратная связь здесь — только факт: совпало или не совпало. Никаких подсказок
-          по правильности решения, EV, диапазонам и прочему. После раздачи ты просто
-          видишь бейдж WIN или LOSS и сумму выигранных или проигранных фишек.
-        </p>
-        <p class="guide-text muted">
-          Свайп снизу вверх по столу — настройки. Свайп сверху вниз — это руководство.
-          Свайп снизу вверх по самому руководству — закрыть его.
-          Любое открытое окошко ставит игру на паузу. Закрыть окошко — тап за его пределами.
-        </p>
-      </div>
-      <div class="guide-text-page" data-page="2">
-      </div>
+      <div id="guide-fade"></div>
     </div>
     <button id="btn-support-panel" type="button">Поддержать</button>
   </div>
@@ -4334,6 +4382,8 @@ const UI = (() => {
     el.bottomPanel    = document.getElementById('bottom-panel');
     el.guidePanel     = document.getElementById('guide-panel');
     el.guideTitle     = document.getElementById('guide-title');
+    el.guideFade      = document.getElementById('guide-fade');
+    el.guideViewport  = document.getElementById('guide-text-viewport');
     el.trainingOverlay= document.getElementById('training-overlay');
     el.trainingWindow = document.getElementById('training-window');
     el.tapClose       = document.getElementById('tap-close');
@@ -4375,7 +4425,6 @@ const UI = (() => {
     el.guidePrevBtn = document.getElementById('guide-prev-btn');
     el.guideNextBtn = document.getElementById('guide-next-btn');
     el.guideTextPages = document.querySelectorAll('.guide-text-page');
-    el.guideTextViewport = document.getElementById('guide-text-viewport');
 
     el.setLanguage       = document.getElementById('set-language');
     el.setDifficulty     = document.getElementById('set-difficulty');
@@ -4484,6 +4533,8 @@ const UI = (() => {
 
     guidePageIndex = center;
     applyGuideTitle();
+    if (el.guideViewport) el.guideViewport.scrollTop = 0;
+    setTimeout(updateGuideFade, 60);
   }
 
   function initGuidePages() {
@@ -4518,6 +4569,21 @@ const UI = (() => {
     const bottomPx = appRect.bottom - rowRect.top + 4;
     if (bottomPx > 0) {
       el.guidePanel.style.bottom = bottomPx + 'px';
+    }
+  }
+
+  function updateGuideFade() {
+    if (!el.guideFade || !el.guideViewport) return;
+    const vp = el.guideViewport;
+    const scrollHeight = vp.scrollHeight;
+    const clientHeight = vp.clientHeight;
+    const scrollTop = vp.scrollTop;
+
+    const hasMoreBelow = (scrollTop + clientHeight) < (scrollHeight - 2);
+    if (hasMoreBelow) {
+      el.guideFade.classList.add('visible');
+    } else {
+      el.guideFade.classList.remove('visible');
     }
   }
 
@@ -4577,6 +4643,7 @@ const UI = (() => {
 
   function placeGuidePanel() {
     applyGuidePanelBottom();
+    updateGuideFade();
   }
 
   function placeHeroTimer() {
@@ -5880,6 +5947,7 @@ const UI = (() => {
     setReplayButtonState,
     showHeroTimer, hideHeroTimer, updateHeroTimer, placeHeroTimer,
     placeTopRoundRow, placeGuidePanel,
+    updateGuideFade,
     showSupportOverlay, hideSupportOverlay, copySupportText,
     resetBelcardSwap, bindBelcardDrag,
     isTopBelcard,
@@ -6004,6 +6072,8 @@ const UI = (() => {
     el.trainingNextBtn = document.getElementById('training-next-btn');
     el.guidePrevBtn = document.getElementById('guide-prev-btn');
     el.guideNextBtn = document.getElementById('guide-next-btn');
+    el.guideViewport = document.getElementById('guide-text-viewport');
+    el.guideFade = document.getElementById('guide-fade');
   }
 
   function bindCopyHandlers() {
@@ -6173,6 +6243,10 @@ const UI = (() => {
           UI.guidePrev();
         }
       }, { passive: true });
+    }
+
+    if (el.guideViewport) {
+      el.guideViewport.addEventListener('scroll', () => { UI.updateGuideFade(); }, { passive: true });
     }
 
     if (el.heroTimerZone) {
