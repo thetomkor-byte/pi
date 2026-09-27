@@ -1618,6 +1618,19 @@ button.disabled {
   text-align: center;
 }
 
+#bottom-panel .settings-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  position: relative;
+}
+#bottom-panel .settings-header-row h3 {
+  margin: 0;
+  flex-shrink: 0;
+}
+
 #top-round-row {
   position: absolute;
   display: flex;
@@ -1650,6 +1663,32 @@ button.disabled {
   padding: 0;
 }
 .round-help-btn:active:not(:disabled) {
+  transform: scale(0.96);
+  filter: brightness(1.35);
+}
+
+.settings-mini-btn {
+  position: relative;
+  width: calc(var(--hero-timer-size) - 8px);
+  height: calc(var(--hero-timer-size) - 8px);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #3a3530, #1a1a1a 70%);
+  border: 1px solid #8a6508;
+  color: var(--gold);
+  font-weight: 900;
+  font-size: clamp(18px, 2.4vmin, 22px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform .08s ease, filter .08s ease;
+  font-family: inherit;
+  padding: 0;
+  flex-shrink: 0;
+}
+.settings-mini-btn:active:not(:disabled) {
   transform: scale(0.96);
   filter: brightness(1.35);
 }
@@ -2255,7 +2294,11 @@ button.disabled {
   </div>
 
   <div id="bottom-panel">
-    <h3>Настройки</h3>
+    <div class="settings-header-row">
+      <button id="settings-header-help-btn" class="settings-mini-btn" type="button" aria-label="Руководство">?</button>
+      <h3>НАСТРОЙКИ</h3>
+      <button id="settings-header-card-btn" class="settings-mini-btn" type="button" aria-label="Поддержать">$</button>
+    </div>
 
     <label class="setting">
       <span>Язык приложения</span>
@@ -4442,6 +4485,9 @@ const UI = (() => {
     el.tgBtn           = document.getElementById('tg-btn');
     el.belcardStack    = document.getElementById('belcard-stack');
 
+    el.settingsHeaderHelpBtn = document.getElementById('settings-header-help-btn');
+    el.settingsHeaderCardBtn = document.getElementById('settings-header-card-btn');
+
     el.finalOverlay    = document.getElementById('final-overlay');
     el.finalDim        = document.getElementById('final-dim');
     el.finalChamp      = document.getElementById('final-champ');
@@ -6086,6 +6132,8 @@ const UI = (() => {
     el.settingsHelpBtn = document.getElementById('settings-help-btn');
     el.settingsCardBtn = document.getElementById('settings-card-btn');
     el.settingsTrainBtn = document.getElementById('settings-train-btn');
+    el.settingsHeaderHelpBtn = document.getElementById('settings-header-help-btn');
+    el.settingsHeaderCardBtn = document.getElementById('settings-header-card-btn');
     el.topRoundRow     = document.getElementById('top-round-row');
     el.gmailBtn        = document.getElementById('gmail-btn');
     el.tgBtn           = document.getElementById('tg-btn');
@@ -6460,6 +6508,32 @@ const UI = (() => {
         e.preventDefault();
         e.stopPropagation();
         openTrainingWindow();
+      }, { passive: false });
+    }
+
+    if (el.settingsHeaderHelpBtn) {
+      el.settingsHeaderHelpBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openGuideWithoutClosing();
+      });
+      el.settingsHeaderHelpBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openGuideWithoutClosing();
+      }, { passive: false });
+    }
+
+    if (el.settingsHeaderCardBtn) {
+      el.settingsHeaderCardBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openSupportOverEverything();
+      });
+      el.settingsHeaderCardBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openSupportOverEverything();
       }, { passive: false });
     }
 
