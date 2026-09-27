@@ -1710,7 +1710,7 @@ button.disabled {
 
 /* ============================================================
    ОКНО РУКОВОДСТВА
-   Низ привязан к верхнему краю блока истории раздач с отступом 4px
+   Низ привязан к верхнему краю блока истории раздач с отступом 8px
    ============================================================ */
 
 #guide-panel {
@@ -4602,7 +4602,7 @@ const UI = (() => {
       el.guidePanel.style.bottom = '';
       return;
     }
-    const bottomPx = appRect.bottom - rowRect.top + 4;
+    const bottomPx = appRect.bottom - rowRect.top + 8;
     if (bottomPx > 0) {
       el.guidePanel.style.bottom = bottomPx + 'px';
     }
