@@ -1712,7 +1712,8 @@ button.disabled {
 
 /* ============================================================
    ОКНО РУКОВОДСТВА
-   Низ привязан к верхнему краю блока истории раздач с отступом 8px
+   Одна страница, кнопки перелистывания убраны,
+   верхнее растворение убрано, добавлена кнопка "вверх".
    ============================================================ */
 
 #guide-panel {
@@ -1755,44 +1756,10 @@ button.disabled {
 #guide-header-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 8px;
   margin-bottom: 14px;
   flex-shrink: 0;
-}
-
-.guide-nav-btn {
-  background: transparent;
-  border: none;
-  padding: 0;
-  margin: 0;
-  color: var(--muted-soft);
-  font-family: inherit;
-  font-weight: 900;
-  font-size: calc(clamp(18px, 2.4vmin, 22px) - 2px);
-  line-height: 1;
-  cursor: pointer;
-  touch-action: manipulation;
-  flex-shrink: 0;
-  width: 1em;
-  height: 1em;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  -webkit-tap-highlight-color: transparent;
-  outline: none;
-  transition: transform .08s ease, color .12s ease, filter .12s ease;
-  align-self: center;
-}
-.guide-nav-btn:active:not(:disabled) {
-  transform: scale(0.9);
-  color: var(--text);
-  filter: brightness(1.3);
-}
-.guide-nav-btn:disabled {
-  cursor: default;
-  opacity: 0.35;
-  color: var(--muted-soft);
 }
 
 #guide-scroll-wrap {
@@ -1813,28 +1780,8 @@ button.disabled {
 }
 #guide-text-viewport::-webkit-scrollbar { display: none; width: 0; height: 0; }
 
-/* Растворение текста у нижнего и/или верхнего края через маску. */
-#guide-text-viewport.has-more-bottom.has-more-top {
-  -webkit-mask-image: linear-gradient(to bottom,
-    rgba(0,0,0,0) 0%,
-    rgba(0,0,0,0.25) 1.4em,
-    rgba(0,0,0,0.65) 2.8em,
-    #000000 4.2em,
-    #000000 calc(100% - 4.2em),
-    rgba(0,0,0,0.65) calc(100% - 2.8em),
-    rgba(0,0,0,0.25) calc(100% - 1.4em),
-    rgba(0,0,0,0) 100%);
-  mask-image: linear-gradient(to bottom,
-    rgba(0,0,0,0) 0%,
-    rgba(0,0,0,0.25) 1.4em,
-    rgba(0,0,0,0.65) 2.8em,
-    #000000 4.2em,
-    #000000 calc(100% - 4.2em),
-    rgba(0,0,0,0.65) calc(100% - 2.8em),
-    rgba(0,0,0,0.25) calc(100% - 1.4em),
-    rgba(0,0,0,0) 100%);
-}
-#guide-text-viewport.has-more-bottom:not(.has-more-top) {
+/* Только нижнее растворение текста. */
+#guide-text-viewport.has-more-bottom {
   -webkit-mask-image: linear-gradient(to bottom,
     #000000 0%,
     #000000 calc(100% - 4.2em),
@@ -1847,43 +1794,9 @@ button.disabled {
     rgba(0,0,0,0.65) calc(100% - 2.8em),
     rgba(0,0,0,0.25) calc(100% - 1.4em),
     rgba(0,0,0,0) 100%);
-}
-#guide-text-viewport.has-more-top:not(.has-more-bottom) {
-  -webkit-mask-image: linear-gradient(to bottom,
-    rgba(0,0,0,0) 0%,
-    rgba(0,0,0,0.25) 1.4em,
-    rgba(0,0,0,0.65) 2.8em,
-    #000000 4.2em,
-    #000000 100%);
-  mask-image: linear-gradient(to bottom,
-    rgba(0,0,0,0) 0%,
-    rgba(0,0,0,0.25) 1.4em,
-    rgba(0,0,0,0.65) 2.8em,
-    #000000 4.2em,
-    #000000 100%);
 }
 
 .guide-text-page {
-  transition: transform 0.5s ease, opacity 0.5s ease;
-  will-change: transform, opacity;
-}
-.guide-text-page.offscreen-left {
-  transform: translateX(-110%);
-  opacity: 0;
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  pointer-events: none;
-}
-.guide-text-page.offscreen-right {
-  transform: translateX(110%);
-  opacity: 0;
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  pointer-events: none;
-}
-.guide-text-page.active {
-  transform: translateX(0);
-  opacity: 1;
   position: relative;
 }
 
@@ -1913,6 +1826,43 @@ button.disabled {
 .guide-text.guide-heading {
   color: #b8b8b8;
   font-weight: 700;
+}
+
+/* Кнопка "вверх" в стиле бывших стрелок перелистывания.
+   Прижимается к нижнему краю видимой области, попадает в зону растворения.
+   Появляется только когда текст пролистан вниз. */
+#guide-scroll-top {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 0;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  color: var(--muted-soft);
+  font-family: inherit;
+  font-weight: 900;
+  font-size: calc(clamp(18px, 2.4vmin, 22px) - 2px);
+  line-height: 1;
+  width: 1em;
+  height: 1em;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  opacity: 0.85;
+  cursor: pointer;
+  touch-action: manipulation;
+  z-index: 6;
+}
+#guide-scroll-top.visible {
+  display: inline-flex;
+}
+#guide-scroll-top:active {
+  opacity: 1;
+  transform: translateX(-50%) scale(0.9);
 }
 
 #btn-support-panel {
@@ -2183,14 +2133,11 @@ button.disabled {
 
   <div id="guide-panel">
     <div id="guide-header-row">
-      <button id="guide-prev-btn" class="guide-nav-btn" type="button" aria-label="Назад">◀︎</button>
       <h3 id="guide-title">РУКОВОДСТВО</h3>
-      <button id="guide-next-btn" class="guide-nav-btn" type="button" aria-label="Вперёд">▶︎</button>
     </div>
     <div id="guide-scroll-wrap">
       <div id="guide-text-viewport">
 
-        <!-- Страница 1: РУКОВОДСТВО -->
         <div class="guide-text-page active" data-page="0" data-title="РУКОВОДСТВО">
           <p class="guide-text guide-heading">Что такое Poker Trainer</p>
           <p class="guide-text">
@@ -2295,15 +2242,10 @@ button.disabled {
           </p>
         </div>
 
-        <!-- Страница 2: УПРАВЛЕНИЕ (пустая) -->
-        <div class="guide-text-page offscreen-right" data-page="1" data-title="УПРАВЛЕНИЕ">
-        </div>
-
-        <!-- Страница 3: ТРЕНИРОВКА (пустая) -->
-        <div class="guide-text-page offscreen-right" data-page="2" data-title="ТРЕНИРОВКА">
-        </div>
-
       </div>
+
+      <button id="guide-scroll-top" type="button" aria-label="Наверх">▲</button>
+
     </div>
     <button id="btn-support-panel" type="button">Поддержать</button>
   </div>
@@ -4506,6 +4448,7 @@ const UI = (() => {
     el.guideTitle     = document.getElementById('guide-title');
     el.guideFade      = document.getElementById('guide-fade');
     el.guideViewport  = document.getElementById('guide-text-viewport');
+    el.guideScrollTop = document.getElementById('guide-scroll-top');
     el.trainingOverlay= document.getElementById('training-overlay');
     el.trainingWindow = document.getElementById('training-window');
     el.tapClose       = document.getElementById('tap-close');
@@ -4544,10 +4487,6 @@ const UI = (() => {
     el.trainingNextBtn = document.getElementById('training-next-btn');
     el.trainingTextPages = document.querySelectorAll('.training-text-page');
 
-    el.guidePrevBtn = document.getElementById('guide-prev-btn');
-    el.guideNextBtn = document.getElementById('guide-next-btn');
-    el.guideTextPages = document.querySelectorAll('.guide-text-page');
-
     el.setLanguage       = document.getElementById('set-language');
     el.setDifficulty     = document.getElementById('set-difficulty');
     el.setCardStyle      = document.getElementById('set-card-style');
@@ -4565,7 +4504,6 @@ const UI = (() => {
 
     applyCardStyle();
     applySettingsToUI();
-    initGuidePages();
     requestAnimationFrame(() => requestAnimationFrame(() => {
       updateBoardAreaOffset();
       alignPercentBlockBottom();
@@ -4608,9 +4546,10 @@ const UI = (() => {
   function openGuidePanel() {
     el.bottomPanel.classList.remove('open');
     el.guidePanel.classList.add('open');
-    resetGuidePage();
+    if (el.guideViewport) el.guideViewport.scrollTop = 0;
     applyGuidePanelBottom();
     updateOverlayState();
+    updateGuideFade();
   }
   function closeGuidePanel() {
     el.guidePanel.classList.remove('open');
@@ -4620,69 +4559,6 @@ const UI = (() => {
     el.bottomPanel.classList.remove('open');
     el.guidePanel.classList.remove('open');
     updateOverlayState();
-  }
-
-  let guidePageIndex = 0;
-
-  function applyGuideTitle() {
-    if (!el.guideTitle) return;
-    const pages = el.guideTextPages;
-    if (!pages || pages.length === 0) return;
-    const total = pages.length;
-    const idx = ((guidePageIndex % total) + total) % total;
-    const page = pages[idx];
-    const title = (page && page.dataset && page.dataset.title) ? page.dataset.title : '';
-    if (title && el.guideTitle.textContent !== title) el.guideTitle.textContent = title;
-  }
-
-  function renderGuidePage(index) {
-    const pages = el.guideTextPages;
-    if (!pages || pages.length === 0) return;
-    const total = pages.length;
-    let center = index;
-    if (total > 0) {
-      center = ((index % total) + total) % total;
-    } else {
-      center = 0;
-    }
-
-    for (let i = 0; i < total; i++) {
-      const p = pages[i];
-      p.classList.remove('active', 'offscreen-left', 'offscreen-right');
-      if (i === center) {
-        p.classList.add('active');
-      } else if (i < center) {
-        p.classList.add('offscreen-left');
-      } else {
-        p.classList.add('offscreen-right');
-      }
-    }
-
-    guidePageIndex = center;
-    applyGuideTitle();
-    if (el.guideViewport) el.guideViewport.scrollTop = 0;
-    setTimeout(updateGuideFade, 60);
-  }
-
-  function initGuidePages() {
-    guidePageIndex = 0;
-    renderGuidePage(0);
-  }
-
-  function guideNext() {
-    const pages = el.guideTextPages;
-    if (!pages || pages.length === 0) return;
-    renderGuidePage(guidePageIndex + 1);
-  }
-
-  function guidePrev() {
-    const pages = el.guideTextPages;
-    if (!pages || pages.length === 0) return;
-    renderGuidePage(guidePageIndex - 1);
-  }
-
-  function resetGuidePage() {
-    renderGuidePage(0);
   }
 
   function applyGuidePanelBottom() {
@@ -4712,10 +4588,21 @@ const UI = (() => {
     const scrollTop = vp.scrollTop;
 
     const hasMoreBelow = (scrollTop + clientHeight) < (scrollHeight - 2);
-    const hasMoreAbove = scrollTop > 2;
-
     vp.classList.toggle('has-more-bottom', hasMoreBelow);
-    vp.classList.toggle('has-more-top', hasMoreAbove);
+
+    if (el.guideScrollTop) {
+      const showTop = scrollTop > 2;
+      el.guideScrollTop.classList.toggle('visible', showTop);
+    }
+  }
+
+  function guideScrollToTop() {
+    if (!el.guideViewport) return;
+    try {
+      el.guideViewport.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (e) {
+      el.guideViewport.scrollTop = 0;
+    }
   }
 
   function openTraining() {
@@ -6078,14 +5965,13 @@ const UI = (() => {
     setReplayButtonState,
     showHeroTimer, hideHeroTimer, updateHeroTimer, placeHeroTimer,
     placeTopRoundRow, placeGuidePanel,
-    updateGuideFade,
+    updateGuideFade, guideScrollToTop,
     showSupportOverlay, hideSupportOverlay, copySupportText,
     resetBelcardSwap, bindBelcardDrag,
     isTopBelcard,
     recalcSeatAssignments, resetSeatAssignments,
     showWinnerFinal, hideFinalOverlay, cancelFinalAutoReload,
-    trainingNext, trainingPrev, resetTrainingPage,
-    guideNext, guidePrev, resetGuidePage
+    trainingNext, trainingPrev, resetTrainingPage
   };
 
 })();
@@ -6193,6 +6079,8 @@ const UI = (() => {
     el.belcardStack   = document.getElementById('belcard-stack');
     el.placeCenter    = document.getElementById('place-center');
     el.guidePanel     = document.getElementById('guide-panel');
+    el.guideViewport  = document.getElementById('guide-text-viewport');
+    el.guideScrollTop = document.getElementById('guide-scroll-top');
     el.finalOverlay   = document.getElementById('final-overlay');
     el.finalDim       = document.getElementById('final-dim');
     el.finalChamp     = document.getElementById('final-champ');
@@ -6201,10 +6089,6 @@ const UI = (() => {
     el.btnTestTop1    = document.getElementById('btn-test-top1');
     el.trainingPrevBtn = document.getElementById('training-prev-btn');
     el.trainingNextBtn = document.getElementById('training-next-btn');
-    el.guidePrevBtn = document.getElementById('guide-prev-btn');
-    el.guideNextBtn = document.getElementById('guide-next-btn');
-    el.guideViewport = document.getElementById('guide-text-viewport');
-    el.guideFade = document.getElementById('guide-fade');
   }
 
   function bindCopyHandlers() {
@@ -6351,33 +6235,22 @@ const UI = (() => {
     }, { passive: true });
 
     if (el.guidePanel) {
-      let gpStartX = 0, gpStartY = 0, gpTracking = false;
-      el.guidePanel.addEventListener('touchstart', (e) => {
-        if (e.touches.length !== 1) { gpTracking = false; return; }
-        gpTracking = true;
-        gpStartX = e.touches[0].clientX;
-        gpStartY = e.touches[0].clientY;
-      }, { passive: true });
-      el.guidePanel.addEventListener('touchend', (e) => {
-        if (!gpTracking) return;
-        gpTracking = false;
-        const endX = e.changedTouches[0].clientX;
-        const endY = e.changedTouches[0].clientY;
-        const dx = endX - gpStartX;
-        const dy = endY - gpStartY;
-        const minDist = 40;
-        if (Math.abs(dx) < minDist) return;
-        if (Math.abs(dy) > Math.abs(dx)) return;
-        if (dx < 0) {
-          UI.guideNext();
-        } else {
-          UI.guidePrev();
-        }
-      }, { passive: true });
+      el.guidePanel.addEventListener('click', (e) => e.stopPropagation());
+      el.guidePanel.addEventListener('touchend', (e) => e.stopPropagation(), { passive: false });
     }
 
     if (el.guideViewport) {
       el.guideViewport.addEventListener('scroll', () => { UI.updateGuideFade(); }, { passive: true });
+    }
+
+    if (el.guideScrollTop) {
+      const goTop = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        UI.guideScrollToTop();
+      };
+      el.guideScrollTop.addEventListener('click', goTop);
+      el.guideScrollTop.addEventListener('touchend', goTop, { passive: false });
     }
 
     if (el.heroTimerZone) {
@@ -6470,31 +6343,6 @@ const UI = (() => {
         e.preventDefault();
         e.stopPropagation();
         UI.trainingNext();
-      }, { passive: false });
-    }
-
-    if (el.guidePrevBtn) {
-      el.guidePrevBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        UI.guidePrev();
-      });
-      el.guidePrevBtn.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        UI.guidePrev();
-      }, { passive: false });
-    }
-    if (el.guideNextBtn) {
-      el.guideNextBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        UI.guideNext();
-      });
-      el.guideNextBtn.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        UI.guideNext();
       }, { passive: false });
     }
 
@@ -6594,10 +6442,6 @@ const UI = (() => {
       el.bottomPanel.addEventListener('click', (e) => e.stopPropagation());
       el.bottomPanel.addEventListener('touchend', (e) => e.stopPropagation(), { passive: false });
     }
-    if (el.guidePanel) {
-      el.guidePanel.addEventListener('click', (e) => e.stopPropagation());
-      el.guidePanel.addEventListener('touchend', (e) => e.stopPropagation(), { passive: false });
-    }
 
     ['set-language','set-difficulty','set-card-style','set-stack-display','set-blind-growth','set-turn-time','set-show-strategies','set-show-all-hands','set-show-all-showdown'].forEach(id => {
       const node = document.getElementById(id);
@@ -6659,7 +6503,7 @@ const UI = (() => {
     UI.el.bottomPanel.classList.remove('open');
     UI.el.guidePanel.classList.add('open');
     UI.el.tapClose.classList.toggle('active', true);
-    UI.resetGuidePage();
+    if (UI.el.guideViewport) UI.el.guideViewport.scrollTop = 0;
     UI.placeGuidePanel();
     if (!session.supportPaused && !session.trainingPaused) {
       pauseGame();
