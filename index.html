@@ -26,6 +26,8 @@
   --gold-2: #e0a800;
   --text: #e8eef5;
   --muted: #8a8a8a;
+  --muted-soft: #9a9a9a;
+  --muted-soft-2: #a8a8a8;
   --accent: #3fa9f5;
   --danger: #d94f3d;
   --ok: #2fb571;
@@ -1660,7 +1662,7 @@ button.disabled {
   align-items: center;
   padding: 10px 0;
   border-bottom: 1px solid #1f1f1f;
-  color: var(--muted);
+  color: var(--muted-soft);
   font-size: 13px;
 }
 .setting:last-of-type { border-bottom: none; }
@@ -1764,7 +1766,7 @@ button.disabled {
   border: none;
   padding: 0;
   margin: 0;
-  color: var(--muted);
+  color: var(--muted-soft);
   font-family: inherit;
   font-weight: 900;
   font-size: calc(clamp(18px, 2.4vmin, 22px) - 2px);
@@ -1790,7 +1792,7 @@ button.disabled {
 .guide-nav-btn:disabled {
   cursor: default;
   opacity: 0.35;
-  color: var(--muted);
+  color: var(--muted-soft);
 }
 
 #guide-scroll-wrap {
@@ -1886,14 +1888,14 @@ button.disabled {
 }
 
 .guide-text {
-  color: var(--muted);
+  color: var(--muted-soft-2);
   font-size: 13px;
   line-height: 1.5;
   margin-bottom: 10px;
   text-align: left;
 }
 .guide-text.muted {
-  color: var(--muted);
+  color: var(--muted-soft-2);
   font-size: 12px;
 }
 .guide-text:last-child {
@@ -1909,7 +1911,7 @@ button.disabled {
 
 /* Заголовки абзацев — жирные И чуть светлее основного текста */
 .guide-text.guide-heading {
-  color: #a8b0bb;
+  color: #b8b8b8;
   font-weight: 700;
 }
 
@@ -2195,7 +2197,7 @@ button.disabled {
             <b>Poker Trainer</b> — это симулятор турнирного покерного стола (Sit &amp; Go, Texas Hold'em, 8-max), созданный для тренировки двух навыков, которые нельзя развить ни одним солвером, ни одним калькулятором, ни одной теорией оптимальной игры. Эти навыки — <b>точная логика покерного мышления</b> и <b>ясное интуитивное восприятие поля информации</b>. Принципы и техники тренировок которых подробно описаны в разделе «Тренировка».
           </p>
           <p class="guide-text">
-            Это не курс GTO. Это не тренажёр математики. Это не таблица чартов. Это тренажёр того, как думает покерист, когда математика уже посчитана, а решение всё ещё нужно принять — против конкретного оппонента, в конкретной ситуации, с конкретной целью.
+            Это не тренажёр математики. Это не таблица чартов, не курс GTO. Это тренажёр того, как думает покерист, когда математика уже посчитана, а решение всё ещё нужно принять — против конкретного оппонента, в конкретной ситуации, с конкретной целью.
           </p>
           <p class="guide-text guide-heading">Чем Poker Trainer отличается от всего, что есть на рынке</p>
           <p class="guide-text">
