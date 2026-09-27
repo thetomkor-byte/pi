@@ -1550,8 +1550,8 @@ button.disabled {
   pointer-events: none !important;
 }
 #quick-percent-list.inactive button .label { color: #6a5a1a; }
-#quick-percent-list.inactive button.allin-btn .label { color: #7a2028; }
 #quick-percent-list.inactive button .value { color: #4a4a4a; }
+#quick-percent-list.inactive button .value.allin-text { color: #7a2028; }
 #quick-percent-list button {
   background: rgba(20,18,16,.92);
   border: 1px solid #3a3530;
@@ -1571,20 +1571,21 @@ button.disabled {
   transition: transform .08s ease, filter .08s ease;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
-#quick-percent-list button.allin-btn {
-  justify-content: center;
-}
-#quick-percent-list button.allin-btn .value {
-  display: none;
-}
 #quick-percent-list button:active:not(:disabled) {
   transform: scale(0.96);
   filter: brightness(1.65);
 }
 #quick-percent-list button:disabled { opacity: 0.55; cursor: default !important; }
 #quick-percent-list button .label { color: var(--gold); font-weight: 800; }
-#quick-percent-list button.allin-btn .label { color: var(--allin); }
-#quick-percent-list button .value { color: var(--muted); font-weight: 600; font-size: clamp(9px, 1.2vmin, 11px); }
+#quick-percent-list button .value {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: clamp(9px, 1.2vmin, 11px);
+}
+#quick-percent-list button .value.allin-text {
+  color: #e63946;
+  font-weight: 700;
+}
 
 #bottom-panel {
   position: absolute;
@@ -1712,8 +1713,6 @@ button.disabled {
 
 /* ============================================================
    ОКНО РУКОВОДСТВА
-   Одна страница, кнопки перелистывания убраны,
-   верхнее растворение убрано, добавлена кнопка "вверх".
    ============================================================ */
 
 #guide-panel {
@@ -1780,7 +1779,6 @@ button.disabled {
 }
 #guide-text-viewport::-webkit-scrollbar { display: none; width: 0; height: 0; }
 
-/* Только нижнее растворение текста. */
 #guide-text-viewport.has-more-bottom {
   -webkit-mask-image: linear-gradient(to bottom,
     #000000 0%,
@@ -1815,22 +1813,17 @@ button.disabled {
   margin-bottom: 0;
 }
 
-/* Жирные фрагменты внутри абзацев — просто жирные, цвет как у обычного текста */
 .guide-text b,
 .guide-text strong {
   color: inherit;
   font-weight: 700;
 }
 
-/* Заголовки абзацев — жирные И чуть светлее основного текста */
 .guide-text.guide-heading {
   color: #b8b8b8;
   font-weight: 700;
 }
 
-/* Кнопка "вверх" в стиле бывших стрелок перелистывания.
-   Прижимается к нижнему краю видимой области, попадает в зону растворения.
-   Появляется только когда текст пролистан вниз. */
 #guide-scroll-top {
   position: absolute;
   left: 50%;
@@ -5215,36 +5208,47 @@ const UI = (() => {
 
     if (variant === 'bb') {
       options = [
-        { label: 'ALL-IN', target: maxTarget, allin: true },
-        { label: '3.5 BB', target: Math.round(bb * 3.5) },
-        { label: '3 BB',   target: Math.round(bb * 3) },
-        { label: '2.5 BB', target: Math.round(bb * 2.5) },
-        { label: '2 BB',   target: Math.round(bb * 2) }
+        { label: '4 BB',   mult: 4 },
+        { label: '3.5 BB', mult: 3.5 },
+        { label: '3 BB',   mult: 3 },
+        { label: '2.5 BB', mult: 2.5 },
+        { label: '2 BB',   mult: 2 }
       ];
     } else {
       const potAfterCall = state.pot + Math.min(toCall, hero.stack);
       options = [
-        { label: 'ALL-IN', target: maxTarget, allin: true },
-        { label: '100%', target: Math.min(maxTarget, state.currentBet + Math.round(potAfterCall * 1.00)) },
-        { label: '70%',  target: Math.min(maxTarget, state.currentBet + Math.round(potAfterCall * 0.70)) },
-        { label: '50%',  target: Math.min(maxTarget, state.currentBet + Math.round(potAfterCall * 0.50)) },
-        { label: '30%',  target: Math.min(maxTarget, state.currentBet + Math.round(potAfterCall * 0.30)) }
+        { label: '150%', pct: 1.50 },
+        { label: '100%', pct: 1.00 },
+        { label: '70%',  pct: 0.70 },
+        { label: '50%',  pct: 0.50 },
+        { label: '30%',  pct: 0.30 }
       ];
     }
 
     for (const opt of options) {
-      let target = Math.min(maxTarget, opt.target);
+      let rawTarget;
+      if (variant === 'bb') {
+        rawTarget = Math.round(bb * opt.mult);
+      } else {
+        const potAfterCall = state.pot + Math.min(toCall, hero.stack);
+        rawTarget = state.currentBet + Math.round(potAfterCall * opt.pct);
+      }
+
+      let target = Math.min(maxTarget, rawTarget);
       if (target < minTarget) target = Math.min(minTarget, maxTarget);
       if (target < state.currentBet) target = state.currentBet;
       if (target < bb) target = bb;
 
+      const isAllIn = (target >= maxTarget);
+
       const btn = document.createElement('button');
-      if (opt.allin) {
-        btn.classList.add('allin-btn');
-        btn.innerHTML = `<span class="label">ALL-IN</span>`;
+      let valueHtml;
+      if (isAllIn) {
+        valueHtml = `<span class="value allin-text">ALL-IN</span>`;
       } else {
-        btn.innerHTML = `<span class="label">${opt.label}</span><span class="value">${formatChips(target, state)}</span>`;
+        valueHtml = `<span class="value">${formatChips(target, state)}</span>`;
       }
+      btn.innerHTML = `<span class="label">${opt.label}</span>${valueHtml}`;
       btn.dataset.target = target;
       btn.disabled = !canRaise;
       el.quickPercentList.appendChild(btn);
@@ -5362,7 +5366,14 @@ const UI = (() => {
       btn.onclick = () => {
         if (el.quickPercentList.classList.contains('inactive')) return;
         if (el.heroActions.classList.contains('inactive')) return;
-        handlers.onRaise(Number(btn.dataset.target));
+        const target = Number(btn.dataset.target);
+        const hero = state.players[heroIndex];
+        const maxTarget = hero.committedThisStreet + hero.stack;
+        if (target >= maxTarget) {
+          handlers.onAllIn();
+        } else {
+          handlers.onRaise(target);
+        }
       };
     });
   }
