@@ -393,7 +393,7 @@ button.disabled {
   left: 50%;
   transform: translateX(-50%);
   bottom: 100%;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
   font-size: var(--info-row-text);
   color: var(--gold);
   font-weight: 700;
@@ -1318,7 +1318,7 @@ button.disabled {
   pointer-events: none;
   z-index: 40;
   display: block;
-  opacity: 0.3;
+  opacity: 0.2;
   transition: opacity .2s ease;
 }
 #hero-timer.active { opacity: 1; }
@@ -1362,6 +1362,9 @@ button.disabled {
   touch-action: manipulation;
   cursor: default;
   display: block;
+}
+#hero-timer-zone.disabled {
+  pointer-events: none;
 }
 
 #hero-actions {
@@ -2533,7 +2536,7 @@ button.disabled {
         <a class="icon-btn" id="gmail-btn" href="#" rel="noopener noreferrer" aria-label="Gmail">
           <img alt="Mail" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' fill='%23ffffff'/%3E%3C/svg%3E" />
         </a>
-        <span class="foot-center">для развития приложения</span>
+        <span class="foot-center">Для развития приложения</span>
         <a class="icon-btn" id="tg-btn" href="#" rel="noopener noreferrer" aria-label="Telegram">
           <img alt="Telegram" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' fill='%23ffffff'/%3E%3C/svg%3E" />
         </a>
@@ -4847,6 +4850,22 @@ const UI = (() => {
     el.heroTimer.classList.remove('active');
   }
 
+  function setHeroTimerOff() {
+    if (!el.heroTimer) return;
+    const fill = el.heroTimer.querySelector('.timer-fill');
+    const num = el.heroTimerNum;
+    const circumference = 2 * Math.PI * 16;
+    if (fill) fill.style.strokeDashoffset = String(circumference);
+    if (num) num.textContent = '0';
+    el.heroTimer.classList.remove('active');
+    if (el.heroTimerZone) el.heroTimerZone.classList.add('disabled');
+  }
+
+  function setHeroTimerZoneEnabled(enabled) {
+    if (!el.heroTimerZone) return;
+    el.heroTimerZone.classList.toggle('disabled', !enabled);
+  }
+
   function updateHeroTimer(currentSec, totalSec) {
     if (!el.heroTimer) return;
     const fill = el.heroTimer.querySelector('.timer-fill');
@@ -6140,7 +6159,7 @@ const UI = (() => {
     resetSliderToStart,
     setReplayButtonState,
     showHeroTimer, hideHeroTimerActive, updateHeroTimer, placeHeroTimer,
-    setHeroTimerIdle,
+    setHeroTimerIdle, setHeroTimerOff, setHeroTimerZoneEnabled,
     placeTopRoundRow, placeGuidePanel,
     updateGuideFade, guideScrollToTop,
     showSupportOverlay, hideSupportOverlay, copySupportText,
@@ -6233,6 +6252,7 @@ const UI = (() => {
       }, 250);
     });
     syncHandsHistoryVisibility();
+    UI.setHeroTimerZoneEnabled(true);
     UI.setHeroTimerIdle();
   });
 
@@ -6281,8 +6301,17 @@ const UI = (() => {
   }
 
   function syncHandsHistoryVisibility() {
-    window.__sessionShowHistoryLabel = (session.viewingIndex >= 0) || (session.replay.active);
+    const inHistory = (session.viewingIndex >= 0) || (session.replay.active);
+    window.__sessionShowHistoryLabel = inHistory;
     UI.updateHandsHistoryVisibility();
+    if (inHistory) {
+      UI.setHeroTimerOff();
+    } else {
+      UI.setHeroTimerZoneEnabled(true);
+      if (!session.waitingForHero || session.heroEliminated) {
+        UI.setHeroTimerIdle();
+      }
+    }
   }
 
   function bindCopyHandlers() {
@@ -6682,6 +6711,7 @@ const UI = (() => {
 
     if (el.heroTimerZone) {
       el.heroTimerZone.addEventListener('touchend', (e) => {
+        if (el.heroTimerZone.classList.contains('disabled')) return;
         e.stopPropagation();
         e.preventDefault();
         toggleTurnTimeOption();
@@ -6689,6 +6719,7 @@ const UI = (() => {
 
       el.heroTimerZone.addEventListener('click', (e) => {
         if (e.pointerType && e.pointerType !== 'mouse') return;
+        if (el.heroTimerZone.classList.contains('disabled')) return;
         if (registerDoubleTap(el.heroTimerZone)) {
           e.preventDefault();
           e.stopPropagation();
@@ -6875,7 +6906,9 @@ const UI = (() => {
       if (!node) return;
       node.addEventListener('change', () => {
         UI.readSettingsFromUI();
-        UI.setHeroTimerIdle();
+        if (!window.__sessionShowHistoryLabel) {
+          UI.setHeroTimerIdle();
+        }
         if (session.state) {
           UI.updateLevel(session.state);
           UI.updateSeats(session.state, session.state.handOver);
@@ -6982,6 +7015,7 @@ const UI = (() => {
   }
 
   function toggleTurnTimeOption() {
+    if (window.__sessionShowHistoryLabel) return;
     const current = Number(UI.settings.turnTime) || 0;
     const next = current === 0 ? 10 : 0;
     UI.settings.turnTime = next;
@@ -7146,6 +7180,7 @@ const UI = (() => {
     UI.setReplayButtonState('replay');
 
     syncHandsHistoryVisibility();
+    UI.setHeroTimerZoneEnabled(true);
     UI.setHeroTimerIdle();
 
     startNewSession();
@@ -7200,6 +7235,7 @@ const UI = (() => {
     UI.setReplayButtonState('replay');
 
     syncHandsHistoryVisibility();
+    UI.setHeroTimerZoneEnabled(true);
     UI.setHeroTimerIdle();
 
     startHand();
@@ -7252,6 +7288,7 @@ const UI = (() => {
     UI.resetSliderToStart();
     refreshQuickPercentList();
     UI.setHeroActionsActive(false);
+    UI.setHeroTimerZoneEnabled(true);
     UI.setHeroTimerIdle();
 
     syncHandsHistoryVisibility();
@@ -7708,7 +7745,9 @@ const UI = (() => {
     session.autoNextTimerId = null;
     UI.setHeroActionsActive(false);
     stopHeroTimer();
-    UI.setHeroTimerIdle();
+    if (!window.__sessionShowHistoryLabel) {
+      UI.setHeroTimerIdle();
+    }
   }
 
   function navigateHistory(delta) {
@@ -7729,7 +7768,7 @@ const UI = (() => {
     if (!snap) return;
     UI.setHeroActionsActive(false);
     UI.hideHeroTimerActive();
-    UI.setHeroTimerIdle();
+    UI.setHeroTimerOff();
     UI.renderTable(snap);
     UI.updateBoard(snap);
     UI.updateSeats(snap, true);
@@ -7928,7 +7967,7 @@ const UI = (() => {
 
     UI.setHeroActionsActive(false);
     UI.hideHeroTimerActive();
-    UI.setHeroTimerIdle();
+    UI.setHeroTimerOff();
     UI.setReplayButtonState('pause');
 
     syncHandsHistoryVisibility();
@@ -8031,6 +8070,7 @@ const UI = (() => {
     const state = session.state;
     if (!state) return;
     UI.hideHeroTimerActive();
+    UI.setHeroTimerZoneEnabled(true);
     UI.setHeroTimerIdle();
 
     syncHandsHistoryVisibility();
