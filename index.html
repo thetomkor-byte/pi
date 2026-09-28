@@ -2856,7 +2856,8 @@ const Engine = (() => {
       committedThisStreet: 0, committedTotal: 0, hasActedThisStreet: false,
       lastAction: null, position: null,
       acted: false, blindPaid: 0, revealed: false,
-      inHand: false
+      inHand: false,
+      heroFinishPlace: 0
     }));
     return {
       handNumber: 0, levelIndex: 0, handsAtLevel: 0, buttonIndex: 0,
@@ -5181,14 +5182,14 @@ const UI = (() => {
     const hero = players.find(p => p.isHero);
     let heroPlace;
 
-    if (hero && hero.eliminated && hero.heroFinishPlace) {
+    if (hero && hero.eliminated && hero.heroFinishPlace > 0) {
       heroPlace = hero.heroFinishPlace;
     } else if (hero && !hero.eliminated) {
       const sorted = alive.slice().sort((a, b) => b.stack - a.stack);
       const idx = sorted.findIndex(p => p.id === hero.id);
       heroPlace = idx >= 0 ? idx + 1 : total;
     } else if (hero && hero.eliminated) {
-      heroPlace = total + 1;
+      heroPlace = total;
     } else {
       heroPlace = total;
     }
@@ -6297,6 +6298,10 @@ const UI = (() => {
     }
   }
 
+  function inHistoryMode() {
+    return (session.viewingIndex >= 0) || session.replay.active;
+  }
+
   function bindCopyHandlers() {
     if (!el.supportWindow) return;
 
@@ -6732,7 +6737,7 @@ const UI = (() => {
         e.stopPropagation();
         UI.hideFinalOverlay();
         UI.cancelFinalAutoReload();
-        if (!session.panelsPaused && !session.supportPaused && !session.trainingPaused && !UI.anyPanelOpen()) {
+        if (!session.panelsPaused && !session.supportPaused && !session.trainingPaused && !UI.anyPanelOpen() && !inHistoryMode()) {
           resumeGame();
         }
       };
@@ -6927,8 +6932,10 @@ const UI = (() => {
     if (session.supportPaused) return;
     if (UI.anyOverlayOpen()) return;
     openFn();
-    session.panelsPaused = true;
-    pauseGame();
+    if (!inHistoryMode()) {
+      session.panelsPaused = true;
+      pauseGame();
+    }
   }
 
   function closeAllPanelsAndResume() {
@@ -6936,7 +6943,7 @@ const UI = (() => {
     UI.closeAllPanels();
     if (wasOpen && session.panelsPaused) {
       session.panelsPaused = false;
-      if (!session.supportPaused && !session.trainingPaused) {
+      if (!session.supportPaused && !session.trainingPaused && !inHistoryMode()) {
         resumeGame();
       }
     }
@@ -6949,7 +6956,7 @@ const UI = (() => {
     UI.el.tapClose.classList.toggle('active', true);
     if (UI.el.guideViewport) UI.el.guideViewport.scrollTop = 0;
     UI.placeGuidePanel();
-    if (!session.supportPaused && !session.trainingPaused) {
+    if (!session.supportPaused && !session.trainingPaused && !inHistoryMode()) {
       pauseGame();
       session.panelsPaused = true;
     }
@@ -6958,7 +6965,9 @@ const UI = (() => {
   function openSupportOverEverything() {
     if (session.supportPaused) return;
     session.supportPaused = true;
-    pauseGame();
+    if (!inHistoryMode()) {
+      pauseGame();
+    }
     UI.resetBelcardSwap();
     UI.showSupportOverlay();
   }
@@ -6966,7 +6975,9 @@ const UI = (() => {
   function openSupportWindow() {
     if (session.supportPaused) return;
     session.supportPaused = true;
-    pauseGame();
+    if (!inHistoryMode()) {
+      pauseGame();
+    }
     UI.resetBelcardSwap();
     UI.showSupportOverlay();
   }
@@ -6975,7 +6986,7 @@ const UI = (() => {
     if (!session.supportPaused) return;
     session.supportPaused = false;
     UI.hideSupportOverlay();
-    if (!session.panelsPaused && !session.trainingPaused && !UI.anyPanelOpen()) {
+    if (!session.panelsPaused && !session.trainingPaused && !UI.anyPanelOpen() && !inHistoryMode()) {
       resumeGame();
     }
   }
@@ -6983,7 +6994,9 @@ const UI = (() => {
   function openTrainingWindow() {
     if (session.trainingPaused) return;
     session.trainingPaused = true;
-    pauseGame();
+    if (!inHistoryMode()) {
+      pauseGame();
+    }
     UI.resetTrainingPage();
     UI.openTraining();
   }
@@ -6992,7 +7005,7 @@ const UI = (() => {
     if (!session.trainingPaused) return;
     session.trainingPaused = false;
     UI.closeTraining();
-    if (!session.panelsPaused && !session.supportPaused && !UI.anyPanelOpen()) {
+    if (!session.panelsPaused && !session.supportPaused && !UI.anyPanelOpen() && !inHistoryMode()) {
       resumeGame();
     }
   }
@@ -7624,9 +7637,9 @@ const UI = (() => {
     const heroP = state.players[session.heroIndex];
     if (heroP.eliminated || heroP.stack <= 0) {
       if (!session.heroEliminated) {
-        const aliveBefore = state.players.filter(p => !p.eliminated).length;
+        const aliveAfter = state.players.filter(p => !p.eliminated).length;
         session.heroEliminated = true;
-        session.heroFinishPlace = aliveBefore + 1;
+        session.heroFinishPlace = aliveAfter;
         heroP.heroFinishPlace = session.heroFinishPlace;
       }
     }
@@ -7799,7 +7812,8 @@ const UI = (() => {
         acted: false,
         lastAction: null,
         revealed: false,
-        blindPaid: 0
+        blindPaid: 0,
+        heroFinishPlace: p.heroFinishPlace || 0
       }))
     };
 
@@ -7919,7 +7933,7 @@ const UI = (() => {
         committedTotal: p.committedTotal,
         blindPaid: p.blindPaid,
         inHand: p.inHand,
-        heroFinishPlace: 0
+        heroFinishPlace: p.heroFinishPlace || 0
       })),
       showdownResults: null,
       actionLog: []
@@ -8050,6 +8064,7 @@ const UI = (() => {
     if (session.supportPaused) return;
     if (session.trainingPaused) return;
     if (UI.anyPanelOpen()) return;
+    if (inHistoryMode()) return;
 
     stopReplay(true);
     session.viewingIndex = -1;
