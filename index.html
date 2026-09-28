@@ -42,6 +42,7 @@
   --small-text: clamp(11px, 1.4vmin, 13px);
   --info-row-text: clamp(11px, 1.5vmin, 14px);
   --place-text: clamp(12px, 1.6vmin, 15px);
+  --hands-history-text: calc(clamp(12px, 1.6vmin, 15px) + 4px);
 
   --nav-btn: clamp(32px, 4.4vmin, 38px);
   --nav-icon-size: clamp(16px, 2.4vmin, 19px);
@@ -333,7 +334,7 @@ button.disabled {
   display: none;
   align-items: center;
   justify-content: center;
-  font-size: var(--place-text);
+  font-size: var(--hands-history-text);
   color: #a8a8a8;
   font-weight: 700;
   letter-spacing: .3px;
@@ -345,12 +346,13 @@ button.disabled {
   touch-action: manipulation;
   text-shadow: 0 1px 4px rgba(0,0,0,.95);
   z-index: 6;
-  transform: translate(-50%, 0);
+  transform: translate(-50%, -50%);
 }
 #hands-history-row.visible { display: flex; }
-#hands-history-row.pressed { color: #d0d0d0; }
+#hands-history-row.pressed,
+#hands-history-row.pressed #hands-history-label { color: var(--gold); }
 #hands-history-row.pressed .hh-copy-icon::before,
-#hands-history-row.pressed .hh-copy-icon::after { border-color: #d0d0d0; }
+#hands-history-row.pressed .hh-copy-icon::after { border-color: var(--gold); }
 
 #hands-history-label {
   position: relative;
@@ -361,8 +363,8 @@ button.disabled {
   position: absolute;
   left: 100%;
   margin-left: 6px;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 0;
+  transform: translateY(0);
   width: 6px;
   height: 6px;
   pointer-events: none;
@@ -395,7 +397,7 @@ button.disabled {
   bottom: 100%;
   margin-bottom: 2px;
   font-size: var(--info-row-text);
-  color: #a8a8a8;
+  color: var(--gold);
   font-weight: 700;
   letter-spacing: .3px;
   white-space: nowrap;
@@ -2533,7 +2535,7 @@ button.disabled {
         <a class="icon-btn" id="gmail-btn" href="#" rel="noopener noreferrer" aria-label="Gmail">
           <img alt="Mail" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' fill='%23ffffff'/%3E%3C/svg%3E" />
         </a>
-        <span class="foot-center">на развитие приложения</span>
+        <span class="foot-center">для развития приложения</span>
         <a class="icon-btn" id="tg-btn" href="#" rel="noopener noreferrer" aria-label="Telegram">
           <img alt="Telegram" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' fill='%23ffffff'/%3E%3C/svg%3E" />
         </a>
@@ -4749,8 +4751,6 @@ const UI = (() => {
 
   function placeHandsHistoryRow() {
     if (!el.handsHistoryRow) return;
-    const seatLeft = document.getElementById('seat-bot2');
-    const seatRight = document.getElementById('seat-bot6');
     const tableEl = document.getElementById('poker-table');
     if (!tableEl) return;
 
@@ -4764,19 +4764,16 @@ const UI = (() => {
       return;
     }
 
-    const leftRect = leftSeat.getBoundingClientRect();
-    const rightRect = rightSeat.getBoundingClientRect();
-
     const leftCards = leftSeat.querySelector('.seat-cards');
     const rightCards = rightSeat.querySelector('.seat-cards');
-    const leftCardsRect = leftCards ? leftCards.getBoundingClientRect() : leftRect;
-    const rightCardsRect = rightCards ? rightCards.getBoundingClientRect() : rightRect;
+    const leftCardsRect = leftCards ? leftCards.getBoundingClientRect() : leftSeat.getBoundingClientRect();
+    const rightCardsRect = rightCards ? rightCards.getBoundingClientRect() : rightSeat.getBoundingClientRect();
 
     const midX = (leftCardsRect.left + rightCardsRect.right) / 2;
-    const topY = Math.min(leftCardsRect.top, rightCardsRect.top);
+    const midY = (leftCardsRect.top + rightCardsRect.top) / 2;
 
     const localX = midX - tableRect.left;
-    const localY = topY - tableRect.top;
+    const localY = midY - tableRect.top;
 
     el.handsHistoryRow.style.left = localX + 'px';
     el.handsHistoryRow.style.top = localY + 'px';
@@ -6341,6 +6338,23 @@ const UI = (() => {
       });
     };
 
+    el.handsHistoryRow.addEventListener('pointerdown', (e) => {
+      if (!el.handsHistoryRow.classList.contains('visible')) return;
+      UI.setHandsHistoryPressed(true);
+    });
+
+    el.handsHistoryRow.addEventListener('pointerup', (e) => {
+      UI.setHandsHistoryPressed(false);
+    });
+
+    el.handsHistoryRow.addEventListener('pointercancel', (e) => {
+      UI.setHandsHistoryPressed(false);
+    });
+
+    el.handsHistoryRow.addEventListener('pointerleave', (e) => {
+      UI.setHandsHistoryPressed(false);
+    });
+
     el.handsHistoryRow.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -6350,6 +6364,7 @@ const UI = (() => {
     el.handsHistoryRow.addEventListener('touchend', (e) => {
       e.preventDefault();
       e.stopPropagation();
+      UI.setHandsHistoryPressed(false);
       handle(e);
     }, { passive: false });
   }
