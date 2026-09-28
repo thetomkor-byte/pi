@@ -351,8 +351,6 @@ button.disabled {
 #hands-history-row.visible { display: flex; }
 #hands-history-row.pressed,
 #hands-history-row.pressed #hands-history-label { color: var(--gold); }
-#hands-history-row.pressed .hh-copy-icon::before,
-#hands-history-row.pressed .hh-copy-icon::after { border-color: var(--gold); }
 
 #hands-history-label {
   position: relative;
@@ -395,7 +393,7 @@ button.disabled {
   left: 50%;
   transform: translateX(-50%);
   bottom: 100%;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
   font-size: var(--info-row-text);
   color: var(--gold);
   font-weight: 700;
@@ -4770,7 +4768,7 @@ const UI = (() => {
     const rightCardsRect = rightCards ? rightCards.getBoundingClientRect() : rightSeat.getBoundingClientRect();
 
     const midX = (leftCardsRect.left + rightCardsRect.right) / 2;
-    const midY = (leftCardsRect.top + rightCardsRect.top) / 2;
+    const midY = (leftCardsRect.top + leftCardsRect.height / 2 + rightCardsRect.top + rightCardsRect.height / 2) / 2;
 
     const localX = midX - tableRect.left;
     const localY = midY - tableRect.top;
