@@ -328,8 +328,49 @@ button.disabled {
 }
 #table-info .info-row.faded { opacity: 0.45; }
 
-#hands-history-row {
+#bottom-fixed-column {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  z-index: 30;
+  pointer-events: none;
+}
+
+#bottom-support-btn {
   position: relative;
+  width: calc(var(--hero-timer-size) - 8px);
+  height: calc(var(--hero-timer-size) - 8px);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #3a3530, #1a1a1a 70%);
+  border: 1px solid #8a6508;
+  color: var(--gold);
+  font-weight: 900;
+  font-size: clamp(18px, 2.4vmin, 22px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform .08s ease, filter .08s ease;
+  font-family: inherit;
+  padding: 0;
+  pointer-events: auto;
+  opacity: 0.7;
+}
+#bottom-support-btn:active:not(:disabled) {
+  transform: scale(0.96);
+  filter: brightness(1.35);
+}
+
+#hands-history-float {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: none;
   align-items: center;
   justify-content: center;
@@ -338,18 +379,17 @@ button.disabled {
   font-weight: 700;
   letter-spacing: .3px;
   line-height: 1.3;
-  min-height: 1.3em;
-  width: 100%;
-  margin-top: 2px;
+  white-space: nowrap;
   pointer-events: auto;
   cursor: pointer;
   touch-action: manipulation;
   text-shadow: 0 1px 4px rgba(0,0,0,.95);
+  z-index: 6;
 }
-#hands-history-row.visible { display: flex; }
-#hands-history-row.pressed { color: #d0d0d0; }
-#hands-history-row.pressed .hh-copy-icon::before,
-#hands-history-row.pressed .hh-copy-icon::after { border-color: #d0d0d0; }
+#hands-history-float.visible { display: flex; }
+#hands-history-float.pressed { color: #d0d0d0; }
+#hands-history-float.pressed .hh-copy-icon::before,
+#hands-history-float.pressed .hh-copy-icon::after { border-color: #d0d0d0; }
 
 #hands-history-label {
   position: relative;
@@ -2149,11 +2189,16 @@ button.disabled {
             <div class="info-row" id="info-blinds-row">Blinds: 10/20</div>
             <div class="info-row faded" id="info-timer-row">10 hands: 15/30</div>
           </div>
-          <div id="hands-history-row">
-            <span id="hands-history-label">Hands History<span class="hh-copy-icon"></span></span>
-            <span id="hands-history-copied">Copied</span>
+          <div id="bottom-fixed-column">
+            <button id="bottom-support-btn" type="button" aria-label="Поддержать">$</button>
           </div>
         </div>
+
+        <div id="hands-history-float">
+          <span id="hands-history-label">Hands History<span class="hh-copy-icon"></span></span>
+          <span id="hands-history-copied">Copied</span>
+        </div>
+
         <div id="seats"></div>
 
         <div id="hero-timer-zone"></div>
@@ -4506,9 +4551,12 @@ const UI = (() => {
     el.placeLine      = document.getElementById('place-line');
     el.headsUpLine    = document.getElementById('heads-up-line');
 
-    el.handsHistoryRow = document.getElementById('hands-history-row');
+    el.handsHistoryFloat = document.getElementById('hands-history-float');
     el.handsHistoryLabel = document.getElementById('hands-history-label');
     el.handsHistoryCopied = document.getElementById('hands-history-copied');
+
+    el.bottomSupportBtn = document.getElementById('bottom-support-btn');
+    el.bottomFixedColumn = document.getElementById('bottom-fixed-column');
 
     el.heroActions    = document.getElementById('hero-actions');
     el.heroButtons    = document.getElementById('hero-buttons');
@@ -4584,6 +4632,8 @@ const UI = (() => {
     requestAnimationFrame(() => requestAnimationFrame(() => {
       updateBoardAreaOffset();
       alignPercentBlockBottom();
+      positionBottomColumn();
+      positionHandsHistoryFloat();
     }));
   }
 
@@ -4603,6 +4653,74 @@ const UI = (() => {
     const tableRect = document.getElementById('poker-table').getBoundingClientRect();
     const bottomPx = tableRect.bottom - haRect.bottom;
     el.quickPercentList.style.bottom = bottomPx + 'px';
+  }
+
+  function positionBottomColumn() {
+    if (!el.bottomFixedColumn) return;
+    const tableEl = document.getElementById('poker-table');
+    if (!tableEl) return;
+    const infoRow = document.getElementById('info-timer-row');
+    const heroSeat = document.getElementById('seat-hero');
+    if (!infoRow || !heroSeat) {
+      el.bottomFixedColumn.style.display = 'none';
+      return;
+    }
+    const tableRect = tableEl.getBoundingClientRect();
+    const infoRect = infoRow.getBoundingClientRect();
+    const heroCards = heroSeat.querySelector('.seat-cards');
+    const heroBet = heroSeat.querySelector('[data-role="bet"]');
+    let heroTopY = null;
+    if (heroBet && heroBet.offsetHeight > 0 && !heroBet.classList.contains('hidden')) {
+      heroTopY = heroBet.getBoundingClientRect().top;
+    } else if (heroCards) {
+      heroTopY = heroCards.getBoundingClientRect().top;
+    }
+    if (heroTopY === null) {
+      el.bottomFixedColumn.style.display = 'none';
+      return;
+    }
+    const infoBottomY = infoRect.bottom;
+    const gapPx = heroTopY - infoBottomY;
+    const btnSize = el.bottomSupportBtn ? el.bottomSupportBtn.offsetHeight : 0;
+    if (gapPx <= 0 || btnSize <= 0) {
+      el.bottomFixedColumn.style.display = 'none';
+      return;
+    }
+    const top = infoRect.bottom - tableRect.top;
+    const left = infoRect.left - tableRect.left + infoRect.width / 2;
+    el.bottomFixedColumn.style.display = 'flex';
+    el.bottomFixedColumn.style.top = top + 'px';
+    el.bottomFixedColumn.style.left = left + 'px';
+    el.bottomFixedColumn.style.transform = 'translateX(-50%)';
+  }
+
+  function positionHandsHistoryFloat() {
+    if (!el.handsHistoryFloat) return;
+    const tableEl = document.getElementById('poker-table');
+    if (!tableEl) return;
+    const tableRect = tableEl.getBoundingClientRect();
+
+    const seat2 = document.querySelector('.seat[data-visual-index="2"]');
+    const seat6 = document.querySelector('.seat[data-visual-index="6"]');
+
+    let centerX, centerY;
+    if (seat2 && seat6) {
+      const seat2Cards = seat2.querySelector('.seat-cards');
+      const seat6Cards = seat6.querySelector('.seat-cards');
+      const r2 = (seat2Cards || seat2).getBoundingClientRect();
+      const r6 = (seat6Cards || seat6).getBoundingClientRect();
+      centerX = ((r2.left + r2.right) / 2 + (r6.left + r6.right) / 2) / 2;
+      centerY = ((r2.top + r2.bottom) / 2 + (r6.top + r6.bottom) / 2) / 2;
+    } else {
+      centerX = tableRect.left + tableRect.width / 2;
+      centerY = tableRect.top + tableRect.height * 0.3;
+    }
+
+    const left = centerX - tableRect.left;
+    const top = centerY - tableRect.top;
+
+    el.handsHistoryFloat.style.left = left + 'px';
+    el.handsHistoryFloat.style.top = top + 'px';
   }
 
   function updateOverlayState() {
@@ -4801,6 +4919,34 @@ const UI = (() => {
     fill.style.strokeDashoffset = String(circumference * (1 - ratio));
   }
 
+  function setTimerGhostMode(enabled, optionOn) {
+    if (!el.heroTimer) return;
+    const num = el.heroTimerNum;
+    const fill = el.heroTimer.querySelector('.timer-fill');
+    const track = el.heroTimer.querySelector('.timer-track');
+    if (enabled) {
+      el.heroTimer.classList.add('visible');
+      el.heroTimer.style.opacity = '0.22';
+      if (num) num.textContent = optionOn ? '10' : '0';
+      if (fill) {
+        if (optionOn) {
+          fill.style.strokeDashoffset = '0';
+          fill.style.opacity = '1';
+        } else {
+          fill.style.strokeDashoffset = '100.53';
+          fill.style.opacity = '1';
+        }
+      }
+      if (track) track.style.opacity = '1';
+      if (num) num.style.opacity = '1';
+    } else {
+      el.heroTimer.style.opacity = '1';
+      if (fill) fill.style.opacity = '1';
+      if (track) track.style.opacity = '1';
+      if (num) num.style.opacity = '1';
+    }
+  }
+
   function renderTable(state) {
     el.seats.innerHTML = '';
     recalcSeatAssignments(state);
@@ -4818,6 +4964,8 @@ const UI = (() => {
     placeHeroTimer();
     placeTopRoundRow();
     placeGuidePanel();
+    positionBottomColumn();
+    positionHandsHistoryFloat();
   }
 
   function recalcSeatAssignments(state) {
@@ -4956,6 +5104,8 @@ const UI = (() => {
     placeHeroTimer();
     placeTopRoundRow();
     placeGuidePanel();
+    positionBottomColumn();
+    positionHandsHistoryFloat();
   }
 
   function renderActionBadge(p, seat) {
@@ -5136,9 +5286,10 @@ const UI = (() => {
   }
 
   function updateHandsHistoryVisibility() {
-    if (!el.handsHistoryRow) return;
+    if (!el.handsHistoryFloat) return;
     const shouldShow = window.__sessionShowHistoryLabel === true;
-    el.handsHistoryRow.classList.toggle('visible', shouldShow);
+    el.handsHistoryFloat.classList.toggle('visible', shouldShow);
+    if (shouldShow) positionHandsHistoryFloat();
   }
 
   function updateBoard(state) {
@@ -5624,8 +5775,8 @@ const UI = (() => {
   }
 
   function setHandsHistoryPressed(pressed) {
-    if (!el.handsHistoryRow) return;
-    el.handsHistoryRow.classList.toggle('pressed', !!pressed);
+    if (!el.handsHistoryFloat) return;
+    el.handsHistoryFloat.classList.toggle('pressed', !!pressed);
   }
 
   let belcardApplyPositionsFn = null;
@@ -6065,7 +6216,7 @@ const UI = (() => {
     settings, init, el,
     renderTable, updateSeats, updateBoard, updatePot, updateLevel,
     updateStacks, updateActiveHighlight, updatePlaceCenter, updateBoardAreaOffset,
-    alignPercentBlockBottom,
+    alignPercentBlockBottom, positionBottomColumn, positionHandsHistoryFloat,
     showActions, setHeroActionsActive,
     openBottomPanel, closeBottomPanel, openGuidePanel, closeGuidePanel,
     openTraining, closeTraining, anyTrainingOpen,
@@ -6078,7 +6229,7 @@ const UI = (() => {
     clearWinnerHighlights,
     resetSliderToStart,
     setReplayButtonState,
-    showHeroTimer, hideHeroTimer, updateHeroTimer, placeHeroTimer,
+    showHeroTimer, hideHeroTimer, updateHeroTimer, placeHeroTimer, setTimerGhostMode,
     placeTopRoundRow, placeGuidePanel,
     updateGuideFade, guideScrollToTop,
     showSupportOverlay, hideSupportOverlay, copySupportText,
@@ -6157,6 +6308,8 @@ const UI = (() => {
       UI.placeHeroTimer();
       UI.placeTopRoundRow();
       UI.placeGuidePanel();
+      UI.positionBottomColumn();
+      UI.positionHandsHistoryFloat();
     });
     window.addEventListener('orientationchange', () => {
       setTimeout(() => {
@@ -6165,9 +6318,12 @@ const UI = (() => {
         UI.placeHeroTimer();
         UI.placeTopRoundRow();
         UI.placeGuidePanel();
+        UI.positionBottomColumn();
+        UI.positionHandsHistoryFloat();
       }, 250);
     });
     syncHandsHistoryVisibility();
+    syncTimerGhost();
   });
 
   function cacheDom() {
@@ -6188,6 +6344,7 @@ const UI = (() => {
     el.settingsHelpBtn = document.getElementById('settings-help-btn');
     el.settingsCardBtn = document.getElementById('settings-card-btn');
     el.settingsTrainBtn = document.getElementById('settings-train-btn');
+    el.bottomSupportBtn = document.getElementById('bottom-support-btn');
     el.topRoundRow     = document.getElementById('top-round-row');
     el.gmailBtn        = document.getElementById('gmail-btn');
     el.tgBtn           = document.getElementById('tg-btn');
@@ -6209,7 +6366,7 @@ const UI = (() => {
     el.btnTestTop1    = document.getElementById('btn-test-top1');
     el.trainingPrevBtn = document.getElementById('training-prev-btn');
     el.trainingNextBtn = document.getElementById('training-next-btn');
-    el.handsHistoryRow = document.getElementById('hands-history-row');
+    el.handsHistoryFloat = document.getElementById('hands-history-float');
     el.handsHistoryLabel = document.getElementById('hands-history-label');
     el.handsHistoryCopied = document.getElementById('hands-history-copied');
   }
@@ -6217,6 +6374,17 @@ const UI = (() => {
   function syncHandsHistoryVisibility() {
     window.__sessionShowHistoryLabel = (session.viewingIndex >= 0) || (session.replay.active);
     UI.updateHandsHistoryVisibility();
+  }
+
+  function syncTimerGhost() {
+    const active = session.waitingForHero && !session.heroEliminated && !session.isPaused && !session.replay.active && session.viewingIndex < 0;
+    const optionOn = (Number(UI.settings.turnTime) || 0) > 0;
+    if (active) {
+      UI.setTimerGhostMode(false, optionOn);
+    } else {
+      UI.setTimerGhostMode(true, optionOn);
+    }
+    UI.placeHeroTimer();
   }
 
   function bindCopyHandlers() {
@@ -6248,13 +6416,13 @@ const UI = (() => {
   }
 
   function bindHandsHistoryTap() {
-    if (!el.handsHistoryRow) return;
+    if (!el.handsHistoryFloat) return;
 
     let lastTapTs = 0;
     const TAP_COOLDOWN = 400;
 
     const handle = (e) => {
-      if (!el.handsHistoryRow.classList.contains('visible')) return;
+      if (!el.handsHistoryFloat.classList.contains('visible')) return;
       const now = Date.now();
       if (now - lastTapTs < TAP_COOLDOWN) return;
       lastTapTs = now;
@@ -6270,13 +6438,13 @@ const UI = (() => {
       });
     };
 
-    el.handsHistoryRow.addEventListener('click', (e) => {
+    el.handsHistoryFloat.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
       handle(e);
     });
 
-    el.handsHistoryRow.addEventListener('touchend', (e) => {
+    el.handsHistoryFloat.addEventListener('touchend', (e) => {
       e.preventDefault();
       e.stopPropagation();
       handle(e);
@@ -6523,7 +6691,9 @@ const UI = (() => {
               target.closest('#hero-timer-zone') ||
               target.closest('#support-overlay') ||
               target.closest('#final-overlay') ||
-              target.closest('#top-round-row'));
+              target.closest('#top-round-row') ||
+              target.closest('#hands-history-float') ||
+              target.closest('#bottom-fixed-column'));
   }
 
   function bindGlobalHandlers() {
@@ -6600,6 +6770,7 @@ const UI = (() => {
         e.stopPropagation();
         e.preventDefault();
         toggleTurnTimeOption();
+        syncTimerGhost();
       }, { passive: false });
 
       el.heroTimerZone.addEventListener('click', (e) => {
@@ -6608,8 +6779,19 @@ const UI = (() => {
           e.preventDefault();
           e.stopPropagation();
           toggleTurnTimeOption();
+          syncTimerGhost();
         }
       });
+    }
+
+    if (el.bottomSupportBtn) {
+      const openBtn = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openSupportOverEverything();
+      };
+      el.bottomSupportBtn.addEventListener('click', openBtn);
+      el.bottomSupportBtn.addEventListener('touchend', openBtn, { passive: false });
     }
 
     if (el.supportOverlay) {
@@ -6802,6 +6984,7 @@ const UI = (() => {
         if (session.replay.active) {
           renderReplayStep();
         }
+        syncTimerGhost();
       });
     });
 
@@ -7058,6 +7241,7 @@ const UI = (() => {
     UI.setReplayButtonState('replay');
 
     syncHandsHistoryVisibility();
+    syncTimerGhost();
 
     startNewSession();
   }
@@ -7111,6 +7295,7 @@ const UI = (() => {
     UI.setReplayButtonState('replay');
 
     syncHandsHistoryVisibility();
+    syncTimerGhost();
 
     startHand();
   }
@@ -7164,6 +7349,7 @@ const UI = (() => {
     UI.setHeroActionsActive(false);
 
     syncHandsHistoryVisibility();
+    syncTimerGhost();
 
     processTurn();
   }
@@ -7220,6 +7406,7 @@ const UI = (() => {
       UI.hideHeroTimer();
       UI.resetSliderToStart();
       refreshQuickPercentList();
+      syncTimerGhost();
       botTurn(player, idx);
     }
   }
@@ -7235,6 +7422,7 @@ const UI = (() => {
     });
     startHeroTimerIfNeeded();
     UI.alignPercentBlockBottom();
+    syncTimerGhost();
   }
 
   function startHeroTimerIfNeeded() {
@@ -7610,6 +7798,7 @@ const UI = (() => {
     session.autoNextTimerId = null;
     UI.setHeroActionsActive(false);
     stopHeroTimer();
+    syncTimerGhost();
   }
 
   function navigateHistory(delta) {
@@ -7640,6 +7829,7 @@ const UI = (() => {
     UI.updateHistoryInfo(session.viewingIndex + 1, session.history.length, true);
     UI.setReplayButtonState('replay');
     syncHandsHistoryVisibility();
+    syncTimerGhost();
   }
 
   function buildReplaySteps(snap) {
@@ -7831,6 +8021,7 @@ const UI = (() => {
     UI.setReplayButtonState('pause');
 
     syncHandsHistoryVisibility();
+    syncTimerGhost();
 
     renderReplayStep();
     scheduleNextReplayStep();
@@ -7856,6 +8047,7 @@ const UI = (() => {
     }
     UI.updateHistoryInfo(session.viewingIndex + 1, session.history.length, true);
     syncHandsHistoryVisibility();
+    syncTimerGhost();
   }
 
   function scheduleNextReplayStep() {
@@ -7917,6 +8109,7 @@ const UI = (() => {
       renderHistorySnapshot();
     }
     syncHandsHistoryVisibility();
+    syncTimerGhost();
   }
 
   function resumeGame() {
@@ -7932,6 +8125,7 @@ const UI = (() => {
     UI.hideHeroTimer();
 
     syncHandsHistoryVisibility();
+    syncTimerGhost();
 
     if (state.handOver) {
       UI.updateBoard(state);
