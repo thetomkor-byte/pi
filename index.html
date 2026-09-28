@@ -1367,7 +1367,6 @@ button.disabled {
   stroke-linecap: round;
   stroke-dasharray: 100.53 100.53;
   stroke-dashoffset: 0;
-  transition: stroke-dashoffset 0.95s linear, stroke 0.4s linear;
 }
 #hero-timer .timer-num {
   fill: #a8a8a8;
@@ -1378,7 +1377,6 @@ button.disabled {
   paint-order: stroke;
   stroke: #000;
   stroke-width: 1.5px;
-  transition: fill 0.4s linear;
 }
 
 #hero-timer-zone {
@@ -4651,6 +4649,7 @@ const UI = (() => {
     if (!tableEl) return;
     const tableRect = tableEl.getBoundingClientRect();
 
+    // Пытаемся взять карты героя
     let heroCardsTop = null;
     const heroSeat = document.getElementById('seat-hero');
     if (heroSeat) {
@@ -4661,13 +4660,25 @@ const UI = (() => {
       }
     }
 
+    // Если карт нет — считаем по стандартной позиции карт героя (seat 0)
     if (heroCardsTop === null) {
-      const heroSeatPos = SEAT_POSITIONS[0];
-      const y = tableRect.top + (heroSeatPos.y / 100) * tableRect.height + (heroSeatPos.offsetY || 0);
-      heroCardsTop = y - (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hero-timer-size')) || 40);
+      const heroPos = SEAT_POSITIONS[0];
+      const seatCenterY = tableRect.top + (heroPos.y / 100) * tableRect.height + (heroPos.offsetY || 0);
+
+      // Пытаемся измерить высоту карт героя через невидимый шаблон — проще взять из CSS
+      // Размеры карт героя по CSS: --card-h clamp(53.1px, 7.83vmin, 68.4px)
+      // Приближённо: используем getComputedStyle от временного узла, но проще — считать фиксированные
+      // Возьмём фактический размер, если есть карты у других игроков, иначе посчитаем из vmin.
+      const vmin = Math.min(window.innerWidth, window.innerHeight) / 100;
+      const cardH = Math.min(68.4, Math.max(53.1, 7.83 * vmin));
+
+      // Центр карт героя примерно на seatCenterY, значит верх карт = seatCenterY - cardH/2 (учитывая смещения)
+      // Визуально карты стоят так, что их центр примерно в районе seatCenterY с учётом смещений в самом seat.
+      // Упрощённо: верх карт = seatCenterY - cardH/2 - небольшой офсет на структуру.
+      heroCardsTop = seatCenterY - cardH / 2 - 4;
     }
 
-    const btnTop = heroCardsTop - tableRect.top - 16;
+    const btnTop = heroCardsTop - tableRect.top - 10;
     const centerX = tableRect.width / 2;
 
     el.bottomSupportBtn.style.top = btnTop + 'px';
@@ -4906,29 +4917,8 @@ const UI = (() => {
     return 'rgb(' + rr + ',' + rg + ',' + rb + ')';
   }
 
-  function setTimerColorBySeconds(sec) {
-    if (!el.heroTimer) return;
-    const fill = el.heroTimer.querySelector('.timer-fill');
-    const num = el.heroTimerNum;
-    if (!fill || !num) return;
-
-    if (sec <= 0) {
-      fill.style.stroke = TIMER_GOLD_STROKE;
-      num.style.fill = TIMER_GRAY_TEXT;
-      return;
-    }
-
-    let ratio = 0;
-    if (sec <= 3) ratio = 1;
-    else if (sec >= 5) ratio = 0;
-    else ratio = (5 - sec) / 2;
-
-    fill.style.stroke = mixColor(TIMER_GOLD_STROKE, TIMER_RED, ratio);
-    num.style.fill = mixColor(TIMER_GRAY_TEXT, TIMER_RED, ratio);
-  }
-
-  function setTimerReverseColor(progress) {
-    // progress 0 (0 сек, пусто) → 1 (10 сек, полно)
+  function setTimerColorByProgress(progress) {
+    // progress 0 (0 сек) → 1 (10 сек)
     // 0-0.3 (0-3 сек): красный
     // 0.3-0.5 (3-5 сек): плавный переход красный → исходный
     // 0.5-1.0 (5-10 сек): исходный
@@ -4955,16 +4945,17 @@ const UI = (() => {
     fill.style.strokeDashoffset = String(circumference * (1 - r));
   }
 
-  function updateHeroTimer(currentSec, totalSec) {
+  function setTimerNumber(value) {
+    if (!el.heroTimerNum) return;
+    el.heroTimerNum.textContent = String(value);
+  }
+
+  function updateHeroTimerContinuous(progress, displayNum) {
+    // progress 0..1 — заполнение круга (и цифра идёт вровень)
     if (!el.heroTimer) return;
-    const num = el.heroTimerNum;
-    if (!num) return;
-    num.textContent = String(Math.max(0, currentSec));
-
-    const ratio = totalSec > 0 ? Math.max(0, Math.min(1, currentSec / totalSec)) : 0;
-    setTimerFillRatio(ratio);
-
-    setTimerColorBySeconds(currentSec);
+    setTimerFillRatio(progress);
+    setTimerNumber(Math.max(0, Math.round(progress * 10)));
+    setTimerColorByProgress(progress);
   }
 
   function setTimerGhostMode(enabled, optionOn) {
@@ -4987,8 +4978,8 @@ const UI = (() => {
       }
       if (track) track.style.opacity = '1';
       if (num) num.style.opacity = '1';
-      if (optionOn) setTimerColorBySeconds(10);
-      else setTimerColorBySeconds(0);
+      if (optionOn) setTimerColorByProgress(1);
+      else setTimerColorByProgress(0);
     } else {
       el.heroTimer.style.opacity = '1';
       if (fill) fill.style.opacity = '1';
@@ -6279,8 +6270,8 @@ const UI = (() => {
     clearWinnerHighlights,
     resetSliderToStart,
     setReplayButtonState,
-    showHeroTimer, hideHeroTimer, updateHeroTimer, placeHeroTimer, setTimerGhostMode,
-    setTimerColorBySeconds, setTimerReverseColor, setTimerFillRatio,
+    showHeroTimer, hideHeroTimer, updateHeroTimer, setTimerGhostMode,
+    setTimerColorByProgress, setTimerFillRatio, setTimerNumber, updateHeroTimerContinuous,
     placeTopRoundRow, placeGuidePanel,
     updateGuideFade, guideScrollToTop,
     showSupportOverlay, hideSupportOverlay, copySupportText,
@@ -6318,11 +6309,12 @@ const UI = (() => {
     trainingPaused: false,
     finalShown: false,
 
-    heroTimerIntervalId: null,
-    heroTimerTimeoutId: null,
-    heroTimerRemaining: 0,
-    heroTimerTotal: 0,
-    timerAnimFrameId: null,
+    heroTimerAnimFrameId: null,
+    heroTimerStartTs: 0,
+    heroTimerTotal: 10,
+    heroTimerProgress: 1,
+
+    refillAnimFrameId: null,
 
     replay: {
       active: false,
@@ -6440,33 +6432,36 @@ const UI = (() => {
   }
 
   function stopTimerAnimFrame() {
-    if (session.timerAnimFrameId) {
-      cancelAnimationFrame(session.timerAnimFrameId);
-      session.timerAnimFrameId = null;
+    if (session.heroTimerAnimFrameId) {
+      cancelAnimationFrame(session.heroTimerAnimFrameId);
+      session.heroTimerAnimFrameId = null;
     }
   }
 
-  function playTimerRefill(onDone) {
-    stopTimerAnimFrame();
-    const duration = 320;
+  function stopRefillAnimFrame() {
+    if (session.refillAnimFrameId) {
+      cancelAnimationFrame(session.refillAnimFrameId);
+      session.refillAnimFrameId = null;
+    }
+  }
+
+  function playTimerRefill(durationMs, onDone) {
+    stopRefillAnimFrame();
+    const duration = durationMs || 320;
     const startTs = performance.now();
 
     function step(now) {
       const t = Math.min(1, (now - startTs) / duration);
-      // Заполнение от 0 к 1
-      UI.setTimerFillRatio(t);
-      UI.setTimerReverseColor(t);
-      const numValue = Math.round(t * 10);
-      if (UI.el.heroTimerNum) UI.el.heroTimerNum.textContent = String(numValue);
-
+      UI.updateHeroTimerContinuous(t);
       if (t < 1) {
-        session.timerAnimFrameId = requestAnimationFrame(step);
+        session.refillAnimFrameId = requestAnimationFrame(step);
       } else {
-        session.timerAnimFrameId = null;
+        session.refillAnimFrameId = null;
+        UI.updateHeroTimerContinuous(1);
         if (typeof onDone === 'function') onDone();
       }
     }
-    session.timerAnimFrameId = requestAnimationFrame(step);
+    session.refillAnimFrameId = requestAnimationFrame(step);
   }
 
   function bindCopyHandlers() {
@@ -7169,14 +7164,14 @@ const UI = (() => {
     if (select) select.value = String(next);
 
     if (next === 0) {
-      stopHeroTimer();
-      // Анимация обратного заполнения
-      playTimerRefill(() => {
+      stopTimerAnimFrame();
+      // обратное заполнение (от 0 к 1) с цветом от красного к исходному
+      playTimerRefill(320, () => {
         UI.setTimerGhostMode(true, false);
       });
     } else {
-      // Анимация обратного заполнения перед активацией
-      playTimerRefill(() => {
+      // обратное заполнение перед активацией
+      playTimerRefill(320, () => {
         UI.setTimerGhostMode(true, true);
         if (session.waitingForHero && !session.heroEliminated) {
           startHeroTimerIfNeeded();
@@ -7299,6 +7294,7 @@ const UI = (() => {
     stopReplay(true);
     stopHeroTimer();
     stopTimerAnimFrame();
+    stopRefillAnimFrame();
     clearTimeout(session.autoNextTimerId);
     clearTimeout(session.botTimerId);
     clearTimeout(session.revealTimerId);
@@ -7341,6 +7337,7 @@ const UI = (() => {
     stopReplay(true);
     stopHeroTimer();
     stopTimerAnimFrame();
+    stopRefillAnimFrame();
     clearTimeout(session.autoNextTimerId);
     clearTimeout(session.botTimerId);
     clearTimeout(session.revealTimerId);
@@ -7397,6 +7394,7 @@ const UI = (() => {
     stopReplay(true);
     stopHeroTimer();
     stopTimerAnimFrame();
+    stopRefillAnimFrame();
 
     if (session.tournamentOver) return;
 
@@ -7520,18 +7518,35 @@ const UI = (() => {
 
   function startHeroTimerIfNeeded() {
     stopHeroTimer();
+    stopTimerAnimFrame();
     const seconds = Number(UI.settings.turnTime) || 0;
     if (seconds <= 0) return;
 
     session.heroTimerTotal = seconds;
-    session.heroTimerRemaining = seconds;
+    session.heroTimerStartTs = performance.now();
+    session.heroTimerProgress = 1;
+
     UI.showHeroTimer(seconds);
 
-    session.heroTimerIntervalId = setInterval(() => {
-      session.heroTimerRemaining -= 1;
-      UI.updateHeroTimer(session.heroTimerRemaining, session.heroTimerTotal);
-      if (session.heroTimerRemaining < 0) {
-        stopHeroTimer();
+    function tick(now) {
+      const elapsed = (now - session.heroTimerStartTs) / 1000;
+      let remain = seconds - elapsed;
+      if (remain < 0) remain = 0;
+
+      // Прогресс 0..1 — синхронно с цифрой
+      const progress = remain / seconds;
+      UI.updateHeroTimerContinuous(progress);
+
+      if (remain <= 0) {
+        // Полное завершение: круг пуст, цифра 0, цвет красный
+        UI.updateHeroTimerContinuous(0);
+        session.heroTimerAnimFrameId = null;
+        stopHeroTimerOnlyInterval();
+
+        // Мгновенно возвращаем к исходным цветам: золото/серый, круг пустой
+        UI.setTimerFillRatio(0);
+        UI.setTimerColorByProgress(1); // прогресс=1 => исходные цвета        UI.setTimerNumber(0);
+
         if (session.waitingForHero && !session.heroEliminated) {
           session.waitingForHero = false;
           UI.setHeroActionsActive(false);
@@ -7547,20 +7562,21 @@ const UI = (() => {
             advanceOrFinish();
           }
         }
+        return;
       }
-    }, 1000);
+
+      session.heroTimerAnimFrameId = requestAnimationFrame(tick);
+    }
+    session.heroTimerAnimFrameId = requestAnimationFrame(tick);
+  }
+
+  function stopHeroTimerOnlyInterval() {
+    // заглушка — новый механизм на requestAnimationFrame, интервалов больше нет
   }
 
   function stopHeroTimer() {
-    if (session.heroTimerIntervalId) {
-      clearInterval(session.heroTimerIntervalId);
-      session.heroTimerIntervalId = null;
-    }
-    if (session.heroTimerTimeoutId) {
-      clearTimeout(session.heroTimerTimeoutId);
-      session.heroTimerTimeoutId = null;
-    }
-    session.heroTimerRemaining = 0;
+    stopTimerAnimFrame();
+    // сбрасываем состояние круга и цвета, но не трогаем видимость — это делает вызывающий код
   }
 
   function heroAct(action) {
@@ -7754,7 +7770,7 @@ const UI = (() => {
     if (session.isPaused) return;
     if (session.replay.active) return;
     stopHeroTimer();
-    stopTimerAnimFrame();
+    stopRefillAnimFrame();
     const state = session.state;
     Engine.finalizeHand(state);
 
