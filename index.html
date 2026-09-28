@@ -328,6 +328,82 @@ button.disabled {
 }
 #table-info .info-row.faded { opacity: 0.45; }
 
+#hands-history-row {
+  position: relative;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--place-text);
+  color: #a8a8a8;
+  font-weight: 700;
+  letter-spacing: .3px;
+  line-height: 1.3;
+  min-height: 1.3em;
+  width: 100%;
+  margin-top: 2px;
+  pointer-events: auto;
+  cursor: pointer;
+  touch-action: manipulation;
+  text-shadow: 0 1px 4px rgba(0,0,0,.95);
+}
+#hands-history-row.visible { display: flex; }
+#hands-history-row.pressed { color: #d0d0d0; }
+#hands-history-row.pressed .hh-copy-icon::before,
+#hands-history-row.pressed .hh-copy-icon::after { border-color: #d0d0d0; }
+
+#hands-history-label {
+  position: relative;
+  display: inline-block;
+}
+
+.hh-copy-icon {
+  position: absolute;
+  left: 100%;
+  margin-left: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  pointer-events: none;
+}
+.hh-copy-icon::before,
+.hh-copy-icon::after {
+  content: "";
+  position: absolute;
+  border: 1px solid #a8a8a8;
+  border-radius: 1px;
+  background: transparent;
+}
+.hh-copy-icon::before {
+  width: 4px;
+  height: 4px;
+  left: 0;
+  top: 2px;
+}
+.hh-copy-icon::after {
+  width: 4px;
+  height: 4px;
+  left: 2px;
+  top: 0;
+}
+
+#hands-history-copied {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 100%;
+  margin-bottom: 2px;
+  font-size: var(--info-row-text);
+  color: #a8a8a8;
+  font-weight: 700;
+  letter-spacing: .3px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s ease;
+}
+#hands-history-copied.visible { opacity: 1; }
+
 .card {
   width: var(--card-w);
   height: var(--card-h);
@@ -2072,6 +2148,10 @@ button.disabled {
           <div id="table-info">
             <div class="info-row" id="info-blinds-row">Blinds: 10/20</div>
             <div class="info-row faded" id="info-timer-row">10 hands: 15/30</div>
+          </div>
+          <div id="hands-history-row">
+            <span id="hands-history-label">Hands History<span class="hh-copy-icon"></span></span>
+            <span id="hands-history-copied">Copied</span>
           </div>
         </div>
         <div id="seats"></div>
@@ -4426,6 +4506,10 @@ const UI = (() => {
     el.placeLine      = document.getElementById('place-line');
     el.headsUpLine    = document.getElementById('heads-up-line');
 
+    el.handsHistoryRow = document.getElementById('hands-history-row');
+    el.handsHistoryLabel = document.getElementById('hands-history-label');
+    el.handsHistoryCopied = document.getElementById('hands-history-copied');
+
     el.heroActions    = document.getElementById('hero-actions');
     el.heroButtons    = document.getElementById('hero-buttons');
     el.sliderHoriz    = document.getElementById('raise-slider-horiz');
@@ -5051,6 +5135,12 @@ const UI = (() => {
     el.placeCenter.classList.remove('hidden');
   }
 
+  function updateHandsHistoryVisibility() {
+    if (!el.handsHistoryRow) return;
+    const shouldShow = window.__sessionShowHistoryLabel === true;
+    el.handsHistoryRow.classList.toggle('visible', shouldShow);
+  }
+
   function updateBoard(state) {
     el.boardCards.innerHTML = '';
     const actualCount = state.board.length;
@@ -5524,6 +5614,20 @@ const UI = (() => {
     } catch (e) {}
   }
 
+  function showHandsHistoryCopied() {
+    if (!el.handsHistoryCopied) return;
+    el.handsHistoryCopied.classList.add('visible');
+    clearTimeout(el.handsHistoryCopied._timer);
+    el.handsHistoryCopied._timer = setTimeout(() => {
+      el.handsHistoryCopied.classList.remove('visible');
+    }, 1200);
+  }
+
+  function setHandsHistoryPressed(pressed) {
+    if (!el.handsHistoryRow) return;
+    el.handsHistoryRow.classList.toggle('pressed', !!pressed);
+  }
+
   let belcardApplyPositionsFn = null;
   let belcardTopCardGetter = null;
 
@@ -5982,7 +6086,10 @@ const UI = (() => {
     isTopBelcard,
     recalcSeatAssignments, resetSeatAssignments,
     showWinnerFinal, hideFinalOverlay, cancelFinalAutoReload,
-    trainingNext, trainingPrev, resetTrainingPage
+    trainingNext, trainingPrev, resetTrainingPage,
+    updateHandsHistoryVisibility,
+    showHandsHistoryCopied,
+    setHandsHistoryPressed
   };
 
 })();
@@ -6043,6 +6150,7 @@ const UI = (() => {
     UI.bindBelcardDrag();
     bindDesktopDoubleClick();
     bindCopyHandlers();
+    bindHandsHistoryTap();
     window.addEventListener('resize', () => {
       UI.updateBoardAreaOffset();
       UI.alignPercentBlockBottom();
@@ -6059,6 +6167,7 @@ const UI = (() => {
         UI.placeGuidePanel();
       }, 250);
     });
+    syncHandsHistoryVisibility();
   });
 
   function cacheDom() {
@@ -6100,6 +6209,14 @@ const UI = (() => {
     el.btnTestTop1    = document.getElementById('btn-test-top1');
     el.trainingPrevBtn = document.getElementById('training-prev-btn');
     el.trainingNextBtn = document.getElementById('training-next-btn');
+    el.handsHistoryRow = document.getElementById('hands-history-row');
+    el.handsHistoryLabel = document.getElementById('hands-history-label');
+    el.handsHistoryCopied = document.getElementById('hands-history-copied');
+  }
+
+  function syncHandsHistoryVisibility() {
+    window.__sessionShowHistoryLabel = (session.viewingIndex >= 0) || (session.replay.active);
+    UI.updateHandsHistoryVisibility();
   }
 
   function bindCopyHandlers() {
@@ -6128,6 +6245,220 @@ const UI = (() => {
       const text = copyEl.getAttribute('data-copy-value') || copyEl.textContent.trim();
       UI.copySupportText(text, card);
     }, { passive: true });
+  }
+
+  function bindHandsHistoryTap() {
+    if (!el.handsHistoryRow) return;
+
+    let lastTapTs = 0;
+    const TAP_COOLDOWN = 400;
+
+    const handle = (e) => {
+      if (!el.handsHistoryRow.classList.contains('visible')) return;
+      const now = Date.now();
+      if (now - lastTapTs < TAP_COOLDOWN) return;
+      lastTapTs = now;
+
+      const text = buildHandHistoryText();
+      if (!text) return;
+
+      UI.setHandsHistoryPressed(true);
+      setTimeout(() => UI.setHandsHistoryPressed(false), 160);
+
+      copyTextToClipboard(text, () => {
+        UI.showHandsHistoryCopied();
+      });
+    };
+
+    el.handsHistoryRow.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      handle(e);
+    });
+
+    el.handsHistoryRow.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      handle(e);
+    }, { passive: false });
+  }
+
+  function copyTextToClipboard(text, onSuccess) {
+    let succeeded = false;
+
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.top = '-1000px';
+      ta.style.left = '-1000px';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      ta.setSelectionRange(0, ta.value.length);
+      succeeded = document.execCommand && document.execCommand('copy');
+      document.body.removeChild(ta);
+    } catch (err) {
+      succeeded = false;
+    }
+
+    if (succeeded) {
+      if (typeof onSuccess === 'function') onSuccess();
+      return;
+    }
+
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          if (typeof onSuccess === 'function') onSuccess();
+        }).catch(() => {});
+      }
+    } catch (err) {}
+  }
+
+  function cardStr(card) {
+    if (!card) return '';
+    const suitMap = { s: 's', h: 'h', d: 'd', c: 'c' };
+    const rank = card.rank === 'T' ? 'T' : card.rank;
+    return rank + (suitMap[card.suit] || card.suit);
+  }
+
+  function buildHandHistoryText() {
+    let snap = null;
+    let isReplay = false;
+
+    if (session.replay.active) {
+      const r = session.replay;
+      const step = r.steps && r.steps[r.stepIndex];
+      if (step && step.kind === 'final') {
+        snap = step.snapshot;
+      } else if (r.handSnapshot) {
+        snap = r.handSnapshot;
+      }
+      isReplay = true;
+    } else if (session.viewingIndex >= 0) {
+      snap = session.history[session.viewingIndex];
+    }
+
+    if (!snap) return '';
+
+    const bb = (snap.blinds && snap.blinds.bb) || 20;
+    const sb = (snap.blinds && snap.blinds.sb) || 10;
+    const ante = (snap.blinds && snap.blinds.ante) || 0;
+    const handNumber = snap.handNumber || 0;
+    const players = snap.players || [];
+
+    const seatOrder = players.slice().sort((a, b) => a.seatIndex - b.seatIndex);
+
+    const lines = [];
+    lines.push('Poker Trainer Hand History');
+    lines.push('Game: Tournament (Sit & Go) 8-max, No Limit Hold\'em');
+    lines.push('Hand #' + handNumber);
+    lines.push('Blinds: ' + sb + '/' + bb + (ante > 0 ? ' (ante ' + ante + ')' : ''));
+    lines.push('');
+
+    lines.push('Table seats:');
+    for (const p of seatOrder) {
+      const name = p.isHero ? 'Hero' : p.name;
+      const pos = p.position || '—';
+      const stack = p.stack || 0;
+      lines.push('Seat ' + (p.seatIndex + 1) + ': ' + name + ' (' + pos + ') ' + stack + ' chips');
+    }
+    lines.push('');
+
+    const sbIndex = (snap.buttonIndex + 1) % players.length;
+    const bbIndex = (sbIndex + 1) % players.length;
+    const sbPlayer = players.find(p => p.seatIndex === sbIndex);
+    const bbPlayer = players.find(p => p.seatIndex === bbIndex);
+
+    const nameOf = (p) => p ? (p.isHero ? 'Hero' : p.name) : 'Player';
+
+    lines.push('*** PRE-FLOP ***');
+    const preActions = (snap.actionLog || []).filter(a => a.street === 'preflop');
+
+    if (sbPlayer) lines.push(nameOf(sbPlayer) + ' posts small blind ' + sb);
+    if (bbPlayer) lines.push(nameOf(bbPlayer) + ' posts big blind ' + bb);
+
+    for (const a of preActions) {
+      const p = players.find(pl => pl.seatIndex === a.playerIndex);
+      if (!p) continue;
+      lines.push(formatActionLine(nameOf(p), a));
+    }
+    lines.push('');
+
+    const board = snap.board || [];
+    const flop = board.slice(0, 3);
+    const turnCard = board.length >= 4 ? board[3] : null;
+    const riverCard = board.length >= 5 ? board[4] : null;
+
+    if (flop.length === 3) {
+      lines.push('*** FLOP *** [' + flop.map(cardStr).join(' ') + ']');
+      const flopActions = (snap.actionLog || []).filter(a => a.street === 'flop');
+      for (const a of flopActions) {
+        const p = players.find(pl => pl.seatIndex === a.playerIndex);
+        if (!p) continue;
+        lines.push(formatActionLine(nameOf(p), a));
+      }
+      lines.push('');
+    }
+
+    if (turnCard) {
+      lines.push('*** TURN *** [' + flop.map(cardStr).join(' ') + '] [' + cardStr(turnCard) + ']');
+      const turnActions = (snap.actionLog || []).filter(a => a.street === 'turn');
+      for (const a of turnActions) {
+        const p = players.find(pl => pl.seatIndex === a.playerIndex);
+        if (!p) continue;
+        lines.push(formatActionLine(nameOf(p), a));
+      }
+      lines.push('');
+    }
+
+    if (riverCard) {
+      lines.push('*** RIVER *** [' + flop.map(cardStr).join(' ') + '] [' + cardStr(turnCard) + ' ' + cardStr(riverCard) + ']');
+      const riverActions = (snap.actionLog || []).filter(a => a.street === 'river');
+      for (const a of riverActions) {
+        const p = players.find(pl => pl.seatIndex === a.playerIndex);
+        if (!p) continue;
+        lines.push(formatActionLine(nameOf(p), a));
+      }
+      lines.push('');
+    }
+
+    if (snap.showdownResults && snap.showdownResults.payouts) {
+      const payouts = snap.showdownResults.payouts;
+      const winnersList = [];
+      for (const [id, amount] of Object.entries(payouts)) {
+        const p = players.find(pl => pl.id === id || pl.id === Number(id));
+        if (p && amount > 0) winnersList.push(nameOf(p) + ' collects ' + amount);
+      }
+      if (winnersList.length > 0) {
+        lines.push('*** SHOW DOWN ***');
+        const revealed = players.filter(p => p.revealed && p.holeCards && p.holeCards.length === 2);
+        for (const p of revealed) {
+          lines.push(nameOf(p) + ' shows ' + p.holeCards.map(cardStr).join(' '));
+        }
+        for (const w of winnersList) lines.push(w);
+        lines.push('');
+      }
+    }
+
+    lines.push('Poker Trainer — ' + (isReplay ? 'Replay mode' : 'History view'));
+
+    return lines.join('\n');
+  }
+
+  function formatActionLine(playerName, action) {
+    const amount = action.amount || 0;
+    switch (action.actionType) {
+      case 'fold':  return playerName + ': folds';
+      case 'check': return playerName + ': checks';
+      case 'call':  return playerName + ': calls ' + amount;
+      case 'raise': return playerName + ': raises to ' + amount;
+      case 'allin': return playerName + ': is all-in ' + amount;
+      default:      return playerName + ': ' + action.actionType + ' ' + amount;
+    }
   }
 
   function bindDesktopDoubleClick() {
@@ -6726,6 +7057,8 @@ const UI = (() => {
     UI.clearWinnerHighlights();
     UI.setReplayButtonState('replay');
 
+    syncHandsHistoryVisibility();
+
     startNewSession();
   }
 
@@ -6777,6 +7110,8 @@ const UI = (() => {
     UI.updateHistoryInfo(0, 0, false);
     UI.setReplayButtonState('replay');
 
+    syncHandsHistoryVisibility();
+
     startHand();
   }
 
@@ -6827,6 +7162,9 @@ const UI = (() => {
     UI.resetSliderToStart();
     refreshQuickPercentList();
     UI.setHeroActionsActive(false);
+
+    syncHandsHistoryVisibility();
+
     processTurn();
   }
 
@@ -7283,6 +7621,7 @@ const UI = (() => {
     } else {
       session.viewingIndex = Math.max(0, Math.min(session.history.length - 1, session.viewingIndex + delta));
     }
+    syncHandsHistoryVisibility();
     renderHistorySnapshot();
   }
 
@@ -7300,6 +7639,7 @@ const UI = (() => {
     highlightWinners(snap);
     UI.updateHistoryInfo(session.viewingIndex + 1, session.history.length, true);
     UI.setReplayButtonState('replay');
+    syncHandsHistoryVisibility();
   }
 
   function buildReplaySteps(snap) {
@@ -7490,6 +7830,8 @@ const UI = (() => {
     UI.hideHeroTimer();
     UI.setReplayButtonState('pause');
 
+    syncHandsHistoryVisibility();
+
     renderReplayStep();
     scheduleNextReplayStep();
   }
@@ -7513,6 +7855,7 @@ const UI = (() => {
       UI.clearWinnerHighlights();
     }
     UI.updateHistoryInfo(session.viewingIndex + 1, session.history.length, true);
+    syncHandsHistoryVisibility();
   }
 
   function scheduleNextReplayStep() {
@@ -7573,6 +7916,7 @@ const UI = (() => {
     if (restoreView && session.viewingIndex >= 0) {
       renderHistorySnapshot();
     }
+    syncHandsHistoryVisibility();
   }
 
   function resumeGame() {
@@ -7586,6 +7930,9 @@ const UI = (() => {
     const state = session.state;
     if (!state) return;
     UI.hideHeroTimer();
+
+    syncHandsHistoryVisibility();
+
     if (state.handOver) {
       UI.updateBoard(state);
       UI.updateSeats(state, true);
