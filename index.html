@@ -329,9 +329,9 @@ button.disabled {
 #table-info .info-row.faded { opacity: 0.45; }
 
 #bottom-support-btn {
-  display: block;
-  margin: 6px auto 0;
-  position: relative;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   width: calc(var(--hero-timer-size) - 8px);
   height: calc(var(--hero-timer-size) - 8px);
   border-radius: 50%;
@@ -340,6 +340,7 @@ button.disabled {
   color: var(--gold);
   font-weight: 900;
   font-size: clamp(18px, 2.4vmin, 22px);
+  display: flex;
   align-items: center;
   justify-content: center;
   line-height: 1;
@@ -350,10 +351,10 @@ button.disabled {
   padding: 0;
   pointer-events: auto;
   opacity: 0.7;
-  flex-shrink: 0;
+  z-index: 15;
 }
 #bottom-support-btn:active:not(:disabled) {
-  transform: scale(0.96);
+  transform: translateX(-50%) scale(0.96);
   filter: brightness(1.35);
 }
 
@@ -1369,7 +1370,7 @@ button.disabled {
   transition: stroke-dashoffset 0.95s linear, stroke 0.4s linear;
 }
 #hero-timer .timer-num {
-  fill: var(--gold);
+  fill: #a8a8a8;
   font-size: 18px;
   font-weight: 900;
   text-anchor: middle;
@@ -2180,8 +2181,9 @@ button.disabled {
             <div class="info-row" id="info-blinds-row">Blinds: 10/20</div>
             <div class="info-row faded" id="info-timer-row">10 hands: 15/30</div>
           </div>
-          <button id="bottom-support-btn" type="button" aria-label="Поддержать">$</button>
         </div>
+
+        <button id="bottom-support-btn" type="button" aria-label="Поддержать">$</button>
 
         <div id="hands-history-float">
           <span id="hands-history-label">Hands History<span class="hh-copy-icon"></span></span>
@@ -2561,7 +2563,7 @@ button.disabled {
         <a class="icon-btn" id="gmail-btn" href="#" rel="noopener noreferrer" aria-label="Gmail">
           <img alt="Mail" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' fill='%23ffffff'/%3E%3C/svg%3E" />
         </a>
-        <span class="foot-center">Благодарю</span>
+        <span class="foot-center">Для развития приложения</span>
         <a class="icon-btn" id="tg-btn" href="#" rel="noopener noreferrer" aria-label="Telegram">
           <img alt="Telegram" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' fill='%23ffffff'/%3E%3C/svg%3E" />
         </a>
@@ -4621,6 +4623,7 @@ const UI = (() => {
       updateBoardAreaOffset();
       alignPercentBlockBottom();
       positionHandsHistoryFloat();
+      positionBottomSupportBtn();
     }));
   }
 
@@ -4640,6 +4643,35 @@ const UI = (() => {
     const tableRect = document.getElementById('poker-table').getBoundingClientRect();
     const bottomPx = tableRect.bottom - haRect.bottom;
     el.quickPercentList.style.bottom = bottomPx + 'px';
+  }
+
+  function positionBottomSupportBtn() {
+    if (!el.bottomSupportBtn) return;
+    const tableEl = document.getElementById('poker-table');
+    if (!tableEl) return;
+    const tableRect = tableEl.getBoundingClientRect();
+
+    let heroCardsTop = null;
+    const heroSeat = document.getElementById('seat-hero');
+    if (heroSeat) {
+      const cardsContainer = heroSeat.querySelector('.seat-cards');
+      if (cardsContainer) {
+        const r = cardsContainer.getBoundingClientRect();
+        if (r.height > 0) heroCardsTop = r.top;
+      }
+    }
+
+    if (heroCardsTop === null) {
+      const heroSeatPos = SEAT_POSITIONS[0];
+      const y = tableRect.top + (heroSeatPos.y / 100) * tableRect.height + (heroSeatPos.offsetY || 0);
+      heroCardsTop = y - (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hero-timer-size')) || 40);
+    }
+
+    const btnTop = heroCardsTop - tableRect.top - 16;
+    const centerX = tableRect.width / 2;
+
+    el.bottomSupportBtn.style.top = btnTop + 'px';
+    el.bottomSupportBtn.style.left = centerX + 'px';
   }
 
   function positionHandsHistoryFloat() {
@@ -4855,44 +4887,82 @@ const UI = (() => {
     if (fill) fill.style.strokeDashoffset = 0;
   }
 
+  const TIMER_GOLD_STROKE = '#ffcb2b';
+  const TIMER_GRAY_TEXT   = '#a8a8a8';
+  const TIMER_RED         = '#e63946';
+
+  function mixColor(fromHex, toHex, r) {
+    const fh = fromHex.replace('#','');
+    const th = toHex.replace('#','');
+    const fr = parseInt(fh.substring(0,2),16);
+    const fg = parseInt(fh.substring(2,4),16);
+    const fb = parseInt(fh.substring(4,6),16);
+    const tr = parseInt(th.substring(0,2),16);
+    const tg = parseInt(th.substring(2,4),16);
+    const tb = parseInt(th.substring(4,6),16);
+    const rr = Math.round(fr + (tr - fr) * r);
+    const rg = Math.round(fg + (tg - fg) * r);
+    const rb = Math.round(fb + (tb - fb) * r);
+    return 'rgb(' + rr + ',' + rg + ',' + rb + ')';
+  }
+
   function setTimerColorBySeconds(sec) {
     if (!el.heroTimer) return;
     const fill = el.heroTimer.querySelector('.timer-fill');
     const num = el.heroTimerNum;
     if (!fill || !num) return;
 
-    const GOLD = '#ffcb2b';
-    const RED  = '#e63946';
+    if (sec <= 0) {
+      fill.style.stroke = TIMER_GOLD_STROKE;
+      num.style.fill = TIMER_GRAY_TEXT;
+      return;
+    }
 
     let ratio = 0;
     if (sec <= 3) ratio = 1;
     else if (sec >= 5) ratio = 0;
     else ratio = (5 - sec) / 2;
 
-    let color;
-    if (ratio <= 0) color = GOLD;
-    else if (ratio >= 1) color = RED;
-    else {
-      const g = [255, 203, 43];
-      const r = [230, 57, 70];
-      const mix = g.map((gv, i) => Math.round(gv + (r[i] - gv) * ratio));
-      color = 'rgb(' + mix[0] + ',' + mix[1] + ',' + mix[2] + ')';
-    }
-
-    fill.style.stroke = color;
-    num.style.fill = color;
+    fill.style.stroke = mixColor(TIMER_GOLD_STROKE, TIMER_RED, ratio);
+    num.style.fill = mixColor(TIMER_GRAY_TEXT, TIMER_RED, ratio);
   }
 
-  function updateHeroTimer(currentSec, totalSec) {
+  function setTimerReverseColor(progress) {
+    // progress 0 (0 сек, пусто) → 1 (10 сек, полно)
+    // 0-0.3 (0-3 сек): красный
+    // 0.3-0.5 (3-5 сек): плавный переход красный → исходный
+    // 0.5-1.0 (5-10 сек): исходный
     if (!el.heroTimer) return;
     const fill = el.heroTimer.querySelector('.timer-fill');
     const num = el.heroTimerNum;
     if (!fill || !num) return;
+
+    let ratio;
+    if (progress <= 0.3) ratio = 1;
+    else if (progress >= 0.5) ratio = 0;
+    else ratio = (0.5 - progress) / 0.2;
+
+    fill.style.stroke = mixColor(TIMER_GOLD_STROKE, TIMER_RED, ratio);
+    num.style.fill = mixColor(TIMER_GRAY_TEXT, TIMER_RED, ratio);
+  }
+
+  function setTimerFillRatio(ratio) {
+    if (!el.heroTimer) return;
+    const fill = el.heroTimer.querySelector('.timer-fill');
+    if (!fill) return;
+    const r = Math.max(0, Math.min(1, ratio));
+    const circumference = 2 * Math.PI * 16;
+    fill.style.strokeDashoffset = String(circumference * (1 - r));
+  }
+
+  function updateHeroTimer(currentSec, totalSec) {
+    if (!el.heroTimer) return;
+    const num = el.heroTimerNum;
+    if (!num) return;
     num.textContent = String(Math.max(0, currentSec));
 
-    const circumference = 2 * Math.PI * 16;
     const ratio = totalSec > 0 ? Math.max(0, Math.min(1, currentSec / totalSec)) : 0;
-    fill.style.strokeDashoffset = String(circumference * (1 - ratio));
+    setTimerFillRatio(ratio);
 
     setTimerColorBySeconds(currentSec);
   }
@@ -4917,6 +4987,8 @@ const UI = (() => {
       }
       if (track) track.style.opacity = '1';
       if (num) num.style.opacity = '1';
+      if (optionOn) setTimerColorBySeconds(10);
+      else setTimerColorBySeconds(0);
     } else {
       el.heroTimer.style.opacity = '1';
       if (fill) fill.style.opacity = '1';
@@ -4943,6 +5015,7 @@ const UI = (() => {
     placeTopRoundRow();
     placeGuidePanel();
     positionHandsHistoryFloat();
+    positionBottomSupportBtn();
   }
 
   function recalcSeatAssignments(state) {
@@ -5082,6 +5155,7 @@ const UI = (() => {
     placeTopRoundRow();
     placeGuidePanel();
     positionHandsHistoryFloat();
+    positionBottomSupportBtn();
   }
 
   function renderActionBadge(p, seat) {
@@ -6192,7 +6266,7 @@ const UI = (() => {
     settings, init, el,
     renderTable, updateSeats, updateBoard, updatePot, updateLevel,
     updateStacks, updateActiveHighlight, updatePlaceCenter, updateBoardAreaOffset,
-    alignPercentBlockBottom, positionHandsHistoryFloat,
+    alignPercentBlockBottom, positionHandsHistoryFloat, positionBottomSupportBtn,
     showActions, setHeroActionsActive,
     openBottomPanel, closeBottomPanel, openGuidePanel, closeGuidePanel,
     openTraining, closeTraining, anyTrainingOpen,
@@ -6206,6 +6280,7 @@ const UI = (() => {
     resetSliderToStart,
     setReplayButtonState,
     showHeroTimer, hideHeroTimer, updateHeroTimer, placeHeroTimer, setTimerGhostMode,
+    setTimerColorBySeconds, setTimerReverseColor, setTimerFillRatio,
     placeTopRoundRow, placeGuidePanel,
     updateGuideFade, guideScrollToTop,
     showSupportOverlay, hideSupportOverlay, copySupportText,
@@ -6247,6 +6322,7 @@ const UI = (() => {
     heroTimerTimeoutId: null,
     heroTimerRemaining: 0,
     heroTimerTotal: 0,
+    timerAnimFrameId: null,
 
     replay: {
       active: false,
@@ -6285,6 +6361,7 @@ const UI = (() => {
       UI.placeTopRoundRow();
       UI.placeGuidePanel();
       UI.positionHandsHistoryFloat();
+      UI.positionBottomSupportBtn();
     });
     window.addEventListener('orientationchange', () => {
       setTimeout(() => {
@@ -6294,6 +6371,7 @@ const UI = (() => {
         UI.placeTopRoundRow();
         UI.placeGuidePanel();
         UI.positionHandsHistoryFloat();
+        UI.positionBottomSupportBtn();
       }, 250);
     });
     syncHandsHistoryVisibility();
@@ -6359,6 +6437,36 @@ const UI = (() => {
       UI.setTimerGhostMode(true, optionOn);
     }
     UI.placeHeroTimer();
+  }
+
+  function stopTimerAnimFrame() {
+    if (session.timerAnimFrameId) {
+      cancelAnimationFrame(session.timerAnimFrameId);
+      session.timerAnimFrameId = null;
+    }
+  }
+
+  function playTimerRefill(onDone) {
+    stopTimerAnimFrame();
+    const duration = 320;
+    const startTs = performance.now();
+
+    function step(now) {
+      const t = Math.min(1, (now - startTs) / duration);
+      // Заполнение от 0 к 1
+      UI.setTimerFillRatio(t);
+      UI.setTimerReverseColor(t);
+      const numValue = Math.round(t * 10);
+      if (UI.el.heroTimerNum) UI.el.heroTimerNum.textContent = String(numValue);
+
+      if (t < 1) {
+        session.timerAnimFrameId = requestAnimationFrame(step);
+      } else {
+        session.timerAnimFrameId = null;
+        if (typeof onDone === 'function') onDone();
+      }
+    }
+    session.timerAnimFrameId = requestAnimationFrame(step);
   }
 
   function bindCopyHandlers() {
@@ -7062,10 +7170,18 @@ const UI = (() => {
 
     if (next === 0) {
       stopHeroTimer();
+      // Анимация обратного заполнения
+      playTimerRefill(() => {
+        UI.setTimerGhostMode(true, false);
+      });
     } else {
-      if (session.waitingForHero && !session.heroEliminated) {
-        startHeroTimerIfNeeded();
-      }
+      // Анимация обратного заполнения перед активацией
+      playTimerRefill(() => {
+        UI.setTimerGhostMode(true, true);
+        if (session.waitingForHero && !session.heroEliminated) {
+          startHeroTimerIfNeeded();
+        }
+      });
     }
   }
 
@@ -7182,6 +7298,7 @@ const UI = (() => {
   function restartSession() {
     stopReplay(true);
     stopHeroTimer();
+    stopTimerAnimFrame();
     clearTimeout(session.autoNextTimerId);
     clearTimeout(session.botTimerId);
     clearTimeout(session.revealTimerId);
@@ -7223,6 +7340,7 @@ const UI = (() => {
   function startNewSession() {
     stopReplay(true);
     stopHeroTimer();
+    stopTimerAnimFrame();
     clearTimeout(session.autoNextTimerId);
     clearTimeout(session.botTimerId);
     clearTimeout(session.revealTimerId);
@@ -7278,6 +7396,7 @@ const UI = (() => {
     if (!session.active) return;
     stopReplay(true);
     stopHeroTimer();
+    stopTimerAnimFrame();
 
     if (session.tournamentOver) return;
 
@@ -7635,6 +7754,7 @@ const UI = (() => {
     if (session.isPaused) return;
     if (session.replay.active) return;
     stopHeroTimer();
+    stopTimerAnimFrame();
     const state = session.state;
     Engine.finalizeHand(state);
 
