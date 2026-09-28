@@ -1316,7 +1316,7 @@ button.disabled {
   pointer-events: none;
   z-index: 40;
   display: block;
-  opacity: 0.2;
+  opacity: 0.55;
   transition: opacity .2s ease;
 }
 #hero-timer.active { opacity: 1; }
@@ -1327,7 +1327,7 @@ button.disabled {
 }
 #hero-timer .timer-track {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.12);
+  stroke: rgba(255, 255, 255, 0.22);
   stroke-width: 3.5;
 }
 #hero-timer .timer-fill {
@@ -1337,10 +1337,11 @@ button.disabled {
   stroke-linecap: round;
   stroke-dasharray: 100.53 100.53;
   stroke-dashoffset: 0;
-  transition: stroke-dashoffset 0.95s linear;
+  opacity: 0.85;
 }
+#hero-timer.active .timer-fill { opacity: 1; }
 #hero-timer .timer-num {
-  fill: #fff;
+  fill: #d8d8d8;
   font-size: 18px;
   font-weight: 900;
   text-anchor: middle;
@@ -1349,6 +1350,7 @@ button.disabled {
   stroke: #000;
   stroke-width: 1.5px;
 }
+#hero-timer.active .timer-num { fill: #fff; }
 
 #hero-timer-zone {
   position: absolute;
@@ -1791,10 +1793,6 @@ button.disabled {
   filter: brightness(1.1);
   box-shadow: 0 1px 0 #8a6508, inset 0 1px 0 rgba(255,255,255,.35);
 }
-
-/* ============================================================
-   ОКНО РУКОВОДСТВА
-   ============================================================ */
 
 #guide-panel {
   position: absolute;
@@ -4819,26 +4817,66 @@ const UI = (() => {
     el.heroTimerZone.style.top = top + 'px';
   }
 
+  const TIMER_RADIUS = 16;
+  const TIMER_CIRC = 2 * Math.PI * TIMER_RADIUS;
+
+  let timerAnimFrameId = null;
+  let timerAnimStartTime = 0;
+  let timerAnimDuration = 0;
+
+  function stopTimerCircleAnimation() {
+    if (timerAnimFrameId !== null) {
+      cancelAnimationFrame(timerAnimFrameId);
+      timerAnimFrameId = null;
+    }
+  }
+
+  function startTimerCircleAnimation(totalSeconds) {
+    stopTimerCircleAnimation();
+    if (!el.heroTimer) return;
+    const fill = el.heroTimer.querySelector('.timer-fill');
+    if (!fill) return;
+    const duration = totalSeconds * 1000;
+    if (duration <= 0) return;
+    timerAnimStartTime = performance.now();
+    timerAnimDuration = duration;
+    fill.style.strokeDashoffset = '0';
+    const tick = (now) => {
+      const elapsed = now - timerAnimStartTime;
+      const ratio = Math.max(0, Math.min(1, elapsed / timerAnimDuration));
+      const offset = TIMER_CIRC * ratio;
+      fill.style.strokeDashoffset = String(offset);
+      if (ratio < 1) {
+        timerAnimFrameId = requestAnimationFrame(tick);
+      } else {
+        timerAnimFrameId = null;
+      }
+    };
+    timerAnimFrameId = requestAnimationFrame(tick);
+  }
+
   function showHeroTimer(seconds) {
     if (!el.heroTimer) return;
     el.heroTimer.classList.add('active');
     updateHeroTimer(seconds, seconds);
+    startTimerCircleAnimation(seconds);
     placeHeroTimer();
   }
 
   function hideHeroTimerActive() {
     if (!el.heroTimer) return;
     el.heroTimer.classList.remove('active');
+    stopTimerCircleAnimation();
   }
 
   function setHeroTimerIdle() {
     if (!el.heroTimer) return;
+    stopTimerCircleAnimation();
     const fill = el.heroTimer.querySelector('.timer-fill');
     const num = el.heroTimerNum;
     const seconds = Number(settings.turnTime) || 0;
-    const circumference = 2 * Math.PI * 16;
     if (seconds <= 0) {
-      if (fill) fill.style.strokeDashoffset = String(circumference);
+      if (fill) fill.style.strokeDashoffset = String(TIMER_CIRC);
       if (num) num.textContent = '0';
     } else {
       if (fill) fill.style.strokeDashoffset = '0';
@@ -4849,10 +4887,10 @@ const UI = (() => {
 
   function setHeroTimerOff() {
     if (!el.heroTimer) return;
+    stopTimerCircleAnimation();
     const fill = el.heroTimer.querySelector('.timer-fill');
     const num = el.heroTimerNum;
-    const circumference = 2 * Math.PI * 16;
-    if (fill) fill.style.strokeDashoffset = String(circumference);
+    if (fill) fill.style.strokeDashoffset = String(TIMER_CIRC);
     if (num) num.textContent = '0';
     el.heroTimer.classList.remove('active');
     if (el.heroTimerZone) el.heroTimerZone.classList.add('disabled');
@@ -4865,14 +4903,9 @@ const UI = (() => {
 
   function updateHeroTimer(currentSec, totalSec) {
     if (!el.heroTimer) return;
-    const fill = el.heroTimer.querySelector('.timer-fill');
     const num = el.heroTimerNum;
-    if (!fill || !num) return;
+    if (!num) return;
     num.textContent = String(Math.max(0, currentSec));
-
-    const circumference = 2 * Math.PI * 16;
-    const ratio = totalSec > 0 ? Math.max(0, Math.min(1, currentSec / totalSec)) : 0;
-    fill.style.strokeDashoffset = String(circumference * (1 - ratio));
   }
 
   function renderTable(state) {
@@ -6181,6 +6214,7 @@ const UI = (() => {
     panelsPaused: false,
     trainingPaused: false,
     finalShown: false,
+    replayPausedForOverlay: false,
 
     heroTimerIntervalId: null,
     heroTimerTimeoutId: null,
@@ -6300,6 +6334,27 @@ const UI = (() => {
 
   function inHistoryMode() {
     return (session.viewingIndex >= 0) || session.replay.active;
+  }
+
+  function pauseReplayForOverlay() {
+    if (!session.replay.active) return;
+    if (session.replay.paused) return;
+    session.replayPausedForOverlay = true;
+    session.replay.paused = true;
+    if (session.replay.timerId) {
+      clearTimeout(session.replay.timerId);
+      session.replay.timerId = null;
+    }
+    UI.setReplayButtonState('play');
+  }
+
+  function resumeReplayAfterOverlay() {
+    if (!session.replay.active) return;
+    if (!session.replayPausedForOverlay) return;
+    session.replayPausedForOverlay = false;
+    session.replay.paused = false;
+    UI.setReplayButtonState('pause');
+    scheduleNextReplayStep();
   }
 
   function bindCopyHandlers() {
@@ -6932,10 +6987,12 @@ const UI = (() => {
     if (session.supportPaused) return;
     if (UI.anyOverlayOpen()) return;
     openFn();
-    if (!inHistoryMode()) {
-      session.panelsPaused = true;
-      pauseGame();
+    if (inHistoryMode()) {
+      pauseReplayForOverlay();
+      return;
     }
+    session.panelsPaused = true;
+    pauseGame();
   }
 
   function closeAllPanelsAndResume() {
@@ -6947,6 +7004,7 @@ const UI = (() => {
         resumeGame();
       }
     }
+    resumeReplayAfterOverlay();
   }
 
   function openGuideWithoutClosing() {
@@ -6956,7 +7014,11 @@ const UI = (() => {
     UI.el.tapClose.classList.toggle('active', true);
     if (UI.el.guideViewport) UI.el.guideViewport.scrollTop = 0;
     UI.placeGuidePanel();
-    if (!session.supportPaused && !session.trainingPaused && !inHistoryMode()) {
+    if (inHistoryMode()) {
+      pauseReplayForOverlay();
+      return;
+    }
+    if (!session.supportPaused && !session.trainingPaused) {
       pauseGame();
       session.panelsPaused = true;
     }
@@ -6967,6 +7029,8 @@ const UI = (() => {
     session.supportPaused = true;
     if (!inHistoryMode()) {
       pauseGame();
+    } else {
+      pauseReplayForOverlay();
     }
     UI.resetBelcardSwap();
     UI.showSupportOverlay();
@@ -6977,6 +7041,8 @@ const UI = (() => {
     session.supportPaused = true;
     if (!inHistoryMode()) {
       pauseGame();
+    } else {
+      pauseReplayForOverlay();
     }
     UI.resetBelcardSwap();
     UI.showSupportOverlay();
@@ -6989,6 +7055,9 @@ const UI = (() => {
     if (!session.panelsPaused && !session.trainingPaused && !UI.anyPanelOpen() && !inHistoryMode()) {
       resumeGame();
     }
+    if (inHistoryMode()) {
+      resumeReplayAfterOverlay();
+    }
   }
 
   function openTrainingWindow() {
@@ -6996,6 +7065,8 @@ const UI = (() => {
     session.trainingPaused = true;
     if (!inHistoryMode()) {
       pauseGame();
+    } else {
+      pauseReplayForOverlay();
     }
     UI.resetTrainingPage();
     UI.openTraining();
@@ -7007,6 +7078,9 @@ const UI = (() => {
     UI.closeTraining();
     if (!session.panelsPaused && !session.supportPaused && !UI.anyPanelOpen() && !inHistoryMode()) {
       resumeGame();
+    }
+    if (inHistoryMode()) {
+      resumeReplayAfterOverlay();
     }
   }
 
@@ -7160,6 +7234,7 @@ const UI = (() => {
     session.panelsPaused = false;
     session.trainingPaused = false;
     session.finalShown = false;
+    session.replayPausedForOverlay = false;
 
     Model.reset();
     Meta.reset();
@@ -7201,6 +7276,7 @@ const UI = (() => {
     session.panelsPaused = false;
     session.trainingPaused = false;
     session.finalShown = false;
+    session.replayPausedForOverlay = false;
 
     Model.reset();
     Meta.reset();
@@ -7965,6 +8041,7 @@ const UI = (() => {
     session.replay.stepIndex = 0;
     session.replay.steps = steps;
     session.replay.handSnapshot = snap;
+    session.replayPausedForOverlay = false;
 
     UI.setHeroActionsActive(false);
     UI.hideHeroTimerActive();
@@ -8052,6 +8129,7 @@ const UI = (() => {
     r.steps = [];
     r.stepIndex = 0;
     r.handSnapshot = null;
+    session.replayPausedForOverlay = false;
     UI.setReplayButtonState('replay');
 
     if (restoreView && session.viewingIndex >= 0) {
@@ -8064,10 +8142,15 @@ const UI = (() => {
     if (session.supportPaused) return;
     if (session.trainingPaused) return;
     if (UI.anyPanelOpen()) return;
-    if (inHistoryMode()) return;
 
-    stopReplay(true);
-    session.viewingIndex = -1;
+    // Принудительно выходим из режима истории и реплея
+    if (session.replay.active) {
+      stopReplay(false);
+    }
+    if (session.viewingIndex >= 0) {
+      session.viewingIndex = -1;
+    }
+
     session.isPaused = false;
     const state = session.state;
     if (!state) return;
