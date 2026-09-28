@@ -328,40 +328,8 @@ button.disabled {
 }
 #table-info .info-row.faded { opacity: 0.45; }
 
-#bottom-support-btn {
+#hands-history-row {
   position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  width: calc(var(--hero-timer-size) - 8px);
-  height: calc(var(--hero-timer-size) - 8px);
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #3a3530, #1a1a1a 70%);
-  border: 1px solid #8a6508;
-  color: var(--gold);
-  font-weight: 900;
-  font-size: clamp(18px, 2.4vmin, 22px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  cursor: pointer;
-  touch-action: manipulation;
-  transition: transform .08s ease, filter .08s ease;
-  font-family: inherit;
-  padding: 0;
-  pointer-events: auto;
-  opacity: 0.7;
-  z-index: 15;
-}
-#bottom-support-btn:active:not(:disabled) {
-  transform: translateX(-50%) scale(0.96);
-  filter: brightness(1.35);
-}
-
-#hands-history-float {
-  position: absolute;
-  left: 50%;
-  transform: translate(-50%, -50%);
   display: none;
   align-items: center;
   justify-content: center;
@@ -370,17 +338,19 @@ button.disabled {
   font-weight: 700;
   letter-spacing: .3px;
   line-height: 1.3;
+  min-height: 1.3em;
   white-space: nowrap;
   pointer-events: auto;
   cursor: pointer;
   touch-action: manipulation;
   text-shadow: 0 1px 4px rgba(0,0,0,.95);
   z-index: 6;
+  transform: translate(-50%, 0);
 }
-#hands-history-float.visible { display: flex; }
-#hands-history-float.pressed { color: #d0d0d0; }
-#hands-history-float.pressed .hh-copy-icon::before,
-#hands-history-float.pressed .hh-copy-icon::after { border-color: #d0d0d0; }
+#hands-history-row.visible { display: flex; }
+#hands-history-row.pressed { color: #d0d0d0; }
+#hands-history-row.pressed .hh-copy-icon::before,
+#hands-history-row.pressed .hh-copy-icon::after { border-color: #d0d0d0; }
 
 #hands-history-label {
   position: relative;
@@ -1347,9 +1317,11 @@ button.disabled {
   height: var(--hero-timer-size);
   pointer-events: none;
   z-index: 40;
-  display: none;
+  display: block;
+  opacity: 0.3;
+  transition: opacity .2s ease;
 }
-#hero-timer.visible { display: block; }
+#hero-timer.active { opacity: 1; }
 #hero-timer .timer-svg {
   width: 100%;
   height: 100%;
@@ -1367,9 +1339,10 @@ button.disabled {
   stroke-linecap: round;
   stroke-dasharray: 100.53 100.53;
   stroke-dashoffset: 0;
+  transition: stroke-dashoffset 0.95s linear;
 }
 #hero-timer .timer-num {
-  fill: #a8a8a8;
+  fill: #fff;
   font-size: 18px;
   font-weight: 900;
   text-anchor: middle;
@@ -1388,6 +1361,7 @@ button.disabled {
   background: transparent;
   touch-action: manipulation;
   cursor: default;
+  display: block;
 }
 
 #hero-actions {
@@ -2181,9 +2155,7 @@ button.disabled {
           </div>
         </div>
 
-        <button id="bottom-support-btn" type="button" aria-label="Поддержать">$</button>
-
-        <div id="hands-history-float">
+        <div id="hands-history-row">
           <span id="hands-history-label">Hands History<span class="hh-copy-icon"></span></span>
           <span id="hands-history-copied">Copied</span>
         </div>
@@ -2202,8 +2174,8 @@ button.disabled {
 
         <div id="top-round-row">
           <button id="settings-help-btn" class="round-help-btn" type="button" aria-label="Руководство">?</button>
-          <button id="settings-train-btn" class="round-help-btn" type="button" aria-label="Тренировка">!</button>
           <button id="settings-card-btn" class="round-help-btn" type="button" aria-label="Поддержать">$</button>
+          <button id="settings-train-btn" class="round-help-btn" type="button" aria-label="Тренировка">!</button>
         </div>
 
         <div id="hero-actions" class="inactive">
@@ -2561,7 +2533,7 @@ button.disabled {
         <a class="icon-btn" id="gmail-btn" href="#" rel="noopener noreferrer" aria-label="Gmail">
           <img alt="Mail" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' fill='%23ffffff'/%3E%3C/svg%3E" />
         </a>
-        <span class="foot-center">Для развития приложения</span>
+        <span class="foot-center">на развитие приложения</span>
         <a class="icon-btn" id="tg-btn" href="#" rel="noopener noreferrer" aria-label="Telegram">
           <img alt="Telegram" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100' height='100' fill='%23ffffff'/%3E%3C/svg%3E" />
         </a>
@@ -4540,11 +4512,9 @@ const UI = (() => {
     el.placeLine      = document.getElementById('place-line');
     el.headsUpLine    = document.getElementById('heads-up-line');
 
-    el.handsHistoryFloat = document.getElementById('hands-history-float');
+    el.handsHistoryRow = document.getElementById('hands-history-row');
     el.handsHistoryLabel = document.getElementById('hands-history-label');
     el.handsHistoryCopied = document.getElementById('hands-history-copied');
-
-    el.bottomSupportBtn = document.getElementById('bottom-support-btn');
 
     el.heroActions    = document.getElementById('hero-actions');
     el.heroButtons    = document.getElementById('hero-buttons');
@@ -4620,8 +4590,6 @@ const UI = (() => {
     requestAnimationFrame(() => requestAnimationFrame(() => {
       updateBoardAreaOffset();
       alignPercentBlockBottom();
-      positionHandsHistoryFloat();
-      positionBottomSupportBtn();
     }));
   }
 
@@ -4641,77 +4609,6 @@ const UI = (() => {
     const tableRect = document.getElementById('poker-table').getBoundingClientRect();
     const bottomPx = tableRect.bottom - haRect.bottom;
     el.quickPercentList.style.bottom = bottomPx + 'px';
-  }
-
-  function positionBottomSupportBtn() {
-    if (!el.bottomSupportBtn) return;
-    const tableEl = document.getElementById('poker-table');
-    if (!tableEl) return;
-    const tableRect = tableEl.getBoundingClientRect();
-
-    // Пытаемся взять карты героя
-    let heroCardsTop = null;
-    const heroSeat = document.getElementById('seat-hero');
-    if (heroSeat) {
-      const cardsContainer = heroSeat.querySelector('.seat-cards');
-      if (cardsContainer) {
-        const r = cardsContainer.getBoundingClientRect();
-        if (r.height > 0) heroCardsTop = r.top;
-      }
-    }
-
-    // Если карт нет — считаем по стандартной позиции карт героя (seat 0)
-    if (heroCardsTop === null) {
-      const heroPos = SEAT_POSITIONS[0];
-      const seatCenterY = tableRect.top + (heroPos.y / 100) * tableRect.height + (heroPos.offsetY || 0);
-
-      // Пытаемся измерить высоту карт героя через невидимый шаблон — проще взять из CSS
-      // Размеры карт героя по CSS: --card-h clamp(53.1px, 7.83vmin, 68.4px)
-      // Приближённо: используем getComputedStyle от временного узла, но проще — считать фиксированные
-      // Возьмём фактический размер, если есть карты у других игроков, иначе посчитаем из vmin.
-      const vmin = Math.min(window.innerWidth, window.innerHeight) / 100;
-      const cardH = Math.min(68.4, Math.max(53.1, 7.83 * vmin));
-
-      // Центр карт героя примерно на seatCenterY, значит верх карт = seatCenterY - cardH/2 (учитывая смещения)
-      // Визуально карты стоят так, что их центр примерно в районе seatCenterY с учётом смещений в самом seat.
-      // Упрощённо: верх карт = seatCenterY - cardH/2 - небольшой офсет на структуру.
-      heroCardsTop = seatCenterY - cardH / 2 - 4;
-    }
-
-    const btnTop = heroCardsTop - tableRect.top - 10;
-    const centerX = tableRect.width / 2;
-
-    el.bottomSupportBtn.style.top = btnTop + 'px';
-    el.bottomSupportBtn.style.left = centerX + 'px';
-  }
-
-  function positionHandsHistoryFloat() {
-    if (!el.handsHistoryFloat) return;
-    const tableEl = document.getElementById('poker-table');
-    if (!tableEl) return;
-    const tableRect = tableEl.getBoundingClientRect();
-
-    const seat2 = document.querySelector('.seat[data-visual-index="2"]');
-    const seat6 = document.querySelector('.seat[data-visual-index="6"]');
-
-    let centerX, centerY;
-    if (seat2 && seat6) {
-      const seat2Cards = seat2.querySelector('.seat-cards');
-      const seat6Cards = seat6.querySelector('.seat-cards');
-      const r2 = (seat2Cards || seat2).getBoundingClientRect();
-      const r6 = (seat6Cards || seat6).getBoundingClientRect();
-      centerX = ((r2.left + r2.right) / 2 + (r6.left + r6.right) / 2) / 2;
-      centerY = ((r2.top + r2.bottom) / 2 + (r6.top + r6.bottom) / 2) / 2;
-    } else {
-      centerX = tableRect.left + tableRect.width / 2;
-      centerY = tableRect.top + tableRect.height * 0.3;
-    }
-
-    const left = centerX - tableRect.left;
-    const top = centerY - tableRect.top;
-
-    el.handsHistoryFloat.style.left = left + 'px';
-    el.handsHistoryFloat.style.top = top + 'px';
   }
 
   function updateOverlayState() {
@@ -4850,17 +4747,60 @@ const UI = (() => {
     updateGuideFade();
   }
 
+  function placeHandsHistoryRow() {
+    if (!el.handsHistoryRow) return;
+    const seatLeft = document.getElementById('seat-bot2');
+    const seatRight = document.getElementById('seat-bot6');
+    const tableEl = document.getElementById('poker-table');
+    if (!tableEl) return;
+
+    const tableRect = tableEl.getBoundingClientRect();
+    const leftSeat = findSeatByVisualIndex(2);
+    const rightSeat = findSeatByVisualIndex(6);
+
+    if (!leftSeat || !rightSeat) {
+      el.handsHistoryRow.style.left = '50%';
+      el.handsHistoryRow.style.top = '20%';
+      return;
+    }
+
+    const leftRect = leftSeat.getBoundingClientRect();
+    const rightRect = rightSeat.getBoundingClientRect();
+
+    const leftCards = leftSeat.querySelector('.seat-cards');
+    const rightCards = rightSeat.querySelector('.seat-cards');
+    const leftCardsRect = leftCards ? leftCards.getBoundingClientRect() : leftRect;
+    const rightCardsRect = rightCards ? rightCards.getBoundingClientRect() : rightRect;
+
+    const midX = (leftCardsRect.left + rightCardsRect.right) / 2;
+    const topY = Math.min(leftCardsRect.top, rightCardsRect.top);
+
+    const localX = midX - tableRect.left;
+    const localY = topY - tableRect.top;
+
+    el.handsHistoryRow.style.left = localX + 'px';
+    el.handsHistoryRow.style.top = localY + 'px';
+  }
+
+  function findSeatByVisualIndex(visualIndex) {
+    const seats = document.querySelectorAll('.seat');
+    for (const s of seats) {
+      if (Number(s.dataset.visualIndex) === visualIndex) return s;
+    }
+    return null;
+  }
+
   function placeHeroTimer() {
     if (!el.heroTimer || !el.heroTimerZone) return;
     const heroSeat = document.getElementById('seat-hero');
     if (!heroSeat) {
-      el.heroTimer.classList.remove('visible');
+      el.heroTimer.style.display = 'none';
       el.heroTimerZone.style.display = 'none';
       return;
     }
     const cardsContainer = heroSeat.querySelector('.seat-cards');
     if (!cardsContainer) {
-      el.heroTimer.classList.remove('visible');
+      el.heroTimer.style.display = 'none';
       el.heroTimerZone.style.display = 'none';
       return;
     }
@@ -4886,106 +4826,42 @@ const UI = (() => {
 
   function showHeroTimer(seconds) {
     if (!el.heroTimer) return;
-    el.heroTimer.classList.add('visible');
+    el.heroTimer.classList.add('active');
     updateHeroTimer(seconds, seconds);
     placeHeroTimer();
   }
 
-  function hideHeroTimer() {
+  function hideHeroTimerActive() {
     if (!el.heroTimer) return;
-    el.heroTimer.classList.remove('visible');
+    el.heroTimer.classList.remove('active');
+  }
+
+  function setHeroTimerIdle() {
+    if (!el.heroTimer) return;
     const fill = el.heroTimer.querySelector('.timer-fill');
-    if (fill) fill.style.strokeDashoffset = 0;
+    const num = el.heroTimerNum;
+    const seconds = Number(settings.turnTime) || 0;
+    const circumference = 2 * Math.PI * 16;
+    if (seconds <= 0) {
+      if (fill) fill.style.strokeDashoffset = String(circumference);
+      if (num) num.textContent = '0';
+    } else {
+      if (fill) fill.style.strokeDashoffset = '0';
+      if (num) num.textContent = '10';
+    }
+    el.heroTimer.classList.remove('active');
   }
 
-  const TIMER_GOLD_STROKE = '#ffcb2b';
-  const TIMER_GRAY_TEXT   = '#a8a8a8';
-  const TIMER_RED         = '#e63946';
-
-  function mixColor(fromHex, toHex, r) {
-    const fh = fromHex.replace('#','');
-    const th = toHex.replace('#','');
-    const fr = parseInt(fh.substring(0,2),16);
-    const fg = parseInt(fh.substring(2,4),16);
-    const fb = parseInt(fh.substring(4,6),16);
-    const tr = parseInt(th.substring(0,2),16);
-    const tg = parseInt(th.substring(2,4),16);
-    const tb = parseInt(th.substring(4,6),16);
-    const rr = Math.round(fr + (tr - fr) * r);
-    const rg = Math.round(fg + (tg - fg) * r);
-    const rb = Math.round(fb + (tb - fb) * r);
-    return 'rgb(' + rr + ',' + rg + ',' + rb + ')';
-  }
-
-  function setTimerColorByProgress(progress) {
-    // progress 0 (0 сек) → 1 (10 сек)
-    // 0-0.3 (0-3 сек): красный
-    // 0.3-0.5 (3-5 сек): плавный переход красный → исходный
-    // 0.5-1.0 (5-10 сек): исходный
+  function updateHeroTimer(currentSec, totalSec) {
     if (!el.heroTimer) return;
     const fill = el.heroTimer.querySelector('.timer-fill');
     const num = el.heroTimerNum;
     if (!fill || !num) return;
+    num.textContent = String(Math.max(0, currentSec));
 
-    let ratio;
-    if (progress <= 0.3) ratio = 1;
-    else if (progress >= 0.5) ratio = 0;
-    else ratio = (0.5 - progress) / 0.2;
-
-    fill.style.stroke = mixColor(TIMER_GOLD_STROKE, TIMER_RED, ratio);
-    num.style.fill = mixColor(TIMER_GRAY_TEXT, TIMER_RED, ratio);
-  }
-
-  function setTimerFillRatio(ratio) {
-    if (!el.heroTimer) return;
-    const fill = el.heroTimer.querySelector('.timer-fill');
-    if (!fill) return;
-    const r = Math.max(0, Math.min(1, ratio));
     const circumference = 2 * Math.PI * 16;
-    fill.style.strokeDashoffset = String(circumference * (1 - r));
-  }
-
-  function setTimerNumber(value) {
-    if (!el.heroTimerNum) return;
-    el.heroTimerNum.textContent = String(value);
-  }
-
-  function updateHeroTimerContinuous(progress, displayNum) {
-    // progress 0..1 — заполнение круга (и цифра идёт вровень)
-    if (!el.heroTimer) return;
-    setTimerFillRatio(progress);
-    setTimerNumber(Math.max(0, Math.round(progress * 10)));
-    setTimerColorByProgress(progress);
-  }
-
-  function setTimerGhostMode(enabled, optionOn) {
-    if (!el.heroTimer) return;
-    const num = el.heroTimerNum;
-    const fill = el.heroTimer.querySelector('.timer-fill');
-    const track = el.heroTimer.querySelector('.timer-track');
-    if (enabled) {
-      el.heroTimer.classList.add('visible');
-      el.heroTimer.style.opacity = '0.22';
-      if (num) num.textContent = optionOn ? '10' : '0';
-      if (fill) {
-        if (optionOn) {
-          fill.style.strokeDashoffset = '0';
-          fill.style.opacity = '1';
-        } else {
-          fill.style.strokeDashoffset = '100.53';
-          fill.style.opacity = '1';
-        }
-      }
-      if (track) track.style.opacity = '1';
-      if (num) num.style.opacity = '1';
-      if (optionOn) setTimerColorByProgress(1);
-      else setTimerColorByProgress(0);
-    } else {
-      el.heroTimer.style.opacity = '1';
-      if (fill) fill.style.opacity = '1';
-      if (track) track.style.opacity = '1';
-      if (num) num.style.opacity = '1';
-    }
+    const ratio = totalSec > 0 ? Math.max(0, Math.min(1, currentSec / totalSec)) : 0;
+    fill.style.strokeDashoffset = String(circumference * (1 - ratio));
   }
 
   function renderTable(state) {
@@ -5005,8 +4881,7 @@ const UI = (() => {
     placeHeroTimer();
     placeTopRoundRow();
     placeGuidePanel();
-    positionHandsHistoryFloat();
-    positionBottomSupportBtn();
+    placeHandsHistoryRow();
   }
 
   function recalcSeatAssignments(state) {
@@ -5145,8 +5020,7 @@ const UI = (() => {
     placeHeroTimer();
     placeTopRoundRow();
     placeGuidePanel();
-    positionHandsHistoryFloat();
-    positionBottomSupportBtn();
+    placeHandsHistoryRow();
   }
 
   function renderActionBadge(p, seat) {
@@ -5327,10 +5201,10 @@ const UI = (() => {
   }
 
   function updateHandsHistoryVisibility() {
-    if (!el.handsHistoryFloat) return;
+    if (!el.handsHistoryRow) return;
     const shouldShow = window.__sessionShowHistoryLabel === true;
-    el.handsHistoryFloat.classList.toggle('visible', shouldShow);
-    if (shouldShow) positionHandsHistoryFloat();
+    el.handsHistoryRow.classList.toggle('visible', shouldShow);
+    if (shouldShow) placeHandsHistoryRow();
   }
 
   function updateBoard(state) {
@@ -5816,8 +5690,8 @@ const UI = (() => {
   }
 
   function setHandsHistoryPressed(pressed) {
-    if (!el.handsHistoryFloat) return;
-    el.handsHistoryFloat.classList.toggle('pressed', !!pressed);
+    if (!el.handsHistoryRow) return;
+    el.handsHistoryRow.classList.toggle('pressed', !!pressed);
   }
 
   let belcardApplyPositionsFn = null;
@@ -6257,7 +6131,7 @@ const UI = (() => {
     settings, init, el,
     renderTable, updateSeats, updateBoard, updatePot, updateLevel,
     updateStacks, updateActiveHighlight, updatePlaceCenter, updateBoardAreaOffset,
-    alignPercentBlockBottom, positionHandsHistoryFloat, positionBottomSupportBtn,
+    alignPercentBlockBottom,
     showActions, setHeroActionsActive,
     openBottomPanel, closeBottomPanel, openGuidePanel, closeGuidePanel,
     openTraining, closeTraining, anyTrainingOpen,
@@ -6270,8 +6144,8 @@ const UI = (() => {
     clearWinnerHighlights,
     resetSliderToStart,
     setReplayButtonState,
-    showHeroTimer, hideHeroTimer, updateHeroTimer, setTimerGhostMode,
-    setTimerColorByProgress, setTimerFillRatio, setTimerNumber, updateHeroTimerContinuous,
+    showHeroTimer, hideHeroTimerActive, updateHeroTimer, placeHeroTimer,
+    setHeroTimerIdle,
     placeTopRoundRow, placeGuidePanel,
     updateGuideFade, guideScrollToTop,
     showSupportOverlay, hideSupportOverlay, copySupportText,
@@ -6282,7 +6156,8 @@ const UI = (() => {
     trainingNext, trainingPrev, resetTrainingPage,
     updateHandsHistoryVisibility,
     showHandsHistoryCopied,
-    setHandsHistoryPressed
+    setHandsHistoryPressed,
+    placeHandsHistoryRow
   };
 
 })();
@@ -6309,12 +6184,10 @@ const UI = (() => {
     trainingPaused: false,
     finalShown: false,
 
-    heroTimerAnimFrameId: null,
-    heroTimerStartTs: 0,
-    heroTimerTotal: 10,
-    heroTimerProgress: 1,
-
-    refillAnimFrameId: null,
+    heroTimerIntervalId: null,
+    heroTimerTimeoutId: null,
+    heroTimerRemaining: 0,
+    heroTimerTotal: 0,
 
     replay: {
       active: false,
@@ -6352,8 +6225,7 @@ const UI = (() => {
       UI.placeHeroTimer();
       UI.placeTopRoundRow();
       UI.placeGuidePanel();
-      UI.positionHandsHistoryFloat();
-      UI.positionBottomSupportBtn();
+      UI.placeHandsHistoryRow();
     });
     window.addEventListener('orientationchange', () => {
       setTimeout(() => {
@@ -6362,12 +6234,11 @@ const UI = (() => {
         UI.placeHeroTimer();
         UI.placeTopRoundRow();
         UI.placeGuidePanel();
-        UI.positionHandsHistoryFloat();
-        UI.positionBottomSupportBtn();
+        UI.placeHandsHistoryRow();
       }, 250);
     });
     syncHandsHistoryVisibility();
-    syncTimerGhost();
+    UI.setHeroTimerIdle();
   });
 
   function cacheDom() {
@@ -6388,7 +6259,6 @@ const UI = (() => {
     el.settingsHelpBtn = document.getElementById('settings-help-btn');
     el.settingsCardBtn = document.getElementById('settings-card-btn');
     el.settingsTrainBtn = document.getElementById('settings-train-btn');
-    el.bottomSupportBtn = document.getElementById('bottom-support-btn');
     el.topRoundRow     = document.getElementById('top-round-row');
     el.gmailBtn        = document.getElementById('gmail-btn');
     el.tgBtn           = document.getElementById('tg-btn');
@@ -6410,7 +6280,7 @@ const UI = (() => {
     el.btnTestTop1    = document.getElementById('btn-test-top1');
     el.trainingPrevBtn = document.getElementById('training-prev-btn');
     el.trainingNextBtn = document.getElementById('training-next-btn');
-    el.handsHistoryFloat = document.getElementById('hands-history-float');
+    el.handsHistoryRow = document.getElementById('hands-history-row');
     el.handsHistoryLabel = document.getElementById('hands-history-label');
     el.handsHistoryCopied = document.getElementById('hands-history-copied');
   }
@@ -6418,50 +6288,6 @@ const UI = (() => {
   function syncHandsHistoryVisibility() {
     window.__sessionShowHistoryLabel = (session.viewingIndex >= 0) || (session.replay.active);
     UI.updateHandsHistoryVisibility();
-  }
-
-  function syncTimerGhost() {
-    const optionOn = (Number(UI.settings.turnTime) || 0) > 0;
-    const active = optionOn && session.waitingForHero && !session.heroEliminated && !session.isPaused && !session.replay.active && session.viewingIndex < 0;
-    if (active) {
-      UI.setTimerGhostMode(false, true);
-    } else {
-      UI.setTimerGhostMode(true, optionOn);
-    }
-    UI.placeHeroTimer();
-  }
-
-  function stopTimerAnimFrame() {
-    if (session.heroTimerAnimFrameId) {
-      cancelAnimationFrame(session.heroTimerAnimFrameId);
-      session.heroTimerAnimFrameId = null;
-    }
-  }
-
-  function stopRefillAnimFrame() {
-    if (session.refillAnimFrameId) {
-      cancelAnimationFrame(session.refillAnimFrameId);
-      session.refillAnimFrameId = null;
-    }
-  }
-
-  function playTimerRefill(durationMs, onDone) {
-    stopRefillAnimFrame();
-    const duration = durationMs || 320;
-    const startTs = performance.now();
-
-    function step(now) {
-      const t = Math.min(1, (now - startTs) / duration);
-      UI.updateHeroTimerContinuous(t);
-      if (t < 1) {
-        session.refillAnimFrameId = requestAnimationFrame(step);
-      } else {
-        session.refillAnimFrameId = null;
-        UI.updateHeroTimerContinuous(1);
-        if (typeof onDone === 'function') onDone();
-      }
-    }
-    session.refillAnimFrameId = requestAnimationFrame(step);
   }
 
   function bindCopyHandlers() {
@@ -6493,13 +6319,13 @@ const UI = (() => {
   }
 
   function bindHandsHistoryTap() {
-    if (!el.handsHistoryFloat) return;
+    if (!el.handsHistoryRow) return;
 
     let lastTapTs = 0;
     const TAP_COOLDOWN = 400;
 
     const handle = (e) => {
-      if (!el.handsHistoryFloat.classList.contains('visible')) return;
+      if (!el.handsHistoryRow.classList.contains('visible')) return;
       const now = Date.now();
       if (now - lastTapTs < TAP_COOLDOWN) return;
       lastTapTs = now;
@@ -6515,13 +6341,13 @@ const UI = (() => {
       });
     };
 
-    el.handsHistoryFloat.addEventListener('click', (e) => {
+    el.handsHistoryRow.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
       handle(e);
     });
 
-    el.handsHistoryFloat.addEventListener('touchend', (e) => {
+    el.handsHistoryRow.addEventListener('touchend', (e) => {
       e.preventDefault();
       e.stopPropagation();
       handle(e);
@@ -6769,8 +6595,7 @@ const UI = (() => {
               target.closest('#support-overlay') ||
               target.closest('#final-overlay') ||
               target.closest('#top-round-row') ||
-              target.closest('#hands-history-float') ||
-              target.closest('#bottom-support-btn'));
+              target.closest('#hands-history-row'));
   }
 
   function bindGlobalHandlers() {
@@ -6847,7 +6672,6 @@ const UI = (() => {
         e.stopPropagation();
         e.preventDefault();
         toggleTurnTimeOption();
-        syncTimerGhost();
       }, { passive: false });
 
       el.heroTimerZone.addEventListener('click', (e) => {
@@ -6856,19 +6680,8 @@ const UI = (() => {
           e.preventDefault();
           e.stopPropagation();
           toggleTurnTimeOption();
-          syncTimerGhost();
         }
       });
-    }
-
-    if (el.bottomSupportBtn) {
-      const openBtn = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        openSupportOverEverything();
-      };
-      el.bottomSupportBtn.addEventListener('click', openBtn);
-      el.bottomSupportBtn.addEventListener('touchend', openBtn, { passive: false });
     }
 
     if (el.supportOverlay) {
@@ -7049,6 +6862,7 @@ const UI = (() => {
       if (!node) return;
       node.addEventListener('change', () => {
         UI.readSettingsFromUI();
+        UI.setHeroTimerIdle();
         if (session.state) {
           UI.updateLevel(session.state);
           UI.updateSeats(session.state, session.state.handOver);
@@ -7061,7 +6875,6 @@ const UI = (() => {
         if (session.replay.active) {
           renderReplayStep();
         }
-        syncTimerGhost();
       });
     });
 
@@ -7164,19 +6977,13 @@ const UI = (() => {
     if (select) select.value = String(next);
 
     if (next === 0) {
-      stopTimerAnimFrame();
-      // обратное заполнение (от 0 к 1) с цветом от красного к исходному
-      playTimerRefill(320, () => {
-        UI.setTimerGhostMode(true, false);
-      });
+      stopHeroTimer();
+      UI.setHeroTimerIdle();
     } else {
-      // обратное заполнение перед активацией
-      playTimerRefill(320, () => {
-        UI.setTimerGhostMode(true, true);
-        if (session.waitingForHero && !session.heroEliminated) {
-          startHeroTimerIfNeeded();
-        }
-      });
+      UI.setHeroTimerIdle();
+      if (session.waitingForHero && !session.heroEliminated) {
+        startHeroTimerIfNeeded();
+      }
     }
   }
 
@@ -7293,8 +7100,6 @@ const UI = (() => {
   function restartSession() {
     stopReplay(true);
     stopHeroTimer();
-    stopTimerAnimFrame();
-    stopRefillAnimFrame();
     clearTimeout(session.autoNextTimerId);
     clearTimeout(session.botTimerId);
     clearTimeout(session.revealTimerId);
@@ -7328,7 +7133,7 @@ const UI = (() => {
     UI.setReplayButtonState('replay');
 
     syncHandsHistoryVisibility();
-    syncTimerGhost();
+    UI.setHeroTimerIdle();
 
     startNewSession();
   }
@@ -7336,8 +7141,6 @@ const UI = (() => {
   function startNewSession() {
     stopReplay(true);
     stopHeroTimer();
-    stopTimerAnimFrame();
-    stopRefillAnimFrame();
     clearTimeout(session.autoNextTimerId);
     clearTimeout(session.botTimerId);
     clearTimeout(session.revealTimerId);
@@ -7384,7 +7187,7 @@ const UI = (() => {
     UI.setReplayButtonState('replay');
 
     syncHandsHistoryVisibility();
-    syncTimerGhost();
+    UI.setHeroTimerIdle();
 
     startHand();
   }
@@ -7393,8 +7196,6 @@ const UI = (() => {
     if (!session.active) return;
     stopReplay(true);
     stopHeroTimer();
-    stopTimerAnimFrame();
-    stopRefillAnimFrame();
 
     if (session.tournamentOver) return;
 
@@ -7411,7 +7212,7 @@ const UI = (() => {
     if (alive.length <= 1) {
       session.tournamentOver = true;
       UI.setHeroActionsActive(false);
-      UI.hideHeroTimer();
+      UI.setHeroTimerIdle();
       UI.updatePlaceCenter(session.state);
       handleTournamentEnd(alive);
       return;
@@ -7438,9 +7239,9 @@ const UI = (() => {
     UI.resetSliderToStart();
     refreshQuickPercentList();
     UI.setHeroActionsActive(false);
+    UI.setHeroTimerIdle();
 
     syncHandsHistoryVisibility();
-    syncTimerGhost();
 
     processTurn();
   }
@@ -7494,10 +7295,10 @@ const UI = (() => {
     } else {
       session.waitingForHero = false;
       UI.setHeroActionsActive(false);
-      UI.hideHeroTimer();
+      UI.hideHeroTimerActive();
+      UI.setHeroTimerIdle();
       UI.resetSliderToStart();
       refreshQuickPercentList();
-      syncTimerGhost();
       botTurn(player, idx);
     }
   }
@@ -7513,40 +7314,26 @@ const UI = (() => {
     });
     startHeroTimerIfNeeded();
     UI.alignPercentBlockBottom();
-    syncTimerGhost();
   }
 
   function startHeroTimerIfNeeded() {
     stopHeroTimer();
-    stopTimerAnimFrame();
     const seconds = Number(UI.settings.turnTime) || 0;
-    if (seconds <= 0) return;
+    if (seconds <= 0) {
+      UI.setHeroTimerIdle();
+      return;
+    }
 
     session.heroTimerTotal = seconds;
-    session.heroTimerStartTs = performance.now();
-    session.heroTimerProgress = 1;
-
+    session.heroTimerRemaining = seconds;
     UI.showHeroTimer(seconds);
 
-    function tick(now) {
-      const elapsed = (now - session.heroTimerStartTs) / 1000;
-      let remain = seconds - elapsed;
-      if (remain < 0) remain = 0;
-
-      // Прогресс 0..1 — синхронно с цифрой
-      const progress = remain / seconds;
-      UI.updateHeroTimerContinuous(progress);
-
-      if (remain <= 0) {
-        // Полное завершение: круг пуст, цифра 0, цвет красный
-        UI.updateHeroTimerContinuous(0);
-        session.heroTimerAnimFrameId = null;
-        stopHeroTimerOnlyInterval();
-
-        // Мгновенно возвращаем к исходным цветам: золото/серый, круг пустой
-        UI.setTimerFillRatio(0);
-        UI.setTimerColorByProgress(1); // прогресс=1 => исходные цвета        UI.setTimerNumber(0);
-
+    session.heroTimerIntervalId = setInterval(() => {
+      session.heroTimerRemaining -= 1;
+      UI.updateHeroTimer(session.heroTimerRemaining, session.heroTimerTotal);
+      if (session.heroTimerRemaining < 0) {
+        stopHeroTimer();
+        UI.setHeroTimerIdle();
         if (session.waitingForHero && !session.heroEliminated) {
           session.waitingForHero = false;
           UI.setHeroActionsActive(false);
@@ -7562,21 +7349,21 @@ const UI = (() => {
             advanceOrFinish();
           }
         }
-        return;
       }
-
-      session.heroTimerAnimFrameId = requestAnimationFrame(tick);
-    }
-    session.heroTimerAnimFrameId = requestAnimationFrame(tick);
-  }
-
-  function stopHeroTimerOnlyInterval() {
-    // заглушка — новый механизм на requestAnimationFrame, интервалов больше нет
+    }, 1000);
   }
 
   function stopHeroTimer() {
-    stopTimerAnimFrame();
-    // сбрасываем состояние круга и цвета, но не трогаем видимость — это делает вызывающий код
+    if (session.heroTimerIntervalId) {
+      clearInterval(session.heroTimerIntervalId);
+      session.heroTimerIntervalId = null;
+    }
+    if (session.heroTimerTimeoutId) {
+      clearTimeout(session.heroTimerTimeoutId);
+      session.heroTimerTimeoutId = null;
+    }
+    session.heroTimerRemaining = 0;
+    UI.hideHeroTimerActive();
   }
 
   function heroAct(action) {
@@ -7602,6 +7389,7 @@ const UI = (() => {
     pushActionLog(state, session.heroIndex, action.type, action.amount || 0);
     UI.updateSeats(state);
     UI.updatePot(state);
+    UI.setHeroTimerIdle();
     advanceOrFinish();
   }
 
@@ -7770,7 +7558,7 @@ const UI = (() => {
     if (session.isPaused) return;
     if (session.replay.active) return;
     stopHeroTimer();
-    stopRefillAnimFrame();
+    UI.setHeroTimerIdle();
     const state = session.state;
     Engine.finalizeHand(state);
 
@@ -7854,7 +7642,7 @@ const UI = (() => {
       if (alive.length <= 1) {
         session.tournamentOver = true;
         UI.setHeroActionsActive(false);
-        UI.hideHeroTimer();
+        UI.setHeroTimerIdle();
         UI.updatePlaceCenter(state);
         UI.updateBoardAreaOffset();
         handleTournamentEnd(alive);
@@ -7907,7 +7695,7 @@ const UI = (() => {
     session.autoNextTimerId = null;
     UI.setHeroActionsActive(false);
     stopHeroTimer();
-    syncTimerGhost();
+    UI.setHeroTimerIdle();
   }
 
   function navigateHistory(delta) {
@@ -7927,7 +7715,8 @@ const UI = (() => {
     const snap = session.history[session.viewingIndex];
     if (!snap) return;
     UI.setHeroActionsActive(false);
-    UI.hideHeroTimer();
+    UI.hideHeroTimerActive();
+    UI.setHeroTimerIdle();
     UI.renderTable(snap);
     UI.updateBoard(snap);
     UI.updateSeats(snap, true);
@@ -7938,7 +7727,6 @@ const UI = (() => {
     UI.updateHistoryInfo(session.viewingIndex + 1, session.history.length, true);
     UI.setReplayButtonState('replay');
     syncHandsHistoryVisibility();
-    syncTimerGhost();
   }
 
   function buildReplaySteps(snap) {
@@ -8126,11 +7914,11 @@ const UI = (() => {
     session.replay.handSnapshot = snap;
 
     UI.setHeroActionsActive(false);
-    UI.hideHeroTimer();
+    UI.hideHeroTimerActive();
+    UI.setHeroTimerIdle();
     UI.setReplayButtonState('pause');
 
     syncHandsHistoryVisibility();
-    syncTimerGhost();
 
     renderReplayStep();
     scheduleNextReplayStep();
@@ -8156,7 +7944,6 @@ const UI = (() => {
     }
     UI.updateHistoryInfo(session.viewingIndex + 1, session.history.length, true);
     syncHandsHistoryVisibility();
-    syncTimerGhost();
   }
 
   function scheduleNextReplayStep() {
@@ -8218,7 +8005,6 @@ const UI = (() => {
       renderHistorySnapshot();
     }
     syncHandsHistoryVisibility();
-    syncTimerGhost();
   }
 
   function resumeGame() {
@@ -8231,10 +8017,10 @@ const UI = (() => {
     session.isPaused = false;
     const state = session.state;
     if (!state) return;
-    UI.hideHeroTimer();
+    UI.hideHeroTimerActive();
+    UI.setHeroTimerIdle();
 
     syncHandsHistoryVisibility();
-    syncTimerGhost();
 
     if (state.handOver) {
       UI.updateBoard(state);
@@ -8268,6 +8054,7 @@ const UI = (() => {
           if (alive.length <= 1) {
             session.tournamentOver = true;
             UI.setHeroActionsActive(false);
+            UI.setHeroTimerIdle();
             UI.updatePlaceCenter(state);
             UI.updateBoardAreaOffset();
             handleTournamentEnd(alive);
