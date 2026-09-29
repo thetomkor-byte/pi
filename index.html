@@ -1559,7 +1559,7 @@ button.disabled {
   width: var(--raise-amount-mini-w);
   min-width: var(--raise-amount-mini-w);
   max-width: var(--raise-amount-mini-w);
-  text-align: right;
+  text-align: center;
   background: rgba(0,0,0,.35);
   border: 1px solid #3a3530;
   border-radius: 6px;
@@ -4608,24 +4608,7 @@ const UI = (() => {
     requestAnimationFrame(() => requestAnimationFrame(() => {
       updateBoardAreaOffset();
       alignPercentBlockBottom();
-      syncRaiseAmountMiniWidth();
     }));
-    window.addEventListener('resize', syncRaiseAmountMiniWidth);
-    window.addEventListener('orientationchange', () => setTimeout(syncRaiseAmountMiniWidth, 250));
-  }
-
-  function syncRaiseAmountMiniWidth() {
-    const btn = el.btnCall;
-    const mini = el.raiseAmountMini;
-    if (!btn || !mini) return;
-    try {
-      const rect = btn.getBoundingClientRect();
-      if (rect.width > 0) {
-        mini.style.width = rect.width + 'px';
-        mini.style.minWidth = rect.width + 'px';
-        mini.style.maxWidth = rect.width + 'px';
-      }
-    } catch (e) {}
   }
 
   function updateBoardAreaOffset() {
@@ -5373,12 +5356,6 @@ const UI = (() => {
     bindActionHandlers(state, heroIndex, toCall, handlers);
 
     updateCallButton(state, hero, handlers);
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        syncRaiseAmountMiniWidth();
-      });
-    });
   }
 
   function updateCallButton(state, hero, handlers) {
@@ -6411,8 +6388,7 @@ const UI = (() => {
     setHandsHistoryPressed,
     placeHandsHistoryRow,
     updateCallButton,
-    updateSliderDisplay,
-    syncRaiseAmountMiniWidth
+    updateSliderDisplay
   };
 
 })();
@@ -6482,7 +6458,6 @@ const UI = (() => {
       UI.placeTopRoundRow();
       UI.placeGuidePanel();
       UI.placeHandsHistoryRow();
-      UI.syncRaiseAmountMiniWidth();
     });
     window.addEventListener('orientationchange', () => {
       setTimeout(() => {
@@ -6492,7 +6467,6 @@ const UI = (() => {
         UI.placeTopRoundRow();
         UI.placeGuidePanel();
         UI.placeHandsHistoryRow();
-        UI.syncRaiseAmountMiniWidth();
       }, 250);
     });
     syncHandsHistoryVisibility();
@@ -7337,7 +7311,6 @@ const UI = (() => {
       UI.updateCallButton(state, hero, handlers);
     }
     UI.updateSliderDisplay(state);
-    UI.syncRaiseAmountMiniWidth();
   }
 
   function bindSeatInteractions() {
@@ -7651,11 +7624,6 @@ const UI = (() => {
     });
     startHeroTimerIfNeeded();
     UI.alignPercentBlockBottom();
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        UI.syncRaiseAmountMiniWidth();
-      });
-    });
   }
 
   function startHeroTimerIfNeeded() {
