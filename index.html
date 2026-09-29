@@ -5679,6 +5679,7 @@ const UI = (() => {
     });
 
     bindWheelOnZone(state, heroIndex, handlers);
+    bindPercentButtonsDrag(state, heroIndex, handlers);
   }
 
   function triggerCallButton(state, heroIndex, handlers) {
@@ -5761,6 +5762,145 @@ const UI = (() => {
       z.__wheelBoundHandler = handler;
       z.addEventListener('wheel', handler, { passive: false });
     }
+  }
+
+  function bindPercentButtonsDrag(state, heroIndex, handlers) {
+    if (!el.quickPercentList) return;
+
+    const DRAG_THRESHOLD = 2;
+
+    const buttons = el.quickPercentList.querySelectorAll('button');
+    buttons.forEach(btn => {
+      let pointerDown = false;
+      let startY = 0;
+      let startX = 0;
+      let startSliderValue = 0;
+      let dragging = false;
+      let activePointerId = null;
+
+      function getSliderEl() {
+        return document.getElementById('raise-slider-horiz');
+      }
+
+      function isActionInactive() {
+        return el.heroActions.classList.contains('inactive') ||
+               el.quickPercentList.classList.contains('inactive');
+      }
+
+      function onPointerDown(clientY, clientX, pointerId) {
+        if (isActionInactive()) return;
+        const slider = getSliderEl();
+        if (!slider || slider.disabled) return;
+
+        pointerDown = true;
+        dragging = false;
+        startY = clientY;
+        startX = clientX;
+        startSliderValue = Number(slider.value);
+        activePointerId = pointerId;
+      }
+
+      function onPointerMove(clientY) {
+        if (!pointerDown) return;
+        if (isActionInactive()) return;
+
+        const slider = getSliderEl();
+        if (!slider || slider.disabled) return;
+
+        const dy = startY - clientY;
+
+        if (!dragging) {
+          if (Math.abs(dy) > DRAG_THRESHOLD) {
+            dragging = true;
+          } else {
+            return;
+          }
+        }
+
+        const rect = slider.getBoundingClientRect();
+        const minVal = Number(slider.min);
+        const maxVal = Number(slider.max);
+        const range = maxVal - minVal;
+        const widthPx = rect.width > 0 ? rect.width : 1;
+
+        const deltaUnits = (dy / widthPx) * range;
+        let rawTarget = startSliderValue + deltaUnits;
+
+        const hero = state.players[heroIndex];
+        const bb = state.blinds.bb;
+        const step = Math.max(1, Math.round(bb / 2));
+
+        let snapped = Math.round((rawTarget - minVal) / step) * step + minVal;
+        snapped = Math.max(minVal, Math.min(maxVal, snapped));
+        snapped = computeDeadZoneJump(state, hero, Number(slider.value), snapped);
+        snapped = Math.max(minVal, Math.min(maxVal, snapped));
+
+        slider.value = snapped;
+        updateSliderDisplay(state);
+        updateCallButton(state, hero, handlers);
+      }
+
+      function onPointerUp() {
+        if (!pointerDown) return;
+        const wasDragging = dragging;
+        pointerDown = false;
+        dragging = false;
+        activePointerId = null;
+        return wasDragging;
+      }
+
+      btn.addEventListener('pointerdown', (e) => {
+        if (isActionInactive()) return;
+        e.stopPropagation();
+        onPointerDown(e.clientY, e.clientX, e.pointerId);
+        try { btn.setPointerCapture && btn.setPointerCapture(e.pointerId); } catch (err) {}
+      });
+
+      btn.addEventListener('pointermove', (e) => {
+        if (!pointerDown) return;
+        e.stopPropagation();
+        onPointerMove(e.clientY);
+      });
+
+      btn.addEventListener('pointerup', (e) => {
+        if (!pointerDown) return;
+        e.stopPropagation();
+        const wasDragging = onPointerUp();
+        if (wasDragging) {
+          e.preventDefault();
+        }
+      });
+
+      btn.addEventListener('pointercancel', (e) => {
+        if (!pointerDown) return;
+        onPointerUp();
+      });
+
+      btn.addEventListener('click', (e) => {
+        if (btn.__suppressClick) {
+          e.preventDefault();
+          e.stopPropagation();
+          btn.__suppressClick = false;
+          return;
+        }
+        if (isActionInactive()) return;
+        const target = Number(btn.dataset.target);
+        const hero = state.players[heroIndex];
+        const maxTarget = hero.committedThisStreet + hero.stack;
+        const slider = getSliderEl();
+        if (slider) {
+          slider.value = Math.max(Number(slider.min), Math.min(maxTarget, target));
+          updateSliderDisplay(state);
+        }
+        updateCallButton(state, hero, handlers);
+      });
+
+      btn.__suppressClick = false;
+
+      btn.addEventListener('pointerdown', () => {
+        btn.__suppressClick = false;
+      }, true);
+    });
   }
 
   function rebind(node, fn) {
