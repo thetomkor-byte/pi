@@ -43,7 +43,7 @@
   --info-row-text: clamp(11px, 1.5vmin, 14px);
   --place-text: clamp(12px, 1.6vmin, 15px);
   --hands-history-text: calc(clamp(12px, 1.6vmin, 15px) + 4px);
-  --raise-amount-mini-w: clamp(88px, 15vmin, 118px);
+  --raise-amount-mini-w: clamp(56px, 9vmin, 76px);
 
   --nav-btn: clamp(32px, 4.4vmin, 38px);
   --nav-icon-size: clamp(16px, 2.4vmin, 19px);
@@ -1563,7 +1563,7 @@ button.disabled {
   background: rgba(0,0,0,.35);
   border: 1px solid #3a3530;
   border-radius: 6px;
-  padding: 2px clamp(5px, 0.8vmin, 8px);
+  padding: 2px clamp(4px, 0.6vmin, 6px);
   flex: 0 0 auto;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1620,9 +1620,6 @@ button.disabled {
 #btn-call.mode-bet {
   background: linear-gradient(180deg, #c94b3d, #8a2a1f);
 }
-#btn-call.mode-allin {
-  background: linear-gradient(180deg, #a01f2b, #6a1018);
-}
 
 #btn-call .call-label { font-size: inherit; font-weight: 800; }
 #btn-call .call-amount {
@@ -1632,7 +1629,6 @@ button.disabled {
   margin-top: 1px;
 }
 #btn-call .call-amount:empty { display: none; }
-#btn-call .call-amount.allin-text { color: #ffffff; font-weight: 900; letter-spacing: .5px; }
 
 #quick-percent-list {
   position: absolute;
@@ -2743,7 +2739,7 @@ const Engine = (() => {
     { sb: 1000, bb: 2000, ante: 200 }, { sb: 1500, bb: 3000, ante: 300 },
     { sb: 2000, bb: 4000, ante: 400 }, { sb: 3000, bb: 6000, ante: 600 }
   ];
-  const STARTING_STACK = 1500;
+  const STARTING_STACK = 2000;
   const SEATS = 8;
   const STREETS = ['preflop', 'flop', 'turn', 'river'];
 
@@ -4612,7 +4608,24 @@ const UI = (() => {
     requestAnimationFrame(() => requestAnimationFrame(() => {
       updateBoardAreaOffset();
       alignPercentBlockBottom();
+      syncRaiseAmountMiniWidth();
     }));
+    window.addEventListener('resize', syncRaiseAmountMiniWidth);
+    window.addEventListener('orientationchange', () => setTimeout(syncRaiseAmountMiniWidth, 250));
+  }
+
+  function syncRaiseAmountMiniWidth() {
+    const btn = el.btnCall;
+    const mini = el.raiseAmountMini;
+    if (!btn || !mini) return;
+    try {
+      const rect = btn.getBoundingClientRect();
+      if (rect.width > 0) {
+        mini.style.width = rect.width + 'px';
+        mini.style.minWidth = rect.width + 'px';
+        mini.style.maxWidth = rect.width + 'px';
+      }
+    } catch (e) {}
   }
 
   function updateBoardAreaOffset() {
@@ -5360,6 +5373,12 @@ const UI = (() => {
     bindActionHandlers(state, heroIndex, toCall, handlers);
 
     updateCallButton(state, hero, handlers);
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        syncRaiseAmountMiniWidth();
+      });
+    });
   }
 
   function updateCallButton(state, hero, handlers) {
@@ -5387,9 +5406,7 @@ const UI = (() => {
       const isAllIn = slider && (sliderVal >= sliderMax) && (sliderVal >= maxTarget);
       const isRaise = slider && (sliderVal >= minRaiseTarget) && (sliderVal < maxTarget);
 
-      if (isAllIn) {
-        mode = 'allin';
-      } else if (isRaise) {
+      if (isRaise || isAllIn) {
         mode = 'raise';
       } else if (toCall > 0) {
         mode = 'call';
@@ -5400,7 +5417,7 @@ const UI = (() => {
       }
     }
 
-    btn.classList.remove('mode-raise', 'mode-bet', 'mode-allin');
+    btn.classList.remove('mode-raise', 'mode-bet');
 
     if (mode === 'call') {
       if (labelEl) labelEl.textContent = 'Call';
@@ -5431,14 +5448,6 @@ const UI = (() => {
         amountEl.classList.remove('allin-text');
         const v = slider ? Number(slider.value) : bb;
         amountEl.textContent = formatChips(v, state);
-      }
-      btn.disabled = false;
-    } else if (mode === 'allin') {
-      btn.classList.add('mode-allin');
-      if (labelEl) labelEl.textContent = state.street === 'preflop' ? 'Raise' : 'Bet';
-      if (amountEl) {
-        amountEl.classList.add('allin-text');
-        amountEl.textContent = 'ALL-IN';
       }
       btn.disabled = false;
     }
@@ -6402,7 +6411,8 @@ const UI = (() => {
     setHandsHistoryPressed,
     placeHandsHistoryRow,
     updateCallButton,
-    updateSliderDisplay
+    updateSliderDisplay,
+    syncRaiseAmountMiniWidth
   };
 
 })();
@@ -6472,6 +6482,7 @@ const UI = (() => {
       UI.placeTopRoundRow();
       UI.placeGuidePanel();
       UI.placeHandsHistoryRow();
+      UI.syncRaiseAmountMiniWidth();
     });
     window.addEventListener('orientationchange', () => {
       setTimeout(() => {
@@ -6481,6 +6492,7 @@ const UI = (() => {
         UI.placeTopRoundRow();
         UI.placeGuidePanel();
         UI.placeHandsHistoryRow();
+        UI.syncRaiseAmountMiniWidth();
       }, 250);
     });
     syncHandsHistoryVisibility();
@@ -7325,6 +7337,7 @@ const UI = (() => {
       UI.updateCallButton(state, hero, handlers);
     }
     UI.updateSliderDisplay(state);
+    UI.syncRaiseAmountMiniWidth();
   }
 
   function bindSeatInteractions() {
@@ -7638,6 +7651,11 @@ const UI = (() => {
     });
     startHeroTimerIfNeeded();
     UI.alignPercentBlockBottom();
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        UI.syncRaiseAmountMiniWidth();
+      });
+    });
   }
 
   function startHeroTimerIfNeeded() {
