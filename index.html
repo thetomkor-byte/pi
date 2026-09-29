@@ -43,6 +43,7 @@
   --info-row-text: clamp(11px, 1.5vmin, 14px);
   --place-text: clamp(12px, 1.6vmin, 15px);
   --hands-history-text: calc(clamp(12px, 1.6vmin, 15px) + 4px);
+  --raise-amount-mini-w: clamp(88px, 15vmin, 118px);
 
   --nav-btn: clamp(32px, 4.4vmin, 38px);
   --nav-icon-size: clamp(16px, 2.4vmin, 19px);
@@ -1491,7 +1492,8 @@ button.disabled {
   transform: translateY(calc(-2px - 1px));
 }
 #raise-slider-horiz {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
   -webkit-appearance: none;
   appearance: none;
   height: 4px;
@@ -1500,7 +1502,6 @@ button.disabled {
   border-radius: 4px;
   outline: none;
   accent-color: var(--gold);
-  min-width: 60px;
   touch-action: none;
   pointer-events: auto;
   vertical-align: middle;
@@ -1555,13 +1556,18 @@ button.disabled {
   font-weight: 800;
   white-space: nowrap;
   text-shadow: 0 1px 3px rgba(0,0,0,.95);
-  min-width: clamp(52px, 7vmin, 70px);
-  text-align: center;
+  width: var(--raise-amount-mini-w);
+  min-width: var(--raise-amount-mini-w);
+  max-width: var(--raise-amount-mini-w);
+  text-align: right;
   background: rgba(0,0,0,.35);
   border: 1px solid #3a3530;
   border-radius: 6px;
   padding: 2px clamp(5px, 0.8vmin, 8px);
-  flex-shrink: 0;
+  flex: 0 0 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
 }
 #raise-amount-mini.allin-text {
   color: #e63946;
@@ -5377,7 +5383,8 @@ const UI = (() => {
       mode = 'bet';
     } else {
       const sliderVal = slider ? Number(slider.value) : 0;
-      const isAllIn = slider && (sliderVal >= maxTarget);
+      const sliderMax = slider ? Number(slider.max) : maxTarget;
+      const isAllIn = slider && (sliderVal >= sliderMax) && (sliderVal >= maxTarget);
       const isRaise = slider && (sliderVal >= minRaiseTarget) && (sliderVal < maxTarget);
 
       if (isAllIn) {
@@ -5541,8 +5548,9 @@ const UI = (() => {
     el.raiseAmountMini = document.getElementById('raise-amount-mini');
     const hero = state.players[state.actingIndex] || state.players.find(p => p.isHero);
     const maxTarget = hero ? (hero.committedThisStreet + hero.stack) : Number(slider.max);
+    const sliderMax = Number(slider.max);
     const v = Number(slider.value);
-    if (v >= maxTarget) {
+    if (v >= sliderMax && v >= maxTarget) {
       el.raiseAmountMini.textContent = 'ALL-IN';
       el.raiseAmountMini.classList.add('allin-text');
     } else {
@@ -5607,10 +5615,9 @@ const UI = (() => {
       ratio = Math.max(0, Math.min(1, ratio));
       let raw = min + ratio * (max - min);
       const hero = state.players[heroIndex];
-      let snapped = Math.round(raw);
       const bb = state.blinds.bb;
       const stepVal = Math.max(1, Math.round(bb / 2));
-      snapped = Math.round((raw - min) / stepVal) * stepVal + min;
+      let snapped = Math.round((raw - min) / stepVal) * stepVal + min;
       snapped = Math.max(min, Math.min(max, snapped));
       snapped = computeDeadZoneJump(state, hero, Number(slider.value), snapped);
       snapped = Math.max(min, Math.min(max, snapped));
