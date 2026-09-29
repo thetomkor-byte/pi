@@ -5551,6 +5551,29 @@ const UI = (() => {
     }
   }
 
+  function computeDeadZoneJump(state, hero, currentVal, rawTarget) {
+    if (!hero) return rawTarget;
+    const bb = state.blinds.bb;
+    const minRaiseTarget = state.currentBet + state.minRaise;
+    const maxTarget = hero.committedThisStreet + hero.stack;
+
+    const isPreflopLimp = state.street === 'preflop' && state.currentBet === bb;
+    const isPostflopNoBet = (state.street !== 'preflop') && state.currentBet === 0;
+
+    if (isPreflopLimp || isPostflopNoBet) return rawTarget;
+
+    const callAmt = state.currentBet;
+    if (minRaiseTarget > maxTarget) return rawTarget;
+    if (callAmt >= minRaiseTarget) return rawTarget;
+
+    const inDeadZone = (rawTarget > callAmt && rawTarget < minRaiseTarget);
+    if (!inDeadZone) return rawTarget;
+
+    if (rawTarget > currentVal) return minRaiseTarget;
+    if (rawTarget < currentVal) return callAmt;
+    return rawTarget;
+  }
+
   function bindActionHandlers(state, heroIndex, toCall, handlers) {
     window.__heroHandlers = handlers;
 
@@ -5578,13 +5601,18 @@ const UI = (() => {
       const rect = slider.getBoundingClientRect();
       const min = Number(slider.min);
       const max = Number(slider.max);
-      const stepVal = Number(slider.step) || 1;
       const thumbW = 16;
       const trackW = rect.width - thumbW;
       let ratio = (clientX - rect.left - thumbW / 2) / trackW;
       ratio = Math.max(0, Math.min(1, ratio));
       let raw = min + ratio * (max - min);
-      let snapped = Math.round((raw - min) / stepVal) * stepVal + min;
+      const hero = state.players[heroIndex];
+      let snapped = Math.round(raw);
+      const bb = state.blinds.bb;
+      const stepVal = Math.max(1, Math.round(bb / 2));
+      snapped = Math.round((raw - min) / stepVal) * stepVal + min;
+      snapped = Math.max(min, Math.min(max, snapped));
+      snapped = computeDeadZoneJump(state, hero, Number(slider.value), snapped);
       snapped = Math.max(min, Math.min(max, snapped));
       return snapped;
     }
@@ -5631,8 +5659,13 @@ const UI = (() => {
 
     slider.oninput = () => {
       if (isSliderDisabled()) return;
-      updateSliderDisplay(state);
+      const current = Number(slider.value);
       const hero = state.players[heroIndex];
+      const jumped = computeDeadZoneJump(state, hero, current, current);
+      if (jumped !== current) {
+        slider.value = jumped;
+      }
+      updateSliderDisplay(state);
       updateCallButton(state, hero, handlers);
     };
 
@@ -5717,22 +5750,11 @@ const UI = (() => {
       const hero = state.players[heroIndex];
       const bb = state.blinds.bb;
       const step = Math.max(1, Math.round(bb / 2));
-      const minRaiseTarget = state.currentBet + state.minRaise;
       const currentVal = Number(slider.value);
       const dir = e.deltaY > 0 ? -1 : 1;
       let target = currentVal + dir * step;
-
-      const isPreflopLimp = state.street === 'preflop' && state.currentBet === bb;
-      const isPostflopNoBet = (state.street !== 'preflop') && state.currentBet === 0;
-
-      if (dir > 0 && !isPreflopLimp && !isPostflopNoBet && currentVal === state.currentBet) {
-        if (minRaiseTarget > currentVal && minRaiseTarget <= Number(slider.max)) {
-          target = minRaiseTarget;
-        }
-      }
-
+      target = computeDeadZoneJump(state, hero, currentVal, target);
       target = Math.max(Number(slider.min), Math.min(Number(slider.max), target));
-
       slider.value = target;
       updateSliderDisplay(state);
       updateCallButton(state, hero, handlers);
