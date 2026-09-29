@@ -43,7 +43,7 @@
   --info-row-text: clamp(11px, 1.5vmin, 14px);
   --place-text: clamp(12px, 1.6vmin, 15px);
   --hands-history-text: calc(clamp(12px, 1.6vmin, 15px) + 4px);
-  --raise-amount-mini-w: clamp(64px, calc(9vmin + 8px), 84px);
+  --raise-amount-mini-w: clamp(66px, calc(9vmin + 10px), 86px);
 
   --nav-btn: clamp(32px, 4.4vmin, 38px);
   --nav-icon-size: clamp(16px, 2.4vmin, 19px);
@@ -2147,6 +2147,795 @@ button.disabled {
     --champ-size: min(81%, 333px);
   }
 }
+
+/* ==== LANDING ==== */
+
+#landing {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: var(--bg);
+  color: var(--text);
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  display: flex;
+  flex-direction: column;
+  transition: opacity .35s ease, transform .35s cubic-bezier(.22,.61,.36,1);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px));
+}
+
+#landing.leaving {
+  opacity: 0;
+  transform: translateY(-24px);
+  pointer-events: none;
+}
+
+#landing.hidden {
+  display: none !important;
+}
+
+/* ---------- общая сетка ---------- */
+
+.lnd-inner {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 clamp(18px, 4vw, 40px);
+}
+
+.lnd-section {
+  padding: clamp(40px, 8vw, 84px) 0;
+}
+
+.lnd-section + .lnd-section {
+  border-top: 1px solid rgba(255,255,255,.05);
+}
+
+.lnd-kicker {
+  color: var(--gold);
+  font-size: clamp(11px, 1.6vmin, 13px);
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  opacity: .9;
+}
+
+.lnd-h2 {
+  font-size: clamp(24px, 5vmin, 40px);
+  font-weight: 900;
+  line-height: 1.12;
+  letter-spacing: -.3px;
+  margin-bottom: 14px;
+  color: #fff;
+}
+
+.lnd-h2 .gold {
+  color: var(--gold);
+}
+
+.lnd-lead {
+  color: var(--muted);
+  font-size: clamp(14px, 2.2vmin, 17px);
+  line-height: 1.55;
+  max-width: 62ch;
+  margin-bottom: 10px;
+}
+
+.lnd-p {
+  color: var(--muted-soft-2);
+  font-size: clamp(13px, 2vmin, 15px);
+  line-height: 1.6;
+  max-width: 66ch;
+  margin-bottom: 12px;
+}
+
+.lnd-p b, .lnd-p strong { color: var(--text); font-weight: 700; }
+
+.lnd-p .gold { color: var(--gold); font-weight: 700; }
+
+/* ---------- кнопки ---------- */
+
+.lnd-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(180deg, var(--gold) 0%, var(--gold-2) 100%);
+  color: #1a1a1a;
+  font-family: inherit;
+  font-weight: 900;
+  font-size: clamp(13px, 2vmin, 15px);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 16px 28px;
+  min-height: 52px;
+  box-shadow: 0 3px 0 #8a6508, inset 0 1px 0 rgba(255,255,255,.35);
+  touch-action: manipulation;
+  transition: transform .08s ease, filter .08s ease, box-shadow .08s ease;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.lnd-btn:active {
+  transform: scale(0.97);
+  filter: brightness(1.1);
+  box-shadow: 0 1px 0 #8a6508, inset 0 1px 0 rgba(255,255,255,.35);
+}
+
+.lnd-btn.ghost {
+  background: transparent;
+  color: var(--gold);
+  border: 1px solid #5a4a1a;
+  box-shadow: none;
+}
+
+.lnd-btn.ghost:active {
+  background: rgba(255,203,43,.06);
+  box-shadow: none;
+}
+
+.lnd-btn.small {
+  padding: 12px 20px;
+  min-height: 44px;
+  font-size: clamp(11px, 1.7vmin, 13px);
+}
+
+/* ---------- hero ---------- */
+
+#landing .lnd-hero {
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding-top: calc(env(safe-area-inset-top, 0px) + clamp(28px, 6vw, 56px));
+  padding-bottom: clamp(28px, 6vw, 56px);
+  overflow: hidden;
+}
+
+#landing .lnd-hero::before {
+  content: "";
+  position: absolute;
+  top: -20%;
+  right: -30%;
+  width: 80vmin;
+  height: 80vmin;
+  background: radial-gradient(circle, rgba(255,203,43,.10) 0%, transparent 62%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+#landing .lnd-hero::after {
+  content: "";
+  position: absolute;
+  bottom: -30%;
+  left: -30%;
+  width: 70vmin;
+  height: 70vmin;
+  background: radial-gradient(circle, rgba(255,203,43,.05) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.lnd-hero-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(28px, 6vw, 48px);
+  align-items: center;
+}
+
+@media (min-width: 860px) {
+  .lnd-hero-grid {
+    grid-template-columns: 1.15fr .85fr;
+  }
+}
+
+.lnd-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: clamp(20px, 4vw, 30px);
+  font-weight: 900;
+  letter-spacing: 3px;
+  font-size: clamp(12px, 1.8vmin, 14px);
+  color: #fff;
+  text-transform: uppercase;
+}
+
+.lnd-logo-mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, var(--gold), var(--gold-2));
+  box-shadow: 0 0 18px rgba(255,203,43,.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1a1a1a;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.lnd-h1 {
+  font-size: clamp(32px, 7.4vmin, 62px);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -1px;
+  margin-bottom: clamp(16px, 3vw, 22px);
+  color: #fff;
+}
+
+.lnd-h1 .gold {
+  color: var(--gold);
+  text-shadow: 0 0 26px rgba(255,203,43,.22);
+}
+
+.lnd-sub {
+  color: var(--muted-soft-2);
+  font-size: clamp(14px, 2.2vmin, 17px);
+  line-height: 1.6;
+  max-width: 54ch;
+  margin-bottom: clamp(24px, 4vw, 34px);
+}
+
+.lnd-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.lnd-hero-note {
+  color: var(--muted);
+  font-size: clamp(11px, 1.7vmin, 13px);
+  margin-top: 16px;
+  letter-spacing: .3px;
+}
+
+/* карточный визуал героя — только CSS */
+
+.lnd-hero-visual {
+  position: relative;
+  height: clamp(220px, 42vw, 380px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 900px;
+}
+
+.lnd-card-fan {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lnd-play-card {
+  position: absolute;
+  width: clamp(78px, 16vw, 130px);
+  height: clamp(110px, 22vw, 184px);
+  border-radius: clamp(8px, 1.6vw, 12px);
+  background: #fafafa;
+  color: #1a1a1a;
+  box-shadow:
+    0 10px 30px rgba(0,0,0,.7),
+    0 0 0 1px rgba(0,0,0,.1),
+    0 0 40px rgba(255,203,43,.10);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: clamp(8px, 1.6vw, 14px);
+  font-weight: 800;
+  transform-origin: 50% 110%;
+  transition: transform .4s cubic-bezier(.22,.61,.36,1);
+  will-change: transform;
+}
+
+.lnd-play-card .rank {
+  font-size: clamp(18px, 3.4vw, 28px);
+  line-height: 1;
+}
+
+.lnd-play-card .suit-big {
+  font-size: clamp(30px, 6vw, 52px);
+  line-height: 1;
+  align-self: flex-end;
+}
+
+.lnd-play-card.spades { color: #111; transform: rotate(-14deg) translate(-58%, 6%); }
+.lnd-play-card.hearts { color: #d63535; transform: rotate(-2deg) translate(-18%, -4%); }
+.lnd-play-card.diamonds { color: #d63535; transform: rotate(9deg) translate(22%, -1%); }
+.lnd-play-card.clubs { color: #1fa04a; transform: rotate(19deg) translate(58%, 7%); }
+
+.lnd-chip {
+  position: absolute;
+  width: clamp(44px, 9vw, 66px);
+  height: clamp(44px, 9vw, 66px);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff6d0 0%, var(--gold) 45%, #b8860b 100%);
+  box-shadow:
+    0 6px 18px rgba(0,0,0,.7),
+    0 0 26px rgba(255,203,43,.35),
+    inset 0 0 0 3px rgba(138,101,8,.7),
+    inset 0 0 0 6px rgba(255,246,208,.35);
+  z-index: 3;
+}
+
+.lnd-chip.c1 { bottom: 4%; left: 4%; }
+.lnd-chip.c2 { bottom: 14%; left: 26%; width: clamp(30px, 6vw, 44px); height: clamp(30px, 6vw, 44px); opacity: .9; }
+.lnd-chip.c3 { bottom: 0%; right: 6%; width: clamp(36px, 7vw, 52px); height: clamp(36px, 7vw, 52px); opacity: .95; }
+
+/* ---------- карточки навыков ---------- */
+
+.lnd-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(14px, 2.4vw, 22px);
+  margin-top: clamp(22px, 4vw, 34px);
+}
+
+@media (min-width: 700px) {
+  .lnd-grid-3 { grid-template-columns: repeat(3, 1fr); }
+}
+
+.lnd-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(14px, 2.4vw, 22px);
+  margin-top: clamp(18px, 3vw, 28px);
+}
+
+@media (min-width: 760px) {
+  .lnd-grid-2 { grid-template-columns: repeat(2, 1fr); }
+}
+
+.lnd-card {
+  background: linear-gradient(180deg, #131313 0%, #0a0a0a 100%);
+  border: 1px solid #2a2520;
+  border-radius: 16px;
+  padding: clamp(18px, 3vw, 26px);
+  position: relative;
+  overflow: hidden;
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+@media (hover: hover) {
+  .lnd-card:hover {
+    border-color: #4a3f18;
+    box-shadow: 0 0 0 1px rgba(255,203,43,.10), 0 18px 40px rgba(0,0,0,.5);
+    transform: translateY(-2px);
+  }
+}
+
+.lnd-card.gold-edge {
+  border-color: #5a4a1a;
+  box-shadow: 0 0 0 1px rgba(255,203,43,.08), 0 0 40px rgba(255,203,43,.05);
+}
+
+.lnd-card .icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255,203,43,.08);
+  border: 1px solid #3a3018;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  color: var(--gold);
+}
+
+.lnd-card .icon svg { width: 22px; height: 22px; display: block; }
+
+.lnd-card h3 {
+  color: #fff;
+  font-size: clamp(15px, 2.4vmin, 18px);
+  font-weight: 800;
+  margin-bottom: 8px;
+  letter-spacing: .2px;
+}
+
+.lnd-card p {
+  color: var(--muted-soft-2);
+  font-size: clamp(12px, 1.9vmin, 14px);
+  line-height: 1.55;
+}
+
+.lnd-card p + p { margin-top: 8px; }
+
+/* ---------- боты ---------- */
+
+.lnd-bot-group {
+  margin-top: clamp(22px, 4vw, 34px);
+}
+
+.lnd-bot-group-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  font-size: clamp(13px, 2vmin, 15px);
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.lnd-bot-group-title .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 10px rgba(255,203,43,.6);
+}
+
+.lnd-bot-group-title .dot.vip { background: #2fb571; box-shadow: 0 0 10px rgba(47,181,113,.5); }
+
+.lnd-bot-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 700px) {
+  .lnd-bot-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 1040px) {
+  .lnd-bot-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+}
+
+.lnd-bot {
+  background: linear-gradient(180deg, #111 0%, #0a0a0a 100%);
+  border: 1px solid #262220;
+  border-radius: 14px;
+  padding: 16px 16px 18px;
+  position: relative;
+}
+
+.lnd-bot .badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 4px 9px;
+  border-radius: 5px;
+  color: #fff;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.12);
+}
+
+.badge.pro-gto    { background: #311f3b; }
+.badge.pro-solver { background: #2f1a3b; }
+.badge.pro-icm    { background: #2c123b; }
+.badge.pro-lag    { background: #290a3b; }
+.badge.vip-taglite{ background: #062a0a; }
+.badge.vip-loose  { background: #0e2f12; }
+.badge.vip-rock   { background: #13311a; }
+.badge.vip-maniac { background: #18331b; }
+
+.lnd-bot h4 {
+  color: #fff;
+  font-size: clamp(13px, 2vmin, 15px);
+  font-weight: 800;
+  margin-bottom: 7px;
+}
+
+.lnd-bot p {
+  color: var(--muted-soft-2);
+  font-size: clamp(12px, 1.8vmin, 13.5px);
+  line-height: 1.5;
+}
+
+/* ---------- механика: мини-стол ---------- */
+
+.lnd-table-wrap {
+  margin-top: clamp(22px, 4vw, 34px);
+  display: flex;
+  justify-content: center;
+}
+
+.lnd-mini-table {
+  position: relative;
+  width: min(100%, 420px);
+  aspect-ratio: 9 / 14;
+  background: linear-gradient(180deg, #6b4622 0%, #3d2512 42%, #2a1a0c 100%);
+  border-radius: clamp(22px, 4vw, 34px);
+  box-shadow: 0 0 0 3px #1a0f05, 0 0 50px rgba(0,0,0,.8);
+  padding: clamp(7px, 1.6vw, 12px);
+}
+
+.lnd-mini-felt {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(ellipse at 50% 45%, #322c26 0%, #1e1a16 58%, #0f0d0b 100%);
+  border-radius: clamp(18px, 3.4vw, 26px);
+  box-shadow: inset 0 0 70px rgba(0,0,0,.7);
+  overflow: hidden;
+}
+
+.lnd-mini-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.lnd-mini-board {
+  display: flex;
+  gap: 4px;
+}
+
+.lnd-mini-card {
+  width: clamp(20px, 4.4vw, 28px);
+  height: clamp(28px, 6.2vw, 40px);
+  border-radius: 4px;
+  background: #fafafa;
+  box-shadow: 0 2px 6px rgba(0,0,0,.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(12px, 2.6vw, 16px);
+  font-weight: 800;
+  color: #111;
+}
+
+.lnd-mini-card.red { color: #d63535; }
+.lnd-mini-card.back {
+  background: repeating-linear-gradient(45deg, #1a2540 0 3px, #243255 3px 6px);
+  border: 1px solid #0a1225;
+}
+
+.lnd-mini-pot {
+  color: var(--gold);
+  font-weight: 800;
+  font-size: clamp(11px, 2.2vw, 14px);
+  text-shadow: 0 0 12px rgba(255,203,43,.3);
+  letter-spacing: .5px;
+}
+
+.lnd-mini-seat {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.lnd-mini-seat .dot {
+  width: clamp(16px, 3.4vw, 22px);
+  height: clamp(16px, 3.4vw, 22px);
+  border-radius: 50%;
+  background: #2a2520;
+  border: 1px solid #4a4038;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.6);
+}
+
+.lnd-mini-seat.hero .dot {
+  background: radial-gradient(circle at 35% 30%, #fff6d0, var(--gold) 60%, #b8860b);
+  box-shadow: 0 0 12px rgba(255,203,43,.45);
+}
+
+.lnd-mini-seat .lbl {
+  font-size: clamp(8px, 1.7vw, 10px);
+  font-weight: 800;
+  color: var(--muted);
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+
+.lnd-mini-seat.hero .lbl { color: var(--gold); }
+
+.lnd-mini-badge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: rgba(255,255,255,.12);
+  font-size: clamp(16px, 3.6vw, 24px);
+  font-weight: 900;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  pointer-events: none;
+  text-transform: uppercase;
+}
+
+/* ---------- фичи: список ---------- */
+
+.lnd-features {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: clamp(20px, 3.4vw, 30px);
+}
+
+@media (min-width: 620px) { .lnd-features { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 980px) { .lnd-features { grid-template-columns: repeat(3, 1fr); } }
+
+.lnd-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(180deg, #101010, #0a0a0a);
+  border: 1px solid #222;
+  border-radius: 12px;
+}
+
+.lnd-feature .tick {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(255,203,43,.10);
+  border: 1px solid #4a3f18;
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 900;
+  margin-top: 1px;
+}
+
+.lnd-feature span {
+  color: var(--muted-soft-2);
+  font-size: clamp(12px, 1.9vmin, 14px);
+  line-height: 1.5;
+}
+
+.lnd-feature span b { color: var(--text); font-weight: 700; }
+
+/* ---------- финальный CTA ---------- */
+
+.lnd-final {
+  position: relative;
+  text-align: center;
+  padding: clamp(46px, 9vw, 90px) 0;
+  overflow: hidden;
+}
+
+.lnd-final::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 90vmin;
+  height: 90vmin;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(255,203,43,.10) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.lnd-final .lnd-h2,
+.lnd-final .lnd-p,
+.lnd-final .lnd-btn {
+  position: relative;
+  z-index: 1;
+}
+
+.lnd-final .lnd-h2 { margin-left: auto; margin-right: auto; max-width: 18ch; }
+
+.lnd-final .lnd-p { margin-left: auto; margin-right: auto; }
+
+.lnd-final-note {
+  position: relative;
+  z-index: 1;
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: clamp(11px, 1.7vmin, 13px);
+  letter-spacing: .3px;
+}
+
+/* ---------- футер ---------- */
+
+.lnd-footer {
+  border-top: 1px solid rgba(255,255,255,.06);
+  padding: clamp(24px, 4vw, 36px) 0 calc(clamp(80px, 12vw, 100px) + env(safe-area-inset-bottom, 0px));
+  color: var(--muted);
+  font-size: clamp(11px, 1.7vmin, 13px);
+  line-height: 1.6;
+}
+
+.lnd-footer .row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.lnd-footer .brand {
+  color: #fff;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-size: clamp(11px, 1.7vmin, 13px);
+}
+
+.lnd-footer .disclaimer {
+  max-width: 58ch;
+  color: var(--muted);
+}
+
+.lnd-footer .copy { color: #555; }
+
+/* ---------- sticky CTA ---------- */
+
+#landing-sticky-cta {
+  position: fixed;
+  right: calc(16px + env(safe-area-inset-right, 0px));
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  z-index: 520;
+  opacity: 0;
+  transform: translateY(14px) scale(.96);
+  pointer-events: none;
+  transition: opacity .25s ease, transform .25s cubic-bezier(.22,.61,.36,1);
+}
+
+#landing-sticky-cta.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+#landing-sticky-cta.hidden {
+  display: none !important;
+}
+
+#landing-sticky-cta .lnd-btn {
+  min-height: 48px;
+  padding: 12px 22px;
+  font-size: clamp(12px, 1.8vmin, 14px);
+  box-shadow: 0 3px 0 #8a6508, inset 0 1px 0 rgba(255,255,255,.35), 0 8px 24px rgba(0,0,0,.6), 0 0 30px rgba(255,203,43,.18);
+}
+
+/* ---------- появление ---------- */
+
+.lnd-reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity .5s ease, transform .5s cubic-bezier(.22,.61,.36,1);
+  will-change: opacity, transform;
+}
+
+.lnd-reveal.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ---------- адаптив ---------- */
+
+@media (max-width: 520px) {
+  .lnd-hero-actions { flex-direction: column; align-items: stretch; }
+  .lnd-hero-actions .lnd-btn { width: 100%; }
+  .lnd-btn { padding: 15px 22px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #landing { scroll-behavior: auto; }
+  .lnd-reveal { transition: none; opacity: 1; transform: none; }
+  .lnd-play-card { transition: none; }
+}
+
+/* ==== /LANDING ==== */
 </style>
 </head>
 <body>
@@ -2574,6 +3363,411 @@ button.disabled {
       <button id="btn-start">Начать игру</button>
     </div>
   </div>
+
+  <!-- ==== LANDING ==== -->
+  <div id="landing" aria-label="Poker Trainer — лендинг">
+
+    <!-- HERO -->
+    <section class="lnd-hero" aria-labelledby="lnd-hero-title">
+      <div class="lnd-inner lnd-hero-grid">
+        <div class="lnd-hero-copy lnd-reveal">
+          <div class="lnd-logo">
+            <span class="lnd-logo-mark">♠</span>
+            <span>Poker Trainer</span>
+          </div>
+
+          <h1 class="lnd-h1" id="lnd-hero-title">
+            Тренируй <span class="gold">логику</span> и <span class="gold">интуицию</span> — играй против оппонента, а не против карт
+          </h1>
+
+          <p class="lnd-sub">
+            Симулятор турнирного стола: Sit &amp; Go, 8-max, Texas Hold'em.
+            Боты уровней PRO и VIP с памятью, характером и адаптацией.
+            Тренажёр того, как думает покерист, когда математика уже посчитана,
+            а решение всё ещё нужно принять.
+          </p>
+
+          <div class="lnd-hero-actions">
+            <button class="lnd-btn" type="button" data-action="enter-app" aria-label="Начать тренировку">
+              Начать тренировку
+            </button>
+          </div>
+
+          <p class="lnd-hero-note">Один файл. Без установки. Без регистрации.</p>
+        </div>
+
+        <div class="lnd-hero-visual lnd-reveal" aria-hidden="true">
+          <div class="lnd-card-fan">
+            <div class="lnd-play-card spades">
+              <span class="rank">A</span>
+              <span class="suit-big">♠</span>
+            </div>
+            <div class="lnd-play-card hearts">
+              <span class="rank">K</span>
+              <span class="suit-big">♥</span>
+            </div>
+            <div class="lnd-play-card diamonds">
+              <span class="rank">Q</span>
+              <span class="suit-big">♦</span>
+            </div>
+            <div class="lnd-play-card clubs">
+              <span class="rank">J</span>
+              <span class="suit-big">♣</span>
+            </div>
+            <div class="lnd-chip c1"></div>
+            <div class="lnd-chip c2"></div>
+            <div class="lnd-chip c3"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ПОЧЕМУ ЭТО РАБОТАЕТ -->
+    <section class="lnd-section" aria-labelledby="lnd-why-title">
+      <div class="lnd-inner">
+        <div class="lnd-reveal">
+          <div class="lnd-kicker">Почему это работает</div>
+          <h2 class="lnd-h2" id="lnd-why-title">Солвер даёт правильный ответ. <span class="gold">Тренажёр учит точной игре</span></h2>
+          <p class="lnd-lead">
+            Солверы, калькуляторы эквити и GTO-тренажёры отвечают на вопрос «как играть правильно в вакууме».
+            Но в турнире вакуума нет. Есть оппонент с памятью, страхом, тильтом и привычками.
+            Против него «правильная» игра часто проигрывает «точной» — той, что строится под его ошибки.
+          </p>
+        </div>
+
+        <div class="lnd-grid-3">
+          <article class="lnd-card lnd-reveal">
+            <div class="icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+              </svg>
+            </div>
+            <h3>Логика</h3>
+            <p>Выстроить линию так, чтобы оппонент совершил ошибку, а не просто «сыграл по чарту». Каждое действие — осознанный ответ на вопрос «зачем».</p>
+          </article>
+
+          <article class="lnd-card lnd-reveal">
+            <div class="icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </div>
+            <h3>Интуиция</h3>
+            <p>Считать исход раздачи из поля информации до того, как карты открылись. Читать линию поведения и замечать повторяющиеся ошибки.</p>
+          </article>
+
+          <article class="lnd-card lnd-reveal">
+            <div class="icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5"/>
+                <path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5"/>
+              </svg>
+            </div>
+            <h3>Связка логики и интуиции</h3>
+            <p>Мало знать, кто сильнее на вскрытии. Нужно выстроить действия так, чтобы выиграть максимум фишек, а не просто забрать банк.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- БОТЫ -->
+    <section class="lnd-section" aria-labelledby="lnd-bots-title">
+      <div class="lnd-inner">
+        <div class="lnd-reveal">
+          <div class="lnd-kicker">Против кого ты играешь</div>
+          <h2 class="lnd-h2" id="lnd-bots-title">Боты с <span class="gold">памятью и характером</span>, а не таблицы и расчёты</h2>
+          <p class="lnd-lead">
+            За столом Poker Trainer нет абстрактных «ботов». Есть характеры, повторяющие реальных игроков турниров.
+            Два класса — PRO и VIP, по четыре типа в каждом.
+          </p>
+        </div>
+
+        <div class="lnd-bot-group lnd-reveal">
+          <div class="lnd-bot-group-title"><span class="dot"></span> Класс PRO — сильные соперники</div>
+          <div class="lnd-bot-grid cols-4">
+            <article class="lnd-bot">
+              <span class="badge pro-lag">PRO · LAG</span>
+              <h4>LAG-Pro</h4>
+              <p>Топ мирового уровня. Постоянное давление, смена образа, ловушки, тонкие вэлью-беты, блефы в точных спотах. Учит строить грамотную ловушку — а для неё нужна идеальная логика.</p>
+            </article>
+
+            <article class="lnd-bot">
+              <span class="badge pro-icm">PRO · ICM</span>
+              <h4>ICM-Exploiter</h4>
+              <p>Турнирный расчёт в чистом виде. На бабле тайтовеет, в призах давит на короткие стеки. Учит турнирным решениям: когда риск оправдан, а когда нет.</p>
+            </article>
+
+            <article class="lnd-bot">
+              <span class="badge pro-solver">PRO · SOLVER</span>
+              <h4>Solver-Hybrid</h4>
+              <p>Быстро читает вас и адаптируется. Учит вариативности: как только он понял ваш паттерн — вы уже проиграли раздачу. Учитесь не давать ему паттерн.</p>
+            </article>
+
+            <article class="lnd-bot">
+              <span class="badge pro-gto">PRO · GTO</span>
+              <h4>GTO-Reg</h4>
+              <p>Честный крепкий регуляр. Играет ровно, не разваливается под давлением, не делает лишних ошибок. Учит фундаменту: точной и дисциплинированной игре.</p>
+            </article>
+          </div>
+        </div>
+
+        <div class="lnd-bot-group lnd-reveal">
+          <div class="lnd-bot-group-title"><span class="dot vip"></span> Класс VIP — слабые соперники</div>
+          <div class="lnd-bot-grid cols-4">
+            <article class="lnd-bot">
+              <span class="badge vip-taglite">VIP · TAG-Lite</span>
+              <h4>TAG-Lite</h4>
+              <p>Знает базу, но играет роботизированно. Не адаптируется, слаб на ривере, 3-беты предсказуемы. Учит ломать шаблон: баррелить там, где он фолдит, и блефовать там, где не ждёт.</p>
+            </article>
+
+            <article class="lnd-bot">
+              <span class="badge vip-loose">VIP · Loose</span>
+              <h4>Loose-Passive</h4>
+              <p>Коллит широко, агрессии почти нет, его рейз — всегда сила. Учит дисциплине: не блефовать и вэлью-бетить плотно. Не тратить фишки там, где он не выкидывает.</p>
+            </article>
+
+            <article class="lnd-bot">
+              <span class="badge vip-rock">VIP · Rock</span>
+              <h4>Rock</h4>
+              <p>Только премиум-руки, абсолютно предсказуем. Вошёл — у него рука. Учит читать слабость и забирать бесплатно: стилить блайнды и фолдить против крупных ставок.</p>
+            </article>
+
+            <article class="lnd-bot">
+              <span class="badge vip-maniac">VIP · Maniac</span>
+              <h4>Maniac</h4>
+              <p>Рейзит всё, блефует на всех улицах, играет на эмоциях. Учит терпению и хладнокровию: ждать руку, вэлью-бетить плотно и не блефовать вообще.</p>
+            </article>
+          </div>
+        </div>
+
+        <div class="lnd-reveal" style="margin-top:26px;">
+          <button class="lnd-btn" type="button" data-action="enter-app" aria-label="Начать тренировку против ботов">
+            Начать тренировку
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ПОЛЬЗА ПО УРОВНЯМ -->
+    <section class="lnd-section" aria-labelledby="lnd-benefit-title">
+      <div class="lnd-inner">
+        <div class="lnd-reveal">
+          <div class="lnd-kicker">Чему ты научишься</div>
+          <h2 class="lnd-h2" id="lnd-benefit-title">Польза для каждого <span class="gold">уровня игры</span></h2>
+        </div>
+
+        <div class="lnd-grid-3">
+          <article class="lnd-card lnd-reveal">
+            <h3>Начинающему</h3>
+            <p>Научиться думать за столом, а не запоминать руки. Понять, что покер — это не карты, а оппоненты и их решения.</p>
+          </article>
+
+          <article class="lnd-card lnd-reveal">
+            <h3>Среднему игроку</h3>
+            <p>Перестать играть «по учебнику» и начать играть против конкретного оппонента. Увидеть, где чарты вас ограничивают.</p>
+          </article>
+
+          <article class="lnd-card lnd-reveal">
+            <h3>Профессионалу</h3>
+            <p>Уйти от перегруженных математических решений к чистой логике и абсолютной интуиции. Найти то, что не считается в солвере: момент, ритм, образ, ловушку.</p>
+          </article>
+        </div>
+
+        <div class="lnd-reveal" style="margin-top:30px;">
+          <div class="lnd-card gold-edge">
+            <h3>Почему тренировка против ботов учит играть против людей</h3>
+            <p>
+              Навык, который вы здесь развиваете, работает против любого соперника — и против человека, и против программы.
+              Читать линию поведения, замечать ошибки, выстраивать действия под чужое мышление — всё это не зависит от того, кто сидит напротив.
+            </p>
+            <p>
+              Живой оппонент отличается от идеального калькулятора не тем, что он человек, а тем, что у него есть
+              <b>повторяющиеся ошибки</b>. Он помнит прошлые раздачи, меняет стиль, ловит вас на паттерне, ошибается под давлением.
+              Всё это — поведение. Поведение можно воспроизвести. Именно это и делают боты Poker Trainer.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- МЕХАНИКА -->
+    <section class="lnd-section" aria-labelledby="lnd-how-title">
+      <div class="lnd-inner">
+        <div class="lnd-reveal">
+          <div class="lnd-kicker">Как устроена игра</div>
+          <h2 class="lnd-h2" id="lnd-how-title">Sit &amp; Go, 8 игроков, <span class="gold">призовая структура на 3 места</span></h2>
+          <p class="lnd-lead">
+            Вы садитесь за стол из восьми игроков (вы и семь ботов) и играете турнир Sit &amp; Go.
+            Каждая раздача — это отдельный урок. Каждое действие бота — информация для вас.
+          </p>
+        </div>
+
+        <div class="lnd-grid-3">
+          <article class="lnd-card lnd-reveal">
+            <h3>Каждая раздача — урок</h3>
+            <p>Каждый ваш ход — попытка направить мышление оппонента туда, где он примет неверное решение и ошибётся в вашу пользу.</p>
+          </article>
+
+          <article class="lnd-card lnd-reveal">
+            <h3>Честная обратная связь</h3>
+            <p>WIN или LOSS, плюс или минус фишек. Никаких подсказок, никаких оценок «правильно/неправильно». Только результат — как в реальном покере.</p>
+          </article>
+
+          <article class="lnd-card lnd-reveal">
+            <h3>Турнирная логика</h3>
+            <p>ICM на баббле и в призах. Давление на короткие стеки. Решения, когда риск оправдан, а когда нет — в условиях реальной структуры выплат.</p>
+          </article>
+        </div>
+
+        <div class="lnd-table-wrap lnd-reveal" aria-hidden="true">
+          <div class="lnd-mini-table">
+            <div class="lnd-mini-felt">
+              <div class="lnd-mini-badge">Poker Trainer</div>
+
+              <div class="lnd-mini-seat" style="left:50%; top:88%;">
+                <div class="dot hero"></div><span class="lbl">Ты</span>
+              </div>
+              <div class="lnd-mini-seat" style="left:10%; top:68%;">
+                <div class="dot"></div><span class="lbl">UTG</span>
+              </div>
+              <div class="lnd-mini-seat" style="left:10%; top:38%;">
+                <div class="dot"></div><span class="lbl">MP</span>
+              </div>
+              <div class="lnd-mini-seat" style="left:10%; top:12%;">
+                <div class="dot"></div><span class="lbl">CO</span>
+              </div>
+              <div class="lnd-mini-seat" style="left:50%; top:8%;">
+                <div class="dot"></div><span class="lbl">BTN</span>
+              </div>
+              <div class="lnd-mini-seat" style="left:90%; top:12%;">
+                <div class="dot"></div><span class="lbl">SB</span>
+              </div>
+              <div class="lnd-mini-seat" style="left:90%; top:38%;">
+                <div class="dot"></div><span class="lbl">BB</span>
+              </div>
+              <div class="lnd-mini-seat" style="left:90%; top:68%;">
+                <div class="dot"></div><span class="lbl">HJ</span>
+              </div>
+
+              <div class="lnd-mini-center">
+                <div class="lnd-mini-pot">Pot: 240</div>
+                <div class="lnd-mini-board">
+                  <div class="lnd-mini-card">A</div>
+                  <div class="lnd-mini-card red">K</div>
+                  <div class="lnd-mini-card">Q</div>
+                  <div class="lnd-mini-card red">7</div>
+                  <div class="lnd-mini-card back"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lnd-reveal" style="margin-top:30px; text-align:center;">
+          <button class="lnd-btn" type="button" data-action="enter-app" aria-label="Начать тренировку за столом">
+            Сесть за стол
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ФИЧИ -->
+    <section class="lnd-section" aria-labelledby="lnd-features-title">
+      <div class="lnd-inner">
+        <div class="lnd-reveal">
+          <div class="lnd-kicker">Что внутри приложения</div>
+          <h2 class="lnd-h2" id="lnd-features-title">Инструменты для <span class="gold">точной игры</span></h2>
+        </div>
+
+        <div class="lnd-features">
+          <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Турнирный стол 8-max</b>, Texas Hold'em, Sit &amp; Go с призовой структурой на 3 места.</span></div>
+          <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Боты с памятью и адаптацией</b> (PRO) и эксплуатируемые слабые боты (VIP).</span></div>
+          <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Слайдер ставок</b>, быстрые проценты банка, BB-пресеты — всё под большой палец.</span></div>
+          <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Таймер на ход</b> и тонкие настройки: сложность, стеки, стиль карт, рост блайндов, показ карт/типов.</span></div>
+          <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>История раздач</b> с копированием в буфер обмена в один тап.</span></div>
+          <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Реплей раздачи по шагам</b> — увидеть линию со стороны и найти свою ошибку.</span></div>
+          <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>ICM-логика</b> на баббле и в призах — турнирные решения, а не кэш-игра.</span></div>
+          <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Тренировочный раздел «Тренировка»</b> — интуиция и логика покерного мышления.</span></div>
+          <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Мобильный-first</b>: safe-area, жесты, свайпы, двойные тапы — всё как надо на телефоне.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- РАЗДЕЛЫ -->
+    <section class="lnd-section" aria-labelledby="lnd-sections-title">
+      <div class="lnd-inner">
+        <div class="lnd-reveal">
+          <div class="lnd-kicker">Разделы и режимы</div>
+          <h2 class="lnd-h2" id="lnd-sections-title">Как <span class="gold">ориентироваться</span> внутри</h2>
+        </div>
+
+        <div class="lnd-grid-2">
+          <article class="lnd-card lnd-reveal">
+            <h3>Настройки</h3>
+            <p>Язык, уровень сложности, стеки (BB/фишки), стиль карт (2/4-цветные), рост блайндов, время на ход, показ стратегий и карт.</p>
+          </article>
+
+          <article class="lnd-card lnd-reveal">
+            <h3>Руководство</h3>
+            <p>Что такое Poker Trainer, чем отличается от солверов, против кого вы играете, почему это работает на реальном столе.</p>
+          </article>
+
+          <article class="lnd-card lnd-reveal">
+            <h3>Тренировка</h3>
+            <p>Принципы и техники тренировки логики и интуиции. Упражнения на поле информации, чтение состояния, доверие к первому тихому отклику.</p>
+          </article>
+
+          <article class="lnd-card lnd-reveal">
+            <h3>Поддержка автора</h3>
+            <p>Карты для перевода (GGPoker, USDT TRC20, Беларусбанк VISA, БЕЛКАРТ) и контакты Gmail/Telegram. Проект развивается на эти средства.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ФИНАЛЬНЫЙ CTA -->
+    <section class="lnd-section lnd-final" aria-labelledby="lnd-final-title">
+      <div class="lnd-inner">
+        <h2 class="lnd-h2 lnd-reveal" id="lnd-final-title">
+          Готов тренировать <span class="gold">логику и интуицию</span>?
+        </h2>
+        <p class="lnd-p lnd-reveal" style="margin-left:auto;margin-right:auto;">
+          Один файл. Без установки. Без регистрации.
+          Садитесь за стол и играйте против оппонентов, а не против карт.
+        </p>
+        <div class="lnd-reveal" style="margin-top:26px;">
+          <button class="lnd-btn" type="button" data-action="enter-app" aria-label="Начать тренировку">
+            Начать тренировку
+          </button>
+        </div>
+        <p class="lnd-final-note">Тренажёр для развития навыков. Не является азартной игрой на реальные деньги.</p>
+      </div>
+    </section>
+
+    <!-- ФУТЕР -->
+    <footer class="lnd-footer">
+      <div class="lnd-inner">
+        <div class="row">
+          <div class="brand">Poker Trainer</div>
+          <div class="copy">© Все права защищены</div>
+        </div>
+        <p class="disclaimer" style="margin-top:14px;">
+          Тренажёр для тренировки навыков покерного мышления.
+          Не является азартной игрой на реальные деньги.
+        </p>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Sticky CTA -->
+  <div id="landing-sticky-cta" aria-hidden="true">
+    <button class="lnd-btn" type="button" data-action="enter-app" aria-label="Играть">
+      Играть
+    </button>
+  </div>
+  <!-- ==== /LANDING ==== -->
 
 </div>
 
@@ -4502,7 +5696,7 @@ const UI = (() => {
   const seatAssignments = new Map();
 
   let placeRankOffset = 0;
-  let percentButtonsHandlers = null;
+  let percentButtonsContext = null;
 
   function resetSeatAssignments() {
     seatAssignments.clear();
@@ -5546,36 +6740,17 @@ const UI = (() => {
     }
   }
 
-  function computeDeadZoneJump(state, hero, currentVal, rawTarget) {
-    if (!hero) return rawTarget;
-    const bb = state.blinds.bb;
-    const minRaiseTarget = state.currentBet + state.minRaise;
-    const maxTarget = hero.committedThisStreet + hero.stack;
-
-    const isPreflopLimp = state.street === 'preflop' && state.currentBet === bb;
-    const isPostflopNoBet = (state.street !== 'preflop') && state.currentBet === 0;
-
-    if (isPreflopLimp || isPostflopNoBet) return rawTarget;
-
-    const callAmt = state.currentBet;
-    if (minRaiseTarget > maxTarget) return rawTarget;
-    if (callAmt >= minRaiseTarget) return rawTarget;
-
-    const inDeadZone = (rawTarget > callAmt && rawTarget < minRaiseTarget);
-    if (!inDeadZone) return rawTarget;
-
-    if (rawTarget > currentVal) return minRaiseTarget;
-    if (rawTarget < currentVal) return callAmt;
-    return rawTarget;
-  }
-
-  function setSliderProgrammatically(slider, v, state, handlers) {
+  function applySliderTarget(state, hero, handlers, rawTarget) {
+    const slider = document.getElementById('raise-slider-horiz');
+    if (!slider) return;
+    const minVal = Number(slider.min);
+    const maxVal = Number(slider.max);
+    let v = Math.max(minVal, Math.min(maxVal, rawTarget));
     slider.__suppressInput = true;
     slider.value = v;
     slider.__suppressInput = false;
     updateSliderDisplay(state);
-    const hero = state.players[state.actingIndex] || state.players.find(p => p.isHero);
-    if (hero) updateCallButton(state, hero, handlers);
+    updateCallButton(state, hero, handlers);
   }
 
   function bindPercentButtonPointerHandlers(state, heroIndex, handlers) {
@@ -5586,6 +6761,7 @@ const UI = (() => {
       let pointerDown = false;
       let startY = 0;
       let startSliderValue = 0;
+      let anchorSide = 0;
 
       function getSliderEl() {
         return document.getElementById('raise-slider-horiz');
@@ -5596,6 +6772,47 @@ const UI = (() => {
                el.quickPercentList.classList.contains('inactive');
       }
 
+      function getDeadZoneBounds() {
+        const slider = getSliderEl();
+        if (!slider) return null;
+        const hero = state.players[heroIndex];
+        const bb = state.blinds.bb;
+        const isPreflopLimp = state.street === 'preflop' && state.currentBet === bb;
+        const isPostflopNoBet = (state.street !== 'preflop') && state.currentBet === 0;
+        if (isPreflopLimp || isPostflopNoBet) return null;
+        const callAmt = state.currentBet;
+        const minRaiseTarget = state.currentBet + state.minRaise;
+        const maxTarget = hero.committedThisStreet + hero.stack;
+        if (minRaiseTarget > maxTarget) return null;
+        if (callAmt >= minRaiseTarget) return null;
+        return { callAmt, minRaiseTarget };
+      }
+
+      function resolveTarget(rawTarget) {
+        const slider = getSliderEl();
+        if (!slider) return rawTarget;
+        const minVal = Number(slider.min);
+        const maxVal = Number(slider.max);
+        const step = Math.max(1, Math.round(state.blinds.bb / 2));
+
+        let snapped = Math.round((rawTarget - minVal) / step) * step + minVal;
+        snapped = Math.max(minVal, Math.min(maxVal, snapped));
+
+        const bounds = getDeadZoneBounds();
+        if (!bounds) return snapped;
+
+        if (snapped > bounds.callAmt && snapped < bounds.minRaiseTarget) {
+          if (anchorSide > 0) return bounds.minRaiseTarget;
+          if (anchorSide < 0) return bounds.callAmt;
+          return snapped;
+        }
+
+        if (snapped >= bounds.minRaiseTarget) anchorSide = 1;
+        else if (snapped <= bounds.callAmt) anchorSide = -1;
+
+        return snapped;
+      }
+
       btn.addEventListener('pointerdown', (e) => {
         if (isActionInactive()) return;
         const slider = getSliderEl();
@@ -5604,6 +6821,7 @@ const UI = (() => {
         pointerDown = true;
         startY = e.clientY;
         startSliderValue = Number(slider.value);
+        anchorSide = 0;
         btn.__suppressClick = false;
         btn.__dragging = false;
         try { btn.setPointerCapture && btn.setPointerCapture(e.pointerId); } catch (err) {}
@@ -5617,7 +6835,6 @@ const UI = (() => {
         e.stopPropagation();
 
         const dy = startY - e.clientY;
-
         if (Math.abs(dy) < 1) return;
 
         btn.__dragging = true;
@@ -5630,18 +6847,11 @@ const UI = (() => {
         const widthPx = rect.width > 0 ? rect.width : 1;
 
         const deltaUnits = (dy / widthPx) * range;
-        let rawTarget = startSliderValue + deltaUnits;
+        const rawTarget = startSliderValue + deltaUnits;
+        const resolved = resolveTarget(rawTarget);
 
         const hero = state.players[heroIndex];
-        const bb = state.blinds.bb;
-        const step = Math.max(1, Math.round(bb / 2));
-
-        let snapped = Math.round((rawTarget - minVal) / step) * step + minVal;
-        snapped = Math.max(minVal, Math.min(maxVal, snapped));
-        snapped = computeDeadZoneJump(state, hero, Number(slider.value), snapped);
-        snapped = Math.max(minVal, Math.min(maxVal, snapped));
-
-        setSliderProgrammatically(slider, snapped, state, handlers);
+        applySliderTarget(state, hero, handlers, resolved);
       });
 
       btn.addEventListener('pointerup', (e) => {
@@ -5669,7 +6879,8 @@ const UI = (() => {
         const maxTarget = hero.committedThisStreet + hero.stack;
         const slider = getSliderEl();
         if (slider) {
-          setSliderProgrammatically(slider, Math.max(Number(slider.min), Math.min(maxTarget, target)), state, handlers);
+          const v = Math.max(Number(slider.min), Math.min(maxTarget, target));
+          applySliderTarget(state, hero, handlers, v);
         }
       });
 
@@ -5677,7 +6888,13 @@ const UI = (() => {
       btn.__dragging = false;
     });
 
-    percentButtonsHandlers = { state, heroIndex, handlers };
+    percentButtonsContext = { state, heroIndex, handlers };
+  }
+
+  function rebindPercentButtonHandlers() {
+    if (!percentButtonsContext) return;
+    const { state, heroIndex, handlers } = percentButtonsContext;
+    bindPercentButtonPointerHandlers(state, heroIndex, handlers);
   }
 
   function bindActionHandlers(state, heroIndex, toCall, handlers) {
@@ -5698,9 +6915,43 @@ const UI = (() => {
     el.sliderHoriz = slider;
 
     let sliderDragging = false;
+    let anchorSide = 0;
+    let startSliderValue = 0;
 
     function isSliderDisabled() {
       return el.heroActions.classList.contains('inactive') || slider.disabled;
+    }
+
+    function getDeadZoneBounds() {
+      const hero = state.players[heroIndex];
+      const bb = state.blinds.bb;
+      const isPreflopLimp = state.street === 'preflop' && state.currentBet === bb;
+      const isPostflopNoBet = (state.street !== 'preflop') && state.currentBet === 0;
+      if (isPreflopLimp || isPostflopNoBet) return null;
+      const callAmt = state.currentBet;
+      const minRaiseTarget = state.currentBet + state.minRaise;
+      const maxTarget = hero.committedThisStreet + hero.stack;
+      if (minRaiseTarget > maxTarget) return null;
+      if (callAmt >= minRaiseTarget) return null;
+      return { callAmt, minRaiseTarget };
+    }
+
+    function resolveTarget(rawTarget) {
+      const min = Number(slider.min);
+      const max = Number(slider.max);
+      const stepVal = Math.max(1, Math.round(state.blinds.bb / 2));
+      let snapped = Math.round((rawTarget - min) / stepVal) * stepVal + min;
+      snapped = Math.max(min, Math.min(max, snapped));
+      const bounds = getDeadZoneBounds();
+      if (!bounds) return snapped;
+      if (snapped > bounds.callAmt && snapped < bounds.minRaiseTarget) {
+        if (anchorSide > 0) return bounds.minRaiseTarget;
+        if (anchorSide < 0) return bounds.callAmt;
+        return snapped;
+      }
+      if (snapped >= bounds.minRaiseTarget) anchorSide = 1;
+      else if (snapped <= bounds.callAmt) anchorSide = -1;
+      return snapped;
     }
 
     function getSliderValueFromClientX(clientX) {
@@ -5711,15 +6962,17 @@ const UI = (() => {
       const trackW = rect.width - thumbW;
       let ratio = (clientX - rect.left - thumbW / 2) / trackW;
       ratio = Math.max(0, Math.min(1, ratio));
-      let raw = min + ratio * (max - min);
+      const raw = min + ratio * (max - min);
+      return resolveTarget(raw);
+    }
+
+    function setSliderProgrammatically(v) {
+      slider.__suppressInput = true;
+      slider.value = v;
+      slider.__suppressInput = false;
+      updateSliderDisplay(state);
       const hero = state.players[heroIndex];
-      const bb = state.blinds.bb;
-      const stepVal = Math.max(1, Math.round(bb / 2));
-      let snapped = Math.round((raw - min) / stepVal) * stepVal + min;
-      snapped = Math.max(min, Math.min(max, snapped));
-      snapped = computeDeadZoneJump(state, hero, Number(slider.value), snapped);
-      snapped = Math.max(min, Math.min(max, snapped));
-      return snapped;
+      updateCallButton(state, hero, handlers);
     }
 
     slider.onpointerdown = (e) => {
@@ -5727,16 +6980,26 @@ const UI = (() => {
       if (isSliderDisabled()) { e.preventDefault(); return; }
       sliderDragging = true;
       slider.classList.add('pressed');
+      startSliderValue = Number(slider.value);
+      const currentVal = Number(slider.value);
+      const bounds = getDeadZoneBounds();
+      if (bounds) {
+        if (currentVal >= bounds.minRaiseTarget) anchorSide = 1;
+        else if (currentVal <= bounds.callAmt) anchorSide = -1;
+        else anchorSide = 0;
+      } else {
+        anchorSide = 0;
+      }
       slider.setPointerCapture && slider.setPointerCapture(e.pointerId);
       const v = getSliderValueFromClientX(e.clientX);
-      setSliderProgrammatically(slider, v, state, handlers);
+      setSliderProgrammatically(v);
     };
 
     slider.onpointermove = (e) => {
       if (!sliderDragging) return;
       if (isSliderDisabled()) return;
       const v = getSliderValueFromClientX(e.clientX);
-      setSliderProgrammatically(slider, v, state, handlers);
+      setSliderProgrammatically(v);
     };
 
     slider.onpointerup = (e) => {
@@ -5759,24 +7022,18 @@ const UI = (() => {
       if (slider.__suppressInput) return;
       if (isSliderDisabled()) return;
       const current = Number(slider.value);
-      const hero = state.players[heroIndex];
-      const jumped = computeDeadZoneJump(state, hero, current, current);
-      if (jumped !== current) {
+      const resolved = resolveTarget(current);
+      if (resolved !== current) {
         slider.__suppressInput = true;
-        slider.value = jumped;
+        slider.value = resolved;
         slider.__suppressInput = false;
       }
       updateSliderDisplay(state);
+      const hero = state.players[heroIndex];
       updateCallButton(state, hero, handlers);
     };
 
     bindWheelOnZone(state, heroIndex, handlers);
-    bindPercentButtonPointerHandlers(state, heroIndex, handlers);
-  }
-
-  function rebindPercentButtonHandlers() {
-    if (!percentButtonsHandlers) return;
-    const { state, heroIndex, handlers } = percentButtonsHandlers;
     bindPercentButtonPointerHandlers(state, heroIndex, handlers);
   }
 
@@ -5847,7 +7104,9 @@ const UI = (() => {
       let target = currentVal + dir * step;
       target = computeDeadZoneJump(state, hero, currentVal, target);
       target = Math.max(Number(slider.min), Math.min(Number(slider.max), target));
+      slider.__suppressInput = true;
       slider.value = target;
+      slider.__suppressInput = false;
       updateSliderDisplay(state);
       updateCallButton(state, hero, handlers);
     };
@@ -5860,6 +7119,29 @@ const UI = (() => {
       z.__wheelBoundHandler = handler;
       z.addEventListener('wheel', handler, { passive: false });
     }
+  }
+
+  function computeDeadZoneJump(state, hero, currentVal, rawTarget) {
+    if (!hero) return rawTarget;
+    const bb = state.blinds.bb;
+    const minRaiseTarget = state.currentBet + state.minRaise;
+    const maxTarget = hero.committedThisStreet + hero.stack;
+
+    const isPreflopLimp = state.street === 'preflop' && state.currentBet === bb;
+    const isPostflopNoBet = (state.street !== 'preflop') && state.currentBet === 0;
+
+    if (isPreflopLimp || isPostflopNoBet) return rawTarget;
+
+    const callAmt = state.currentBet;
+    if (minRaiseTarget > maxTarget) return rawTarget;
+    if (callAmt >= minRaiseTarget) return rawTarget;
+
+    const inDeadZone = (rawTarget > callAmt && rawTarget < minRaiseTarget);
+    if (!inDeadZone) return rawTarget;
+
+    if (rawTarget > currentVal) return minRaiseTarget;
+    if (rawTarget < currentVal) return callAmt;
+    return rawTarget;
   }
 
   function rebind(node, fn) {
@@ -6975,7 +8257,8 @@ const UI = (() => {
               target.closest('#support-overlay') ||
               target.closest('#final-overlay') ||
               target.closest('#top-round-row') ||
-              target.closest('#hands-history-row'));
+              target.closest('#hands-history-row') ||
+              target.closest('#landing'));
   }
 
   function bindGlobalHandlers() {
@@ -8511,6 +9794,153 @@ const UI = (() => {
   }
 
 })();
+</script>
+
+<script>
+// ==== LANDING ====
+(function() {
+  'use strict';
+
+  var landing = document.getElementById('landing');
+  var stickyCta = document.getElementById('landing-sticky-cta');
+  var app = document.getElementById('app');
+
+  if (!landing || !app) return;
+
+  var entered = false;
+  var hideTimer = null;
+
+  function markLandingSeen() {
+    try { sessionStorage.setItem('pt_landing_seen', '1'); } catch (e) {}
+  }
+
+  function hasSeenLanding() {
+    try { return sessionStorage.getItem('pt_landing_seen') === '1'; } catch (e) { return false; }
+  }
+
+  function hideLandingImmediately() {
+    landing.classList.add('hidden');
+    if (stickyCta) stickyCta.classList.add('hidden');
+    if (hideTimer) clearTimeout(hideTimer);
+  }
+
+  function enterApp() {
+    if (entered) return;
+    entered = true;
+    markLandingSeen();
+
+    if (stickyCta) {
+      stickyCta.classList.remove('visible');
+      stickyCta.classList.add('hidden');
+    }
+
+    landing.classList.add('leaving');
+
+    hideTimer = setTimeout(function() {
+      landing.classList.add('hidden');
+
+      var btnStart = document.getElementById('btn-start');
+      if (btnStart) {
+        try {
+          btnStart.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+        } catch (e) {
+          try { btnStart.click(); } catch (e2) {}
+        }
+      }
+    }, 360);
+  }
+
+  // Делегированный обработчик всех CTA
+  landing.addEventListener('click', function(e) {
+    var target = e.target;
+    if (!target) return;
+    var trigger = target.closest ? target.closest('[data-action="enter-app"]') : null;
+    if (!trigger) return;
+    e.preventDefault();
+    e.stopPropagation();
+    enterApp();
+  });
+
+  // Sticky CTA клик
+  if (stickyCta) {
+    stickyCta.addEventListener('click', function(e) {
+      var target = e.target;
+      if (!target) return;
+      var trigger = target.closest ? target.closest('[data-action="enter-app"]') : null;
+      if (!trigger) return;
+      e.preventDefault();
+      e.stopPropagation();
+      enterApp();
+    });
+  }
+
+  // Скролл-бар: sticky CTA + reveal
+  var revealObserver = null;
+  var heroObserver = null;
+
+  function initObservers() {
+    // Появление блоков
+    if ('IntersectionObserver' in window) {
+      revealObserver = new IntersectionObserver(function(entries) {
+        for (var i = 0; i < entries.length; i++) {
+          var en = entries[i];
+          if (en.isIntersecting) {
+            en.target.classList.add('in-view');
+            revealObserver.unobserve(en.target);
+          }
+        }
+      }, { root: landing, rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+
+      var reveals = landing.querySelectorAll('.lnd-reveal');
+      for (var j = 0; j < reveals.length; j++) revealObserver.observe(reveals[j]);
+
+      // Sticky CTA появляется после hero
+      var hero = landing.querySelector('.lnd-hero');
+      if (hero) {
+        heroObserver = new IntersectionObserver(function(entries) {
+          for (var k = 0; k < entries.length; k++) {
+            var en = entries[k];
+            if (stickyCta && !entered) {
+              if (!en.isIntersecting) stickyCta.classList.add('visible');
+              else stickyCta.classList.remove('visible');
+            }
+          }
+        }, { root: landing, threshold: 0.25 });
+        heroObserver.observe(hero);
+      }
+    } else {
+      // Fallback: сразу показать всё
+      var all = landing.querySelectorAll('.lnd-reveal');
+      for (var m = 0; m < all.length; m++) all[m].classList.add('in-view');
+      if (stickyCta) stickyCta.classList.add('visible');
+    }
+  }
+
+  // Показывать лендинг при загрузке, если ещё не входили в этой сессии
+  function boot() {
+    if (hasSeenLanding()) {
+      hideLandingImmediately();
+      return;
+    }
+    // Не даём приложению стартовать раньше времени:
+    // #start-overlay остаётся в DOM, приложение не активно до enterApp()
+    initObservers();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+
+  // Очистка при уходе со страницы
+  window.addEventListener('pagehide', function() {
+    if (revealObserver) revealObserver.disconnect();
+    if (heroObserver) heroObserver.disconnect();
+  });
+
+})();
+// ==== /LANDING ====
 </script>
 </body>
 </html>
