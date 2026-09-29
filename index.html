@@ -43,7 +43,7 @@
   --info-row-text: clamp(11px, 1.5vmin, 14px);
   --place-text: clamp(12px, 1.6vmin, 15px);
   --hands-history-text: calc(clamp(12px, 1.6vmin, 15px) + 4px);
-  --raise-amount-mini-w: clamp(56px, 9vmin, 76px);
+  --raise-amount-mini-w: clamp(63px, calc(9vmin + 7px), 83px);
 
   --nav-btn: clamp(32px, 4.4vmin, 38px);
   --nav-icon-size: clamp(16px, 2.4vmin, 19px);
@@ -5611,7 +5611,9 @@ const UI = (() => {
     }
 
     function setSliderValue(v) {
+      slider.__suppressInput = true;
       slider.value = v;
+      slider.__suppressInput = false;
       updateSliderDisplay(state);
       const hero = state.players[heroIndex];
       updateCallButton(state, hero, handlers);
@@ -5651,12 +5653,15 @@ const UI = (() => {
     };
 
     slider.oninput = () => {
+      if (slider.__suppressInput) return;
       if (isSliderDisabled()) return;
       const current = Number(slider.value);
       const hero = state.players[heroIndex];
       const jumped = computeDeadZoneJump(state, hero, current, current);
       if (jumped !== current) {
+        slider.__suppressInput = true;
         slider.value = jumped;
+        slider.__suppressInput = false;
       }
       updateSliderDisplay(state);
       updateCallButton(state, hero, handlers);
@@ -5671,8 +5676,7 @@ const UI = (() => {
         const maxTarget = hero.committedThisStreet + hero.stack;
         const slider = document.getElementById('raise-slider-horiz');
         if (slider) {
-          slider.value = Math.max(Number(slider.min), Math.min(maxTarget, target));
-          updateSliderDisplay(state);
+          setSliderValue(Math.max(Number(slider.min), Math.min(maxTarget, target)));
         }
         updateCallButton(state, hero, handlers);
       };
@@ -5773,10 +5777,8 @@ const UI = (() => {
     buttons.forEach(btn => {
       let pointerDown = false;
       let startY = 0;
-      let startX = 0;
       let startSliderValue = 0;
       let dragging = false;
-      let activePointerId = null;
 
       function getSliderEl() {
         return document.getElementById('raise-slider-horiz');
@@ -5787,31 +5789,40 @@ const UI = (() => {
                el.quickPercentList.classList.contains('inactive');
       }
 
-      function onPointerDown(clientY, clientX, pointerId) {
-        if (isActionInactive()) return;
-        const slider = getSliderEl();
-        if (!slider || slider.disabled) return;
-
-        pointerDown = true;
-        dragging = false;
-        startY = clientY;
-        startX = clientX;
-        startSliderValue = Number(slider.value);
-        activePointerId = pointerId;
+      function setSliderFromDrag(slider, target) {
+        slider.__suppressInput = true;
+        slider.value = target;
+        slider.__suppressInput = false;
+        updateSliderDisplay(state);
+        const hero = state.players[heroIndex];
+        updateCallButton(state, hero, handlers);
       }
 
-      function onPointerMove(clientY) {
-        if (!pointerDown) return;
+      btn.addEventListener('pointerdown', (e) => {
         if (isActionInactive()) return;
-
         const slider = getSliderEl();
         if (!slider || slider.disabled) return;
+        e.stopPropagation();
+        pointerDown = true;
+        dragging = false;
+        startY = e.clientY;
+        startSliderValue = Number(slider.value);
+        try { btn.setPointerCapture && btn.setPointerCapture(e.pointerId); } catch (err) {}
+      });
 
-        const dy = startY - clientY;
+      btn.addEventListener('pointermove', (e) => {
+        if (!pointerDown) return;
+        if (isActionInactive()) return;
+        const slider = getSliderEl();
+        if (!slider || slider.disabled) return;
+        e.stopPropagation();
+
+        const dy = startY - e.clientY;
 
         if (!dragging) {
           if (Math.abs(dy) > DRAG_THRESHOLD) {
             dragging = true;
+            btn.__suppressClick = true;
           } else {
             return;
           }
@@ -5835,45 +5846,20 @@ const UI = (() => {
         snapped = computeDeadZoneJump(state, hero, Number(slider.value), snapped);
         snapped = Math.max(minVal, Math.min(maxVal, snapped));
 
-        slider.value = snapped;
-        updateSliderDisplay(state);
-        updateCallButton(state, hero, handlers);
-      }
-
-      function onPointerUp() {
-        if (!pointerDown) return;
-        const wasDragging = dragging;
-        pointerDown = false;
-        dragging = false;
-        activePointerId = null;
-        return wasDragging;
-      }
-
-      btn.addEventListener('pointerdown', (e) => {
-        if (isActionInactive()) return;
-        e.stopPropagation();
-        onPointerDown(e.clientY, e.clientX, e.pointerId);
-        try { btn.setPointerCapture && btn.setPointerCapture(e.pointerId); } catch (err) {}
-      });
-
-      btn.addEventListener('pointermove', (e) => {
-        if (!pointerDown) return;
-        e.stopPropagation();
-        onPointerMove(e.clientY);
+        setSliderFromDrag(slider, snapped);
       });
 
       btn.addEventListener('pointerup', (e) => {
         if (!pointerDown) return;
         e.stopPropagation();
-        const wasDragging = onPointerUp();
-        if (wasDragging) {
-          e.preventDefault();
-        }
+        pointerDown = false;
+        dragging = false;
       });
 
       btn.addEventListener('pointercancel', (e) => {
         if (!pointerDown) return;
-        onPointerUp();
+        pointerDown = false;
+        dragging = false;
       });
 
       btn.addEventListener('click', (e) => {
@@ -5889,17 +5875,12 @@ const UI = (() => {
         const maxTarget = hero.committedThisStreet + hero.stack;
         const slider = getSliderEl();
         if (slider) {
-          slider.value = Math.max(Number(slider.min), Math.min(maxTarget, target));
-          updateSliderDisplay(state);
+          setSliderFromDrag(slider, Math.max(Number(slider.min), Math.min(maxTarget, target)));
         }
         updateCallButton(state, hero, handlers);
       });
 
       btn.__suppressClick = false;
-
-      btn.addEventListener('pointerdown', () => {
-        btn.__suppressClick = false;
-      }, true);
     });
   }
 
