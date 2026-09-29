@@ -1504,6 +1504,8 @@ button.disabled {
   touch-action: none;
   pointer-events: auto;
   vertical-align: middle;
+  margin: 0;
+  padding: 0;
 }
 #raise-slider-horiz::-webkit-slider-thumb {
   -webkit-appearance: none;
@@ -1553,13 +1555,17 @@ button.disabled {
   font-weight: 800;
   white-space: nowrap;
   text-shadow: 0 1px 3px rgba(0,0,0,.95);
-  min-width: clamp(44px, 6vmin, 60px);
+  min-width: clamp(52px, 7vmin, 70px);
   text-align: center;
   background: rgba(0,0,0,.35);
   border: 1px solid #3a3530;
   border-radius: 6px;
   padding: 2px clamp(5px, 0.8vmin, 8px);
   flex-shrink: 0;
+}
+#raise-amount-mini.allin-text {
+  color: #e63946;
+  font-weight: 900;
 }
 
 #hero-buttons {
@@ -1602,6 +1608,15 @@ button.disabled {
 #btn-fold  { background: linear-gradient(180deg, #5a5a5a, #3a3a3a); }
 #btn-check { background: linear-gradient(180deg, #2a4a3a, #14261c); }
 #btn-call  { background: linear-gradient(180deg, #3a7bd5, #1e4a8a); }
+#btn-call.mode-raise {
+  background: linear-gradient(180deg, #c94b3d, #8a2a1f);
+}
+#btn-call.mode-bet {
+  background: linear-gradient(180deg, #c94b3d, #8a2a1f);
+}
+#btn-call.mode-allin {
+  background: linear-gradient(180deg, #a01f2b, #6a1018);
+}
 
 #btn-call .call-label { font-size: inherit; font-weight: 800; }
 #btn-call .call-amount {
@@ -1611,6 +1626,7 @@ button.disabled {
   margin-top: 1px;
 }
 #btn-call .call-amount:empty { display: none; }
+#btn-call .call-amount.allin-text { color: #ffffff; font-weight: 900; letter-spacing: .5px; }
 
 #quick-percent-list {
   position: absolute;
@@ -5277,7 +5293,10 @@ const UI = (() => {
       if (state && state.blinds && state.blinds.bb > 0) bb = state.blinds.bb;
       else if (state && state.levelIndex !== undefined) bb = Engine.getBlindLevel(state.levelIndex).bb;
       const bbVal = amount / bb;
-      return bbVal.toFixed(bbVal >= 10 ? 0 : 1) + ' BB';
+      if (Math.abs(bbVal - Math.round(bbVal)) < 0.001) {
+        return Math.round(bbVal) + ' BB';
+      }
+      return bbVal.toFixed(1) + ' BB';
     }
     return amount.toLocaleString('ru-RU');
   }
@@ -5312,35 +5331,110 @@ const UI = (() => {
     if (!slider) return;
     slider.value = slider.min;
     const mini = document.getElementById('raise-amount-mini');
-    if (mini) mini.textContent = '0';
+    if (mini) {
+      mini.textContent = '0';
+      mini.classList.remove('allin-text');
+    }
   }
 
   function showActions(state, heroIndex, handlers) {
     const hero = state.players[heroIndex];
     const toCall = Math.max(0, state.currentBet - hero.committedThisStreet);
     const canCheck = toCall === 0;
-    const canCall  = toCall > 0 && toCall < hero.stack;
-    const canRaise = hero.stack > toCall;
 
     setHeroActionsActive(true);
 
     el.btnFold.disabled = canCheck;
     el.btnCheck.disabled = !canCheck;
-    el.btnCall.disabled = !canCall;
-
-    if (canCall) {
-      el.callAmount.textContent = formatChips(toCall, state);
-    } else {
-      el.callAmount.textContent = '';
-    }
 
     renderQuickRaiseOptions(state, hero, toCall, null);
 
-    if (canRaise) {
-      setupHorizontalSlider(state, hero);
-    }
+    setupHorizontalSlider(state, hero, toCall);
 
     bindActionHandlers(state, heroIndex, toCall, handlers);
+
+    updateCallButton(state, hero, handlers);
+  }
+
+  function updateCallButton(state, hero, handlers) {
+    const btn = el.btnCall;
+    if (!btn) return;
+    const labelEl = btn.querySelector('.call-label');
+    const amountEl = btn.querySelector('#call-amount') || el.callAmount;
+
+    const toCall = Math.max(0, state.currentBet - hero.committedThisStreet);
+    const bb = state.blinds.bb;
+    const minRaiseTarget = state.currentBet + state.minRaise;
+    const maxTarget = hero.committedThisStreet + hero.stack;
+    const slider = document.getElementById('raise-slider-horiz');
+
+    const isPostflopNoBet = (state.street !== 'preflop') && state.currentBet === 0;
+    const isPreflopLimp = state.street === 'preflop' && state.currentBet === bb;
+
+    let mode = 'call';
+
+    if (isPostflopNoBet) {
+      mode = 'bet';
+    } else {
+      const sliderVal = slider ? Number(slider.value) : 0;
+      const isAllIn = slider && (sliderVal >= maxTarget);
+      const isRaise = slider && (sliderVal >= minRaiseTarget) && (sliderVal < maxTarget);
+
+      if (isAllIn) {
+        mode = 'allin';
+      } else if (isRaise) {
+        mode = 'raise';
+      } else if (toCall > 0) {
+        mode = 'call';
+      } else if (isPreflopLimp) {
+        mode = 'call';
+      } else {
+        mode = 'call';
+      }
+    }
+
+    btn.classList.remove('mode-raise', 'mode-bet', 'mode-allin');
+
+    if (mode === 'call') {
+      if (labelEl) labelEl.textContent = 'Call';
+      if (amountEl) {
+        amountEl.classList.remove('allin-text');
+        amountEl.textContent = toCall > 0 ? formatChips(toCall, state) : formatChips(state.blinds.bb, state);
+      }
+      if (isPreflopLimp && toCall > 0 && toCall < hero.stack) {
+        btn.disabled = false;
+      } else if (toCall > 0 && toCall < hero.stack) {
+        btn.disabled = false;
+      } else {
+        btn.disabled = true;
+      }
+    } else if (mode === 'raise') {
+      btn.classList.add('mode-raise');
+      if (labelEl) labelEl.textContent = 'Raise';
+      if (amountEl) {
+        amountEl.classList.remove('allin-text');
+        const v = slider ? Number(slider.value) : minRaiseTarget;
+        amountEl.textContent = formatChips(v, state);
+      }
+      btn.disabled = false;
+    } else if (mode === 'bet') {
+      btn.classList.add('mode-bet');
+      if (labelEl) labelEl.textContent = 'Bet';
+      if (amountEl) {
+        amountEl.classList.remove('allin-text');
+        const v = slider ? Number(slider.value) : bb;
+        amountEl.textContent = formatChips(v, state);
+      }
+      btn.disabled = false;
+    } else if (mode === 'allin') {
+      btn.classList.add('mode-allin');
+      if (labelEl) labelEl.textContent = state.street === 'preflop' ? 'Raise' : 'Bet';
+      if (amountEl) {
+        amountEl.classList.add('allin-text');
+        amountEl.textContent = 'ALL-IN';
+      }
+      btn.disabled = false;
+    }
   }
 
   function renderQuickRaiseOptions(state, hero, toCall, forceVariant) {
@@ -5369,7 +5463,6 @@ const UI = (() => {
         { label: '2 BB',   mult: 2 }
       ];
     } else {
-      const potAfterCall = state.pot + Math.min(toCall, hero.stack);
       options = [
         { label: '150%', pct: 1.50 },
         { label: '100%', pct: 1.00 },
@@ -5409,18 +5502,34 @@ const UI = (() => {
     }
   }
 
-  function setupHorizontalSlider(state, hero) {
+  function setupHorizontalSlider(state, hero, toCall) {
     const slider = document.getElementById('raise-slider-horiz');
     el.sliderHoriz = slider;
 
-    const minTarget = state.currentBet + state.minRaise;
     const maxTarget = hero.committedThisStreet + hero.stack;
-    const realMin = Math.min(minTarget, maxTarget);
+    const bb = state.blinds.bb;
+    const step = Math.max(1, Math.round(bb / 2));
+    const minRaiseTarget = state.currentBet + state.minRaise;
+
+    const isPostflopNoBet = (state.street !== 'preflop') && state.currentBet === 0;
+    const isPreflopLimp = state.street === 'preflop' && state.currentBet === bb;
+
+    let realMin;
+    if (isPreflopLimp) {
+      realMin = bb;
+    } else if (isPostflopNoBet) {
+      realMin = bb;
+    } else if (toCall > 0) {
+      realMin = state.currentBet;
+    } else {
+      realMin = Math.min(minRaiseTarget, maxTarget);
+    }
+
     const realMax = maxTarget;
 
     slider.min   = realMin;
     slider.max   = realMax;
-    slider.step  = state.blinds.bb >= 100 ? 10 : 1;
+    slider.step  = step;
     slider.value = realMin;
 
     updateSliderDisplay(state);
@@ -5430,90 +5539,101 @@ const UI = (() => {
     const slider = document.getElementById('raise-slider-horiz');
     el.sliderHoriz = slider;
     el.raiseAmountMini = document.getElementById('raise-amount-mini');
-    el.raiseAmountMini.textContent = formatChips(Number(slider.value), state);
+    const hero = state.players[state.actingIndex] || state.players.find(p => p.isHero);
+    const maxTarget = hero ? (hero.committedThisStreet + hero.stack) : Number(slider.max);
+    const v = Number(slider.value);
+    if (v >= maxTarget) {
+      el.raiseAmountMini.textContent = 'ALL-IN';
+      el.raiseAmountMini.classList.add('allin-text');
+    } else {
+      el.raiseAmountMini.textContent = formatChips(v, state);
+      el.raiseAmountMini.classList.remove('allin-text');
+    }
   }
 
   function bindActionHandlers(state, heroIndex, toCall, handlers) {
+    window.__heroHandlers = handlers;
+
     rebind(el.btnFold,  () => { if (!el.heroActions.classList.contains('inactive')) handlers.onFold(); });
     rebind(el.btnCheck, () => { if (!el.heroActions.classList.contains('inactive')) handlers.onCheck(); });
-    rebind(el.btnCall,  () => { if (!el.heroActions.classList.contains('inactive')) handlers.onCall(); });
+
+    const callBtn = el.btnCall;
+    callBtn.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (el.heroActions.classList.contains('inactive')) return;
+      triggerCallButton(state, heroIndex, handlers);
+    };
 
     const slider = document.getElementById('raise-slider-horiz');
     el.sliderHoriz = slider;
 
-    let startValue = Number(slider.value);
-    let pressedOnThumb = false;
     let sliderDragging = false;
 
     function isSliderDisabled() {
       return el.heroActions.classList.contains('inactive') || slider.disabled;
     }
 
-    function isPointOnThumb(clientX) {
+    function getSliderValueFromClientX(clientX) {
       const rect = slider.getBoundingClientRect();
       const min = Number(slider.min);
       const max = Number(slider.max);
-      const val = Number(slider.value);
-      if (max <= min) return false;
+      const stepVal = Number(slider.step) || 1;
       const thumbW = 16;
       const trackW = rect.width - thumbW;
-      const ratio = (val - min) / (max - min);
-      const thumbCenter = rect.left + thumbW / 2 + ratio * trackW;
-      return Math.abs(clientX - thumbCenter) <= thumbW * 0.9;
+      let ratio = (clientX - rect.left - thumbW / 2) / trackW;
+      ratio = Math.max(0, Math.min(1, ratio));
+      let raw = min + ratio * (max - min);
+      let snapped = Math.round((raw - min) / stepVal) * stepVal + min;
+      snapped = Math.max(min, Math.min(max, snapped));
+      return snapped;
+    }
+
+    function setSliderValue(v) {
+      slider.value = v;
+      updateSliderDisplay(state);
+      const hero = state.players[heroIndex];
+      updateCallButton(state, hero, handlers);
     }
 
     slider.onpointerdown = (e) => {
       e.stopPropagation();
       if (isSliderDisabled()) { e.preventDefault(); return; }
-      pressedOnThumb = isPointOnThumb(e.clientX);
-      if (!pressedOnThumb) {
-        e.preventDefault();
-        return;
-      }
       sliderDragging = true;
-      startValue = Number(slider.value);
       slider.classList.add('pressed');
+      slider.setPointerCapture && slider.setPointerCapture(e.pointerId);
+      const v = getSliderValueFromClientX(e.clientX);
+      setSliderValue(v);
+    };
+
+    slider.onpointermove = (e) => {
+      if (!sliderDragging) return;
+      if (isSliderDisabled()) return;
+      const v = getSliderValueFromClientX(e.clientX);
+      setSliderValue(v);
     };
 
     slider.onpointerup = (e) => {
       e.stopPropagation();
-      if (!pressedOnThumb) { pressedOnThumb = false; return; }
       slider.classList.remove('pressed');
-      pressedOnThumb = false;
-      if (!sliderDragging) return;
       sliderDragging = false;
-      if (isSliderDisabled()) return;
-      const current = Number(slider.value);
-      if (current === startValue) return;
-      const hero = state.players[heroIndex];
-      const maxTarget = hero.committedThisStreet + hero.stack;
-      if (current >= maxTarget) {
-        handlers.onAllIn();
-      } else {
-        handlers.onRaise(current);
-      }
     };
 
     slider.onpointercancel = () => {
       slider.classList.remove('pressed');
-      pressedOnThumb = false;
       sliderDragging = false;
     };
 
-    slider.onclick = (e) => { e.preventDefault(); e.stopPropagation(); };
+    slider.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
 
     slider.oninput = () => {
       if (isSliderDisabled()) return;
       updateSliderDisplay(state);
-    };
-
-    slider.ontouchstart = (e) => {
-      if (isSliderDisabled()) { e.preventDefault(); return; }
-      const t = e.touches && e.touches[0];
-      if (!t) return;
-      if (!isPointOnThumb(t.clientX)) {
-        e.preventDefault();
-      }
+      const hero = state.players[heroIndex];
+      updateCallButton(state, hero, handlers);
     };
 
     el.quickPercentList.querySelectorAll('button').forEach(btn => {
@@ -5523,13 +5643,109 @@ const UI = (() => {
         const target = Number(btn.dataset.target);
         const hero = state.players[heroIndex];
         const maxTarget = hero.committedThisStreet + hero.stack;
-        if (target >= maxTarget) {
-          handlers.onAllIn();
-        } else {
-          handlers.onRaise(target);
+        const slider = document.getElementById('raise-slider-horiz');
+        if (slider) {
+          slider.value = Math.max(Number(slider.min), Math.min(maxTarget, target));
+          updateSliderDisplay(state);
         }
+        updateCallButton(state, hero, handlers);
       };
     });
+
+    bindWheelOnZone(state, heroIndex, handlers);
+  }
+
+  function triggerCallButton(state, heroIndex, handlers) {
+    const hero = state.players[heroIndex];
+    const toCall = Math.max(0, state.currentBet - hero.committedThisStreet);
+    const bb = state.blinds.bb;
+    const maxTarget = hero.committedThisStreet + hero.stack;
+    const minRaiseTarget = state.currentBet + state.minRaise;
+    const slider = document.getElementById('raise-slider-horiz');
+    const sliderVal = slider ? Number(slider.value) : 0;
+
+    const isPostflopNoBet = (state.street !== 'preflop') && state.currentBet === 0;
+    const isPreflopLimp = state.street === 'preflop' && state.currentBet === bb;
+
+    if (isPostflopNoBet) {
+      const target = sliderVal < bb ? bb : sliderVal;
+      if (target >= maxTarget) handlers.onAllIn();
+      else handlers.onRaise(target);
+      return;
+    }
+
+    if (sliderVal >= maxTarget) {
+      handlers.onAllIn();
+      return;
+    }
+
+    if (sliderVal >= minRaiseTarget && sliderVal > state.currentBet) {
+      handlers.onRaise(sliderVal);
+      return;
+    }
+
+    if (isPreflopLimp && toCall > 0 && toCall < hero.stack) {
+      handlers.onCall();
+      return;
+    }
+
+    if (toCall > 0 && toCall < hero.stack) {
+      handlers.onCall();
+      return;
+    }
+
+    if (toCall === 0) {
+      if (sliderVal >= bb) {
+        if (sliderVal >= maxTarget) handlers.onAllIn();
+        else handlers.onRaise(sliderVal);
+      }
+      return;
+    }
+  }
+
+  function bindWheelOnZone(state, heroIndex, handlers) {
+    const zones = [
+      document.getElementById('hero-actions'),
+      document.getElementById('quick-percent-list')
+    ];
+
+    const handler = (e) => {
+      if (el.heroActions.classList.contains('inactive')) return;
+      const slider = document.getElementById('raise-slider-horiz');
+      if (!slider || slider.disabled) return;
+      e.preventDefault();
+      const hero = state.players[heroIndex];
+      const bb = state.blinds.bb;
+      const step = Math.max(1, Math.round(bb / 2));
+      const minRaiseTarget = state.currentBet + state.minRaise;
+      const currentVal = Number(slider.value);
+      const dir = e.deltaY > 0 ? -1 : 1;
+      let target = currentVal + dir * step;
+
+      const isPreflopLimp = state.street === 'preflop' && state.currentBet === bb;
+      const isPostflopNoBet = (state.street !== 'preflop') && state.currentBet === 0;
+
+      if (dir > 0 && !isPreflopLimp && !isPostflopNoBet && currentVal === state.currentBet) {
+        if (minRaiseTarget > currentVal && minRaiseTarget <= Number(slider.max)) {
+          target = minRaiseTarget;
+        }
+      }
+
+      target = Math.max(Number(slider.min), Math.min(Number(slider.max), target));
+
+      slider.value = target;
+      updateSliderDisplay(state);
+      updateCallButton(state, hero, handlers);
+    };
+
+    for (const z of zones) {
+      if (!z) continue;
+      if (z.__wheelBoundHandler) {
+        z.removeEventListener('wheel', z.__wheelBoundHandler);
+      }
+      z.__wheelBoundHandler = handler;
+      z.addEventListener('wheel', handler, { passive: false });
+    }
   }
 
   function rebind(node, fn) {
@@ -6155,7 +6371,9 @@ const UI = (() => {
     updateHandsHistoryVisibility,
     showHandsHistoryCopied,
     setHandsHistoryPressed,
-    placeHandsHistoryRow
+    placeHandsHistoryRow,
+    updateCallButton,
+    updateSliderDisplay
   };
 
 })();
@@ -6193,7 +6411,8 @@ const UI = (() => {
       stepIndex: 0,
       steps: [],
       timerId: null,
-      handSnapshot: null
+      handSnapshot: null,
+      pausedByWindow: false
     }
   };
 
@@ -6305,6 +6524,16 @@ const UI = (() => {
   function pauseReplayIfActive() {
     if (session.replay.active && !session.replay.paused) {
       pauseReplay();
+      session.replay.pausedByWindow = true;
+    }
+  }
+
+  function resumeReplayIfPausedByWindow() {
+    if (session.replay.active && session.replay.pausedByWindow) {
+      session.replay.pausedByWindow = false;
+      if (session.replay.paused) {
+        resumeReplay();
+      }
     }
   }
 
@@ -6955,6 +7184,9 @@ const UI = (() => {
         resumeGame();
       }
     }
+    if (inHistoryMode()) {
+      resumeReplayIfPausedByWindow();
+    }
   }
 
   function openGuideWithoutClosing() {
@@ -7005,6 +7237,9 @@ const UI = (() => {
     if (!session.panelsPaused && !session.trainingPaused && !UI.anyPanelOpen() && !inHistoryMode()) {
       resumeGame();
     }
+    if (inHistoryMode()) {
+      resumeReplayIfPausedByWindow();
+    }
   }
 
   function openTrainingWindow() {
@@ -7025,6 +7260,9 @@ const UI = (() => {
     UI.closeTraining();
     if (!session.panelsPaused && !session.supportPaused && !UI.anyPanelOpen() && !inHistoryMode()) {
       resumeGame();
+    }
+    if (inHistoryMode()) {
+      resumeReplayIfPausedByWindow();
     }
   }
 
@@ -7053,20 +7291,11 @@ const UI = (() => {
     if (!state) return;
     const hero = state.players[session.heroIndex];
     if (!hero) return;
-    const toCall = Math.max(0, state.currentBet - hero.committedThisStreet);
-    const amountEl = document.getElementById('call-amount');
-    if (!amountEl) return;
-    const canCall = toCall > 0 && toCall < hero.stack;
-    if (canCall) {
-      amountEl.textContent = UI.formatChips(toCall, state);
-    } else {
-      amountEl.textContent = '';
+    const handlers = window.__heroHandlers;
+    if (handlers) {
+      UI.updateCallButton(state, hero, handlers);
     }
-    const slider = document.getElementById('raise-slider-horiz');
-    const mini = document.getElementById('raise-amount-mini');
-    if (slider && mini) {
-      mini.textContent = UI.formatChips(Number(slider.value), state);
-    }
+    UI.updateSliderDisplay(state);
   }
 
   function bindSeatInteractions() {
@@ -7178,6 +7407,7 @@ const UI = (() => {
     session.panelsPaused = false;
     session.trainingPaused = false;
     session.finalShown = false;
+    session.replay.pausedByWindow = false;
 
     Model.reset();
     Meta.reset();
@@ -7219,6 +7449,7 @@ const UI = (() => {
     session.panelsPaused = false;
     session.trainingPaused = false;
     session.finalShown = false;
+    session.replay.pausedByWindow = false;
 
     Model.reset();
     Meta.reset();
@@ -7969,6 +8200,7 @@ const UI = (() => {
     }
 
     if (session.replay.paused) {
+      session.replay.pausedByWindow = false;
       resumeReplay();
     } else {
       pauseReplay();
@@ -7983,6 +8215,7 @@ const UI = (() => {
     session.replay.stepIndex = 0;
     session.replay.steps = steps;
     session.replay.handSnapshot = snap;
+    session.replay.pausedByWindow = false;
 
     UI.setHeroActionsActive(false);
     UI.hideHeroTimerActive();
@@ -8046,6 +8279,7 @@ const UI = (() => {
     const r = session.replay;
     if (!r.active) return;
     r.paused = false;
+    r.pausedByWindow = false;
     UI.setReplayButtonState('pause');
     scheduleNextReplayStep();
   }
@@ -8054,6 +8288,7 @@ const UI = (() => {
     const r = session.replay;
     r.active = false;
     r.paused = false;
+    r.pausedByWindow = false;
     clearTimeout(r.timerId);
     r.timerId = null;
     r.steps = [];
@@ -8067,6 +8302,7 @@ const UI = (() => {
     r.timerId = null;
     r.active = false;
     r.paused = false;
+    r.pausedByWindow = false;
     r.steps = [];
     r.stepIndex = 0;
     r.handSnapshot = null;
@@ -8082,7 +8318,6 @@ const UI = (() => {
     if (session.supportPaused) return;
     if (session.trainingPaused) return;
     if (UI.anyPanelOpen()) return;
-    if (inHistoryMode()) return;
 
     stopReplay(true);
     session.viewingIndex = -1;
