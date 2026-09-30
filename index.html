@@ -1490,6 +1490,7 @@ button.disabled {
   -webkit-user-select: none;
   display: flex;
   align-items: center;
+  padding-left: 8px;
 }
 
 #raise-slider-segments {
@@ -1538,13 +1539,14 @@ button.disabled {
   background: radial-gradient(circle at 35% 35%, #fff6d0, #ffcb2b 60%, #b8860b);
   border: 1px solid #8a6508;
   box-shadow: 0 2px 4px rgba(0,0,0,.7);
-  transform: translate(-50%, -50%);
+  transform: translate(0, -50%);
   pointer-events: none;
   transition: transform .08s ease, filter .08s ease;
   z-index: 2;
+  margin-left: 8px;
 }
 #raise-slider-thumb.pressed {
-  transform: translate(-50%, -50%) scale(0.85);
+  transform: translate(0, -50%) scale(0.85);
   filter: brightness(1.35);
 }
 
