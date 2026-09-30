@@ -501,15 +501,15 @@ button.disabled {
 .seat .strat-badge.hidden { display: none; }
 .seat.folded .strat-badge { opacity: 0.35; }
 
-.seat .strat-badge.pro-gto      { background: #311f3b; }
-.seat .strat-badge.pro-solver   { background: #2f1a3b; }
-.seat .strat-badge.pro-icm      { background: #2c123b; }
-.seat .strat-badge.pro-lag      { background: #290a3b; }
+.seat .strat-badge.pro-gto      { background: #5b4a7a; }
+.seat .strat-badge.pro-solver   { background: #5b4a7a; }
+.seat .strat-badge.pro-icm      { background: #5b4a7a; }
+.seat .strat-badge.pro-lag      { background: #5b4a7a; }
 
-.seat .strat-badge.vip-taglite  { background: #062a0a; }
-.seat .strat-badge.vip-loose    { background: #0e2f12; }
-.seat .strat-badge.vip-rock     { background: #13311a; }
-.seat .strat-badge.vip-maniac   { background: #18331b; }
+.seat .strat-badge.vip-taglite  { background: #3e5a80; }
+.seat .strat-badge.vip-loose    { background: #3e5a80; }
+.seat .strat-badge.vip-rock     { background: #3e5a80; }
+.seat .strat-badge.vip-maniac   { background: #3e5a80; }
 
 .seat .seat-cards {
   display: flex;
@@ -3101,6 +3101,27 @@ const Engine = (() => {
         break;
       }
 
+      case 'bet': {
+        if (state.currentBet > 0) return { ok: false, error: 'На этой улице уже есть ставка' };
+        if (p.committedThisStreet > 0) return { ok: false, error: 'Уже есть вложение' };
+        const target = action.amount;
+        if (target <= 0) return { ok: false, error: 'Ставка должна быть больше нуля' };
+        const need = target - p.committedThisStreet;
+        if (need > p.stack) return { ok: false, error: 'Недостаточно фишек' };
+        p.stack -= need; p.committedThisStreet += need;
+        p.committedTotal += need; state.pot += need;
+        state.minRaise = Math.max(state.minRaise, target);
+        state.currentBet = target; state.lastAggressorIndex = playerIndex;
+        for (const other of state.players) {
+          if (other !== p && !other.folded && !other.eliminated && !other.allIn) other.hasActedThisStreet = false;
+        }
+        p.hasActedThisStreet = true;
+        p.lastAction = (p.stack === 0) ? 'allin' : 'bet';
+        p.acted = true;
+        if (p.stack === 0) p.allIn = true;
+        break;
+      }
+
       case 'raise': {
         const target = action.amount;
         if (target <= state.currentBet) return { ok: false, error: 'Рейз меньше ставки' };
@@ -3125,9 +3146,11 @@ const Engine = (() => {
       case 'allin': {
         const pay = p.stack;
         const target = p.committedThisStreet + pay;
+        const wasBet = (state.currentBet === 0 && p.committedThisStreet === 0);
         p.stack = 0; p.committedThisStreet = target;
         p.committedTotal += pay; state.pot += pay;
-        p.allIn = true; p.hasActedThisStreet = true; p.lastAction = 'allin';
+        p.allIn = true; p.hasActedThisStreet = true;
+        p.lastAction = 'allin';
         p.acted = true;
         if (target > state.currentBet) {
           const raiseSize = target - state.currentBet;
@@ -3482,8 +3505,8 @@ const Math2 = (() => {
     }
 
     let threshold = 0.35;
-    if (actionType === 'raise' || actionType === 'allin') threshold = 0.65;
-    if (street === 'preflop' && actionType === 'raise') threshold = 0.72;
+    if (actionType === 'raise' || actionType === 'allin' || actionType === 'bet') threshold = 0.65;
+    if (street === 'preflop' && (actionType === 'raise' || actionType === 'bet')) threshold = 0.72;
     if (actionType === 'call') threshold = 0.30;
     if (actionType === 'check') threshold = 0.10;
 
@@ -3777,7 +3800,7 @@ const Model = (() => {
       let raised = false;
       for (const a of actions) {
         if (a.actionType === 'call') { s.calls++; entered = true; }
-        if (a.actionType === 'raise' || a.actionType === 'allin') { s.raises++; raised = true; entered = true; }
+        if (a.actionType === 'raise' || a.actionType === 'allin' || a.actionType === 'bet') { s.raises++; raised = true; entered = true; }
         if (a.actionType === 'fold') {
           s.folds++;
         }
@@ -4400,27 +4423,27 @@ const Bots = (() => {
       if (strength + streetBonus > 0.65) {
         const sizingFactor = texture && Texture.sizingForTexture ? Texture.sizingForTexture(texture, profile.aggression) : 0.5;
         const betSize = Math.round(pot * sizingFactor);
-        return { action: 'raise', amount: Math.min(myStack, Math.max(bb, betSize)) };
+        return { action: 'bet', amount: Math.min(myStack, Math.max(bb, betSize)) };
       }
       if (strength > 0.4 && Math.random() < profile.aggression * 0.5) {
         const betSize = Math.round(pot * 0.5);
-        return { action: 'raise', amount: Math.min(myStack, Math.max(bb, betSize)) };
+        return { action: 'bet', amount: Math.min(myStack, Math.max(bb, betSize)) };
       }
 
       if (typeMeta.useMeta && profile.proThinking) {
         if (Meta.goodBluffSpot(ctx, profile)) {
           const bluffSize = Math.round(pot * 0.65);
-          return { action: 'raise', amount: Math.min(myStack, Math.max(bb, bluffSize)) };
+          return { action: 'bet', amount: Math.min(myStack, Math.max(bb, bluffSize)) };
         }
       } else if (Math.random() < profile.bluff * 0.25 + adaptBonus) {
         const betSize = Math.round(pot * 0.6);
-        return { action: 'raise', amount: Math.min(myStack, Math.max(bb, betSize)) };
+        return { action: 'bet', amount: Math.min(myStack, Math.max(bb, betSize)) };
       }
 
       if (planAction === 'bet' || planAction === 'barrel' || planAction === 'value-bet') {
         if (profile.proThinking && strength > 0.3) {
           const betSize = Math.round(pot * 0.5);
-          return { action: 'raise', amount: Math.min(myStack, Math.max(bb, betSize)) };
+          return { action: 'bet', amount: Math.min(myStack, Math.max(bb, betSize)) };
         }
       }
       return { action: 'check', amount: 0 };
@@ -5871,11 +5894,11 @@ const UI = (() => {
 
     if (isPostflopNoBet) {
       if (sv <= cv) {
-        handlers.onRaise(cv);
+        handlers.onBet(cv);
       } else if (sv >= maxTarget) {
         handlers.onAllIn();
       } else {
-        handlers.onRaise(sv);
+        handlers.onBet(sv);
       }
       return;
     }
@@ -7037,6 +7060,7 @@ const UI = (() => {
       case 'fold':  return playerName + ': folds';
       case 'check': return playerName + ': checks';
       case 'call':  return playerName + ': calls ' + amount;
+      case 'bet':   return playerName + ': bets ' + amount;
       case 'raise': return playerName + ': raises to ' + amount;
       case 'allin': return playerName + ': is all-in ' + amount;
       default:      return playerName + ': ' + action.actionType + ' ' + amount;
@@ -7868,6 +7892,7 @@ const UI = (() => {
       onFold:  () => heroAct({ type: 'fold' }),
       onCheck: () => heroAct({ type: 'check' }),
       onCall:  () => heroAct({ type: 'call' }),
+      onBet:   (amount) => heroAct({ type: 'bet', amount }),
       onRaise: (amount) => heroAct({ type: 'raise', amount }),
       onAllIn: () => heroAct({ type: 'allin' })
     });
@@ -7936,7 +7961,7 @@ const UI = (() => {
     const state = session.state;
     const hero = state.players[session.heroIndex];
 
-    if (action.type === 'call' || action.type === 'raise' || action.type === 'allin') session.heroEntered = true;
+    if (action.type === 'call' || action.type === 'raise' || action.type === 'bet' || action.type === 'allin') session.heroEntered = true;
 
     const res = Engine.applyAction(state, session.heroIndex, action);
     if (!res.ok) {
@@ -7972,6 +7997,12 @@ const UI = (() => {
       let engineAction = botDecisionToEngineAction(decision);
       if (engineAction.type === 'check' && toCall > 0) engineAction = { type: 'fold', amount: 0 };
 
+      if (engineAction.type === 'bet') {
+        if (state.currentBet > 0) {
+          engineAction.type = 'raise';
+        }
+      }
+
       if (engineAction.type === 'raise') {
         const minTarget = state.currentBet + state.minRaise;
         const maxTarget = bot.committedThisStreet + bot.stack;
@@ -7981,6 +8012,14 @@ const UI = (() => {
         if (target <= state.currentBet) {
           engineAction = toCall > 0 ? { type: 'call', amount: toCall } : { type: 'check', amount: 0 };
         } else engineAction.amount = target;
+      }
+
+      if (engineAction.type === 'bet') {
+        const maxTarget = bot.committedThisStreet + bot.stack;
+        let target = engineAction.amount;
+        if (target <= 0) target = state.blinds.bb;
+        if (target > maxTarget) target = maxTarget;
+        engineAction.amount = target;
       }
 
       const res = Engine.applyAction(state, idx, engineAction);
@@ -8384,15 +8423,15 @@ const UI = (() => {
         pl.committedThisStreet += diff;
         pl.committedTotal += diff;
         cur.pot += diff;
-      } else if (act.actionType === 'raise') {
-        pl.lastAction = 'raise';
+      } else if (act.actionType === 'bet') {
+        pl.lastAction = 'bet';
         pl.acted = true;
         pl.stack -= diff;
         pl.committedThisStreet += diff;
         pl.committedTotal += diff;
         cur.pot += diff;
-      } else if (act.actionType === 'bet') {
-        pl.lastAction = 'bet';
+      } else if (act.actionType === 'raise') {
+        pl.lastAction = 'raise';
         pl.acted = true;
         pl.stack -= diff;
         pl.committedThisStreet += diff;
