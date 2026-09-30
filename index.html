@@ -501,15 +501,15 @@ button.disabled {
 .seat .strat-badge.hidden { display: none; }
 .seat.folded .strat-badge { opacity: 0.35; }
 
-.seat .strat-badge.pro-gto      { background: #5b4a7a; }
-.seat .strat-badge.pro-solver   { background: #5b4a7a; }
-.seat .strat-badge.pro-icm      { background: #5b4a7a; }
-.seat .strat-badge.pro-lag      { background: #5b4a7a; }
+.seat .strat-badge.pro-gto      { background: #4a3a68; }
+.seat .strat-badge.pro-solver   { background: #4a3a68; }
+.seat .strat-badge.pro-icm      { background: #4a3a68; }
+.seat .strat-badge.pro-lag      { background: #4a3a68; }
 
-.seat .strat-badge.vip-taglite  { background: #3e5a80; }
-.seat .strat-badge.vip-loose    { background: #3e5a80; }
-.seat .strat-badge.vip-rock     { background: #3e5a80; }
-.seat .strat-badge.vip-maniac   { background: #3e5a80; }
+.seat .strat-badge.vip-taglite  { background: #324a6e; }
+.seat .strat-badge.vip-loose    { background: #324a6e; }
+.seat .strat-badge.vip-rock     { background: #324a6e; }
+.seat .strat-badge.vip-maniac   { background: #324a6e; }
 
 .seat .seat-cards {
   display: flex;
@@ -753,7 +753,7 @@ button.disabled {
   position: absolute;
   top: 50%;
   left: 100%;
-  margin-left: clamp(8px, 1.2vmin, 10px);
+  margin-left: calc(clamp(8px, 1.2vmin, 10px) + 2px);
   transform: translateY(-50%);
   width: var(--hero-timer-size);
   height: var(--hero-timer-size);
@@ -799,7 +799,7 @@ button.disabled {
   position: absolute;
   top: 50%;
   left: 100%;
-  margin-left: clamp(8px, 1.2vmin, 10px);
+  margin-left: calc(clamp(8px, 1.2vmin, 10px) + 2px);
   transform: translateY(-50%);
   width: var(--hero-timer-size);
   height: var(--hero-timer-size);
@@ -4530,7 +4530,7 @@ const UI = (() => {
   const el = {};
 
   const SEAT_POSITIONS = [
-    { x: 50, y: 70, side: 'bottom', offsetY: -18 - 2 },
+    { x: 50, y: 70, side: 'bottom', offsetY: -22 },
     { x: 14, y: 56, side: 'left',   offsetY: -1 - 6 - 4 + 2 },
     { x: 14, y: 32, side: 'left',   offsetY: 4 + 1 - 2 - 2 - 2 + 2 },
     { x: 14, y: 9,  side: 'left',   offsetY: 2 + 1 + 2 },
@@ -8365,7 +8365,7 @@ const UI = (() => {
     highlightWinners(snap);
     UI.updateHistoryInfo(session.viewingIndex + 1, session.history.length, true);
     UI.setReplayButtonState('replay');
-    syncHandsHistoryVisibility();
+    UI.setHeroTimerOff();
   }
 
   function buildReplaySteps(snap) {
@@ -8593,7 +8593,7 @@ const UI = (() => {
       UI.clearWinnerHighlights();
     }
     UI.updateHistoryInfo(session.viewingIndex + 1, session.history.length, true);
-    syncHandsHistoryVisibility();
+    UI.setHeroTimerOff();
   }
 
   function scheduleNextReplayStep() {
