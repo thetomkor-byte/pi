@@ -170,6 +170,23 @@ button.disabled {
   overflow: hidden;
 }
 
+#hu-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity .35s ease;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 203, 43, 0.85),
+    inset 0 0 10px 2px rgba(255, 203, 43, 0.55),
+    inset 0 0 22px 4px rgba(255, 203, 43, 0.28);
+}
+#hu-glow.visible {
+  opacity: 1;
+}
+
 #board-area {
   position: absolute;
   top: calc(46% - 8px); left: 50%;
@@ -2153,6 +2170,7 @@ button.disabled {
   <div id="table-scene">
     <div id="poker-table-wood">
       <div id="poker-table">
+        <div id="hu-glow"></div>
         <div id="swipe-center"></div>
         <div id="board-area">
           <div id="place-center">
@@ -2386,6 +2404,7 @@ button.disabled {
         </div>
       </div>
       <div id="training-test-buttons">
+        <button id="btn-test-hu" type="button">HU</button>
         <button id="btn-test-top1" type="button">TOP-1</button>
       </div>
     </div>
@@ -4562,6 +4581,8 @@ const UI = (() => {
     el.btnCall        = document.getElementById('btn-call');
     el.callAmount     = document.getElementById('call-amount');
 
+    el.huGlow         = document.getElementById('hu-glow');
+
     el.bottomPanel    = document.getElementById('bottom-panel');
     el.guidePanel     = document.getElementById('guide-panel');
     el.guideTitle     = document.getElementById('guide-title');
@@ -4601,6 +4622,7 @@ const UI = (() => {
     el.finalFx         = document.getElementById('final-fx');
     el.championIcon    = document.getElementById('champion-icon');
     el.btnTestTop1     = document.getElementById('btn-test-top1');
+    el.btnTestHu       = document.getElementById('btn-test-hu');
 
     el.trainingPrevBtn = document.getElementById('training-prev-btn');
     el.trainingNextBtn = document.getElementById('training-next-btn');
@@ -4627,6 +4649,11 @@ const UI = (() => {
       updateBoardAreaOffset();
       alignPercentBlockBottom();
     }));
+  }
+
+  function setHuGlow(on) {
+    if (!el.huGlow) return;
+    el.huGlow.classList.toggle('visible', !!on);
   }
 
   function updateBoardAreaOffset() {
@@ -6565,7 +6592,8 @@ const UI = (() => {
     placeHandsHistoryRow,
     updateCallButton,
     rebindPercentButtonHandlers,
-    relayoutSlider
+    relayoutSlider,
+    setHuGlow
   };
 
 })();
@@ -6596,6 +6624,9 @@ const UI = (() => {
     heroTimerTimeoutId: null,
     heroTimerRemaining: 0,
     heroTimerTotal: 0,
+
+    huGlowOn: false,
+    huAutoActive: false,
 
     replay: {
       active: false,
@@ -6651,6 +6682,7 @@ const UI = (() => {
     syncHandsHistoryVisibility();
     UI.setHeroTimerZoneEnabled(true);
     UI.setHeroTimerIdle();
+    updateHuGlowFromState();
   });
 
   function cacheDom() {
@@ -6690,11 +6722,31 @@ const UI = (() => {
     el.finalFx        = document.getElementById('final-fx');
     el.championIcon   = document.getElementById('champion-icon');
     el.btnTestTop1    = document.getElementById('btn-test-top1');
+    el.btnTestHu      = document.getElementById('btn-test-hu');
     el.trainingPrevBtn = document.getElementById('training-prev-btn');
     el.trainingNextBtn = document.getElementById('training-next-btn');
     el.handsHistoryRow = document.getElementById('hands-history-row');
     el.handsHistoryLabel = document.getElementById('hands-history-label');
     el.handsHistoryCopied = document.getElementById('hands-history-copied');
+  }
+
+  function updateHuGlowFromState() {
+    let shouldShow = false;
+    if (session.huGlowOn) {
+      shouldShow = true;
+    } else if (session.huAutoActive) {
+      shouldShow = true;
+    }
+    UI.setHuGlow(shouldShow);
+  }
+
+  function checkHuAutoActivation() {
+    if (!session.state) return;
+    const alive = session.state.players.filter(p => !p.eliminated);
+    if (alive.length === 2) {
+      session.huAutoActive = true;
+    }
+    updateHuGlowFromState();
   }
 
   function syncHandsHistoryVisibility() {
@@ -7221,6 +7273,17 @@ const UI = (() => {
       }, { passive: false });
     }
 
+    if (el.btnTestHu) {
+      const onHu = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        session.huGlowOn = !session.huGlowOn;
+        updateHuGlowFromState();
+      };
+      el.btnTestHu.addEventListener('click', onHu);
+      el.btnTestHu.addEventListener('touchend', onHu, { passive: false });
+    }
+
     if (el.btnTestTop1) {
       el.btnTestTop1.addEventListener('click', (e) => {
         e.preventDefault();
@@ -7603,6 +7666,8 @@ const UI = (() => {
     session.trainingPaused = false;
     session.finalShown = false;
     session.replay.pausedByWindow = false;
+    session.huGlowOn = false;
+    session.huAutoActive = false;
 
     Model.reset();
     Meta.reset();
@@ -7621,6 +7686,7 @@ const UI = (() => {
     syncHandsHistoryVisibility();
     UI.setHeroTimerZoneEnabled(true);
     UI.setHeroTimerIdle();
+    updateHuGlowFromState();
 
     startNewSession();
   }
@@ -7645,6 +7711,7 @@ const UI = (() => {
     session.trainingPaused = false;
     session.finalShown = false;
     session.replay.pausedByWindow = false;
+    session.huAutoActive = false;
 
     Model.reset();
     Meta.reset();
@@ -7677,6 +7744,7 @@ const UI = (() => {
     syncHandsHistoryVisibility();
     UI.setHeroTimerZoneEnabled(true);
     UI.setHeroTimerIdle();
+    updateHuGlowFromState();
 
     startHand();
   }
@@ -7732,6 +7800,7 @@ const UI = (() => {
     UI.setHeroTimerIdle();
 
     syncHandsHistoryVisibility();
+    checkHuAutoActivation();
 
     processTurn();
   }
@@ -8024,6 +8093,7 @@ const UI = (() => {
       if (res.done) { finishHand(); return; }
       UI.updateSeats(state);
       UI.updateActiveHighlight(state);
+      checkHuAutoActivation();
       processTurn();
       return;
     }
@@ -8036,6 +8106,7 @@ const UI = (() => {
       refreshQuickPercentList();
       if (res.done) { finishHand(); return; }
       UI.updateSeats(state);
+      checkHuAutoActivation();
       processTurn();
       return;
     }
