@@ -748,6 +748,72 @@ button.disabled {
 }
 .seat .bet-chips.hidden { display: none; }
 
+/* Таймер внутри места героя, привязан к блоку карт */
+.seat .hero-timer-wrap {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  margin-left: clamp(8px, 1.2vmin, 10px);
+  transform: translateY(-50%);
+  width: var(--hero-timer-size);
+  height: var(--hero-timer-size);
+  pointer-events: none;
+  z-index: 30;
+  display: block;
+}
+
+.seat .hero-timer-wrap .hero-timer-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  opacity: 0.2;
+  transition: opacity .2s ease;
+}
+.seat .hero-timer-wrap.active .hero-timer-svg { opacity: 1; }
+.seat .hero-timer-wrap .timer-track {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 3.5;
+}
+.seat .hero-timer-wrap .timer-fill {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-dasharray: 100.53 100.53;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 0.95s linear;
+}
+.seat .hero-timer-wrap .timer-num {
+  fill: #fff;
+  font-size: 18px;
+  font-weight: 900;
+  text-anchor: middle;
+  dominant-baseline: central;
+  paint-order: stroke;
+  stroke: #000;
+  stroke-width: 1.5px;
+}
+
+.seat .hero-timer-zone {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  margin-left: clamp(8px, 1.2vmin, 10px);
+  transform: translateY(-50%);
+  width: var(--hero-timer-size);
+  height: var(--hero-timer-size);
+  pointer-events: auto;
+  z-index: 31;
+  background: transparent;
+  touch-action: manipulation;
+  cursor: default;
+  display: block;
+}
+.seat .hero-timer-zone.disabled {
+  pointer-events: none;
+}
+
 #support-overlay {
   position: absolute;
   inset: 0;
@@ -1321,62 +1387,6 @@ button.disabled {
   transform: scale(0.97);
   filter: brightness(1.1);
   box-shadow: 0 1px 0 #8a6508, inset 0 1px 0 rgba(255,255,255,.35);
-}
-
-#hero-timer {
-  position: absolute;
-  width: var(--hero-timer-size);
-  height: var(--hero-timer-size);
-  pointer-events: none;
-  z-index: 40;
-  display: block;
-  opacity: 0.2;
-  transition: opacity .2s ease;
-}
-#hero-timer.active { opacity: 1; }
-#hero-timer .timer-svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-#hero-timer .timer-track {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.12);
-  stroke-width: 3.5;
-}
-#hero-timer .timer-fill {
-  fill: none;
-  stroke: var(--gold);
-  stroke-width: 3.5;
-  stroke-linecap: round;
-  stroke-dasharray: 100.53 100.53;
-  stroke-dashoffset: 0;
-  transition: stroke-dashoffset 0.95s linear;
-}
-#hero-timer .timer-num {
-  fill: #fff;
-  font-size: 18px;
-  font-weight: 900;
-  text-anchor: middle;
-  dominant-baseline: central;
-  paint-order: stroke;
-  stroke: #000;
-  stroke-width: 1.5px;
-}
-
-#hero-timer-zone {
-  position: absolute;
-  width: var(--hero-timer-size);
-  height: var(--hero-timer-size);
-  pointer-events: auto;
-  z-index: 41;
-  background: transparent;
-  touch-action: manipulation;
-  cursor: default;
-  display: block;
-}
-#hero-timer-zone.disabled {
-  pointer-events: none;
 }
 
 #hero-actions {
@@ -2195,16 +2205,6 @@ button.disabled {
         </div>
 
         <div id="seats"></div>
-
-        <div id="hero-timer-zone"></div>
-
-        <div id="hero-timer">
-          <svg class="timer-svg" viewBox="0 0 40 40">
-            <circle class="timer-track" cx="20" cy="20" r="16"></circle>
-            <circle class="timer-fill" cx="20" cy="20" r="16"></circle>
-            <text class="timer-num" x="20" y="20" id="hero-timer-num">10</text>
-          </svg>
-        </div>
 
         <div id="top-round-row">
           <button id="settings-help-btn" class="round-help-btn" type="button" aria-label="Руководство">?</button>
@@ -3146,7 +3146,6 @@ const Engine = (() => {
       case 'allin': {
         const pay = p.stack;
         const target = p.committedThisStreet + pay;
-        const wasBet = (state.currentBet === 0 && p.committedThisStreet === 0);
         p.stack = 0; p.committedThisStreet = target;
         p.committedTotal += pay; state.pot += pay;
         p.allIn = true; p.hasActedThisStreet = true;
@@ -4531,14 +4530,14 @@ const UI = (() => {
   const el = {};
 
   const SEAT_POSITIONS = [
-    { x: 50, y: 70, side: 'bottom', offsetY: -18 },
-    { x: 14, y: 56, side: 'left',   offsetY: -1 - 6 - 4 },
-    { x: 14, y: 32, side: 'left',   offsetY: 4 + 1 - 2 - 2 - 2 },
-    { x: 14, y: 9,  side: 'left',   offsetY: 2 + 1 },
-    { x: 50, y: 9,  side: 'top',    offsetY: 2 + 1 },
-    { x: 86, y: 9,  side: 'right',  offsetY: 2 + 1 },
-    { x: 86, y: 32, side: 'right',  offsetY: 3 + 1 - 2 - 1 - 2 },
-    { x: 86, y: 56, side: 'right',  offsetY: 1 + 1 - 6 - 3 - 4 }
+    { x: 50, y: 70, side: 'bottom', offsetY: -18 - 2 },
+    { x: 14, y: 56, side: 'left',   offsetY: -1 - 6 - 4 + 2 },
+    { x: 14, y: 32, side: 'left',   offsetY: 4 + 1 - 2 - 2 - 2 + 2 },
+    { x: 14, y: 9,  side: 'left',   offsetY: 2 + 1 + 2 },
+    { x: 50, y: 9,  side: 'top',    offsetY: 2 + 1 + 2 },
+    { x: 86, y: 9,  side: 'right',  offsetY: 2 + 1 + 2 },
+    { x: 86, y: 32, side: 'right',  offsetY: 3 + 1 - 2 - 1 - 2 + 2 },
+    { x: 86, y: 56, side: 'right',  offsetY: 1 + 1 - 6 - 3 - 4 + 2 }
   ];
 
   const SUIT_CLASS = { s: 'suit-spades', h: 'suit-hearts', d: 'suit-diamonds', c: 'suit-clubs' };
@@ -4624,9 +4623,7 @@ const UI = (() => {
     el.hnResume       = document.getElementById('hn-resume');
     el.hnSettings     = document.getElementById('hn-settings');
 
-    el.heroTimer      = document.getElementById('hero-timer');
-    el.heroTimerZone  = document.getElementById('hero-timer-zone');
-    el.heroTimerNum   = document.getElementById('hero-timer-num');
+    el.heroTimerZone  = null;
 
     el.supportOverlay = document.getElementById('support-overlay');
     el.supportWindow  = document.getElementById('support-window');
@@ -4872,55 +4869,33 @@ const UI = (() => {
   }
 
   function placeHeroTimer() {
-    if (!el.heroTimer || !el.heroTimerZone) return;
-    const heroSeat = document.getElementById('seat-hero');
-    if (!heroSeat) {
-      el.heroTimer.style.display = 'none';
-      el.heroTimerZone.style.display = 'none';
-      return;
-    }
-    const cardsContainer = heroSeat.querySelector('.seat-cards');
-    if (!cardsContainer) {
-      el.heroTimer.style.display = 'none';
-      el.heroTimerZone.style.display = 'none';
-      return;
-    }
-    const lastCard = cardsContainer.querySelector('.card');
-    const anchorEl = cardsContainer.lastElementChild || lastCard || cardsContainer;
-
-    const tableRect = document.getElementById('poker-table').getBoundingClientRect();
-    const anchorRect = anchorEl.getBoundingClientRect();
-
-    const size = el.heroTimer.offsetWidth || 44;
-    const isDesktop = window.innerWidth >= 768;
-    const gap = isDesktop ? 10 : 8;
-    const left = anchorRect.right - tableRect.left + gap;
-    const top = anchorRect.top - tableRect.top + anchorRect.height / 2 - size / 2;
-
-    el.heroTimer.style.left = left + 'px';
-    el.heroTimer.style.top = top + 'px';
-
-    el.heroTimerZone.style.display = 'block';
-    el.heroTimerZone.style.left = left + 'px';
-    el.heroTimerZone.style.top = top + 'px';
+    /* Таймер теперь живёт внутри места героя. Ничего пересчитывать не нужно. */
   }
 
   function showHeroTimer(seconds) {
-    if (!el.heroTimer) return;
-    el.heroTimer.classList.add('active');
+    const heroSeat = document.getElementById('seat-hero');
+    if (!heroSeat) return;
+    const wrap = heroSeat.querySelector('.hero-timer-wrap');
+    if (!wrap) return;
+    wrap.classList.add('active');
     updateHeroTimer(seconds, seconds);
-    placeHeroTimer();
   }
 
   function hideHeroTimerActive() {
-    if (!el.heroTimer) return;
-    el.heroTimer.classList.remove('active');
+    const heroSeat = document.getElementById('seat-hero');
+    if (!heroSeat) return;
+    const wrap = heroSeat.querySelector('.hero-timer-wrap');
+    if (!wrap) return;
+    wrap.classList.remove('active');
   }
 
   function setHeroTimerIdle() {
-    if (!el.heroTimer) return;
-    const fill = el.heroTimer.querySelector('.timer-fill');
-    const num = el.heroTimerNum;
+    const heroSeat = document.getElementById('seat-hero');
+    if (!heroSeat) return;
+    const wrap = heroSeat.querySelector('.hero-timer-wrap');
+    if (!wrap) return;
+    const fill = wrap.querySelector('.timer-fill');
+    const num = wrap.querySelector('.timer-num');
     const seconds = Number(settings.turnTime) || 0;
     const circumference = 2 * Math.PI * 16;
     if (seconds <= 0) {
@@ -4930,29 +4905,39 @@ const UI = (() => {
       if (fill) fill.style.strokeDashoffset = '0';
       if (num) num.textContent = '10';
     }
-    el.heroTimer.classList.remove('active');
+    wrap.classList.remove('active');
   }
 
   function setHeroTimerOff() {
-    if (!el.heroTimer) return;
-    const fill = el.heroTimer.querySelector('.timer-fill');
-    const num = el.heroTimerNum;
+    const heroSeat = document.getElementById('seat-hero');
+    if (!heroSeat) return;
+    const wrap = heroSeat.querySelector('.hero-timer-wrap');
+    if (!wrap) return;
+    const fill = wrap.querySelector('.timer-fill');
+    const num = wrap.querySelector('.timer-num');
     const circumference = 2 * Math.PI * 16;
     if (fill) fill.style.strokeDashoffset = String(circumference);
     if (num) num.textContent = '0';
-    el.heroTimer.classList.remove('active');
-    if (el.heroTimerZone) el.heroTimerZone.classList.add('disabled');
+    wrap.classList.remove('active');
+    const zone = heroSeat.querySelector('.hero-timer-zone');
+    if (zone) zone.classList.add('disabled');
   }
 
   function setHeroTimerZoneEnabled(enabled) {
-    if (!el.heroTimerZone) return;
-    el.heroTimerZone.classList.toggle('disabled', !enabled);
+    const heroSeat = document.getElementById('seat-hero');
+    if (!heroSeat) return;
+    const zone = heroSeat.querySelector('.hero-timer-zone');
+    if (!zone) return;
+    zone.classList.toggle('disabled', !enabled);
   }
 
   function updateHeroTimer(currentSec, totalSec) {
-    if (!el.heroTimer) return;
-    const fill = el.heroTimer.querySelector('.timer-fill');
-    const num = el.heroTimerNum;
+    const heroSeat = document.getElementById('seat-hero');
+    if (!heroSeat) return;
+    const wrap = heroSeat.querySelector('.hero-timer-wrap');
+    if (!wrap) return;
+    const fill = wrap.querySelector('.timer-fill');
+    const num = wrap.querySelector('.timer-num');
     if (!fill || !num) return;
     num.textContent = String(Math.max(0, currentSec));
 
@@ -4975,10 +4960,10 @@ const UI = (() => {
     updatePlaceCenter(state);
     updateBoardAreaOffset();
     alignPercentBlockBottom();
-    placeHeroTimer();
     placeTopRoundRow();
     placeGuidePanel();
     placeHandsHistoryRow();
+    bindTimerZoneTap();
   }
 
   function recalcSeatAssignments(state) {
@@ -5024,7 +5009,32 @@ const UI = (() => {
 
     const isTopLayout = player.isHero || pos.side === 'top';
 
-    if (isTopLayout) {
+    if (player.isHero) {
+      seat.innerHTML = `
+        <div class="strat-badge hidden" data-role="strat"></div>
+        <div class="dealer-chip hidden" data-role="btn">D</div>
+        <div class="seat-cards" data-role="cards">
+          <div class="hero-timer-wrap" data-role="timer">
+            <svg class="hero-timer-svg" viewBox="0 0 40 40">
+              <circle class="timer-track" cx="20" cy="20" r="16"></circle>
+              <circle class="timer-fill" cx="20" cy="20" r="16"></circle>
+              <text class="timer-num" x="20" y="20">10</text>
+            </svg>
+          </div>
+        </div>
+        <div class="hero-timer-zone" data-role="timer-zone"></div>
+        <div class="pos-row">
+          <span class="pos-name" data-role="pos">—</span>
+        </div>
+        <div class="stack-wrap">
+          <span class="stack" data-role="stack"></span>
+          <span class="delta-text hidden" data-role="delta"></span>
+        </div>
+        <div class="action-badge hidden" data-role="action"></div>
+        <div class="winner-badge hidden" data-role="winner">WIN</div>
+        <div class="bet-chips hidden" data-role="bet"></div>
+      `;
+    } else if (isTopLayout) {
       seat.innerHTML = `
         <div class="strat-badge hidden" data-role="strat"></div>
         <div class="dealer-chip hidden" data-role="btn">D</div>
@@ -5075,6 +5085,7 @@ const UI = (() => {
       if (!seat) {
         const newSeat = createSeatElement(p, state);
         if (newSeat) el.seats.appendChild(newSeat);
+        bindTimerZoneTap();
         continue;
       }
 
@@ -5114,10 +5125,10 @@ const UI = (() => {
     updatePlaceCenter(state);
     updateBoardAreaOffset();
     alignPercentBlockBottom();
-    placeHeroTimer();
     placeTopRoundRow();
     placeGuidePanel();
     placeHandsHistoryRow();
+    bindTimerZoneTap();
   }
 
   function renderActionBadge(p, seat) {
@@ -5205,7 +5216,16 @@ const UI = (() => {
     const seat = document.getElementById(`seat-${player.id}`);
     if (!seat) return;
     const cardsEl = seat.querySelector('[data-role="cards"]');
-    cardsEl.innerHTML = '';
+    if (!cardsEl) return;
+
+    const existingTimer = cardsEl.querySelector('[data-role="timer"]');
+
+    Array.from(cardsEl.children).forEach(child => {
+      if (child.getAttribute('data-role') !== 'timer') {
+        cardsEl.removeChild(child);
+      }
+    });
+
     if (player.holeCards.length === 0) return;
 
     let show;
@@ -5222,16 +5242,21 @@ const UI = (() => {
       show = revealAll || player.isHero || player.revealed === true;
     }
 
+    const nodes = [];
     if (show) {
-      for (const c of player.holeCards) cardsEl.appendChild(createCardElement(c));
+      for (const c of player.holeCards) nodes.push(createCardElement(c));
     } else if (!player.folded || player.eliminated) {
-      for (let i = 0; i < player.holeCards.length; i++) cardsEl.appendChild(createCardBack());
+      for (let i = 0; i < player.holeCards.length; i++) nodes.push(createCardBack());
     } else {
       for (let i = 0; i < player.holeCards.length; i++) {
         const cb = createCardBack();
         cb.style.opacity = '0.35';
-        cardsEl.appendChild(cb);
+        nodes.push(cb);
       }
+    }
+
+    for (const node of nodes) {
+      cardsEl.appendChild(node);
     }
   }
 
@@ -6582,6 +6607,32 @@ const UI = (() => {
     layoutSliderThumb();
   }
 
+  function bindTimerZoneTap() {
+    const heroSeat = document.getElementById('seat-hero');
+    if (!heroSeat) return;
+    const zone = heroSeat.querySelector('.hero-timer-zone');
+    if (!zone) return;
+    if (zone.__bound) return;
+    zone.__bound = true;
+
+    zone.addEventListener('touchend', (e) => {
+      if (zone.classList.contains('disabled')) return;
+      e.stopPropagation();
+      e.preventDefault();
+      if (typeof window.__ptToggleTurnTime === 'function') window.__ptToggleTurnTime();
+    }, { passive: false });
+
+    zone.addEventListener('click', (e) => {
+      if (e.pointerType && e.pointerType !== 'mouse') return;
+      if (zone.classList.contains('disabled')) return;
+      if (typeof window.__ptRegisterDoubleTap === 'function' && window.__ptRegisterDoubleTap(zone)) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (typeof window.__ptToggleTurnTime === 'function') window.__ptToggleTurnTime();
+      }
+    });
+  }
+
   return {
     settings, init, el,
     renderTable, updateSeats, updateBoard, updatePot, updateLevel,
@@ -6616,7 +6667,8 @@ const UI = (() => {
     updateCallButton,
     rebindPercentButtonHandlers,
     relayoutSlider,
-    setHuGlow
+    setHuGlow,
+    bindTimerZoneTap
   };
 
 })();
@@ -6685,7 +6737,6 @@ const UI = (() => {
     window.addEventListener('resize', () => {
       UI.updateBoardAreaOffset();
       UI.alignPercentBlockBottom();
-      UI.placeHeroTimer();
       UI.placeTopRoundRow();
       UI.placeGuidePanel();
       UI.placeHandsHistoryRow();
@@ -6695,7 +6746,6 @@ const UI = (() => {
       setTimeout(() => {
         UI.updateBoardAreaOffset();
         UI.alignPercentBlockBottom();
-        UI.placeHeroTimer();
         UI.placeTopRoundRow();
         UI.placeGuidePanel();
         UI.placeHandsHistoryRow();
@@ -6731,7 +6781,6 @@ const UI = (() => {
     el.tgBtn           = document.getElementById('tg-btn');
     el.app            = document.getElementById('app');
     el.seats          = document.getElementById('seats');
-    el.heroTimerZone  = document.getElementById('hero-timer-zone');
     el.supportOverlay = document.getElementById('support-overlay');
     el.supportWindow  = document.getElementById('support-window');
     el.belcardStack   = document.getElementById('belcard-stack');
@@ -6752,6 +6801,9 @@ const UI = (() => {
     el.handsHistoryLabel = document.getElementById('hands-history-label');
     el.handsHistoryCopied = document.getElementById('hands-history-copied');
   }
+
+  window.__ptToggleTurnTime = function() { toggleTurnTimeOption(); };
+  window.__ptRegisterDoubleTap = function(node) { return registerDoubleTap(node); };
 
   function updateHuGlowFromState() {
     let shouldShow = false;
@@ -7126,7 +7178,7 @@ const UI = (() => {
               target.closest('#start-overlay') ||
               target.closest('#hero-actions') ||
               target.closest('#quick-percent-list') ||
-              target.closest('#hero-timer-zone') ||
+              target.closest('.hero-timer-zone') ||
               target.closest('#support-overlay') ||
               target.closest('#final-overlay') ||
               target.closest('#top-round-row') ||
@@ -7200,25 +7252,6 @@ const UI = (() => {
       };
       el.guideScrollTop.addEventListener('click', goTop);
       el.guideScrollTop.addEventListener('touchend', goTop, { passive: false });
-    }
-
-    if (el.heroTimerZone) {
-      el.heroTimerZone.addEventListener('touchend', (e) => {
-        if (el.heroTimerZone.classList.contains('disabled')) return;
-        e.stopPropagation();
-        e.preventDefault();
-        toggleTurnTimeOption();
-      }, { passive: false });
-
-      el.heroTimerZone.addEventListener('click', (e) => {
-        if (e.pointerType && e.pointerType !== 'mouse') return;
-        if (el.heroTimerZone.classList.contains('disabled')) return;
-        if (registerDoubleTap(el.heroTimerZone)) {
-          e.preventDefault();
-          e.stopPropagation();
-          toggleTurnTimeOption();
-        }
-      });
     }
 
     if (el.supportOverlay) {
@@ -7583,6 +7616,7 @@ const UI = (() => {
     if (!el.seats) return;
 
     el.seats.addEventListener('touchend', (e) => {
+      if (e.target.closest('.hero-timer-zone')) return;
       const stackEl = e.target.closest('.stack');
       const cardsEl = e.target.closest('.seat-cards');
 
