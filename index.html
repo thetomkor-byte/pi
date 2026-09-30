@@ -5722,7 +5722,6 @@ const UI = (() => {
 
     let sliderDragging = false;
     let anchorSide = 0;
-    let startSliderValue = 0;
 
     function isSliderDisabled() {
       return el.heroActions.classList.contains('inactive') || slider.disabled;
@@ -5786,7 +5785,6 @@ const UI = (() => {
       if (isSliderDisabled()) { e.preventDefault(); return; }
       sliderDragging = true;
       slider.classList.add('pressed');
-      startSliderValue = Number(slider.value);
       const currentVal = Number(slider.value);
       const bounds = getDeadZoneBounds();
       if (bounds) {
