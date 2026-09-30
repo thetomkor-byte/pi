@@ -112,10 +112,6 @@ button.disabled {
   cursor: default;
 }
 
-/* ============================================================
-   ЗАГЛУШКА ПОД CSS ПРИЛОЖЕНИЯ
-   ============================================================ */
-
 /* ==== POKER TRAINER: APP CSS ==== */
 /* Сюда вставляется вся секция стилей приложения. */
 /* ==== /POKER TRAINER: APP CSS ==== */
@@ -818,13 +814,20 @@ button.disabled {
   border-radius: inherit;
 }
 
-/* Иконки стали крупнее на 4px: было 28/26 → стало 32/30 */
+/* Базовый размер — 36x36 (для конверта).
+   Самолётик (tg) получает 40x40 через отдельное правило ниже. */
 .lnd-contact-btn .lnd-contact-svg {
   position: relative;
   z-index: 2;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: block;
+}
+
+/* Самолётик на 8px больше базового: 36 + 4 = 40 (апнули с прежних 32 на 8) */
+.lnd-contact-btn.tg .lnd-contact-svg {
+  width: 40px;
+  height: 40px;
 }
 
 /* Обе плитки — один и тот же насыщенно-синий градиент (как у почты) */
@@ -862,7 +865,9 @@ button.disabled {
 
 @media (max-width: 480px) {
   .lnd-contact-btn { width: 48px; height: 48px; min-width: 48px; min-height: 48px; }
-  .lnd-contact-btn .lnd-contact-svg { width: 30px; height: 30px; }
+  /* Мобильные: конверт 34x34, самолётик 38x38 */
+  .lnd-contact-btn.mail .lnd-contact-svg { width: 34px; height: 34px; }
+  .lnd-contact-btn.tg .lnd-contact-svg { width: 38px; height: 38px; }
 }
 
 /* ---------- ДЕМО-СТОЛ ---------- */
@@ -1484,9 +1489,7 @@ button.disabled {
 <div id="app">
 
   <!-- ==== POKER TRAINER: APP HTML ==== -->
-  <!-- Здесь должны быть все блоки приложения: #table-scene, #tap-close,
-       #guide-panel, #training-overlay, #bottom-panel, #support-overlay,
-       #final-overlay, #start-overlay — ровно как в исходном файле. -->
+  <!-- Здесь должны быть все блоки приложения. -->
   <!-- ==== /POKER TRAINER: APP HTML ==== -->
 
 
@@ -2014,17 +2017,15 @@ button.disabled {
 
 <script>
 // ==== POKER TRAINER: WINDOW INIT ====
-// Сюда вставляется первая маленькая инициализация приложения.
 (function() {
-  // try { ... } catch (e) {}
+  // Сюда вставляется первая маленькая инициализация приложения.
 })();
 // ==== /POKER TRAINER: WINDOW INIT ====
 </script>
 
 <script>
 // ==== POKER TRAINER: APP JS ====
-// Сюда вставляется весь JS приложения (Engine, Math2, ICM, Texture,
-// Plan, Model, Meta, Bots, UI и MAIN-сессия).
+// Сюда вставляется весь JS приложения.
 // ==== /POKER TRAINER: APP JS ====
 </script>
 
@@ -2041,8 +2042,6 @@ button.disabled {
 
   var entered = false;
   var hideTimer = null;
-
-  // --- Demo table ---
 
   var DEMO_HANDS = 4;
 
@@ -2431,8 +2430,6 @@ button.disabled {
     demoRunHand();
   }
 
-  // --- Landing visibility & navigation ---
-
   function enterApp() {
     if (entered) return;
     entered = true;
@@ -2480,8 +2477,6 @@ button.disabled {
       enterApp();
     });
   }
-
-  // --- Footer contacts ---
 
   function bindFooterContacts() {
     var tg = document.getElementById('lnd-contact-tg');
