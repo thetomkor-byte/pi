@@ -5559,6 +5559,17 @@ const UI = (() => {
     updateCallButton(state, hero, handlers);
   }
 
+  function snapToStep(state, rawTarget) {
+    const slider = document.getElementById('raise-slider-horiz');
+    if (!slider) return rawTarget;
+    const minVal = Number(slider.min);
+    const maxVal = Number(slider.max);
+    const step = Math.max(1, Math.round(state.blinds.bb / 2));
+    let snapped = Math.round((rawTarget - minVal) / step) * step + minVal;
+    snapped = Math.max(minVal, Math.min(maxVal, snapped));
+    return snapped;
+  }
+
   function bindPercentButtonPointerHandlers(state, heroIndex, handlers) {
     if (!el.quickPercentList) return;
 
@@ -5567,7 +5578,6 @@ const UI = (() => {
       let pointerDown = false;
       let startY = 0;
       let startSliderValue = 0;
-      let anchorSide = 0;
 
       function getSliderEl() {
         return document.getElementById('raise-slider-horiz');
@@ -5578,47 +5588,6 @@ const UI = (() => {
                el.quickPercentList.classList.contains('inactive');
       }
 
-      function getDeadZoneBounds() {
-        const slider = getSliderEl();
-        if (!slider) return null;
-        const hero = state.players[heroIndex];
-        const bb = state.blinds.bb;
-        const isPreflopLimp = state.street === 'preflop' && state.currentBet === bb;
-        const isPostflopNoBet = (state.street !== 'preflop') && state.currentBet === 0;
-        if (isPreflopLimp || isPostflopNoBet) return null;
-        const callAmt = state.currentBet;
-        const minRaiseTarget = state.currentBet + state.minRaise;
-        const maxTarget = hero.committedThisStreet + hero.stack;
-        if (minRaiseTarget > maxTarget) return null;
-        if (callAmt >= minRaiseTarget) return null;
-        return { callAmt, minRaiseTarget };
-      }
-
-      function resolveTarget(rawTarget) {
-        const slider = getSliderEl();
-        if (!slider) return rawTarget;
-        const minVal = Number(slider.min);
-        const maxVal = Number(slider.max);
-        const step = Math.max(1, Math.round(state.blinds.bb / 2));
-
-        let snapped = Math.round((rawTarget - minVal) / step) * step + minVal;
-        snapped = Math.max(minVal, Math.min(maxVal, snapped));
-
-        const bounds = getDeadZoneBounds();
-        if (!bounds) return snapped;
-
-        if (snapped > bounds.callAmt && snapped < bounds.minRaiseTarget) {
-          if (anchorSide > 0) return bounds.minRaiseTarget;
-          if (anchorSide < 0) return bounds.callAmt;
-          return snapped;
-        }
-
-        if (snapped >= bounds.minRaiseTarget) anchorSide = 1;
-        else if (snapped <= bounds.callAmt) anchorSide = -1;
-
-        return snapped;
-      }
-
       btn.addEventListener('pointerdown', (e) => {
         if (isActionInactive()) return;
         const slider = getSliderEl();
@@ -5627,9 +5596,7 @@ const UI = (() => {
         pointerDown = true;
         startY = e.clientY;
         startSliderValue = Number(slider.value);
-        anchorSide = 0;
         btn.__suppressClick = false;
-        btn.__dragging = false;
         try { btn.setPointerCapture && btn.setPointerCapture(e.pointerId); } catch (err) {}
       });
 
@@ -5643,7 +5610,6 @@ const UI = (() => {
         const dy = startY - e.clientY;
         if (Math.abs(dy) < 1) return;
 
-        btn.__dragging = true;
         btn.__suppressClick = true;
 
         const rect = slider.getBoundingClientRect();
@@ -5654,10 +5620,10 @@ const UI = (() => {
 
         const deltaUnits = (dy / widthPx) * range;
         const rawTarget = startSliderValue + deltaUnits;
-        const resolved = resolveTarget(rawTarget);
+        const snapped = snapToStep(state, rawTarget);
 
         const hero = state.players[heroIndex];
-        applySliderTarget(state, hero, handlers, resolved);
+        applySliderTarget(state, hero, handlers, snapped);
       });
 
       btn.addEventListener('pointerup', (e) => {
@@ -5676,7 +5642,6 @@ const UI = (() => {
           e.preventDefault();
           e.stopPropagation();
           btn.__suppressClick = false;
-          btn.__dragging = false;
           return;
         }
         if (isActionInactive()) return;
@@ -5691,7 +5656,6 @@ const UI = (() => {
       });
 
       btn.__suppressClick = false;
-      btn.__dragging = false;
     });
 
     percentButtonsContext = { state, heroIndex, handlers };
@@ -5721,42 +5685,9 @@ const UI = (() => {
     el.sliderHoriz = slider;
 
     let sliderDragging = false;
-    let anchorSide = 0;
 
     function isSliderDisabled() {
       return el.heroActions.classList.contains('inactive') || slider.disabled;
-    }
-
-    function getDeadZoneBounds() {
-      const hero = state.players[heroIndex];
-      const bb = state.blinds.bb;
-      const isPreflopLimp = state.street === 'preflop' && state.currentBet === bb;
-      const isPostflopNoBet = (state.street !== 'preflop') && state.currentBet === 0;
-      if (isPreflopLimp || isPostflopNoBet) return null;
-      const callAmt = state.currentBet;
-      const minRaiseTarget = state.currentBet + state.minRaise;
-      const maxTarget = hero.committedThisStreet + hero.stack;
-      if (minRaiseTarget > maxTarget) return null;
-      if (callAmt >= minRaiseTarget) return null;
-      return { callAmt, minRaiseTarget };
-    }
-
-    function resolveTarget(rawTarget) {
-      const min = Number(slider.min);
-      const max = Number(slider.max);
-      const stepVal = Math.max(1, Math.round(state.blinds.bb / 2));
-      let snapped = Math.round((rawTarget - min) / stepVal) * stepVal + min;
-      snapped = Math.max(min, Math.min(max, snapped));
-      const bounds = getDeadZoneBounds();
-      if (!bounds) return snapped;
-      if (snapped > bounds.callAmt && snapped < bounds.minRaiseTarget) {
-        if (anchorSide > 0) return bounds.minRaiseTarget;
-        if (anchorSide < 0) return bounds.callAmt;
-        return snapped;
-      }
-      if (snapped >= bounds.minRaiseTarget) anchorSide = 1;
-      else if (snapped <= bounds.callAmt) anchorSide = -1;
-      return snapped;
     }
 
     function getSliderValueFromClientX(clientX) {
@@ -5768,7 +5699,7 @@ const UI = (() => {
       let ratio = (clientX - rect.left - thumbW / 2) / trackW;
       ratio = Math.max(0, Math.min(1, ratio));
       const raw = min + ratio * (max - min);
-      return resolveTarget(raw);
+      return snapToStep(state, raw);
     }
 
     function setSliderProgrammatically(v) {
@@ -5785,15 +5716,6 @@ const UI = (() => {
       if (isSliderDisabled()) { e.preventDefault(); return; }
       sliderDragging = true;
       slider.classList.add('pressed');
-      const currentVal = Number(slider.value);
-      const bounds = getDeadZoneBounds();
-      if (bounds) {
-        if (currentVal >= bounds.minRaiseTarget) anchorSide = 1;
-        else if (currentVal <= bounds.callAmt) anchorSide = -1;
-        else anchorSide = 0;
-      } else {
-        anchorSide = 0;
-      }
       slider.setPointerCapture && slider.setPointerCapture(e.pointerId);
       const v = getSliderValueFromClientX(e.clientX);
       setSliderProgrammatically(v);
@@ -5826,10 +5748,10 @@ const UI = (() => {
       if (slider.__suppressInput) return;
       if (isSliderDisabled()) return;
       const current = Number(slider.value);
-      const resolved = resolveTarget(current);
-      if (resolved !== current) {
+      const snapped = snapToStep(state, current);
+      if (snapped !== current) {
         slider.__suppressInput = true;
-        slider.value = resolved;
+        slider.value = snapped;
         slider.__suppressInput = false;
       }
       updateSliderDisplay(state);
@@ -5906,7 +5828,6 @@ const UI = (() => {
       const currentVal = Number(slider.value);
       const dir = e.deltaY > 0 ? -1 : 1;
       let target = currentVal + dir * step;
-      target = computeDeadZoneJump(state, hero, currentVal, target);
       target = Math.max(Number(slider.min), Math.min(Number(slider.max), target));
       slider.__suppressInput = true;
       slider.value = target;
@@ -5923,29 +5844,6 @@ const UI = (() => {
       z.__wheelBoundHandler = handler;
       z.addEventListener('wheel', handler, { passive: false });
     }
-  }
-
-  function computeDeadZoneJump(state, hero, currentVal, rawTarget) {
-    if (!hero) return rawTarget;
-    const bb = state.blinds.bb;
-    const minRaiseTarget = state.currentBet + state.minRaise;
-    const maxTarget = hero.committedThisStreet + hero.stack;
-
-    const isPreflopLimp = state.street === 'preflop' && state.currentBet === bb;
-    const isPostflopNoBet = (state.street !== 'preflop') && state.currentBet === 0;
-
-    if (isPreflopLimp || isPostflopNoBet) return rawTarget;
-
-    const callAmt = state.currentBet;
-    if (minRaiseTarget > maxTarget) return rawTarget;
-    if (callAmt >= minRaiseTarget) return rawTarget;
-
-    const inDeadZone = (rawTarget > callAmt && rawTarget < minRaiseTarget);
-    if (!inDeadZone) return rawTarget;
-
-    if (rawTarget > currentVal) return minRaiseTarget;
-    if (rawTarget < currentVal) return callAmt;
-    return rawTarget;
   }
 
   function rebind(node, fn) {
