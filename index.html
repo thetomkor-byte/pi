@@ -19,7 +19,6 @@
 <style>
 /* ============================================================
    БАЗОВЫЕ ПЕРЕМЕННЫЕ И СБРОС
-   (эти переменные приложение тоже использует — оставляем как есть)
    ============================================================ */
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -115,29 +114,11 @@ button.disabled {
 
 /* ============================================================
    ЗАГЛУШКА ПОД CSS ПРИЛОЖЕНИЯ
-   ------------------------------------------------------------
-   Сюда нужно вставить ВСЮ существующую секцию стилей приложения
-   из его <style> — то есть всё, что было до секции /* ==== LANDING ==== *\/.
-   Это включает (не ограничиваясь):
-     - стили #app, #table-scene, #poker-table-wood, #poker-table
-     - стили #board-area, карт .card, бейджей .strat-badge, чипов .dealer-chip
-     - стили мест .seat, .hero, .stack, .bet-chips, .winner-badge, .action-badge
-     - стили #hero-actions, слайдера, #hero-buttons, #quick-percent-list
-     - стили #bottom-panel, #guide-panel, #training-overlay
-     - стили #support-overlay, .belcard-stack, .belcard, кнопок копирования
-     - стили #final-overlay, #champion-icon, .firework
-     - стили #start-overlay, .start-card, #btn-start
-     - все media-запросы, относящиеся к приложению
    ============================================================ */
 
 /* ==== POKER TRAINER: APP CSS ==== */
-
-/* ============================================================
-   БАЗОВЫЕ ПРАВИЛА ДЛЯ #app
-   (приложение рендерится в этот контейнер; пока он пустой —
-    просто пустой чёрный слой, никак не мешает лендингу,
-    потому что лендинг выше по z-index)
-   ============================================================ */
+/* Сюда вставляется вся секция стилей приложения. */
+/* ==== /POKER TRAINER: APP CSS ==== */
 
 #app {
   position: fixed;
@@ -151,8 +132,6 @@ button.disabled {
   overflow: hidden;
   background: var(--bg-bottom);
 }
-
-/* ==== /POKER TRAINER: APP CSS ==== */
 
 
 /* ==== LANDING ==== */
@@ -839,18 +818,17 @@ button.disabled {
   border-radius: inherit;
 }
 
+/* Иконки стали крупнее на 4px: было 28/26 → стало 32/30 */
 .lnd-contact-btn .lnd-contact-svg {
   position: relative;
   z-index: 2;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   display: block;
 }
 
-.lnd-contact-btn.tg {
-  background: linear-gradient(180deg, #37aee2 0%, #1e96c8 55%, #0e7bb0 100%);
-}
-
+/* Обе плитки — один и тот же насыщенно-синий градиент (как у почты) */
+.lnd-contact-btn.tg,
 .lnd-contact-btn.mail {
   background: linear-gradient(180deg, #4aa8ff 0%, #1f7fe0 55%, #0b5fb3 100%);
 }
@@ -884,7 +862,7 @@ button.disabled {
 
 @media (max-width: 480px) {
   .lnd-contact-btn { width: 48px; height: 48px; min-width: 48px; min-height: 48px; }
-  .lnd-contact-btn .lnd-contact-svg { width: 26px; height: 26px; }
+  .lnd-contact-btn .lnd-contact-svg { width: 30px; height: 30px; }
 }
 
 /* ---------- ДЕМО-СТОЛ ---------- */
@@ -1503,29 +1481,6 @@ button.disabled {
 </head>
 <body>
 
-<!-- ============================================================
-     ЗАГЛУШКА ПОД HTML ПРИЛОЖЕНИЯ
-     ------------------------------------------------------------
-     Сюда нужно вставить весь HTML приложения внутри <div id="app">
-     ровно так, как он был в исходном файле:
-
-       <div id="app">
-         <div id="table-scene">…</div>
-         <div id="tap-close"></div>
-         <div id="guide-panel">…</div>
-         <div id="training-overlay">…</div>
-         <div id="bottom-panel">…</div>
-         <div id="support-overlay">…</div>
-         <div id="final-overlay">…</div>
-         <div id="start-overlay">…</div>
-       </div>
-
-     Лендинг (#landing) должен оказаться ВНУТРИ #app,
-     сразу после #start-overlay — чтобы стили лендинга и приложения
-     работали в одном контексте и лендинг перекрывал приложение
-     по z-index: 500.
-     ============================================================ -->
-
 <div id="app">
 
   <!-- ==== POKER TRAINER: APP HTML ==== -->
@@ -2057,20 +2012,9 @@ button.disabled {
 
 </div>
 
-<!-- ============================================================
-     ЗАГЛУШКИ ПОД СКРИПТЫ ПРИЛОЖЕНИЯ
-     ============================================================ -->
-
 <script>
 // ==== POKER TRAINER: WINDOW INIT ====
-// Сюда вставляется первая маленькая инициализация приложения:
-//   - console.warn / защита кода от копирования
-//   - отключение контекстного меню, selectstart, dragstart
-//   - блокировка F12 / Ctrl+Shift+I / Ctrl+U / Ctrl+S / Ctrl+A
-//   - viewport-lock: принудительная установка meta viewport,
-//     запрет pinch-zoom, gesturestart/gesturechange/gestureend,
-//     visualViewport-фиксация, resetZoomToDefault и т.п.
-// Ниже — пустой каркас IIFE, замените его на оригинальные блоки.
+// Сюда вставляется первая маленькая инициализация приложения.
 (function() {
   // try { ... } catch (e) {}
 })();
@@ -2079,21 +2023,8 @@ button.disabled {
 
 <script>
 // ==== POKER TRAINER: APP JS ====
-// Сюда вставляется весь JS приложения в том же порядке, что и в исходном файле:
-//   - const Engine = (() => { ... })();
-//   - const Math2  = (() => { ... })();
-//   - const ICM    = (() => { ... })();
-//   - const Texture= (() => { ... })();
-//   - const Plan   = (() => { ... })();
-//   - const Model  = (() => { ... })();
-//   - const Meta   = (() => { ... })();
-//   - const Bots   = (() => { ... })();
-//   - const UI     = (() => { ... })();
-//   - (() => { /* MAIN session */ })();
-// После вставки этот блок не должен ломать лендинг: лендинг живёт
-// выше по z-index и до клика на CTA приложение не запускается,
-// потому что #start-overlay остаётся видимым в DOM, а реальный старт
-// происходит только после enterApp() и эмуляции клика по #btn-start.
+// Сюда вставляется весь JS приложения (Engine, Math2, ICM, Texture,
+// Plan, Model, Meta, Bots, UI и MAIN-сессия).
 // ==== /POKER TRAINER: APP JS ====
 </script>
 
@@ -2501,13 +2432,6 @@ button.disabled {
   }
 
   // --- Landing visibility & navigation ---
-
-  function hideLandingImmediately() {
-    landing.classList.add('hidden');
-    if (stickyCta) stickyCta.classList.add('hidden');
-    if (hideTimer) clearTimeout(hideTimer);
-    demoClearTimers();
-  }
 
   function enterApp() {
     if (entered) return;
