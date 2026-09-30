@@ -189,7 +189,7 @@ button.disabled {
 
 #board-area {
   position: absolute;
-  top: calc(46% - 8px); left: 50%;
+  top: calc(46% - 6px); left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
   pointer-events: none;
@@ -4683,7 +4683,7 @@ const UI = (() => {
     const totalShift = rankH + gapVal - 6 - 2;
     placeRankOffset = totalShift;
     const baseTop = 'calc(46% - 8px)';
-    el.boardArea.style.top = `calc(${baseTop} - ${totalShift}px)`;
+    el.boardArea.style.top = `calc(${baseTop} - ${totalShift}px + 2px)`;
   }
 
   function alignPercentBlockBottom() {
