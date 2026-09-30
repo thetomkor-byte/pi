@@ -179,9 +179,9 @@ button.disabled {
   opacity: 0;
   transition: opacity .35s ease;
   box-shadow:
-    inset 0 0 0 1px rgba(255, 203, 43, 0.85),
-    inset 0 0 10px 2px rgba(255, 203, 43, 0.55),
-    inset 0 0 22px 4px rgba(255, 203, 43, 0.28);
+    inset 0 0 0 1px rgba(255, 203, 43, 0.425),
+    inset 0 0 10px 2px rgba(255, 203, 43, 0.275),
+    inset 0 0 22px 4px rgba(255, 203, 43, 0.14);
 }
 #hu-glow.visible {
   opacity: 1;
@@ -496,7 +496,6 @@ button.disabled {
   z-index: 15;
   transition: opacity .2s;
   text-shadow: 0 1px 2px rgba(0,0,0,.55);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
   line-height: 1;
 }
 .seat .strat-badge.hidden { display: none; }
@@ -691,9 +690,10 @@ button.disabled {
   bottom: clamp(-26px, -3.2vmin, -22px);
   top: auto;
 }
-.seat .action-badge.fold  { color: #ff8a7a; border-color: #5a2a25; }
+.seat .action-badge.fold  { color: #d0d0d0; border-color: #4a4a4a; }
 .seat .action-badge.call  { color: #7ab8ff; border-color: #25445a; }
-.seat .action-badge.raise { color: var(--gold); border-color: #5a4a1a; }
+.seat .action-badge.raise { color: #ff8a7a; border-color: #5a2a25; }
+.seat .action-badge.bet   { color: #ff8a7a; border-color: #5a2a25; }
 .seat .action-badge.check { color: #7ae5a0; border-color: #255a35; }
 .seat .action-badge.allin { color: var(--allin); border-color: #5a2028; }
 .seat .action-badge.hidden { display: none; }
@@ -5103,8 +5103,8 @@ const UI = (() => {
       badge.classList.add('hidden');
       return;
     }
-    const map = { fold:'FOLD', check:'CHECK', call:'CALL', raise:'RAISE', allin:'ALL-IN' };
-    const cls = { fold:'fold', check:'check', call:'call', raise:'raise', allin:'allin' };
+    const map = { fold:'FOLD', check:'CHECK', call:'CALL', raise:'RAISE', bet:'BET', allin:'ALL-IN' };
+    const cls = { fold:'fold', check:'check', call:'call', raise:'raise', bet:'bet', allin:'allin' };
     badge.textContent = map[p.lastAction] || p.lastAction.toUpperCase();
     badge.className = 'action-badge ' + (cls[p.lastAction] || '');
   }
@@ -8386,6 +8386,13 @@ const UI = (() => {
         cur.pot += diff;
       } else if (act.actionType === 'raise') {
         pl.lastAction = 'raise';
+        pl.acted = true;
+        pl.stack -= diff;
+        pl.committedThisStreet += diff;
+        pl.committedTotal += diff;
+        cur.pot += diff;
+      } else if (act.actionType === 'bet') {
+        pl.lastAction = 'bet';
         pl.acted = true;
         pl.stack -= diff;
         pl.committedThisStreet += diff;
