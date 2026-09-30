@@ -1490,7 +1490,6 @@ button.disabled {
   -webkit-user-select: none;
   display: flex;
   align-items: center;
-  padding-left: 0;
 }
 
 #raise-slider-segments {
@@ -1543,7 +1542,6 @@ button.disabled {
   pointer-events: none;
   transition: transform .08s ease, filter .08s ease;
   z-index: 2;
-  margin-left: 0;
 }
 #raise-slider-thumb.pressed {
   transform: translate(-50%, -50%) scale(0.85);
@@ -5348,7 +5346,7 @@ const UI = (() => {
         el.raiseAmountMini.textContent = '0';
         el.raiseAmountMini.classList.remove('allin-text');
       }
-      if (el.sliderThumb) el.sliderThumb.style.left = '0px';
+      if (el.sliderThumb) el.sliderThumb.style.left = '8px';
       return;
     }
     sliderState.currentValue = sliderState.callValue;
@@ -5356,41 +5354,56 @@ const UI = (() => {
     updateSliderDisplayFromValue(sliderState.callValue);
   }
 
+  function thumbDiameter() {
+    if (!el.sliderThumb) return 16;
+    const w = el.sliderThumb.offsetWidth || 16;
+    return w;
+  }
+
   function layoutSliderThumb() {
     if (!el.sliderThumb || !el.sliderSegments || !el.sliderCallSeg) return;
     const segRect = el.sliderSegments.getBoundingClientRect();
-    const callW = el.sliderCallSeg.getBoundingClientRect().width;
     const totalW = segRect.width;
     if (totalW <= 0) return;
 
-    const raiseW = Math.max(0, totalW - callW);
+    const d = thumbDiameter();
+    const radius = d / 2;
+    // Отрезок движения ЦЕНТРА кружка: от radius до totalW - radius
+    const travel = Math.max(0, totalW - d);
+
     const { callValue, minRaiseValue, maxValue, currentValue } = sliderState;
 
-    let x;
-    if (currentValue <= callValue || minRaiseValue <= callValue || raiseW <= 0) {
-      x = 0;
+    let xCenter;
+    if (currentValue <= callValue || minRaiseValue <= callValue || travel <= 0) {
+      xCenter = radius;
     } else {
       const t = (currentValue - minRaiseValue) / Math.max(1, (maxValue - minRaiseValue));
       const clamped = Math.max(0, Math.min(1, t));
-      x = callW + clamped * raiseW;
+      xCenter = radius + clamped * travel;
     }
-    el.sliderThumb.style.left = x + 'px';
+    el.sliderThumb.style.left = xCenter + 'px';
   }
 
   function valueFromPointer(clientX) {
     if (!el.sliderSegments || !el.sliderCallSeg) return sliderState.callValue;
     const segRect = el.sliderSegments.getBoundingClientRect();
-    const callW = el.sliderCallSeg.getBoundingClientRect().width;
     const totalW = segRect.width;
-    const raiseW = Math.max(0, totalW - callW);
+    if (totalW <= 0) return sliderState.callValue;
+
+    const d = thumbDiameter();
+    const radius = d / 2;
+    const travel = Math.max(0, totalW - d);
 
     const px = Math.max(0, Math.min(totalW, clientX - segRect.left));
 
-    if (px <= callW || raiseW <= 0) {
+    // Если палец в зоне колла (первая половина диаметра от левого края)
+    if (px <= radius || travel <= 0) {
       return sliderState.callValue;
     }
 
-    const t = (px - callW) / raiseW;
+    // Считаем позицию центра кружка от края с учётом диаметра
+    const centerPx = px;
+    const t = (centerPx - radius) / travel;
     const raw = sliderState.minRaiseValue + t * (sliderState.maxValue - sliderState.minRaiseValue);
     const step = sliderState.stepValue;
     const snapped = Math.round(raw / step) * step;
@@ -5668,10 +5681,10 @@ const UI = (() => {
         btn.__suppressClick = true;
 
         const segRect = el.sliderSegments.getBoundingClientRect();
-        const callW = el.sliderCallSeg.getBoundingClientRect().width;
-        const raiseW = Math.max(1, segRect.width - callW);
+        const d = thumbDiameter();
+        const travel = Math.max(1, segRect.width - d);
         const range = sliderState.maxValue - sliderState.minRaiseValue;
-        const widthPx = raiseW;
+        const widthPx = travel;
 
         const deltaUnits = (dy / widthPx) * range;
         const rawTarget = startSliderValue + deltaUnits;
