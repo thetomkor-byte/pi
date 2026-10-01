@@ -1354,6 +1354,8 @@ button.disabled {
   position: relative;
   width: var(--table-col-w);
   max-width: 94vw;
+  height: 60vh;
+  height: 60dvh;
   background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
   border: 2px solid #3a3530;
   border-radius: 16px;
@@ -1370,7 +1372,7 @@ button.disabled {
 #training-header-row {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   gap: 8px;
   margin-bottom: 18px;
   flex-shrink: 0;
@@ -1386,10 +1388,80 @@ button.disabled {
   margin: 0;
 }
 
+.training-nav-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  color: transparent;
+  font-family: inherit;
+  font-weight: 900;
+  font-size: clamp(18px, 2.4vmin, 22px);
+  line-height: 1;
+  cursor: default;
+  touch-action: manipulation;
+  flex-shrink: 0;
+  width: 1em;
+  height: 1em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  caret-color: transparent;
+}
+.training-nav-btn:disabled {
+  cursor: default;
+}
+
+#training-text-viewport {
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+  min-height: 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+#training-text-viewport::-webkit-scrollbar { display: none; width: 0; height: 0; }
+
+.training-text-page {
+  transition: transform 0.5s ease, opacity 0.5s ease;
+  will-change: transform, opacity;
+}
+.training-text-page.offscreen-left {
+  transform: translateX(-110%);
+  opacity: 0;
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  pointer-events: none;
+}
+.training-text-page.offscreen-right {
+  transform: translateX(110%);
+  opacity: 0;
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  pointer-events: none;
+}
+.training-text-page.active {
+  transform: translateX(0);
+  opacity: 1;
+  position: relative;
+}
+
+.training-text {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
 #training-test-buttons {
   display: flex;
   gap: 10px;
-  margin-top: 0;
+  margin-top: 16px;
   flex-shrink: 0;
 }
 #training-test-buttons button {
@@ -1918,6 +1990,9 @@ button.disabled {
   overflow: hidden;
 }
 
+/* Нижний внутренний отступ у области текста: последняя строка текста
+   всегда остаётся на 2 px выше верхнего края кнопки «вверх» (▲),
+   чтобы стрелка не закрывала буквы в конце руководства. */
 #guide-text-viewport {
   position: relative;
   overflow-y: auto;
@@ -1926,6 +2001,7 @@ button.disabled {
   scrollbar-width: none;
   -ms-overflow-style: none;
   -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(1em + 2px);
 }
 #guide-text-viewport::-webkit-scrollbar { display: none; width: 0; height: 0; }
 
@@ -1946,9 +2022,6 @@ button.disabled {
 
 .guide-text-page {
   position: relative;
-  /* Нижний отступ, чтобы последняя строка текста не заходила под кнопку «вверх».
-     Кнопка «вверх» стоит внизу по центру, 2 px запаса над ней для букв. */
-  padding-bottom: calc(2px + 2px);
 }
 
 .guide-text {
@@ -2401,11 +2474,40 @@ button.disabled {
   <div id="training-overlay">
     <div id="training-window">
       <div id="training-header-row">
-        <h3>ТЕСТ</h3>
+        <button id="training-prev-btn" class="training-nav-btn" type="button" aria-label="Назад" disabled>◀︎</button>
+        <h3>ТРЕНИРОВКА</h3>
+        <button id="training-next-btn" class="training-nav-btn" type="button" aria-label="Вперёд">▶︎</button>
+      </div>
+      <div id="training-text-viewport">
+        <div class="training-text-page active" data-page="0">
+          <p class="training-text">
+            Логика покера — это система мышления, при которой каждый твой ход является осознанным ответом на вопрос:
+            «Что я пытаюсь заставить оппонента подумать, почувствовать и сделать, а главное — зачем?»
+          </p>
+          <p class="training-text">
+            Ты не играешь карты. Ты играешь против мышления конкретного оппонента в конкретной ситуации.
+            Карты — лишь инструмент, которым ты управляешь его решениями.
+          </p>
+          <p class="training-text">
+            Ключевая идея: у каждого действия должна быть причина, которую ты можешь сформулировать словами.
+            Если не можешь — ты не играешь, а угадываешь.
+          </p>
+        </div>
+        <div class="training-text-page offscreen-right" data-page="1">
+          <p class="training-text">
+            Тренировка начинается с тишины: перед любым выбором — чай, встреча, звонок — на десять секунд закрой глаза и не думай, а просто отметь первое ощущение в теле. Не анализируй его, не спорь. Это и есть первый сигнал поля, который обычно заглушается мыслями.
+          </p>
+          <p class="training-text">
+            Дальше учись читать уже случившееся: вспомни событие дня и восстанови не логику, а состояние — что ты чувствовал за минуту до него. Повторяй это каждый вечер на трёх событиях. Так мозг начинает связывать внутренний сигнал с внешним результатом, и предчувствие перестаёт быть случайностью.
+          </p>
+          <p class="training-text">
+            Главный сдвиг — перестать ждать будущее и начать вспоминать его. Когда решение уже принято внутри, оно ощущается спокойно и буднично, как факт, который просто ещё не наступил. Тренируй это состояние на мелочах — какая очередь, кто позвонит, чем закончится разговор. Точность придёт не от усилия, а от доверия к первому тихому отклику.
+          </p>
+        </div>
       </div>
       <div id="training-test-buttons">
         <button id="btn-test-hu" type="button">HU</button>
-        <button id="btn-test-top1" type="button">ТОП</button>
+        <button id="btn-test-top1" type="button">TOP-1</button>
       </div>
     </div>
   </div>
@@ -4657,6 +4759,10 @@ const UI = (() => {
     el.btnTestTop1     = document.getElementById('btn-test-top1');
     el.btnTestHu       = document.getElementById('btn-test-hu');
 
+    el.trainingPrevBtn = document.getElementById('training-prev-btn');
+    el.trainingNextBtn = document.getElementById('training-next-btn');
+    el.trainingTextPages = document.querySelectorAll('.training-text-page');
+
     el.setLanguage       = document.getElementById('set-language');
     el.setDifficulty     = document.getElementById('set-difficulty');
     el.setCardStyle      = document.getElementById('set-card-style');
@@ -4784,6 +4890,8 @@ const UI = (() => {
   function openTraining() {
     if (!el.trainingOverlay) return;
     el.trainingOverlay.classList.add('visible');
+    const vp = document.getElementById('training-text-viewport');
+    if (vp) vp.scrollTop = 0;
   }
   function closeTraining() {
     if (!el.trainingOverlay) return;
@@ -6616,6 +6724,92 @@ const UI = (() => {
     }
   }
 
+  let trainingPageIndex = 0;
+  function setTrainingPage(index) {
+    const pages = el.trainingTextPages;
+    if (!pages || pages.length === 0) return;
+    if (index < 0) index = 0;
+    if (index > pages.length - 1) index = pages.length - 1;
+    if (index === trainingPageIndex && pages[trainingPageIndex].classList.contains('active')) return;
+
+    trainingPageIndex = index;
+
+    for (let i = 0; i < pages.length; i++) {
+      const p = pages[i];
+      p.classList.remove('active', 'offscreen-left', 'offscreen-right');
+      if (i < index) {
+        p.classList.add('offscreen-left');
+      } else if (i > index) {
+        p.classList.add('offscreen-right');
+      } else {
+        p.classList.add('active');
+      }
+    }
+
+    const vp = document.getElementById('training-text-viewport');
+    if (vp) vp.scrollTop = 0;
+
+    if (el.trainingPrevBtn) el.trainingPrevBtn.disabled = (index <= 0);
+    if (el.trainingNextBtn) el.trainingNextBtn.disabled = (index >= pages.length - 1);
+  }
+
+  function trainingNext() {
+    const pages = el.trainingTextPages;
+    if (!pages) return;
+    if (trainingPageIndex >= pages.length - 1) return;
+    setTrainingPage(trainingPageIndex + 1);
+  }
+  function trainingPrev() {
+    if (trainingPageIndex <= 0) return;
+    setTrainingPage(trainingPageIndex - 1);
+  }
+  function resetTrainingPage() {
+    trainingPageIndex = 0;
+    const pages = el.trainingTextPages;
+    if (!pages) return;
+    for (let i = 0; i < pages.length; i++) {
+      const p = pages[i];
+      p.classList.remove('active', 'offscreen-left', 'offscreen-right');
+      if (i === 0) p.classList.add('active');
+      else p.classList.add('offscreen-right');
+    }
+    const vp = document.getElementById('training-text-viewport');
+    if (vp) vp.scrollTop = 0;
+    if (el.trainingPrevBtn) el.trainingPrevBtn.disabled = true;
+    if (el.trainingNextBtn) el.trainingNextBtn.disabled = (pages.length <= 1);
+  }
+
+  function relayoutSlider() {
+    if (!sliderState.active) return;
+    layoutSliderThumb();
+  }
+
+  function bindTimerZoneTap() {
+    const heroSeat = document.getElementById('seat-hero');
+    if (!heroSeat) return;
+    const zone = heroSeat.querySelector('.hero-timer-zone');
+    if (!zone) return;
+    if (zone.__bound) return;
+    zone.__bound = true;
+
+    zone.addEventListener('touchend', (e) => {
+      if (zone.classList.contains('disabled')) return;
+      e.stopPropagation();
+      e.preventDefault();
+      if (typeof window.__ptToggleTurnTime === 'function') window.__ptToggleTurnTime();
+    }, { passive: false });
+
+    zone.addEventListener('click', (e) => {
+      if (e.pointerType && e.pointerType !== 'mouse') return;
+      if (zone.classList.contains('disabled')) return;
+      if (typeof window.__ptRegisterDoubleTap === 'function' && window.__ptRegisterDoubleTap(zone)) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (typeof window.__ptToggleTurnTime === 'function') window.__ptToggleTurnTime();
+      }
+    });
+  }
+
   return {
     settings, init, el,
     renderTable, updateSeats, updateBoard, updatePot, updateLevel,
@@ -6642,6 +6836,7 @@ const UI = (() => {
     isTopBelcard,
     recalcSeatAssignments, resetSeatAssignments,
     showWinnerFinal, hideFinalOverlay, cancelFinalAutoReload,
+    trainingNext, trainingPrev, resetTrainingPage,
     updateHandsHistoryVisibility,
     showHandsHistoryCopied,
     setHandsHistoryPressed,
@@ -6777,6 +6972,8 @@ const UI = (() => {
     el.championIcon   = document.getElementById('champion-icon');
     el.btnTestTop1    = document.getElementById('btn-test-top1');
     el.btnTestHu      = document.getElementById('btn-test-hu');
+    el.trainingPrevBtn = document.getElementById('training-prev-btn');
+    el.trainingNextBtn = document.getElementById('training-next-btn');
     el.handsHistoryRow = document.getElementById('hands-history-row');
     el.handsHistoryLabel = document.getElementById('hands-history-label');
     el.handsHistoryCopied = document.getElementById('hands-history-copied');
@@ -7287,6 +7484,31 @@ const UI = (() => {
       el.trainingWindow.addEventListener('touchmove', (e) => e.stopPropagation(), { passive: true });
     }
 
+    if (el.trainingPrevBtn) {
+      el.trainingPrevBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        UI.trainingPrev();
+      });
+      el.trainingPrevBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        UI.trainingPrev();
+      }, { passive: false });
+    }
+    if (el.trainingNextBtn) {
+      el.trainingNextBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        UI.trainingNext();
+      });
+      el.trainingNextBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        UI.trainingNext();
+      }, { passive: false });
+    }
+
     if (el.btnTestHu) {
       const onHu = (e) => {
         e.preventDefault();
@@ -7527,6 +7749,7 @@ const UI = (() => {
     } else {
       pauseGame();
     }
+    UI.resetTrainingPage();
     UI.openTraining();
   }
 
