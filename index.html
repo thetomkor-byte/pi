@@ -804,7 +804,8 @@ button.disabled {
 /* Состояния таймера задаются атрибутом data-state на обёртке.
    off    — история/реплей: пустой круг, цифра 0, полупрозрачно;
    ready  — живая игра, ход не героя: полный круг, цифра 10, полупрозрачно;
-   active — ход героя: полный круг, цифра отсчитывается, полностью видимо. */
+   active — ход героя: полный круг, цифра отсчитывается, полностью видимо.
+   В active inline-стиль stroke-dashoffset управляется из JS по остатку времени. */
 .seat .hero-timer-wrap[data-state="off"] .hero-timer-svg { opacity: 0.2; }
 .seat .hero-timer-wrap[data-state="off"] .timer-fill { stroke-dashoffset: 100.53; }
 
@@ -812,7 +813,6 @@ button.disabled {
 .seat .hero-timer-wrap[data-state="ready"] .timer-fill { stroke-dashoffset: 0; }
 
 .seat .hero-timer-wrap[data-state="active"] .hero-timer-svg { opacity: 1; }
-.seat .hero-timer-wrap[data-state="active"] .timer-fill { stroke-dashoffset: 0; }
 
 .seat .hero-timer-zone {
   position: absolute;
@@ -1239,17 +1239,18 @@ button.disabled {
 
 /* ============================================================
    КОНТАКТНЫЕ ПЛИТКИ В ОКОШКЕ «ПОДДЕРЖАТЬ АВТОРА»
-   (перенесены из лендинга как есть)
+   (плитки уменьшены на 2 px по каждой стороне,
+    SVG-эмблемы внутри оставлены прежнего размера)
    ============================================================ */
 
 .lnd-contact-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 52px;
-  min-width: 52px;
-  min-height: 52px;
+  width: 50px;
+  height: 50px;
+  min-width: 50px;
+  min-height: 50px;
   border-radius: 14px;
   border: none;
   padding: 0;
@@ -1285,6 +1286,8 @@ button.disabled {
   border-radius: inherit;
 }
 
+/* Размеры SVG не привязаны к размеру плитки — оставлены прежними:
+   почта 36, телега 40. Пропорционального сжатия нет. */
 .lnd-contact-btn .lnd-contact-svg {
   position: relative;
   z-index: 2;
@@ -1323,8 +1326,9 @@ button.disabled {
   }
 }
 
+/* Мобильная: плитка 46x46 (−2 px), SVG-эмблемы остаются прежними 34/38. */
 @media (max-width: 480px) {
-  .lnd-contact-btn { width: 48px; height: 48px; min-width: 48px; min-height: 48px; }
+  .lnd-contact-btn { width: 46px; height: 46px; min-width: 46px; min-height: 46px; }
   .lnd-contact-btn.mail .lnd-contact-svg { width: 34px; height: 34px; }
   .lnd-contact-btn.tg .lnd-contact-svg { width: 38px; height: 38px; }
 }
@@ -4641,6 +4645,9 @@ const UI = (() => {
 
   const seatAssignments = new Map();
 
+  /* Длина окружности кольца таймера (радиус 16): C = 2 * π * 16 ≈ 100.53 */
+  const TIMER_CIRCUMFERENCE = 100.53;
+
   let placeRankOffset = 0;
   let percentButtonsContext = null;
 
@@ -4967,14 +4974,25 @@ const UI = (() => {
     /* Таймер теперь живёт внутри места героя. Ничего пересчитывать не нужно. */
   }
 
-  /* Единая функция установки состояния таймера героя.
-     Всегда пишет на обёртку только атрибут data-state, ничего не переключает классами. */
+  /* Единая установка состояния таймера героя через data-state на обёртке.
+     Дополнительно управляет inline-значением stroke-dashoffset на .timer-fill:
+     в off — пустой (C), в ready — полный (0), в active — по остатку из JS. */
   function setTimerState(state) {
     const heroSeat = document.getElementById('seat-hero');
     if (!heroSeat) return;
     const wrap = heroSeat.querySelector('.hero-timer-wrap');
     if (!wrap) return;
     wrap.setAttribute('data-state', state);
+
+    const fill = wrap.querySelector('.timer-fill');
+    if (!fill) return;
+
+    if (state === 'off') {
+      fill.style.strokeDashoffset = String(TIMER_CIRCUMFERENCE);
+    } else if (state === 'ready') {
+      fill.style.strokeDashoffset = '0';
+    }
+    /* В active ничего не пишем — там управляет updateHeroTimer по остатку. */
   }
 
   function setHeroTimerNumber(n) {
@@ -5012,13 +5030,21 @@ const UI = (() => {
     if (zone) zone.classList.remove('disabled');
   }
 
-  /* ACTIVE — ход героя: полный круг, цифра отсчитывается, полностью видимо. */
+  /* ACTIVE — ход героя: полный круг изначально, дальше updateHeroTimer уменьшает кружок. */
   function showHeroTimer(seconds) {
     setTimerState('active');
     setHeroTimerNumber(seconds);
+    const heroSeat = document.getElementById('seat-hero');
+    if (!heroSeat) return;
+    const wrap = heroSeat.querySelector('.hero-timer-wrap');
+    if (!wrap) return;
+    const fill = wrap.querySelector('.timer-fill');
+    if (!fill) return;
+    /* На старте отсчёта кружок полный (0 offset). */
+    fill.style.strokeDashoffset = '0';
   }
 
-  /* IDLE — режим «Без времени»: пустой круг, цифра 0, полупрозрачно. */
+  /* IDLE — режим «Без времени»: пустой круг, цифра 0. */
   function setHeroTimerIdle() {
     setTimerState('off');
     setHeroTimerNumber(0);
@@ -5036,8 +5062,20 @@ const UI = (() => {
     zone.classList.toggle('disabled', !enabled);
   }
 
+  /* Обновляет и цифру, и кружок таймера героя. Кружок убывает синхронно с цифрой.
+     ratio = currentSec / totalSec; stroke-dashoffset = C * (1 - ratio). */
   function updateHeroTimer(currentSec, totalSec) {
     setHeroTimerNumber(Math.max(0, currentSec));
+    const heroSeat = document.getElementById('seat-hero');
+    if (!heroSeat) return;
+    const wrap = heroSeat.querySelector('.hero-timer-wrap');
+    if (!wrap) return;
+    const fill = wrap.querySelector('.timer-fill');
+    if (!fill) return;
+    const total = Number(totalSec) || 0;
+    const cur = Math.max(0, Number(currentSec) || 0);
+    const ratio = total > 0 ? Math.max(0, Math.min(1, cur / total)) : 0;
+    fill.style.strokeDashoffset = String(TIMER_CIRCUMFERENCE * (1 - ratio));
   }
 
   function renderTable(state) {
