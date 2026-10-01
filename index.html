@@ -1235,6 +1235,10 @@ button.disabled {
     padding-bottom: calc(clamp(20px, 4vmin, 28px) + 6px);
     transform: translateY(-3px);
   }
+  /* Текст «Для развития приложения» на 1 px меньше только на мобильной. */
+  #support-footer {
+    font-size: clamp(12px, 1.6vmin, 14px);
+  }
 }
 
 /* ============================================================
@@ -5017,6 +5021,11 @@ const UI = (() => {
 
   /* READY — живая игра, режим 10 сек, ход ещё не героя: полный круг, цифра 10, полупрозрачно, тап включён. */
   function setHeroTimerReady() {
+    /* В истории раздач и реплее таймер всегда off, в ready не переводим. */
+    if (window.__sessionShowHistoryLabel === true) {
+      setHeroTimerOff();
+      return;
+    }
     const seconds = Number(settings.turnTime) || 0;
     if (seconds <= 0) {
       setHeroTimerIdle();
@@ -5078,6 +5087,27 @@ const UI = (() => {
     fill.style.strokeDashoffset = String(TIMER_CIRCUMFERENCE * (1 - ratio));
   }
 
+  /* Явная установка готового состояния таймера для только что созданного SVG:
+     без мигания, круг сразу полный в живой игре.
+     В истории раздач и реплее таймер должен оставаться off. */
+  function applyReadyToNewSeat() {
+    if (window.__sessionShowHistoryLabel === true) {
+      setHeroTimerOff();
+      return;
+    }
+    const seconds = Number(settings.turnTime) || 0;
+    if (seconds <= 0) return;
+    const heroSeat = document.getElementById('seat-hero');
+    if (!heroSeat) return;
+    const wrap = heroSeat.querySelector('.hero-timer-wrap');
+    if (!wrap) return;
+    wrap.setAttribute('data-state', 'ready');
+    const fill = wrap.querySelector('.timer-fill');
+    if (fill) fill.style.strokeDashoffset = '0';
+    const num = wrap.querySelector('.timer-num');
+    if (num) num.textContent = String(seconds);
+  }
+
   function renderTable(state) {
     el.seats.innerHTML = '';
     recalcSeatAssignments(state);
@@ -5086,6 +5116,10 @@ const UI = (() => {
       const seat = createSeatElement(p, state);
       if (seat) el.seats.appendChild(seat);
     }
+
+    /* Применяем готовое состояние таймера сразу после того, как места созданы. */
+    applyReadyToNewSeat();
+
     updateStacks(state);
     updatePot(state);
     updateLevel(state);
@@ -5217,6 +5251,7 @@ const UI = (() => {
       if (!seat) {
         const newSeat = createSeatElement(p, state);
         if (newSeat) el.seats.appendChild(newSeat);
+        if (p.isHero) applyReadyToNewSeat();
         bindTimerZoneTap();
         continue;
       }
