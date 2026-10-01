@@ -776,7 +776,6 @@ button.disabled {
   opacity: 0.2;
   transition: opacity .2s ease;
 }
-.seat .hero-timer-wrap.active .hero-timer-svg { opacity: 1; }
 .seat .hero-timer-wrap .timer-track {
   fill: none;
   stroke: rgba(255, 255, 255, 0.12);
@@ -791,17 +790,6 @@ button.disabled {
   stroke-dashoffset: 100.53;
   transition: stroke-dashoffset 0.95s linear;
 }
-/* Живая игра, режим 10 сек, ход ещё не героя: кружок уже полный, но полупрозрачный */
-.seat .hero-timer-wrap.pending .hero-timer-svg {
-  opacity: 0.2;
-}
-.seat .hero-timer-wrap.pending .timer-fill {
-  stroke-dashoffset: 0;
-}
-/* Ход героя: кружок полный и непрозрачный, начинает опустошаться по мере отсчёта */
-.seat .hero-timer-wrap.active .timer-fill {
-  stroke-dashoffset: 0;
-}
 .seat .hero-timer-wrap .timer-num {
   fill: #fff;
   font-size: 18px;
@@ -812,6 +800,19 @@ button.disabled {
   stroke: #000;
   stroke-width: 1.5px;
 }
+
+/* Состояния таймера задаются атрибутом data-state на обёртке.
+   off    — история/реплей: пустой круг, цифра 0, полупрозрачно;
+   ready  — живая игра, ход не героя: полный круг, цифра 10, полупрозрачно;
+   active — ход героя: полный круг, цифра отсчитывается, полностью видимо. */
+.seat .hero-timer-wrap[data-state="off"] .hero-timer-svg { opacity: 0.2; }
+.seat .hero-timer-wrap[data-state="off"] .timer-fill { stroke-dashoffset: 100.53; }
+
+.seat .hero-timer-wrap[data-state="ready"] .hero-timer-svg { opacity: 0.2; }
+.seat .hero-timer-wrap[data-state="ready"] .timer-fill { stroke-dashoffset: 0; }
+
+.seat .hero-timer-wrap[data-state="active"] .hero-timer-svg { opacity: 1; }
+.seat .hero-timer-wrap[data-state="active"] .timer-fill { stroke-dashoffset: 0; }
 
 .seat .hero-timer-zone {
   position: absolute;
@@ -4966,64 +4967,65 @@ const UI = (() => {
     /* Таймер теперь живёт внутри места героя. Ничего пересчитывать не нужно. */
   }
 
-  function showHeroTimer(seconds) {
+  /* Единая функция установки состояния таймера героя.
+     Всегда пишет на обёртку только атрибут data-state, ничего не переключает классами. */
+  function setTimerState(state) {
     const heroSeat = document.getElementById('seat-hero');
     if (!heroSeat) return;
     const wrap = heroSeat.querySelector('.hero-timer-wrap');
     if (!wrap) return;
-    wrap.classList.remove('pending');
-    wrap.classList.add('active');
-    updateHeroTimer(seconds, seconds);
+    wrap.setAttribute('data-state', state);
+  }
+
+  function setHeroTimerNumber(n) {
+    const heroSeat = document.getElementById('seat-hero');
+    if (!heroSeat) return;
+    const wrap = heroSeat.querySelector('.hero-timer-wrap');
+    if (!wrap) return;
+    const num = wrap.querySelector('.timer-num');
+    if (!num) return;
+    num.textContent = String(n);
+  }
+
+  /* OFF — история/реплей: пустой круг, цифра 0, полупрозрачно, тап отключён. */
+  function setHeroTimerOff() {
+    setTimerState('off');
+    setHeroTimerNumber(0);
+    const heroSeat = document.getElementById('seat-hero');
+    if (!heroSeat) return;
+    const zone = heroSeat.querySelector('.hero-timer-zone');
+    if (zone) zone.classList.add('disabled');
+  }
+
+  /* READY — живая игра, режим 10 сек, ход ещё не героя: полный круг, цифра 10, полупрозрачно, тап включён. */
+  function setHeroTimerReady() {
+    const seconds = Number(settings.turnTime) || 0;
+    if (seconds <= 0) {
+      setHeroTimerIdle();
+      return;
+    }
+    setTimerState('ready');
+    setHeroTimerNumber(seconds);
+    const heroSeat = document.getElementById('seat-hero');
+    if (!heroSeat) return;
+    const zone = heroSeat.querySelector('.hero-timer-zone');
+    if (zone) zone.classList.remove('disabled');
+  }
+
+  /* ACTIVE — ход героя: полный круг, цифра отсчитывается, полностью видимо. */
+  function showHeroTimer(seconds) {
+    setTimerState('active');
+    setHeroTimerNumber(seconds);
+  }
+
+  /* IDLE — режим «Без времени»: пустой круг, цифра 0, полупрозрачно. */
+  function setHeroTimerIdle() {
+    setTimerState('off');
+    setHeroTimerNumber(0);
   }
 
   function hideHeroTimerActive() {
-    const heroSeat = document.getElementById('seat-hero');
-    if (!heroSeat) return;
-    const wrap = heroSeat.querySelector('.hero-timer-wrap');
-    if (!wrap) return;
-    wrap.classList.remove('active');
-  }
-
-  /* Живая игра, режим «10 секунд», ход ещё не героя:
-     кружок полный, но полупрозрачный; цифра на месте. */
-  function setHeroTimerPending() {
-    const heroSeat = document.getElementById('seat-hero');
-    if (!heroSeat) return;
-    const wrap = heroSeat.querySelector('.hero-timer-wrap');
-    if (!wrap) return;
-    const num = wrap.querySelector('.timer-num');
-    const seconds = Number(settings.turnTime) || 0;
-    if (num) num.textContent = seconds <= 0 ? '0' : String(seconds);
-    wrap.classList.remove('active');
-    if (seconds > 0) wrap.classList.add('pending');
-    else wrap.classList.remove('pending');
-  }
-
-  /* Режим «Без времени» либо простой сброс: кружок пустой, цифра 0. */
-  function setHeroTimerIdle() {
-    const heroSeat = document.getElementById('seat-hero');
-    if (!heroSeat) return;
-    const wrap = heroSeat.querySelector('.hero-timer-wrap');
-    if (!wrap) return;
-    const num = wrap.querySelector('.timer-num');
-    const seconds = Number(settings.turnTime) || 0;
-    if (num) num.textContent = '0';
-    wrap.classList.remove('active');
-    wrap.classList.remove('pending');
-  }
-
-  /* История раздач / реплей: таймер полностью выключен — пустой круг, цифра 0. */
-  function setHeroTimerOff() {
-    const heroSeat = document.getElementById('seat-hero');
-    if (!heroSeat) return;
-    const wrap = heroSeat.querySelector('.hero-timer-wrap');
-    if (!wrap) return;
-    const num = wrap.querySelector('.timer-num');
-    if (num) num.textContent = '0';
-    wrap.classList.remove('active');
-    wrap.classList.remove('pending');
-    const zone = heroSeat.querySelector('.hero-timer-zone');
-    if (zone) zone.classList.add('disabled');
+    /* Оставлено для совместимости, отдельная работа не нужна. */
   }
 
   function setHeroTimerZoneEnabled(enabled) {
@@ -5035,13 +5037,7 @@ const UI = (() => {
   }
 
   function updateHeroTimer(currentSec, totalSec) {
-    const heroSeat = document.getElementById('seat-hero');
-    if (!heroSeat) return;
-    const wrap = heroSeat.querySelector('.hero-timer-wrap');
-    if (!wrap) return;
-    const num = wrap.querySelector('.timer-num');
-    if (!num) return;
-    num.textContent = String(Math.max(0, currentSec));
+    setHeroTimerNumber(Math.max(0, currentSec));
   }
 
   function renderTable(state) {
@@ -5112,7 +5108,7 @@ const UI = (() => {
         <div class="strat-badge hidden" data-role="strat"></div>
         <div class="dealer-chip hidden" data-role="btn">D</div>
         <div class="seat-cards" data-role="cards">
-          <div class="hero-timer-wrap" data-role="timer">
+          <div class="hero-timer-wrap" data-role="timer" data-state="off">
             <svg class="hero-timer-svg" viewBox="0 0 40 40">
               <circle class="timer-track" cx="20" cy="20" r="16"></circle>
               <circle class="timer-fill" cx="20" cy="20" r="16"></circle>
@@ -6749,7 +6745,7 @@ const UI = (() => {
     resetSliderToStart,
     setReplayButtonState,
     showHeroTimer, hideHeroTimerActive, updateHeroTimer, placeHeroTimer,
-    setHeroTimerIdle, setHeroTimerPending, setHeroTimerOff, setHeroTimerZoneEnabled,
+    setHeroTimerIdle, setHeroTimerReady, setHeroTimerOff, setHeroTimerZoneEnabled,
     placeTopRoundRow, placeGuidePanel,
     updateGuideFade, guideScrollToTop,
     showSupportOverlay, hideSupportOverlay, copySupportText,
@@ -6852,7 +6848,7 @@ const UI = (() => {
     });
     syncHandsHistoryVisibility();
     UI.setHeroTimerZoneEnabled(true);
-    UI.setHeroTimerPending();
+    UI.setHeroTimerReady();
     updateHuGlowFromState();
   });
 
@@ -6932,7 +6928,7 @@ const UI = (() => {
       UI.setHeroTimerZoneEnabled(true);
       const seconds = Number(UI.settings.turnTime) || 0;
       if (!session.waitingForHero || session.heroEliminated) {
-        if (seconds > 0) UI.setHeroTimerPending();
+        if (seconds > 0) UI.setHeroTimerReady();
         else UI.setHeroTimerIdle();
       }
     }
@@ -7546,7 +7542,7 @@ const UI = (() => {
         if (!window.__sessionShowHistoryLabel) {
           const seconds = Number(UI.settings.turnTime) || 0;
           if (seconds > 0) {
-            if (!session.waitingForHero || session.heroEliminated) UI.setHeroTimerPending();
+            if (!session.waitingForHero || session.heroEliminated) UI.setHeroTimerReady();
           } else {
             UI.setHeroTimerIdle();
           }
@@ -7702,7 +7698,7 @@ const UI = (() => {
       if (session.waitingForHero && !session.heroEliminated) {
         startHeroTimerIfNeeded();
       } else {
-        UI.setHeroTimerPending();
+        UI.setHeroTimerReady();
       }
     }
   }
@@ -7849,7 +7845,7 @@ const UI = (() => {
 
     syncHandsHistoryVisibility();
     UI.setHeroTimerZoneEnabled(true);
-    UI.setHeroTimerPending();
+    UI.setHeroTimerReady();
     updateHuGlowFromState();
 
     startNewSession();
@@ -7907,7 +7903,7 @@ const UI = (() => {
 
     syncHandsHistoryVisibility();
     UI.setHeroTimerZoneEnabled(true);
-    UI.setHeroTimerPending();
+    UI.setHeroTimerReady();
     updateHuGlowFromState();
 
     startHand();
@@ -7961,7 +7957,7 @@ const UI = (() => {
     refreshQuickPercentList();
     UI.setHeroActionsActive(false);
     UI.setHeroTimerZoneEnabled(true);
-    UI.setHeroTimerPending();
+    UI.setHeroTimerReady();
 
     syncHandsHistoryVisibility();
     checkHuAutoActivation();
@@ -8018,9 +8014,8 @@ const UI = (() => {
     } else {
       session.waitingForHero = false;
       UI.setHeroActionsActive(false);
-      UI.hideHeroTimerActive();
       const seconds = Number(UI.settings.turnTime) || 0;
-      if (seconds > 0) UI.setHeroTimerPending();
+      if (seconds > 0) UI.setHeroTimerReady();
       else UI.setHeroTimerIdle();
       UI.resetSliderToStart();
       refreshQuickPercentList();
@@ -8060,7 +8055,7 @@ const UI = (() => {
       if (session.heroTimerRemaining < 0) {
         stopHeroTimer();
         const s = Number(UI.settings.turnTime) || 0;
-        if (s > 0) UI.setHeroTimerPending();
+        if (s > 0) UI.setHeroTimerReady();
         else UI.setHeroTimerIdle();
         if (session.waitingForHero && !session.heroEliminated) {
           session.waitingForHero = false;
@@ -8118,7 +8113,7 @@ const UI = (() => {
     UI.updateSeats(state);
     UI.updatePot(state);
     const s = Number(UI.settings.turnTime) || 0;
-    if (s > 0) UI.setHeroTimerPending();
+    if (s > 0) UI.setHeroTimerReady();
     else UI.setHeroTimerIdle();
     advanceOrFinish();
   }
@@ -8305,7 +8300,7 @@ const UI = (() => {
     if (session.replay.active) return;
     stopHeroTimer();
     const s = Number(UI.settings.turnTime) || 0;
-    if (s > 0) UI.setHeroTimerPending();
+    if (s > 0) UI.setHeroTimerReady();
     else UI.setHeroTimerIdle();
     const state = session.state;
     Engine.finalizeHand(state);
@@ -8448,7 +8443,7 @@ const UI = (() => {
     stopHeroTimer();
     if (!window.__sessionShowHistoryLabel) {
       const s = Number(UI.settings.turnTime) || 0;
-      if (s > 0) UI.setHeroTimerPending();
+      if (s > 0) UI.setHeroTimerReady();
       else UI.setHeroTimerIdle();
     }
   }
@@ -8470,7 +8465,6 @@ const UI = (() => {
     const snap = session.history[session.viewingIndex];
     if (!snap) return;
     UI.setHeroActionsActive(false);
-    UI.hideHeroTimerActive();
     UI.setHeroTimerOff();
     UI.renderTable(snap);
     UI.updateBoard(snap);
@@ -8680,7 +8674,6 @@ const UI = (() => {
     session.replay.pausedByWindow = false;
 
     UI.setHeroActionsActive(false);
-    UI.hideHeroTimerActive();
     UI.setHeroTimerOff();
     UI.setReplayButtonState('pause');
 
@@ -8786,10 +8779,9 @@ const UI = (() => {
     session.isPaused = false;
     const state = session.state;
     if (!state) return;
-    UI.hideHeroTimerActive();
     UI.setHeroTimerZoneEnabled(true);
     const s = Number(UI.settings.turnTime) || 0;
-    if (s > 0) UI.setHeroTimerPending();
+    if (s > 0) UI.setHeroTimerReady();
     else UI.setHeroTimerIdle();
 
     syncHandsHistoryVisibility();
