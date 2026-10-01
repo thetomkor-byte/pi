@@ -4645,6 +4645,9 @@ const UI = (() => {
     { x: 86, y: 56, side: 'right',  offsetY: 1 + 1 - 6 - 3 - 4 + 2 + 3 + 2 }
   ];
 
+  /* Сдвиг блока борда целиком вниз. */
+  const BOARD_AREA_SHIFT_DOWN = 7;
+
   const SUIT_CLASS = { s: 'suit-spades', h: 'suit-hearts', d: 'suit-diamonds', c: 'suit-clubs' };
   const SUIT_SYMBOL = { s: '♠', h: '♥', d: '♦', c: '♣' };
   const RANK_DISPLAY = { T: '10' };
@@ -4791,7 +4794,8 @@ const UI = (() => {
     const totalShift = rankH + gapVal - 6 - 2;
     placeRankOffset = totalShift;
     const baseTop = 'calc(46% - 8px)';
-    el.boardArea.style.top = `calc(${baseTop} - ${totalShift}px + 2px)`;
+    /* К базовому положению прибавляем фиксированный сдвиг вниз BOARD_AREA_SHIFT_DOWN. */
+    el.boardArea.style.top = `calc(${baseTop} - ${totalShift}px + 2px + ${BOARD_AREA_SHIFT_DOWN}px)`;
   }
 
   function alignPercentBlockBottom() {
