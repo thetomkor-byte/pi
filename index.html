@@ -4632,15 +4632,17 @@ const UI = (() => {
 
   const el = {};
 
+  /* Места 1, 2, 6, 7 опущены на 3 пикселя вниз (+3 к offsetY этих мест).
+     Место 0 (герой) и места 3, 4, 5 — без изменений. */
   const SEAT_POSITIONS = [
     { x: 50, y: 70, side: 'bottom', offsetY: -22 },
-    { x: 14, y: 56, side: 'left',   offsetY: -1 - 6 - 4 + 2 },
-    { x: 14, y: 32, side: 'left',   offsetY: 4 + 1 - 2 - 2 - 2 + 2 },
+    { x: 14, y: 56, side: 'left',   offsetY: -1 - 6 - 4 + 2 + 3 },
+    { x: 14, y: 32, side: 'left',   offsetY: 4 + 1 - 2 - 2 - 2 + 2 + 3 },
     { x: 14, y: 9,  side: 'left',   offsetY: 2 + 1 + 2 },
     { x: 50, y: 9,  side: 'top',    offsetY: 2 + 1 + 2 },
     { x: 86, y: 9,  side: 'right',  offsetY: 2 + 1 + 2 },
-    { x: 86, y: 32, side: 'right',  offsetY: 3 + 1 - 2 - 1 - 2 + 2 },
-    { x: 86, y: 56, side: 'right',  offsetY: 1 + 1 - 6 - 3 - 4 + 2 }
+    { x: 86, y: 32, side: 'right',  offsetY: 3 + 1 - 2 - 1 - 2 + 2 + 3 },
+    { x: 86, y: 56, side: 'right',  offsetY: 1 + 1 - 6 - 3 - 4 + 2 + 3 }
   ];
 
   const SUIT_CLASS = { s: 'suit-spades', h: 'suit-hearts', d: 'suit-diamonds', c: 'suit-clubs' };
