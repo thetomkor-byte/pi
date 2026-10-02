@@ -838,6 +838,70 @@ button.disabled {
   pointer-events: none;
 }
 
+/* ============================================================
+   МЕСТО ГЕРОЯ: столбик элементов над картами.
+   Сверху вниз: ставка → действие → стек → позиция → карты.
+   Между всеми элементами столбика зазор 3 px.
+   Кнопка баттона (D) — слева от карт, по левому краю карт,
+   с отступом 4 px влево.
+   ============================================================ */
+
+.seat.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.seat.hero .seat-cards {
+  margin-bottom: 0;
+  order: 5;
+}
+
+.seat.hero .pos-row {
+  order: 4;
+  margin-bottom: 0;
+}
+
+.seat.hero .stack-wrap {
+  order: 3;
+}
+
+.seat.hero .action-badge {
+  position: relative;
+  left: auto;
+  bottom: auto;
+  top: auto;
+  transform: none;
+  order: 2;
+}
+
+.seat.hero .bet-chips {
+  position: relative;
+  left: auto;
+  bottom: auto;
+  top: auto;
+  transform: none;
+  order: 1;
+}
+
+.seat.hero .winner-badge {
+  position: absolute;
+}
+
+/* Кнопка баттона героя — слева от блока карт, по левому краю карт,
+   с отступом 4 px влево от левого края карт.
+   Кнопка позиционируется относительно места героя. */
+.seat.hero .dealer-chip {
+  top: auto;
+  bottom: auto;
+  left: auto;
+  right: auto;
+  transform: none;
+  top: 50%;
+  left: calc(50% - (var(--card-w, 43px) * 2 + clamp(4px, 0.9vmin, 7px)) / 2 - 4px - 100%);
+}
+
 #support-overlay {
   position: absolute;
   inset: 0;
@@ -4646,10 +4710,10 @@ const UI = (() => {
 
   const el = {};
 
-  /* Места 1, 2, 6, 7 опущены вниз. Места 1 и 7 — дополнительно на 2 px.
-     Место 0 (герой) и места 3, 4, 5 — без изменений. */
+  /* Место героя опущено на 24 px: было -22, стало +2.
+     Места 1, 2, 6, 7 — без изменений. */
   const SEAT_POSITIONS = [
-    { x: 50, y: 70, side: 'bottom', offsetY: -22 },
+    { x: 50, y: 70, side: 'bottom', offsetY: 2 },
     { x: 14, y: 56, side: 'left',   offsetY: -1 - 6 - 4 + 2 + 3 + 2 },
     { x: 14, y: 32, side: 'left',   offsetY: 4 + 1 - 2 - 2 - 2 + 2 + 3 },
     { x: 14, y: 9,  side: 'left',   offsetY: 2 + 1 + 2 },
