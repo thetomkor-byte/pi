@@ -703,6 +703,7 @@ button.disabled {
 .seat .action-badge.bet   { color: #ff8a7a; border-color: #5a2a25; }
 .seat .action-badge.check { color: #7ae5a0; border-color: #255a35; }
 .seat .action-badge.allin { color: var(--allin); border-color: #5a2028; }
+.seat .action-badge.blind { color: #ffcb2b; border-color: #8a6508; }
 .seat .action-badge.hidden { display: none; }
 
 .seat .winner-badge {
@@ -5315,8 +5316,15 @@ const UI = (() => {
 
   function renderActionBadge(p, seat) {
     const badge = seat.querySelector('[data-role="action"]');
-    if (!p.lastAction || p.lastAction === 'sb' || p.lastAction === 'bb') {
+    if (!p.lastAction) {
       badge.classList.add('hidden');
+      return;
+    }
+    /* Блайнды (sb / bb) на префлопе показываем как отдельный бейдж «BLIND»
+       жёлто-оранжевого цвета — это тоже обязательное действие на префлопе. */
+    if (p.lastAction === 'sb' || p.lastAction === 'bb') {
+      badge.textContent = 'BLIND';
+      badge.className = 'action-badge blind';
       return;
     }
     const map = { fold:'FOLD', check:'CHECK', call:'CALL', raise:'RAISE', bet:'BET', allin:'ALL-IN' };
