@@ -488,9 +488,7 @@ button:disabled, button.disabled { cursor: default; }
 @media (min-width: 768px) { :root { --champ-size: min(81%, 333px); } }
 
 /* ============================================================
-   POKER REPLAYER — оверлей оффлайн-реплеера
-   Стиль 1-в-1 как у Poker Trainer: чёрный фон, золото,
-   те же шрифты и радиусы. Не влияет на сам Trainer.
+   POKER REPLAYER — DOM-клон стола Trainer'а
    ============================================================ */
 #replayer-overlay {
   position: absolute;
@@ -498,409 +496,141 @@ button:disabled, button.disabled { cursor: default; }
   z-index: 450;
   background: #000;
   display: none;
-  align-items: stretch;
+  align-items: center;
   justify-content: center;
 }
 #replayer-overlay.visible { display: flex; }
 
-#replayer-window {
-  position: relative;
-  width: var(--table-col-w);
-  max-width: 100vw;
-  height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  background: #000;
-  padding: calc(8px + var(--safe-top)) 8px calc(8px + var(--safe-bottom));
-  gap: 8px;
-  overflow: hidden;
-}
-
-#replayer-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  flex-shrink: 0;
-}
-#replayer-title {
-  color: var(--gold);
-  font-size: clamp(12px, 1.8vmin, 15px);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-weight: 900;
-  flex: 1;
-  text-align: center;
-}
-.replayer-head-btn {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #3a3530, #1a1a1a 70%);
-  border: 1px solid #8a6508;
-  color: var(--gold);
-  font-weight: 900;
-  font-size: 15px;
+/* Внутри — точно тот же блок #poker-table-wood, что в Trainer,
+   просто в отдельной обёртке. */
+#replayer-table-scene {
+  position: absolute;
+  top: calc(var(--safe-top) + 2px);
+  left: 0; right: 0; bottom: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  font-family: inherit;
-  padding: 0;
-  touch-action: manipulation;
-  transition: transform .08s ease, filter .08s ease;
+  background: #000;
 }
-.replayer-head-btn:active { transform: scale(0.94); filter: brightness(1.35); }
 
-#replayer-steps {
-  display: flex;
-  gap: 4px;
-  overflow-x: auto;
-  flex-shrink: 0;
-  scrollbar-width: none;
-  padding-bottom: 2px;
-}
-#replayer-steps::-webkit-scrollbar { display: none; }
-.replayer-step {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 5px 8px;
-  border-radius: 6px;
-  background: #1a1a1a;
-  border: 1px solid #2a2520;
-  font-size: 10px;
-  color: var(--muted);
-  white-space: nowrap;
-  font-weight: 700;
-  cursor: pointer;
-  font-family: inherit;
-  touch-action: manipulation;
-}
-.replayer-step .step-num {
-  width: 16px; height: 16px;
-  border-radius: 50%;
-  background: #2a2520;
-  color: var(--muted);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 9px;
-  font-weight: 800;
-}
-.replayer-step.active {
-  border-color: var(--gold);
-  color: var(--gold);
-}
-.replayer-step.active .step-num { background: var(--gold); color: #1a1a1a; }
-.replayer-step.done {
-  border-color: #1e3a28;
-  color: var(--ok);
-}
-.replayer-step.done .step-num { background: var(--ok); color: #1a1a1a; }
-
-#replayer-body {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  background: linear-gradient(180deg, #141210, #0d0d0d);
-  border: 1px solid #2a2520;
-  border-radius: 10px;
-  padding: 12px;
-  scrollbar-width: thin;
-  scrollbar-color: #3a3530 transparent;
-}
-#replayer-body::-webkit-scrollbar { width: 4px; }
-#replayer-body::-webkit-scrollbar-thumb { background: #3a3530; border-radius: 2px; }
-
-#replayer-footer {
-  display: flex;
-  gap: 6px;
-  flex-shrink: 0;
-  flex-wrap: wrap;
-}
-#replayer-footer button {
-  flex: 1 1 calc(50% - 3px);
-  padding: 10px;
-  border-radius: 10px;
-  border: none;
-  background: linear-gradient(180deg, #ffcb2b, #e0a800);
-  color: #1a1a1a;
-  font-weight: 900;
-  text-transform: uppercase;
-  font-size: 11px;
-  letter-spacing: 1px;
-  cursor: pointer;
-  min-height: 42px;
-  font-family: inherit;
-  touch-action: manipulation;
-  transition: transform .08s ease, filter .08s ease;
-  box-shadow: 0 3px 0 #8a6508, inset 0 1px 0 rgba(255,255,255,.35);
-}
-#replayer-footer button.secondary {
-  background: linear-gradient(180deg, #2a2a2a, #1a1a1a);
+/* Попап редактирования — появляется рядом с выбранным местом */
+#replayer-popup {
+  position: absolute;
+  z-index: 500;
+  background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
+  border: 2px solid #3a3530;
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.9), 0 0 40px rgba(255,203,43,.08);
+  padding: 14px;
+  min-width: 240px;
+  max-width: min(340px, 90vw);
   color: var(--text);
-  border: 1px solid #3a3530;
-  box-shadow: none;
+  display: none;
 }
-#replayer-footer button:active:not(:disabled) {
-  transform: scale(0.97);
-  filter: brightness(1.12);
-}
-#replayer-footer button:disabled {
-  opacity: .35;
-  cursor: default;
-  filter: grayscale(.6);
-}
-
-/* Секции редактора */
-.replayer-section {
-  margin-bottom: 14px;
-}
-.replayer-section h4 {
+#replayer-popup.visible { display: block; }
+#replayer-popup h4 {
   color: var(--gold);
-  font-size: 11px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 1px;
-  margin-bottom: 8px;
-  font-weight: 800;
+  margin-bottom: 10px;
+  font-weight: 900;
+  text-align: center;
 }
-.replayer-hint {
-  font-size: 11px;
-  color: var(--muted);
-  line-height: 1.4;
-  margin-bottom: 8px;
-}
-.replayer-row {
+#replayer-popup .rp-row {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 8px;
 }
-.replayer-row label {
+#replayer-popup .rp-row label {
   color: var(--muted-soft);
   font-size: 12px;
-  min-width: 70px;
+  min-width: 60px;
 }
-.replayer-row input,
-.replayer-row select {
+#replayer-popup input,
+#replayer-popup select {
   flex: 1;
   background: #1a1a1a;
   border: 1px solid #2a2520;
   color: var(--text);
   border-radius: 6px;
-  padding: 8px 10px;
+  padding: 7px 9px;
   font-size: 13px;
-  min-height: 38px;
+  min-height: 36px;
   font-family: inherit;
 }
-.replayer-row input:focus,
-.replayer-row select:focus {
+#replayer-popup input:focus,
+#replayer-popup select:focus {
   outline: none;
   border-color: var(--gold);
 }
 
-/* Список игроков */
-.replayer-player-row {
+#replayer-popup .rp-actions {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px;
-  border-radius: 8px;
-  background: #1a1a1a;
-  border: 1px solid #2a2520;
-  margin-bottom: 6px;
-  cursor: pointer;
-  touch-action: manipulation;
-}
-.replayer-player-row.selected {
-  border-color: var(--gold);
-  background: #241f10;
-}
-.replayer-player-row .p-name {
-  flex: 1;
-  font-weight: 700;
-  color: var(--text);
-  font-size: 12px;
-}
-.replayer-player-row .p-pos {
-  color: var(--gold);
-  font-weight: 800;
-  font-size: 11px;
-  min-width: 42px;
-  text-align: center;
-}
-.replayer-player-row .p-stack {
-  color: var(--muted);
-  font-size: 11px;
-  min-width: 60px;
-  text-align: right;
-}
-.replayer-player-row .p-cards {
-  color: var(--text);
-  font-size: 11px;
-  min-width: 64px;
-  text-align: right;
-  font-weight: 700;
-}
-.replayer-player-row .p-cards.unknown {
-  color: var(--muted);
-  font-style: italic;
-}
-
-/* Действия */
-.replayer-action-block {
-  background: #1a1a1a;
-  border: 1px solid #2a2520;
-  border-radius: 8px;
-  padding: 10px;
-  margin-bottom: 8px;
-}
-.replayer-action-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 6px;
-  font-size: 12px;
-  color: var(--text);
-  font-weight: 700;
-}
-.replayer-action-head .a-del {
-  color: var(--danger);
-  font-size: 15px;
-  cursor: pointer;
-  background: none;
-  border: none;
-  padding: 2px 8px;
-  font-family: inherit;
-}
-.replayer-action-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-.replayer-action-buttons button {
-  flex: 1 1 auto;
-  min-width: 60px;
-  padding: 8px 6px;
-  border-radius: 6px;
-  background: #2a2520;
-  color: var(--text);
-  border: 1px solid #3a3530;
-  font-size: 11px;
-  font-weight: 800;
-  cursor: pointer;
-  text-transform: uppercase;
-  font-family: inherit;
-  touch-action: manipulation;
-}
-.replayer-action-buttons button.selected {
-  background: var(--gold);
-  color: #1a1a1a;
-  border-color: var(--gold);
-}
-
-/* Canvas-превью */
-#replayer-preview-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-#replayer-canvas {
-  width: 100%;
-  max-width: 340px;
-  aspect-ratio: 9 / 16;
-  background: #000;
-  border-radius: 10px;
-  border: 1px solid #2a2520;
-  display: block;
-  box-shadow: 0 0 30px rgba(255,203,43,.08);
-}
-#replayer-play-controls {
-  display: flex;
-  flex-wrap: wrap;
   gap: 6px;
-  width: 100%;
-  max-width: 340px;
+  margin-top: 10px;
 }
-#replayer-play-controls button {
-  flex: 1 1 calc(50% - 3px);
+#replayer-popup .rp-actions button {
+  flex: 1;
   padding: 10px;
   border-radius: 8px;
-  border: 1px solid #3a3530;
-  background: linear-gradient(180deg, #2a2a2a, #1a1a1a);
-  color: var(--text);
+  border: none;
   font-weight: 800;
+  text-transform: uppercase;
   font-size: 11px;
   letter-spacing: .5px;
-  cursor: pointer;
-  text-transform: uppercase;
-  min-height: 40px;
   font-family: inherit;
-  touch-action: manipulation;
+  cursor: pointer;
+  min-height: 38px;
 }
-#replayer-play-controls button.primary {
+#replayer-popup .rp-btn-ok {
   background: linear-gradient(180deg, #ffcb2b, #e0a800);
   color: #1a1a1a;
-  border-color: #8a6508;
+  box-shadow: 0 2px 0 #8a6508;
 }
-#replayer-play-controls button:active:not(:disabled) {
-  transform: scale(0.97);
-  filter: brightness(1.15);
-}
-#replayer-play-controls button:disabled {
-  opacity: .4;
-  cursor: default;
-}
-#replayer-status {
-  font-size: 11px;
-  color: var(--gold);
-  min-height: 16px;
-  text-align: center;
-  width: 100%;
+#replayer-popup .rp-btn-cancel {
+  background: linear-gradient(180deg, #2a2a2a, #1a1a1a);
+  color: var(--text);
+  border: 1px solid #3a3530;
 }
 
-/* Сетка карт (номинал × масть) */
-.rp-card-grid {
+/* Сетка карт в попапе */
+#replayer-popup .rp-card-grid {
   display: grid;
   grid-template-columns: repeat(13, 1fr);
-  gap: 3px;
-  margin-bottom: 8px;
+  gap: 2px;
+  margin-bottom: 6px;
 }
-.rp-card-cell {
+#replayer-popup .rp-card-cell {
   aspect-ratio: 2/3;
-  border-radius: 4px;
+  border-radius: 3px;
   background: #fafafa;
   border: 1px solid #2a2520;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 800;
   cursor: pointer;
   padding: 1px;
-  user-select: none;
-  touch-action: manipulation;
   line-height: 1;
-  gap: 0;
+  touch-action: manipulation;
 }
-.rp-card-cell .rp-rank { font-size: 10px; line-height: 1; font-weight: 900; }
-.rp-card-cell .rp-suit { font-size: 12px; line-height: 1; }
-.rp-card-cell.suit-s { color: #1a1a1a; }
-.rp-card-cell.suit-h { color: #d63535; }
-.rp-card-cell.suit-d { color: #2b6dd6; }
-.rp-card-cell.suit-c { color: #1fa04a; }
-.rp-card-cell.selected {
+#replayer-popup .rp-card-cell .rp-rank { font-size: 9px; font-weight: 900; line-height: 1; }
+#replayer-popup .rp-card-cell .rp-suit { font-size: 10px; line-height: 1; }
+#replayer-popup .rp-card-cell.suit-s { color: #1a1a1a; }
+#replayer-popup .rp-card-cell.suit-h { color: #d63535; }
+#replayer-popup .rp-card-cell.suit-d { color: #2b6dd6; }
+#replayer-popup .rp-card-cell.suit-c { color: #1fa04a; }
+#replayer-popup .rp-card-cell.selected {
   outline: 2px solid var(--gold);
-  box-shadow: 0 0 8px var(--gold);
-  transform: scale(1.05);
+  box-shadow: 0 0 6px var(--gold);
 }
-.rp-card-cell.used {
-  opacity: 0.3;
-  pointer-events: none;
-}
+#replayer-popup .rp-card-cell.used { opacity: 0.3; pointer-events: none; }
 
-/* Мягкая окантовка кликабельных зон на столе реплеера */
+/* Кликабельные зоны на столе реплеера */
 .rp-clickable {
   position: relative;
 }
@@ -913,8 +643,8 @@ button:disabled, button.disabled { cursor: default; }
   pointer-events: none;
   transition: border-color .2s ease, box-shadow .2s ease;
 }
-.rp-clickable:active::before,
-.rp-clickable.hover::before {
+.rp-clickable:hover::before,
+.rp-clickable:active::before {
   border-color: var(--gold);
   box-shadow: 0 0 8px rgba(255,203,43,.4);
 }
@@ -923,15 +653,103 @@ button:disabled, button.disabled { cursor: default; }
   border-style: solid;
 }
 
-#replayer-toggle-help {
-  color: var(--muted);
-  font-size: 11px;
-  text-align: center;
-  padding: 4px 0;
-  cursor: pointer;
-  user-select: none;
+/* Панель управления реплеером — на месте #hero-actions Trainer'а */
+#replayer-controls {
+  position: absolute;
+  left: calc(var(--dash-inset) + var(--edge));
+  right: calc(var(--dash-inset) + var(--edge) + var(--pct-block-w) + var(--edge));
+  bottom: calc(var(--dash-inset) + var(--edge) - 1px);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: rgba(20,18,16,.92);
+  border: 1px solid #3a3530;
+  border-radius: 10px;
+  padding: 6px;
+  z-index: 100;
 }
-#replayer-toggle-help.active { color: var(--gold); }
+#replayer-controls .rp-ctl-row {
+  display: flex;
+  gap: 4px;
+}
+#replayer-controls button {
+  flex: 1;
+  padding: 7px 6px;
+  border: none;
+  border-radius: 7px;
+  background: linear-gradient(180deg, #2a2a2a, #1a1a1a);
+  color: var(--text);
+  border: 1px solid #3a3530;
+  font-weight: 800;
+  font-size: 10px;
+  letter-spacing: .3px;
+  text-transform: uppercase;
+  font-family: inherit;
+  cursor: pointer;
+  min-height: 34px;
+  touch-action: manipulation;
+}
+#replayer-controls button.primary {
+  background: linear-gradient(180deg, #ffcb2b, #e0a800);
+  color: #1a1a1a;
+  border-color: #8a6508;
+  box-shadow: 0 2px 0 #8a6508;
+}
+#replayer-controls button:active {
+  transform: scale(0.96);
+  filter: brightness(1.15);
+}
+#replayer-status-bar {
+  font-size: 10px;
+  color: var(--gold);
+  text-align: center;
+  min-height: 14px;
+  line-height: 1.2;
+}
+
+/* Кнопка выхода */
+#replayer-close-btn {
+  position: absolute;
+  top: calc(var(--safe-top) + 8px);
+  right: 8px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #3a3530, #1a1a1a 70%);
+  border: 1px solid #8a6508;
+  color: var(--gold);
+  font-weight: 900;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 120;
+  font-family: inherit;
+  padding: 0;
+}
+
+/* Инструкция */
+#replayer-help-btn {
+  position: absolute;
+  top: calc(var(--safe-top) + 8px);
+  right: 52px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #3a3530, #1a1a1a 70%);
+  border: 1px solid #8a6508;
+  color: var(--gold);
+  font-weight: 900;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 120;
+  font-family: inherit;
+  padding: 0;
+}
 </style>
 </head>
 <body>
@@ -1049,29 +867,14 @@ button:disabled, button.disabled { cursor: default; }
       </div>
       <div id="training-text-viewport">
         <div class="training-text-page active" data-page="0">
-          <p class="training-text">
-            Логика покера — это система мышления, при которой каждый твой ход является осознанным ответом на вопрос:
-            «Что я пытаюсь заставить оппонента подумать, почувствовать и сделать, а главное — зачем?»
-          </p>
-          <p class="training-text">
-            Ты не играешь карты. Ты играешь против мышления конкретного оппонента в конкретной ситуации.
-            Карты — лишь инструмент, которым ты управляешь его решениями.
-          </p>
-          <p class="training-text">
-            Ключевая идея: у каждого действия должна быть причина, которую ты можешь сформулировать словами.
-            Если не можешь — ты не играешь, а угадываешь.
-          </p>
+          <p class="training-text">Логика покера — это система мышления, при которой каждый твой ход является осознанным ответом на вопрос: «Что я пытаюсь заставить оппонента подумать, почувствовать и сделать, а главное — зачем?»</p>
+          <p class="training-text">Ты не играешь карты. Ты играешь против мышления конкретного оппонента в конкретной ситуации. Карты — лишь инструмент, которым ты управляешь его решениями.</p>
+          <p class="training-text">Ключевая идея: у каждого действия должна быть причина, которую ты можешь сформулировать словами. Если не можешь — ты не играешь, а угадываешь.</p>
         </div>
         <div class="training-text-page offscreen-right" data-page="1">
-          <p class="training-text">
-            Тренировка начинается с тишины: перед любым выбором — чай, встреча, звонок — на десять секунд закрой глаза и не думай, а просто отметь первое ощущение в теле. Не анализируй его, не спорь. Это и есть первый сигнал поля, который обычно заглушается мыслями.
-          </p>
-          <p class="training-text">
-            Дальше учись читать уже случившееся: вспомни событие дня и восстанови не логику, а состояние — что ты чувствовал за минуту до него. Повторяй это каждый вечер на трёх событиях. Так мозг начинает связывать внутренний сигнал с внешним результатом, и предчувствие перестаёт быть случайностью.
-          </p>
-          <p class="training-text">
-            Главный сдвиг — перестать ждать будущее и начать вспоминать его. Когда решение уже принято внутри, оно ощущается спокойно и буднично, как факт, который просто ещё не наступил. Тренируй это состояние на мелочах — какая очередь, кто позвонит, чем закончится разговор. Точность придёт не от усилия, а от доверия к первому тихому отклику.
-          </p>
+          <p class="training-text">Тренировка начинается с тишины: перед любым выбором — чай, встреча, звонок — на десять секунд закрой глаза и не думай, а просто отметь первое ощущение в теле. Не анализируй его, не спорь. Это и есть первый сигнал поля, который обычно заглушается мыслями.</p>
+          <p class="training-text">Дальше учись читать уже случившееся: вспомни событие дня и восстанови не логику, а состояние — что ты чувствовал за минуту до него. Повторяй это каждый вечер на трёх событиях. Так мозг начинает связывать внутренний сигнал с внешним результатом, и предчувствие перестаёт быть случайностью.</p>
+          <p class="training-text">Главный сдвиг — перестать ждать будущее и начать вспоминать его. Когда решение уже принято внутри, оно ощущается спокойно и буднично, как факт, который просто ещё не наступил. Тренируй это состояние на мелочах — какая очередь, кто позвонит, чем закончится разговор. Точность придёт не от усилия, а от доверия к первому тихому отклику.</p>
         </div>
       </div>
       <div id="training-test-buttons">
@@ -1085,46 +888,27 @@ button:disabled, button.disabled { cursor: default; }
     <h3>Настройки</h3>
     <label class="setting">
       <span>Язык приложения</span>
-      <select id="set-language">
-        <option value="ru">Русский</option>
-        <option value="en">Английский</option>
-      </select>
+      <select id="set-language"><option value="ru">Русский</option><option value="en">Английский</option></select>
     </label>
     <label class="setting">
       <span>Уровень сложности</span>
-      <select id="set-difficulty">
-        <option value="min">Минимум</option>
-        <option value="mid" selected>Средний</option>
-        <option value="max">Максимум</option>
-      </select>
+      <select id="set-difficulty"><option value="min">Минимум</option><option value="mid" selected>Средний</option><option value="max">Максимум</option></select>
     </label>
     <label class="setting">
       <span>Стеки игроков</span>
-      <select id="set-stack-display">
-        <option value="bb">BB</option>
-        <option value="chips">Фишки</option>
-      </select>
+      <select id="set-stack-display"><option value="bb">BB</option><option value="chips">Фишки</option></select>
     </label>
     <label class="setting">
       <span>Стиль карт</span>
-      <select id="set-card-style">
-        <option value="4color">4-цветные</option>
-        <option value="2color">2-цветные</option>
-      </select>
+      <select id="set-card-style"><option value="4color">4-цветные</option><option value="2color">2-цветные</option></select>
     </label>
     <label class="setting">
       <span>Рост блайндов</span>
-      <select id="set-blind-growth">
-        <option value="10">Каждые 10 раздач</option>
-        <option value="5">Каждые 5 раздач</option>
-      </select>
+      <select id="set-blind-growth"><option value="10">Каждые 10 раздач</option><option value="5">Каждые 5 раздач</option></select>
     </label>
     <label class="setting">
       <span>Время на ход</span>
-      <select id="set-turn-time">
-        <option value="0">Без времени</option>
-        <option value="10" selected>10 секунд</option>
-      </select>
+      <select id="set-turn-time"><option value="0">Без времени</option><option value="10" selected>10 секунд</option></select>
     </label>
     <label class="setting">
       <span>Показывать тип игроков</span>
@@ -1146,71 +930,38 @@ button:disabled, button.disabled { cursor: default; }
       <h3>ПОДДЕРЖИ АВТОРА</h3>
       <div class="belcard-stack" id="belcard-stack">
         <div class="belcard belcard-gold" data-card="gold">
-          <div class="belcard-top">
-            <div class="belcard-bank" translate="no"><span class="gold-gg">GG</span>POKER</div>
-            <div class="belcard-club-top" translate="no">Transfer</div>
-          </div>
+          <div class="belcard-top"><div class="belcard-bank" translate="no"><span class="gold-gg">GG</span>POKER</div><div class="belcard-club-top" translate="no">Transfer</div></div>
           <div class="belcard-chip"></div>
-          <div class="gold-nickname-row" translate="no">
-            <span class="gold-name-label">Nickname:</span>
-            <span class="copy-text gold-name-value" data-copy-value="Lucky Light">Lucky Light<span class="copy-icon"></span></span>
-          </div>
-          <div class="belcard-bottom">
-            <div class="belcard-bottom-line" translate="no">Balance: $</div>
-          </div>
+          <div class="gold-nickname-row" translate="no"><span class="gold-name-label">Nickname:</span><span class="copy-text gold-name-value" data-copy-value="Lucky Light">Lucky Light<span class="copy-icon"></span></span></div>
+          <div class="belcard-bottom"><div class="belcard-bottom-line" translate="no">Balance: $</div></div>
           <div class="belcard-copied" data-copied="en">Copied</div>
         </div>
         <div class="belcard belcard-gray" data-card="gray">
-          <div class="belcard-top">
-            <div class="belcard-bank" translate="no">Cryptocurrency</div>
-            <div class="belcard-club-top" translate="no">Tether</div>
-          </div>
+          <div class="belcard-top"><div class="belcard-bank" translate="no">Cryptocurrency</div><div class="belcard-club-top" translate="no">Tether</div></div>
           <div class="belcard-chip"></div>
-          <div class="belcard-usdt-line" translate="no">
-            <span class="copy-text" data-copy-value="TNxHP8tVZUFhFyAxGGtmKEqEm9Cjhbck3A">TNxHP8tVZUFhFyAxGGtmKEqEm9Cjhbck3A<span class="copy-icon"></span></span>
-          </div>
-          <div class="belcard-bottom">
-            <div class="belcard-bottom-line" translate="no">USDT Tether → TRON (TRC20)</div>
-          </div>
+          <div class="belcard-usdt-line" translate="no"><span class="copy-text" data-copy-value="TNxHP8tVZUFhFyAxGGtmKEqEm9Cjhbck3A">TNxHP8tVZUFhFyAxGGtmKEqEm9Cjhbck3A<span class="copy-icon"></span></span></div>
+          <div class="belcard-bottom"><div class="belcard-bottom-line" translate="no">USDT Tether → TRON (TRC20)</div></div>
           <div class="belcard-copied" data-copied="en">Copied</div>
         </div>
         <div class="belcard belcard-blue" data-card="blue">
-          <div class="belcard-top">
-            <div class="belcard-bank" translate="no">BELARUSBANK</div>
-            <div class="belcard-club-top" translate="no">VISA</div>
-          </div>
+          <div class="belcard-top"><div class="belcard-bank" translate="no">BELARUSBANK</div><div class="belcard-club-top" translate="no">VISA</div></div>
           <div class="belcard-chip"></div>
           <a class="belcard-paysend" href="https://paysend.com/send" target="_blank" rel="noopener noreferrer" translate="no">PAYSEND</a>
           <div class="belcard-number-row">
-            <div class="belcard-number" translate="no">
-              <span class="copy-text" data-copy-value="4255 1901 3916 7251">4255 1901 3916 7251<span class="copy-icon"></span></span>
-            </div>
+            <div class="belcard-number" translate="no"><span class="copy-text" data-copy-value="4255 1901 3916 7251">4255 1901 3916 7251<span class="copy-icon"></span></span></div>
             <div class="belcard-currencies-top" translate="no">USD / EUR</div>
           </div>
-          <div class="belcard-bottom">
-            <div class="belcard-name" translate="no">
-              <span class="copy-text" data-copy-value="TOM TOT">TOM TOT<span class="copy-icon"></span></span>
-            </div>
-          </div>
+          <div class="belcard-bottom"><div class="belcard-name" translate="no"><span class="copy-text" data-copy-value="TOM TOT">TOM TOT<span class="copy-icon"></span></span></div></div>
           <div class="belcard-copied" data-copied="en">Copied</div>
         </div>
         <div class="belcard belcard-green" data-card="green">
-          <div class="belcard-top">
-            <div class="belcard-bank" translate="no">БЕЛАРУСБАНК</div>
-            <div class="belcard-club-top" translate="no">БЕЛКАРТ</div>
-          </div>
+          <div class="belcard-top"><div class="belcard-bank" translate="no">БЕЛАРУСБАНК</div><div class="belcard-club-top" translate="no">БЕЛКАРТ</div></div>
           <div class="belcard-chip"></div>
           <div class="belcard-number-row">
-            <div class="belcard-number" translate="no">
-              <span class="copy-text" data-copy-value="9112 3801 6012 8254">9112 3801 6012 8254<span class="copy-icon"></span></span>
-            </div>
+            <div class="belcard-number" translate="no"><span class="copy-text" data-copy-value="9112 3801 6012 8254">9112 3801 6012 8254<span class="copy-icon"></span></span></div>
             <div class="belcard-currencies-top" translate="no">BYN / RUB</div>
           </div>
-          <div class="belcard-bottom">
-            <div class="belcard-name" translate="no">
-              <span class="copy-text" data-copy-value="TOM TOT">TOM TOT<span class="copy-icon"></span></span>
-            </div>
-          </div>
+          <div class="belcard-bottom"><div class="belcard-name" translate="no"><span class="copy-text" data-copy-value="TOM TOT">TOM TOT<span class="copy-icon"></span></span></div></div>
           <div class="belcard-copied" data-copied="ru">Скопировано</div>
         </div>
       </div>
@@ -1233,9 +984,7 @@ button:disabled, button.disabled { cursor: default; }
 
   <div id="final-overlay">
     <div id="final-dim"></div>
-    <div id="final-champ">
-      <div id="champion-icon"></div>
-    </div>
+    <div id="final-champ"><div id="champion-icon"></div></div>
     <div id="final-fx"></div>
   </div>
 
@@ -1248,46 +997,47 @@ button:disabled, button.disabled { cursor: default; }
   </div>
 
   <!-- ============================================================ -->
-  <!-- POKER REPLAYER — оверлей оффлайн-реплеера                    -->
+  <!-- POKER REPLAYER — оверлей с DOM-клоном стола Trainer'а        -->
   <!-- ============================================================ -->
   <div id="replayer-overlay">
-    <div id="replayer-window">
-
-      <div id="replayer-header">
-        <button id="replayer-close" class="replayer-head-btn" type="button" aria-label="Закрыть">✕</button>
-        <div id="replayer-title">POKER REPLAYER</div>
-        <button id="replayer-help" class="replayer-head-btn" type="button" aria-label="Помощь">?</button>
+    <div id="replayer-table-scene">
+      <div id="replayer-table-wood" class="rp-wood">
+        <div id="replayer-table" class="rp-table">
+          <div id="replayer-board-area" class="rp-board-area">
+            <div id="replayer-pot-display" class="rp-pot">Pot: 0</div>
+            <div id="replayer-board-cards-wrap" class="rp-board-wrap">
+              <div id="replayer-brand-label">POKER REPLAYER</div>
+              <div id="replayer-board-cards"></div>
+            </div>
+            <div id="replayer-blinds-row">Blinds: 10/20</div>
+          </div>
+          <div id="replayer-seats"></div>
+        </div>
       </div>
-
-      <div id="replayer-steps">
-        <button class="replayer-step" data-step="1" type="button">
-          <span class="step-num">1</span><span>Blinds</span>
-        </button>
-        <button class="replayer-step" data-step="2" type="button">
-          <span class="step-num">2</span><span>Players</span>
-        </button>
-        <button class="replayer-step" data-step="3" type="button">
-          <span class="step-num">3</span><span>Cards</span>
-        </button>
-        <button class="replayer-step" data-step="4" type="button">
-          <span class="step-num">4</span><span>Actions</span>
-        </button>
-        <button class="replayer-step" data-step="5" type="button">
-          <span class="step-num">5</span><span>Board</span>
-        </button>
-        <button class="replayer-step" data-step="6" type="button">
-          <span class="step-num">6</span><span>Play &amp; Export</span>
-        </button>
-      </div>
-
-      <div id="replayer-body"></div>
-
-      <div id="replayer-footer">
-        <button id="replayer-prev" type="button" class="secondary">◀ Back</button>
-        <button id="replayer-next" type="button">Next ▶</button>
-      </div>
-
     </div>
+    <button id="replayer-help-btn" type="button" aria-label="Помощь">?</button>
+    <button id="replayer-close-btn" type="button" aria-label="Закрыть">✕</button>
+
+    <div id="replayer-controls">
+      <div class="rp-ctl-row">
+        <button id="rp-btn-play" class="primary" type="button">▶ Play</button>
+        <button id="rp-btn-pause" type="button">⏸</button>
+        <button id="rp-btn-restart" type="button">↺</button>
+      </div>
+      <div class="rp-ctl-row">
+        <button id="rp-btn-export" type="button">💾 WebM</button>
+        <button id="rp-btn-share" type="button">📤 Share</button>
+        <button id="rp-btn-hh" type="button">📋 HH</button>
+      </div>
+      <div class="rp-ctl-row">
+        <button id="rp-btn-save" type="button">📦 JSON</button>
+        <button id="rp-btn-load" type="button">📂 Load</button>
+        <button id="rp-btn-clear" type="button">🗑 Clear</button>
+      </div>
+      <div id="replayer-status-bar"></div>
+    </div>
+
+    <div id="replayer-popup"></div>
   </div>
 
 </div>
@@ -1799,11 +1549,7 @@ const Engine = (() => {
         if (remainder > 0) remainder--;
         payouts[wid] = (payouts[wid] || 0) + share + extra;
       }
-      potResults.push({
-        amount: pot.amount,
-        winners: winners.map(id => state.players.find(p => p.id === id).name),
-        winnersIds: winners
-      });
+      potResults.push({ amount: pot.amount, winners: winners.map(id => state.players.find(p => p.id === id).name), winnersIds: winners });
     }
 
     for (const [id, amount] of Object.entries(payouts)) {
@@ -2068,10 +1814,7 @@ const Math2 = (() => {
     return filtered.length > 0 ? filtered : allHands.slice(0, 20);
   }
 
-  return {
-    equityVsRange, potOdds, mdf, alpha, spr,
-    countCombos, blockerEffect, buildOpponentRange
-  };
+  return { equityVsRange, potOdds, mdf, alpha, spr, countCombos, blockerEffect, buildOpponentRange };
 })();
 
 
@@ -2126,10 +1869,7 @@ const ICM = (() => {
     return Math.min(0.95, baseThreshold + riskPremium(bubbleFactorValue));
   }
 
-  return {
-    PRIZE_STRUCTURE, stackValue, bubbleFactor,
-    riskPremium, ladderEffect, adjustedCallThreshold
-  };
+  return { PRIZE_STRUCTURE, stackValue, bubbleFactor, riskPremium, ladderEffect, adjustedCallThreshold };
 })();
 
 
@@ -2213,9 +1953,7 @@ const Plan = (() => {
         plan.riverIfCompleted = 'value-bet';
       } else if (medium) {
         plan.flop = isAggressor ? 'bet' : 'check';
-        plan.turnIfBlank = 'check';
-        plan.turnIfWet = 'check';
-        plan.riverIfCompleted = 'check';
+        plan.turnIfBlank = 'check'; plan.turnIfWet = 'check'; plan.riverIfCompleted = 'check';
       } else {
         plan.flop = 'check'; plan.turnIfBlank = 'check'; plan.turnIfWet = 'check';
       }
@@ -2273,7 +2011,6 @@ const Model = (() => {
     if (!handData || !handData.players) return;
     const bot = handData.players.find(p => p.id === botId);
     if (!bot) return;
-
     for (const opp of handData.players) {
       if (opp.id === botId) continue;
       if (opp.eliminated && !opp.inHand) continue;
@@ -2294,7 +2031,6 @@ const Model = (() => {
       if (raised) s.pfr++;
       const totalActions = actions.length || 1;
       s.aggIndex = (s.raises * 2 + s.calls) / totalActions;
-
       if (handData.handOver && handData.showdownResults && handData.showdownResults.scores) {
         const sc = handData.showdownResults.scores[opp.id];
         if (sc && opp.revealed) {
@@ -2315,8 +2051,7 @@ const Model = (() => {
     const pfrRate = s.pfr / s.hands;
     const foldRate = s.folds / Math.max(1, s.hands);
     return {
-      vpipRate, pfrRate, foldRate,
-      aggIndex: s.aggIndex, hands: s.hands,
+      vpipRate, pfrRate, foldRate, aggIndex: s.aggIndex, hands: s.hands,
       looseness: Math.min(1, vpipRate / 0.6),
       aggression: Math.min(1, pfrRate / 0.5),
       foldTendency: Math.min(1, foldRate / 0.8)
@@ -2411,10 +2146,7 @@ const Meta = (() => {
 
   function reset() { botImages.clear(); }
 
-  return {
-    getBotImage, tickImage, imageModifiers, level3BluffCatchModifier,
-    level4BluffReduction, goodBluffSpot, thinBluffCatch, reset
-  };
+  return { getBotImage, tickImage, imageModifiers, level3BluffCatchModifier, level4BluffReduction, goodBluffSpot, thinBluffCatch, reset };
 })();
 
 
@@ -2539,7 +2271,6 @@ const Bots = (() => {
 
   function assignBotTypes(difficulty) {
     const result = [];
-
     if (difficulty === 'min') {
       result.push('PRO_GTO');
       result.push('VIP_TAGLITE');
@@ -2559,7 +2290,6 @@ const Bots = (() => {
       }
       return result;
     }
-
     if (difficulty === 'max') {
       result.push('PRO_LAG');
       result.push('PRO_LAG');
@@ -2586,7 +2316,6 @@ const Bots = (() => {
       }
       return result;
     }
-
     result.push('PRO_LAG');
     const proPool = [
       { key: 'PRO_GTO', weight: 22 },
@@ -2595,7 +2324,6 @@ const Bots = (() => {
     ];
     result.push(pickWeighted(proPool));
     result.push(pickWeighted(proPool));
-
     const vipPool = [
       { key: 'VIP_TAGLITE', weight: 18 },
       { key: 'VIP_LOOSE', weight: 14 },
@@ -2672,7 +2400,6 @@ const Bots = (() => {
     const profile = PROFILES[ctx.botType];
     if (!profile) return { action: 'fold', amount: 0 };
     const typeMeta = TYPES[ctx.botType] || {};
-
     let effProfile = profile;
     if (typeMeta.useMeta) {
       const img = Meta.getBotImage(ctx.botId, profile);
@@ -2687,7 +2414,6 @@ const Bots = (() => {
         tightBubble: profile.tightBubble
       };
     }
-
     return ctx.street === 'preflop'
       ? decidePreflop(ctx, effProfile, typeMeta)
       : decidePostflop(ctx, effProfile, typeMeta);
@@ -2704,9 +2430,7 @@ const Bots = (() => {
     const eq = Math2.equityVsRange(myHand, board, oppRange, typeMeta.equityIters);
     const po = Math2.potOdds(toCall, ctx.pot);
     let adjustedPo = po;
-    if (typeMeta.useICM && ctx.icmBubbleFactor && ctx.icmBubbleFactor > 1) {
-      adjustedPo = po * ctx.icmBubbleFactor;
-    }
+    if (typeMeta.useICM && ctx.icmBubbleFactor && ctx.icmBubbleFactor > 1) adjustedPo = po * ctx.icmBubbleFactor;
     if (eq < adjustedPo - 0.03 && eq < profile.callThreshold * 0.9) return { action: 'fold', amount: 0 };
     if (eq > adjustedPo + 0.20 && eq > 0.65 && profile.aggression > 0.5) {
       const sizeFactor = Texture.sizingForTexture(ctx.texture || { wet: 0.3 }, profile.aggression);
@@ -2723,16 +2447,10 @@ const Bots = (() => {
     const strength = preflopStrength(card1, card2);
     const bubbleTighten = (playersLeft <= 4) ? profile.tightBubble : 0;
     const effStrength = strength * (1 - 0.2 * bubbleTighten);
-
     let adaptBonus = 0;
-    if (profile.proThinking && ctx.oppRead && ctx.oppRead.hands >= 8) {
-      adaptBonus = profile.adaptivity * ctx.oppRead.foldTendency * 0.15;
-    }
-
+    if (profile.proThinking && ctx.oppRead && ctx.oppRead.hands >= 8) adaptBonus = profile.adaptivity * ctx.oppRead.foldTendency * 0.15;
     let icmAdjust = 0;
-    if (typeMeta.useICM && ctx.icmBubbleFactor && ctx.icmBubbleFactor > 1.2 && playersLeft <= 4) {
-      icmAdjust = (ctx.icmBubbleFactor - 1) * 0.15;
-    }
+    if (typeMeta.useICM && ctx.icmBubbleFactor && ctx.icmBubbleFactor > 1.2 && playersLeft <= 4) icmAdjust = (ctx.icmBubbleFactor - 1) * 0.15;
     const effectiveStrength = effStrength * (1 - icmAdjust);
 
     if (stackBB <= 15 && !ctx.facingRaise) {
@@ -2748,14 +2466,12 @@ const Bots = (() => {
     if (ctx.facingRaise && ctx.facingAllin) {
       let needStrong = 0.55;
       if (typeMeta.useICM && ctx.icmBubbleFactor && ctx.icmBubbleFactor > 1.3) needStrong = 0.72;
-      if (handInChart(card1, card2, 'CALL_SHOVE') ||
-          (profile.looseness > 0.7 && effectiveStrength > needStrong)) return { action: 'call', amount: toCall };
+      if (handInChart(card1, card2, 'CALL_SHOVE') || (profile.looseness > 0.7 && effectiveStrength > needStrong)) return { action: 'call', amount: toCall };
       return { action: 'fold', amount: 0 };
     }
 
     if (ctx.facing3Bet) {
-      if (handInChart(card1, card2, 'CALL_3BET') ||
-          (profile.looseness > 0.6 && effectiveStrength > 0.6)) {
+      if (handInChart(card1, card2, 'CALL_3BET') || (profile.looseness > 0.6 && effectiveStrength > 0.6)) {
         if (profile.aggression > 0.7 && effectiveStrength > 0.8 && Math.random() < 0.5) {
           const size = Math.min(myStack, Math.round((pot + toCall) * 2.2));
           return { action: 'raise', amount: size };
@@ -2834,15 +2550,12 @@ const Bots = (() => {
     }
 
     let adaptBonus = 0;
-    if (profile.proThinking && ctx.oppRead && ctx.oppRead.hands >= 8) {
-      adaptBonus = profile.adaptivity * ctx.oppRead.foldTendency * 0.2;
-    }
+    if (profile.proThinking && ctx.oppRead && ctx.oppRead.hands >= 8) adaptBonus = profile.adaptivity * ctx.oppRead.foldTendency * 0.2;
 
     if (toCall === 0) {
       if (profile.proThinking && profile.aggression > 0.6 && strength > 0.85 && street === 'flop') {
         if (Math.random() < 0.35 * profile.adaptivity) return { action: 'check', amount: 0 };
       }
-
       if (strength + streetBonus > 0.65) {
         const sizingFactor = texture && Texture.sizingForTexture ? Texture.sizingForTexture(texture, profile.aggression) : 0.5;
         const betSize = Math.round(pot * sizingFactor);
@@ -2852,7 +2565,6 @@ const Bots = (() => {
         const betSize = Math.round(pot * 0.5);
         return { action: 'bet', amount: Math.min(myStack, Math.max(bb, betSize)) };
       }
-
       if (typeMeta.useMeta && profile.proThinking) {
         if (Meta.goodBluffSpot(ctx, profile)) {
           const bluffSize = Math.round(pot * 0.65);
@@ -2862,7 +2574,6 @@ const Bots = (() => {
         const betSize = Math.round(pot * 0.6);
         return { action: 'bet', amount: Math.min(myStack, Math.max(bb, betSize)) };
       }
-
       if (planAction === 'bet' || planAction === 'barrel' || planAction === 'value-bet') {
         if (profile.proThinking && strength > 0.3) {
           const betSize = Math.round(pot * 0.5);
@@ -2873,23 +2584,16 @@ const Bots = (() => {
     }
 
     const potOdds = toCall / (pot + toCall);
-
     let adjustedThreshold = profile.callThreshold;
-    if (typeMeta.useICM && ctx.icmBubbleFactor && ctx.icmBubbleFactor > 1) {
-      adjustedThreshold = Math.min(0.95, profile.callThreshold + (ctx.icmBubbleFactor - 1) * 0.2);
-    }
+    if (typeMeta.useICM && ctx.icmBubbleFactor && ctx.icmBubbleFactor > 1) adjustedThreshold = Math.min(0.95, profile.callThreshold + (ctx.icmBubbleFactor - 1) * 0.2);
 
     let bluffCatchBonus = 0;
-    if (typeMeta.useMeta && profile.proThinking && ctx.oppRead) {
-      bluffCatchBonus = Meta.level3BluffCatchModifier(ctx.oppRead);
-    }
+    if (typeMeta.useMeta && profile.proThinking && ctx.oppRead) bluffCatchBonus = Meta.level3BluffCatchModifier(ctx.oppRead);
 
     if (profile.proThinking && ctx.oppRead && ctx.oppRead.hands >= 10) {
       const mdfVal = Math2.mdf(toCall, pot);
       const ourDefense = strength + bluffCatchBonus;
-      if (ourDefense < mdfVal * 0.8 && strength > 0.25 && Math.random() < 0.5) {
-        return { action: 'call', amount: toCall };
-      }
+      if (ourDefense < mdfVal * 0.8 && strength > 0.25 && Math.random() < 0.5) return { action: 'call', amount: toCall };
     }
 
     if (typeMeta.useMeta && profile.proThinking && street === 'river') {
@@ -2924,17 +2628,15 @@ const Bots = (() => {
     decide, preflopStrength, postflopStrength,
     handInChart, normalizeHand, getChart
   };
-
 })();
 </script>
 
-<!-- === ЧАСТЬ 3: UI TRAINER + POKER REPLAYER === -->
+<!-- === ЧАСТЬ 3: UI TRAINER + MAIN === -->
 
   <script>
 /* ============================================================
    UI
    ============================================================ */
-
 const UI = (() => {
 
   const settings = {
@@ -3425,9 +3127,7 @@ const UI = (() => {
           </div>
         </div>
         <div class="hero-timer-zone" data-role="timer-zone"></div>
-        <div class="pos-row">
-          <span class="pos-name" data-role="pos">—</span>
-        </div>
+        <div class="pos-row"><span class="pos-name" data-role="pos">—</span></div>
         <div class="stack-wrap">
           <span class="stack" data-role="stack"></span>
           <span class="delta-text hidden" data-role="delta"></span>
@@ -3441,9 +3141,7 @@ const UI = (() => {
         <div class="strat-badge hidden" data-role="strat"></div>
         <div class="dealer-chip hidden" data-role="btn">D</div>
         <div class="seat-cards" data-role="cards"></div>
-        <div class="pos-row">
-          <span class="pos-name" data-role="pos">—</span>
-        </div>
+        <div class="pos-row"><span class="pos-name" data-role="pos">—</span></div>
         <div class="stack-wrap">
           <span class="stack" data-role="stack"></span>
           <span class="delta-text hidden" data-role="delta"></span>
@@ -3461,9 +3159,7 @@ const UI = (() => {
           <span class="pos-name" data-role="pos">—</span>
           <span class="delta-text hidden" data-role="delta"></span>
         </div>
-        <div class="stack-wrap">
-          <span class="stack" data-role="stack"></span>
-        </div>
+        <div class="stack-wrap"><span class="stack" data-role="stack"></span></div>
         <div class="action-badge hidden" data-role="action"></div>
         <div class="winner-badge hidden" data-role="winner">WIN</div>
         <div class="bet-chips hidden" data-role="bet"></div>
@@ -3479,7 +3175,6 @@ const UI = (() => {
         if (seat && seat.parentNode) seat.parentNode.removeChild(seat);
       }
     }
-
     for (const p of state.players) {
       if (p.eliminated && !p.inHand) continue;
       const seat = document.getElementById(`seat-${p.id}`);
@@ -3490,7 +3185,6 @@ const UI = (() => {
         bindTimerZoneTap();
         continue;
       }
-
       seat.querySelector('[data-role="pos"]').textContent = p.position || '—';
       seat.classList.toggle('folded', p.folded && !p.eliminated);
 
@@ -3592,8 +3286,6 @@ const UI = (() => {
     const cardsEl = seat.querySelector('[data-role="cards"]');
     if (!cardsEl) return;
 
-    const existingTimer = cardsEl.querySelector('[data-role="timer"]');
-
     Array.from(cardsEl.children).forEach(child => {
       if (child.getAttribute('data-role') !== 'timer') cardsEl.removeChild(child);
     });
@@ -3622,7 +3314,6 @@ const UI = (() => {
         nodes.push(cb);
       }
     }
-
     for (const node of nodes) cardsEl.appendChild(node);
 
     const stratBadgeEl = seat.querySelector('[data-role="strat"]');
@@ -3795,9 +3486,8 @@ const UI = (() => {
     const travel = Math.max(0, totalW - d);
     const { callValue, minRaiseValue, maxValue, currentValue } = sliderState;
     let xCenter;
-    if (currentValue <= callValue || minRaiseValue <= callValue || travel <= 0) {
-      xCenter = radius;
-    } else {
+    if (currentValue <= callValue || minRaiseValue <= callValue || travel <= 0) xCenter = radius;
+    else {
       const t = (currentValue - minRaiseValue) / Math.max(1, (maxValue - minRaiseValue));
       const clamped = Math.max(0, Math.min(1, t));
       xCenter = radius + clamped * travel;
@@ -3922,7 +3612,6 @@ const UI = (() => {
     const sv = sliderState.currentValue;
     const inCallZone = sliderState.active && sv <= sliderState.callValue;
     let mode = 'call';
-
     if (isPostflopNoBet) mode = 'bet';
     else {
       if (inCallZone) mode = 'call';
@@ -3931,9 +3620,7 @@ const UI = (() => {
       else if (toCall > 0) mode = 'call';
       else mode = 'call';
     }
-
     btn.classList.remove('mode-raise', 'mode-bet');
-
     if (mode === 'call') {
       if (labelEl) labelEl.textContent = 'Call';
       if (amountEl) {
@@ -4044,12 +3731,10 @@ const UI = (() => {
       let pointerDown = false;
       let startY = 0;
       let startCenterX = 0;
-
       function isActionInactive() {
         return el.heroActions.classList.contains('inactive') ||
                el.quickPercentList.classList.contains('inactive');
       }
-
       btn.addEventListener('pointerdown', (e) => {
         if (isActionInactive()) return;
         if (!sliderState.active) return;
@@ -4060,7 +3745,6 @@ const UI = (() => {
         btn.__suppressClick = false;
         try { btn.setPointerCapture && btn.setPointerCapture(e.pointerId); } catch (err) {}
       });
-
       btn.addEventListener('pointermove', (e) => {
         if (!pointerDown) return;
         if (isActionInactive()) return;
@@ -4074,22 +3758,15 @@ const UI = (() => {
         const newVal = valueFromSliderCenterX(newCenterX);
         applySliderValue(state, hero, handlers, newVal);
       });
-
       btn.addEventListener('pointerup', (e) => {
         if (!pointerDown) return;
         e.stopPropagation();
         pointerDown = false;
       });
-
-      btn.addEventListener('pointercancel', (e) => {
-        if (!pointerDown) return;
-        pointerDown = false;
-      });
-
+      btn.addEventListener('pointercancel', () => { pointerDown = false; });
       btn.addEventListener('click', (e) => {
         if (btn.__suppressClick) {
-          e.preventDefault();
-          e.stopPropagation();
+          e.preventDefault(); e.stopPropagation();
           btn.__suppressClick = false;
           return;
         }
@@ -4106,10 +3783,8 @@ const UI = (() => {
           }
         }
       });
-
       btn.__suppressClick = false;
     });
-
     percentButtonsContext = { state, heroIndex, handlers };
   }
 
@@ -4121,7 +3796,6 @@ const UI = (() => {
 
   function bindActionHandlers(state, heroIndex, toCall, handlers) {
     window.__heroHandlers = handlers;
-
     rebind(el.btnFold,  () => { if (!el.heroActions.classList.contains('inactive')) handlers.onFold(); });
     rebind(el.btnCheck, () => { if (!el.heroActions.classList.contains('inactive')) handlers.onCheck(); });
 
@@ -4134,11 +3808,9 @@ const UI = (() => {
     };
 
     let dragging = false;
-
     function isDisabled() {
       return el.heroActions.classList.contains('inactive') || !sliderState.active;
     }
-
     function onDown(clientX) {
       if (isDisabled()) return;
       dragging = true;
@@ -4147,7 +3819,6 @@ const UI = (() => {
       const hero = state.players[heroIndex];
       applySliderValue(state, hero, handlers, v);
     }
-
     function onMove(clientX) {
       if (!dragging) return;
       if (isDisabled()) return;
@@ -4155,7 +3826,6 @@ const UI = (() => {
       const hero = state.players[heroIndex];
       applySliderValue(state, hero, handlers, v);
     }
-
     function onUp() {
       dragging = false;
       if (el.sliderThumb) el.sliderThumb.classList.remove('pressed');
@@ -4163,8 +3833,7 @@ const UI = (() => {
 
     if (el.sliderTrack) {
       el.sliderTrack.onpointerdown = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+        e.preventDefault(); e.stopPropagation();
         if (isDisabled()) return;
         el.sliderTrack.setPointerCapture && el.sliderTrack.setPointerCapture(e.pointerId);
         onDown(e.clientX);
@@ -4200,7 +3869,6 @@ const UI = (() => {
       else handlers.onBet(sv);
       return;
     }
-
     if (sv <= cv) {
       if (toCall > 0 && toCall < hero.stack) handlers.onCall();
       else if (isPreflopLimp && toCall > 0 && toCall < hero.stack) handlers.onCall();
@@ -4208,7 +3876,6 @@ const UI = (() => {
       else handlers.onCheck();
       return;
     }
-
     if (sv >= maxTarget) { handlers.onAllIn(); return; }
     if (sv >= minRaiseTarget && sv > state.currentBet) { handlers.onRaise(sv); return; }
     if (toCall > 0 && toCall < hero.stack) { handlers.onCall(); return; }
@@ -4219,7 +3886,6 @@ const UI = (() => {
       document.getElementById('hero-actions'),
       document.getElementById('quick-percent-list')
     ];
-
     const handler = (e) => {
       if (el.heroActions.classList.contains('inactive')) return;
       if (!sliderState.active) return;
@@ -4249,7 +3915,6 @@ const UI = (() => {
       if (next >= values.length) next = values.length - 1;
       applySliderValue(state, hero, handlers, values[next]);
     };
-
     for (const z of zones) {
       if (!z) continue;
       if (z.__wheelBoundHandler) z.removeEventListener('wheel', z.__wheelBoundHandler);
@@ -4492,7 +4157,6 @@ const UI = (() => {
       const thirdNode = cards[order[2]];
       const fourthNode = cards[order[3]];
       const newOrder = [order[1], order[2], order[3], order[0]];
-
       topNode.style.transition = 'transform .38s cubic-bezier(.22,.61,.36,1)';
       secondNode.style.transition = 'transform .38s cubic-bezier(.22,.61,.36,1)';
       thirdNode.style.transition = 'transform .38s cubic-bezier(.22,.61,.36,1)';
@@ -4842,7 +4506,6 @@ const UI = (() => {
 /* ============================================================
    MAIN
    ============================================================ */
-
 (() => {
 
   const session = {
@@ -5051,11 +4714,10 @@ const UI = (() => {
     el.handsHistoryRow.addEventListener('pointerup', () => UI.setHandsHistoryPressed(false));
     el.handsHistoryRow.addEventListener('pointercancel', () => UI.setHandsHistoryPressed(false));
     el.handsHistoryRow.addEventListener('pointerleave', () => UI.setHandsHistoryPressed(false));
-    el.handsHistoryRow.addEventListener('click', (e) => {
-      e.preventDefault(); e.stopPropagation(); handle();
-    });
+    el.handsHistoryRow.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); handle(); });
     el.handsHistoryRow.addEventListener('touchend', (e) => {
-      e.preventDefault(); e.stopPropagation(); UI.setHandsHistoryPressed(false); handle();
+      e.preventDefault(); e.stopPropagation();
+      UI.setHandsHistoryPressed(false); handle();
     }, { passive: false });
   }
 
@@ -5102,9 +4764,7 @@ const UI = (() => {
       if (step && step.kind === 'final') snap = step.snapshot;
       else if (r.handSnapshot) snap = r.handSnapshot;
       isReplay = true;
-    } else if (session.viewingIndex >= 0) {
-      snap = session.history[session.viewingIndex];
-    }
+    } else if (session.viewingIndex >= 0) snap = session.history[session.viewingIndex];
     if (!snap) return '';
     const bb = (snap.blinds && snap.blinds.bb) || 20;
     const sb = (snap.blinds && snap.blinds.sb) || 10;
@@ -5302,9 +4962,7 @@ const UI = (() => {
       el.guidePanel.addEventListener('click', (e) => e.stopPropagation());
       el.guidePanel.addEventListener('touchend', (e) => e.stopPropagation(), { passive: false });
     }
-    if (el.guideViewport) {
-      el.guideViewport.addEventListener('scroll', () => { UI.updateGuideFade(); }, { passive: true });
-    }
+    if (el.guideViewport) el.guideViewport.addEventListener('scroll', () => { UI.updateGuideFade(); }, { passive: true });
     if (el.guideScrollTop) {
       const goTop = (e) => { e.preventDefault(); e.stopPropagation(); UI.guideScrollToTop(); };
       el.guideScrollTop.addEventListener('click', goTop);
@@ -5500,8 +5158,7 @@ const UI = (() => {
   function openSupportOverEverything() {
     if (session.supportPaused) return;
     session.supportPaused = true;
-    if (inHistoryMode()) pauseReplayIfActive();
-    else pauseGame();
+    if (inHistoryMode()) pauseReplayIfActive(); else pauseGame();
     UI.resetBelcardSwap();
     UI.showSupportOverlay();
   }
@@ -5509,8 +5166,7 @@ const UI = (() => {
   function openSupportWindow() {
     if (session.supportPaused) return;
     session.supportPaused = true;
-    if (inHistoryMode()) pauseReplayIfActive();
-    else pauseGame();
+    if (inHistoryMode()) pauseReplayIfActive(); else pauseGame();
     UI.resetBelcardSwap();
     UI.showSupportOverlay();
   }
@@ -5526,8 +5182,7 @@ const UI = (() => {
   function openTrainingWindow() {
     if (session.trainingPaused) return;
     session.trainingPaused = true;
-    if (inHistoryMode()) pauseReplayIfActive();
-    else pauseGame();
+    if (inHistoryMode()) pauseReplayIfActive(); else pauseGame();
     UI.resetTrainingPage();
     UI.openTraining();
   }
@@ -6022,7 +5677,6 @@ const UI = (() => {
     if (session.replay.active) return;
     const state = session.state;
     if (state.handOver) { finishHand(); return; }
-
     if (Engine.isBettingRoundComplete(state)) {
       const res = Engine.endBettingRound(state);
       UI.updateBoard(state);
@@ -6035,7 +5689,6 @@ const UI = (() => {
       processTurn();
       return;
     }
-
     const next = Engine.nextActor(state);
     if (next < 0) {
       const res = Engine.endBettingRound(state);
@@ -6238,7 +5891,6 @@ const UI = (() => {
     const actionLog = snap.actionLog || [];
     const baseStacks = {};
     for (const p of snap.players) baseStacks[p.id] = p.stack + (p.committedTotal || 0);
-
     const cur = {
       board: [], pot: 0,
       players: snap.players.map(p => ({
@@ -6251,9 +5903,7 @@ const UI = (() => {
         heroFinishPlace: p.heroFinishPlace || 0
       }))
     };
-
     const boardDeal = { preflop: 0, flop: 3, turn: 4, river: 5 };
-
     const takeBoardSnapshot = (street) => {
       const needed = boardDeal[street] || 0;
       while (cur.board.length < needed) {
@@ -6262,15 +5912,12 @@ const UI = (() => {
         else break;
       }
     };
-
     const resetStreetCommits = () => {
       for (const p of cur.players) p.committedThisStreet = 0;
     };
-
     let lastStreet = 'preflop';
     takeBoardSnapshot(lastStreet);
     steps.push({ kind: 'start', snapshot: makeReplaySnapshot(cur, snap, 'preflop', false) });
-
     for (const act of actionLog) {
       if (act.street !== lastStreet) {
         lastStreet = act.street;
@@ -6284,7 +5931,6 @@ const UI = (() => {
       const pl = cur.players.find(p => p.seatIndex === act.playerIndex);
       if (!pl) continue;
       const diff = Math.max(0, act.potAfter - cur.pot);
-
       if (act.actionType === 'fold') { pl.folded = true; pl.lastAction = 'fold'; }
       else if (act.actionType === 'check') { pl.lastAction = 'check'; pl.acted = true; }
       else if (act.actionType === 'call') {
@@ -6300,13 +5946,10 @@ const UI = (() => {
         pl.lastAction = 'allin'; pl.acted = true; pl.allIn = true;
         pl.stack -= diff; pl.committedThisStreet += diff; pl.committedTotal += diff; cur.pot += diff;
       }
-
       if (pl.stack <= 0 && !pl.folded && act.actionType !== 'check' && act.actionType !== 'fold') pl.allIn = true;
       steps.push({ kind: 'action', snapshot: makeReplaySnapshot(cur, snap, lastStreet, false) });
     }
-
     while (cur.board.length < finalBoard.length) cur.board.push({ ...finalBoard[cur.board.length] });
-
     const finalSnap = JSON.parse(JSON.stringify(snap));
     finalSnap.handOver = true;
     steps.push({ kind: 'final', snapshot: finalSnap });
@@ -6503,9 +6146,7 @@ const UI = (() => {
     UI.updateHistoryInfo(session.history.length, session.history.length, false);
   }
 
-  /* === Мостик к Poker Replayer ===
-     Кнопка ▶ открывает оверлей оффлайн-реплеера (сам код — в Части 3B).
-     Если модуль PokerReplayer ещё не загружен, кнопка просто ничего не делает. */
+  /* === Мостик к Poker Replayer === */
   window.addEventListener('DOMContentLoaded', () => {
     const btn = document.getElementById('offline-replay-btn');
     if (!btn) return;
@@ -6521,1278 +6162,815 @@ const UI = (() => {
 })();
 </script>
 
-<!-- === ЧАСТЬ 3B: POKER REPLAYER === -->
+<!-- === ЧАСТЬ 4: POKER REPLAYER === -->
 
   <script>
 /* ============================================================
-   POKER REPLAYER — оффлайн-редактор и проигрыватель раздач
-   Экспорт видео — нативный MediaRecorder + canvas.captureStream.
-   Никаких внешних библиотек.
+   POKER REPLAYER — DOM-клон стола Trainer'а с редактором
+   через попапы прямо за столом. Проигрывание раздачи.
    ============================================================ */
 (() => {
   'use strict';
 
   // ---- Константы ----
-  const RANKS = ['2','3','4','5','6','7','8','9','T','J','Q','K','A'];
-  const SUITS = ['s','h','d','c'];
   const SUIT_SYM = { s:'♠', h:'♥', d:'♦', c:'♣' };
-  const SUIT_COLOR = { s:'#1a1a1a', h:'#d63535', d:'#2b6dd6', c:'#1fa04a' };
   const RANK_DISP = { T:'10' };
+  const RANKS_ORDER = ['A','K','Q','J','T','9','8','7','6','5','4','3','2'];
+  const SUITS_ORDER = ['s','h','d','c'];
   const STREETS = ['preflop','flop','turn','river'];
-  const STREETS_RU = { preflop:'Preflop', flop:'Flop', turn:'Turn', river:'River' };
+  const STREET_RU = { preflop:'Префлоп', flop:'Флоп', turn:'Тёрн', river:'Ривер' };
 
-  // 9 мест: 7 по дуге + 2 снизу (место 8 = слева-снизу, место 0 = герой справа-снизу)
-  // Координаты — доли от ширины/высоты canvas (0..1)
-  const SEAT_LAYOUT = [
-    { x: 0.62, y: 0.82, side: 'bottom', hero: true },  // 0 hero (справа снизу)
-    { x: 0.12, y: 0.62, side: 'left' },
-    { x: 0.12, y: 0.38, side: 'left' },
-    { x: 0.12, y: 0.14, side: 'left' },
-    { x: 0.50, y: 0.10, side: 'top' },
-    { x: 0.88, y: 0.14, side: 'right' },
-    { x: 0.88, y: 0.38, side: 'right' },
-    { x: 0.88, y: 0.62, side: 'right' },
-    { x: 0.38, y: 0.82, side: 'bottom' }               // 8 (слева снизу)
+  // Координаты мест — 1-в-1 как в Trainer'е (SEAT_POSITIONS),
+  // плюс 2 места снизу: индекс 8 — слева-снизу (Player 8), индекс 0 — Hero справа-снизу.
+  const SEAT_POSITIONS = [
+    { x: 62, y: 78, side: 'bottom-hero' },   // 0 Hero (справа снизу)
+    { x: 14, y: 56, side: 'left',   offsetY: -1 - 6 - 4 + 2 + 3 + 2 },
+    { x: 14, y: 32, side: 'left',   offsetY: 4 + 1 - 2 - 2 - 2 + 2 + 3 },
+    { x: 14, y: 9,  side: 'left',   offsetY: 2 + 1 + 2 },
+    { x: 50, y: 9,  side: 'top',    offsetY: 2 + 1 + 2 },
+    { x: 86, y: 9,  side: 'right',  offsetY: 2 + 1 + 2 },
+    { x: 86, y: 32, side: 'right',  offsetY: 3 + 1 - 2 - 1 - 2 + 2 + 3 },
+    { x: 86, y: 56, side: 'right',  offsetY: 1 + 1 - 6 - 3 - 4 + 2 + 3 + 2 },
+    { x: 38, y: 78, side: 'bottom-8' }        // 8 Player 8 (слева снизу)
   ];
 
-  const POSITION_LABELS_9 = ['UTG','UTG1','UTG2','LJ','HJ','CO','BTN','SB','BB'];
-  const POSITION_LABELS_BY_COUNT = {
-    9: ['UTG','UTG1','UTG2','LJ','HJ','CO','BTN','SB','BB'],
-    8: ['UTG','UTG1','LJ','HJ','CO','BTN','SB','BB'],
-    7: ['UTG1','LJ','HJ','CO','BTN','SB','BB'],
-    6: ['LJ','HJ','CO','BTN','SB','BB'],
-    5: ['HJ','CO','BTN','SB','BB'],
-    4: ['CO','BTN','SB','BB'],
-    3: ['BTN','SB','BB'],
-    2: ['BTN','BB']
-  };
+  const POSITIONS_9 = ['UTG','UTG1','UTG2','LJ','HJ','CO','BTN','SB','BB'];
 
   // ---- Состояние ----
   const S = {
-    step: 1,
+    seats: [],            // 9 мест
     blinds: { sb: 10, bb: 20, ante: 0 },
-    buttonIndex: 0,
-    seats: [],            // 9 объектов
-    board: [],            // до 5 карт
-    actions: [],          // { street, seat, type, amount }
-    showdown: new Set(),  // индексы мест, открывших карты
-    cursorSeat: -1,
-    cardPickIndex: 0,     // 0/1 — какую из двух карт игрока сейчас вводим
-    boardPickIndex: 0,
+    buttonIndex: 0,       // индекс 0..8
+    board: [],            // до 5 карт {rank,suit}
+    actions: [],          // {street, seat, type, amount}
+    showdown: new Set(),  // индексы открывших карты
+    // проигрывание
     playing: false,
-    playTimer: null,
+    playTimerId: null,
     playStepIndex: 0,
+    playSteps: [],
+    // запись
     recorder: null,
     recordedChunks: [],
-    isRecording: false
+    isRecording: false,
+    // попап
+    popupTarget: null,    // { type, seatIndex, ... }
+    popupCardSlot: 0,
+    popupPickedCards: [null, null], // для карт игрока
+    popupBoardPick: null  // для борда
   };
 
   // ---- DOM ----
   const el = {};
-  let canvas = null;
-  let ctx = null;
-  const CW = 720, CH = 1280;
 
   function cacheDom() {
-    el.overlay = document.getElementById('replayer-overlay');
-    el.body = document.getElementById('replayer-body');
-    el.prev = document.getElementById('replayer-prev');
-    el.next = document.getElementById('replayer-next');
-    el.close = document.getElementById('replayer-close');
-    el.help = document.getElementById('replayer-help');
-    el.title = document.getElementById('replayer-title');
-    el.steps = document.querySelectorAll('.replayer-step');
+    el.overlay       = document.getElementById('replayer-overlay');
+    el.scene         = document.getElementById('replayer-table-scene');
+    el.wood          = document.getElementById('replayer-table-wood');
+    el.table         = document.getElementById('replayer-table');
+    el.boardArea     = document.getElementById('replayer-board-area');
+    el.potDisplay    = document.getElementById('replayer-pot-display');
+    el.boardCards    = document.getElementById('replayer-board-cards');
+    el.brandLabel    = document.getElementById('replayer-brand-label');
+    el.blindsRow     = document.getElementById('replayer-blinds-row');
+    el.seats         = document.getElementById('replayer-seats');
+    el.popup         = document.getElementById('replayer-popup');
+    el.closeBtn      = document.getElementById('replayer-close-btn');
+    el.helpBtn       = document.getElementById('replayer-help-btn');
+    el.btnPlay       = document.getElementById('rp-btn-play');
+    el.btnPause      = document.getElementById('rp-btn-pause');
+    el.btnRestart    = document.getElementById('rp-btn-restart');
+    el.btnExport     = document.getElementById('rp-btn-export');
+    el.btnShare      = document.getElementById('rp-btn-share');
+    el.btnHH         = document.getElementById('rp-btn-hh');
+    el.btnSave       = document.getElementById('rp-btn-save');
+    el.btnLoad       = document.getElementById('rp-btn-load');
+    el.btnClear      = document.getElementById('rp-btn-clear');
+    el.statusBar     = document.getElementById('replayer-status-bar');
   }
 
+  // ---- Инициализация мест ----
   function initSeats() {
     S.seats = [];
     for (let i = 0; i < 9; i++) {
       S.seats.push({
         name: i === 0 ? 'Hero' : ('Player ' + i),
         stack: 2000,
-        pos: POSITION_LABELS_9[i],
-        cards: null,                 // [{rank,suit},{rank,suit}] или null
-        cardsKnown: i === 0,         // у героя изначально известны
+        pos: POSITIONS_9[i],
+        cards: [null, null],     // до 2 карт
+        cardsKnown: i === 0,     // у героя сразу известны
         folded: false,
-        inHand: true
+        lastAction: null,        // для бейджа
+        committed: 0             // фишек поставлено в этой раздаче
       });
     }
     S.blinds = { sb: 10, bb: 20, ante: 0 };
-    S.buttonIndex = 7; // SB по умолчанию? Пусть BTN будет 6 (индекс), SB=7, BB=8
+    S.buttonIndex = 0;
     S.board = [];
     S.actions = [];
     S.showdown = new Set();
-    S.cursorSeat = -1;
-    S.cardPickIndex = 0;
-    S.boardPickIndex = 0;
+    S.playing = false;
+    if (S.playTimerId) { clearTimeout(S.playTimerId); S.playTimerId = null; }
+    S.playStepIndex = 0;
+    S.playSteps = [];
+    recalcPositions();
   }
 
-  // ---- Позиции по кнопке ----
   function recalcPositions() {
-    const n = S.seats.length;
-    const labels = POSITION_LABELS_BY_COUNT[n] || POSITION_LABELS_9;
-    for (let k = 0; k < n; k++) {
-      const seatIdx = (S.buttonIndex + k) % n;
-      S.seats[seatIdx].pos = labels[k];
+    // Позиции по кнопке: BTN = S.buttonIndex, SB = +1, BB = +2, далее по часовой
+    // Но для 9-max используется порядок POSITIONS_9.
+    // Упрощённо: кнопка всегда BTN, дальше по кругу.
+    const labels9 = POSITIONS_9.slice();
+    const btn = S.buttonIndex;
+    // Ищем индекс BTN в labels9 = 6
+    const btnLabelIdx = labels9.indexOf('BTN');
+    for (let k = 0; k < 9; k++) {
+      const seatIdx = (btn + k) % 9;
+      const labelIdx = (btnLabelIdx + k) % 9;
+      S.seats[seatIdx].pos = labels9[labelIdx];
     }
   }
 
-  // ---- Отрисовка canvas ----
-  function drawTable(state) {
-    if (!ctx) return;
-    const w = CW, h = CH;
+  // ---- Рендер стола ----
+  function renderTable() {
+    renderSeats();
+    renderBoard();
+    renderPot();
+    renderBlinds();
+    attachSeatHandlers();
+  }
 
-    // Фон
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(0, 0, w, h);
-
-    // Деревянная рамка
-    const pad = 24;
-    const tableW = w - pad * 2;
-    const tableH = h - pad * 2;
-    const rad = 90;
-
-    roundRect(ctx, pad, pad, tableW, tableH, rad);
-    const woodGrad = ctx.createLinearGradient(0, pad, 0, pad + tableH);
-    woodGrad.addColorStop(0, '#6b4622');
-    woodGrad.addColorStop(0.4, '#3d2512');
-    woodGrad.addColorStop(1, '#2a1a0c');
-    ctx.fillStyle = woodGrad;
-    ctx.fill();
-
-    // Сукно
-    const inner = 14;
-    roundRect(ctx, pad + inner, pad + inner, tableW - inner * 2, tableH - inner * 2, rad - inner);
-    const feltGrad = ctx.createRadialGradient(w/2, h*0.45, 80, w/2, h*0.5, Math.max(w,h)*0.75);
-    feltGrad.addColorStop(0, '#322c26');
-    feltGrad.addColorStop(0.55, '#1e1a16');
-    feltGrad.addColorStop(1, '#0f0d0b');
-    ctx.fillStyle = feltGrad;
-    ctx.fill();
-
-    // Лейбл по центру
-    ctx.save();
-    ctx.globalAlpha = 0.20;
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 44px Inter, Segoe UI, system-ui, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('POKER REPLAYER', w/2, h*0.40);
-    ctx.restore();
-
-    // Места
-    for (let i = 0; i < S.seats.length; i++) {
+  function renderSeats() {
+    el.seats.innerHTML = '';
+    for (let i = 0; i < 9; i++) {
       const seat = S.seats[i];
-      const layout = SEAT_LAYOUT[i];
-      drawSeat(state, i, seat, layout, w, h);
-    }
+      const layout = SEAT_POSITIONS[i];
+      const node = document.createElement('div');
+      node.className = 'seat';
+      node.dataset.seatIndex = String(i);
 
-    // Борд
-    drawBoard(state, w, h);
-  }
+      // Сторона
+      if (layout.side === 'left') node.classList.add('left');
+      else if (layout.side === 'right') node.classList.add('right');
+      else if (layout.side === 'top') node.classList.add('top');
+      else if (layout.side === 'bottom-hero') node.classList.add('hero');
 
-  function drawSeat(state, idx, seat, layout, w, h) {
-    const cx = layout.x * w;
-    const cy = layout.y * h;
-    const seatW = 150;
-    const seatH = 105;
+      if (seat.folded) node.classList.add('folded');
 
-    // Подсветка активного места (курсор)
-    if (S.cursorSeat === idx) {
-      ctx.save();
-      ctx.strokeStyle = '#ffcb2b';
-      ctx.lineWidth = 3;
-      ctx.setLineDash([6, 4]);
-      roundRect(ctx, cx - seatW/2 - 6, cy - seatH/2 - 6, seatW + 12, seatH + 12, 12);
-      ctx.stroke();
-      ctx.restore();
-    }
+      node.style.left = layout.x + '%';
+      node.style.top = layout.y + '%';
+      const oy = (layout.offsetY !== undefined) ? layout.offsetY : 0;
+      node.style.transform = `translate(-50%, calc(-50% + ${oy}px))`;
 
-    // Карты игрока
-    const cardsY = cy - seatH/2 + 6;
-    const cardW = 44, cardH = 62;
-    const gap = 6;
-    const cardsTotalW = cardW * 2 + gap;
-    const cardsX = cx - cardsTotalW/2;
-
-    if (seat.cards && seat.cards.length === 2 && seat.cardsKnown && !seat.folded) {
-      drawCardFace(cardsX, cardsY, cardW, cardH, seat.cards[0]);
-      drawCardFace(cardsX + cardW + gap, cardsY, cardW, cardH, seat.cards[1]);
-    } else {
-      drawCardBack(cardsX, cardsY, cardW, cardH);
-      drawCardBack(cardsX + cardW + gap, cardsY, cardW, cardH);
-    }
-
-    // Имя/позиция
-    ctx.fillStyle = '#ffcb2b';
-    ctx.font = 'bold 18px Inter, Segoe UI, system-ui, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'top';
-    ctx.fillText(seat.pos, cx, cy + seatH/2 - 40);
-
-    // Стек
-    ctx.fillStyle = '#e8eef5';
-    ctx.font = 'bold 16px Inter, Segoe UI, system-ui, sans-serif';
-    ctx.fillText(String(seat.stack), cx, cy + seatH/2 - 18);
-
-    // Действие игрока на текущем шаге проигрывания
-    if (state && state.seatActions && state.seatActions[idx]) {
-      const a = state.seatActions[idx];
-      const badgeW = 70, badgeH = 22;
-      const bx = cx - badgeW/2;
-      const by = cy + seatH/2 + 2;
-      roundRect(ctx, bx, by, badgeW, badgeH, 5);
-      ctx.fillStyle = 'rgba(0,0,0,0.85)';
-      ctx.fill();
-      ctx.strokeStyle = actionColor(a);
-      ctx.lineWidth = 1;
-      roundRect(ctx, bx, by, badgeW, badgeH, 5);
-      ctx.stroke();
-      ctx.fillStyle = actionColor(a);
-      ctx.font = 'bold 12px Inter, Segoe UI, system-ui, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(actionLabel(a), cx, by + badgeH/2);
-    }
-  }
-
-  function actionColor(a) {
-    switch (a) {
-      case 'fold': return '#d0d0d0';
-      case 'check': return '#7ae5a0';
-      case 'call': return '#7ab8ff';
-      case 'bet':
-      case 'raise': return '#ff8a7a';
-      case 'allin': return '#e63946';
-      default: return '#e8eef5';
-    }
-  }
-  function actionLabel(a) {
-    switch (a) {
-      case 'fold': return 'FOLD';
-      case 'check': return 'CHECK';
-      case 'call': return 'CALL';
-      case 'bet': return 'BET';
-      case 'raise': return 'RAISE';
-      case 'allin': return 'ALL-IN';
-      default: return String(a).toUpperCase();
-    }
-  }
-
-  function drawBoard(state, w, h) {
-    const cardW = 62, cardH = 88;
-    const gap = 8;
-    const totalW = cardW * 5 + gap * 4;
-    const startX = w/2 - totalW/2;
-    const y = h * 0.50;
-
-    // Пот
-    if (state && typeof state.pot === 'number') {
-      ctx.fillStyle = '#ffcb2b';
-      ctx.font = 'bold 26px Inter, Segoe UI, system-ui, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText('Pot: ' + state.pot, w/2, y - 14);
-    }
-
-    for (let i = 0; i < 5; i++) {
-      const x = startX + i * (cardW + gap);
-      if (i < S.board.length) {
-        drawCardFace(x, y, cardW, cardH, S.board[i]);
-      } else {
-        // Пустая ячейка — подсказка для нажатия (только в редакторе)
-        if (S.step === 5) {
-          ctx.save();
-          ctx.strokeStyle = 'rgba(255,203,43,0.55)';
-          ctx.lineWidth = 2;
-          ctx.setLineDash([6, 4]);
-          roundRect(ctx, x, y, cardW, cardH, 8);
-          ctx.stroke();
-          ctx.restore();
+      // Карты
+      const cardsHtml = (() => {
+        let html = '<div class="seat-cards rp-clickable" data-action="cards">';
+        for (let c = 0; c < 2; c++) {
+          const card = seat.cards[c];
+          if (card && seat.cardsKnown) {
+            html += cardToHtml(card);
+          } else {
+            html += '<div class="card back"></div>';
+          }
         }
+        html += '</div>';
+        return html;
+      })();
+
+      // Dealer chip
+      const isBtn = seat.pos === 'BTN';
+
+      node.innerHTML = `
+        <div class="dealer-chip ${isBtn ? '' : 'hidden'}">D</div>
+        ${cardsHtml}
+        <div class="pos-row">
+          <span class="pos-name rp-clickable" data-action="name">${seat.pos}</span>
+        </div>
+        <div class="stack-wrap">
+          <span class="stack rp-clickable" data-action="stack">${seat.stack}</span>
+        </div>
+        <div class="action-badge ${seat.lastAction ? actionBadgeClass(seat.lastAction) : 'hidden'}" data-role="action">
+          ${seat.lastAction ? actionBadgeText(seat.lastAction) : ''}
+        </div>
+        <div class="bet-chips ${seat.committed > 0 ? '' : 'hidden'}">${seat.committed > 0 ? seat.committed : ''}</div>
+      `;
+
+      el.seats.appendChild(node);
+    }
+  }
+
+  function cardToHtml(card) {
+    const suitClass = 'suit-' + ({ s:'spades', h:'hearts', d:'diamonds', c:'clubs' })[card.suit];
+    const rank = RANK_DISP[card.rank] || card.rank;
+    const suit = SUIT_SYM[card.suit];
+    return `<div class="card ${suitClass}"><div class="rank">${rank}</div><div class="suit">${suit}</div></div>`;
+  }
+
+  function actionBadgeClass(a) {
+    const map = { fold:'fold', check:'check', call:'call', bet:'bet', raise:'raise', allin:'allin', blind:'blind' };
+    return 'action-badge ' + (map[a] || '');
+  }
+  function actionBadgeText(a) {
+    const map = { fold:'FOLD', check:'CHECK', call:'CALL', bet:'BET', raise:'RAISE', allin:'ALL-IN', blind:'BLIND' };
+    return map[a] || String(a).toUpperCase();
+  }
+
+  function renderBoard() {
+    el.boardCards.innerHTML = '';
+    for (let i = 0; i < 5; i++) {
+      if (i < S.board.length) {
+        el.boardCards.innerHTML += cardToHtml(S.board[i]);
+      } else {
+        // Пустая ячейка — с золотой окантовкой и кликабельная
+        const empty = document.createElement('div');
+        empty.className = 'card rp-clickable card-empty';
+        empty.style.background = 'rgba(255,255,255,0.04)';
+        empty.style.border = '1.5px dashed rgba(255,203,43,0.55)';
+        empty.dataset.action = 'board';
+        empty.dataset.boardIndex = String(i);
+        empty.style.cursor = 'pointer';
+        el.boardCards.appendChild(empty);
+        continue;
       }
     }
+    // Проставляем клики на существующие карты борда для редактирования
+    const realCards = el.boardCards.querySelectorAll('.card:not(.card-empty)');
+    realCards.forEach((cardNode, idx) => {
+      cardNode.classList.add('rp-clickable');
+      cardNode.dataset.action = 'board-edit';
+      cardNode.dataset.boardIndex = String(idx);
+      cardNode.style.cursor = 'pointer';
+    });
   }
 
-  function drawCardFace(x, y, w, h, card) {
-    ctx.save();
-    roundRect(ctx, x, y, w, h, 7);
-    ctx.fillStyle = '#fafafa';
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(0,0,0,0.35)';
-    ctx.lineWidth = 1;
-    roundRect(ctx, x, y, w, h, 7);
-    ctx.stroke();
-
-    const color = SUIT_COLOR[card.suit] || '#1a1a1a';
-    ctx.fillStyle = color;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    const rank = RANK_DISP[card.rank] || card.rank;
-    ctx.font = 'bold ' + Math.round(h * 0.36) + 'px Inter, Segoe UI, system-ui, sans-serif';
-    ctx.fillText(rank, x + w/2, y + h * 0.30);
-    ctx.font = Math.round(h * 0.42) + 'px Inter, Segoe UI, system-ui, sans-serif';
-    ctx.fillText(SUIT_SYM[card.suit] || '?', x + w/2, y + h * 0.68);
-    ctx.restore();
-  }
-
-  function drawCardBack(x, y, w, h) {
-    ctx.save();
-    roundRect(ctx, x, y, w, h, 7);
-    ctx.fillStyle = '#1a2540';
-    ctx.fill();
-    ctx.strokeStyle = '#0a1225';
-    ctx.lineWidth = 1;
-    roundRect(ctx, x, y, w, h, 7);
-    ctx.stroke();
-
-    // Узор
-    ctx.strokeStyle = 'rgba(255,203,43,0.28)';
-    ctx.lineWidth = 1;
-    roundRect(ctx, x + 5, y + 5, w - 10, h - 10, 4);
-    ctx.stroke();
-    ctx.restore();
-  }
-
-  function roundRect(context, x, y, w, h, r) {
-    context.beginPath();
-    context.moveTo(x + r, y);
-    context.lineTo(x + w - r, y);
-    context.quadraticCurveTo(x + w, y, x + w, y + r);
-    context.lineTo(x + w, y + h - r);
-    context.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    context.lineTo(x + r, y + h);
-    context.quadraticCurveTo(x, y + h, x, y + h - r);
-    context.lineTo(x, y + r);
-    context.quadraticCurveTo(x, y, x + r, y);
-    context.closePath();
-  }
-
-  // ---- Шаги редактора ----
-  function renderStep() {
-    if (el.steps && el.steps.length) {
-      el.steps.forEach(s => {
-        const n = Number(s.dataset.step);
-        s.classList.toggle('active', n === S.step);
-        s.classList.toggle('done', n < S.step);
-      });
-    }
-
-    let html = '';
-    if (S.step === 1) html = renderStep1();
-    else if (S.step === 2) html = renderStep2();
-    else if (S.step === 3) html = renderStep3();
-    else if (S.step === 4) html = renderStep4();
-    else if (S.step === 5) html = renderStep5();
-    else if (S.step === 6) html = renderStep6();
-
-    el.body.innerHTML = html;
-
-    el.prev.disabled = S.step <= 1;
-    el.next.disabled = S.step >= 6;
-    el.next.textContent = S.step >= 6 ? 'Готово' : 'Next ▶';
-
-    bindStepEvents();
-    const st = buildCanvasState();
-    drawTable(st);
-  }
-
-  function renderStep1() {
-    return `
-      <div class="replayer-section">
-        <h4>Блайнды и анте</h4>
-        <div class="replayer-hint">Введите блайнды и анте. Они действуют всю раздачу и не меняются.</div>
-        <div class="replayer-row"><label>SB</label><input id="rp-sb" type="number" min="1" value="${S.blinds.sb}"></div>
-        <div class="replayer-row"><label>BB</label><input id="rp-bb" type="number" min="1" value="${S.blinds.bb}"></div>
-        <div class="replayer-row"><label>Ante</label><input id="rp-ante" type="number" min="0" value="${S.blinds.ante}"></div>
-      </div>
-      <div class="replayer-section">
-        <h4>Баттон</h4>
-        <div class="replayer-hint">Кто сидит на баттоне?</div>
-        <div class="replayer-row">
-          <select id="rp-btn">
-            ${S.seats.map((s,i) => `<option value="${i}" ${i===S.buttonIndex?'selected':''}>${s.name} — ${s.pos}</option>`).join('')}
-          </select>
-        </div>
-      </div>
-    `;
-  }
-
-  function renderStep2() {
-    return `
-      <div class="replayer-section">
-        <h4>Игроки и стеки</h4>
-        <div class="replayer-hint">Тапните по игроку, чтобы изменить имя, стек и позицию.</div>
-        ${S.seats.map((s,i) => `
-          <div class="replayer-player-row" data-seat="${i}">
-            <span class="p-name">${s.name}</span>
-            <span class="p-pos">${s.pos}</span>
-            <span class="p-stack">${s.stack}</span>
-          </div>
-        `).join('')}
-      </div>
-    `;
-  }
-
-  function renderStep3() {
-    return `
-      <div class="replayer-section">
-        <h4>Карманные карты</h4>
-        <div class="replayer-hint">Тапните по игроку, чтобы ввести его 2 карты. Если карты неизвестны — оставьте «Не известны», они будут показаны рубашкой.</div>
-        ${S.seats.map((s,i) => {
-          let label;
-          let cls = '';
-          if (s.cardsKnown && s.cards && s.cards.length === 2) {
-            label = s.cards.map(c => (RANK_DISP[c.rank]||c.rank) + SUIT_SYM[c.suit]).join(' ');
-          } else if (s.cardsKnown) {
-            label = '— не заданы —';
-            cls = 'unknown';
-          } else {
-            label = 'Не известны';
-            cls = 'unknown';
-          }
-          return `
-            <div class="replayer-player-row" data-seat="${i}">
-              <span class="p-name">${s.name}</span>
-              <span class="p-pos">${s.pos}</span>
-              <span class="p-cards ${cls}">${label}</span>
-            </div>
-          `;
-        }).join('')}
-      </div>
-    `;
-  }
-
-  function renderStep4() {
-    const grouped = { preflop: [], flop: [], turn: [], river: [] };
-    S.actions.forEach((a, i) => grouped[a.street].push({ ...a, idx: i }));
-
-    return `
-      <div class="replayer-section">
-        <h4>Действия</h4>
-        <div class="replayer-hint">Добавляйте действия по улицам в том порядке, в котором они происходили. Порядок важен.</div>
-        ${STREETS.map(st => `
-          <div style="margin-bottom:12px;">
-            <div style="color:var(--gold);font-size:11px;font-weight:800;margin-bottom:6px;">${STREETS_RU[st]}</div>
-            ${grouped[st].length === 0 ? '<div class="replayer-hint" style="margin-bottom:6px;">— нет действий —</div>'
-              : grouped[st].map(a => {
-                  const s = S.seats[a.seat];
-                  return `
-                    <div class="replayer-action-block">
-                      <div class="replayer-action-head">
-                        <span>${s ? s.name : '?'} ${s ? '('+s.pos+')' : ''}</span>
-                        <button class="a-del" data-del="${a.idx}" type="button">✕</button>
-                      </div>
-                      <div style="font-size:11px;color:var(--muted);">
-                        ${a.type.toUpperCase()}${a.amount ? ' ' + a.amount : ''}
-                      </div>
-                    </div>
-                  `;
-                }).join('')}
-            <button class="replayer-add-action" data-street="${st}" type="button" style="width:100%;padding:10px;border-radius:8px;border:1px dashed #3a3530;background:transparent;color:var(--gold);font-size:11px;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:1px;font-family:inherit;">+ Add ${STREETS_RU[st]}</button>
-          </div>
-        `).join('')}
-      </div>
-    `;
-  }
-
-  function renderStep5() {
-    return `
-      <div class="replayer-section">
-        <h4>Борд</h4>
-        <div class="replayer-hint">Добавьте карты борда по одной: 1-я карта флопа, 2-я, 3-я, терн, ривер.</div>
-        <div style="margin-bottom:8px;color:var(--text);font-weight:700;font-size:13px;">
-          ${S.board.length
-            ? S.board.map(c => (RANK_DISP[c.rank]||c.rank) + SUIT_SYM[c.suit]).join(' ')
-            : '— не задан —'}
-        </div>
-        <div style="display:flex;gap:6px;">
-          <button id="rp-board-add" type="button" style="flex:1;padding:10px;border-radius:8px;border:1px dashed #3a3530;background:transparent;color:var(--gold);font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;">+ Добавить карту борда</button>
-          <button id="rp-board-clear" type="button" style="flex:1;padding:10px;border-radius:8px;border:1px solid #3a3530;background:#1a1a1a;color:var(--muted);font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;">Очистить</button>
-        </div>
-      </div>
-      <div class="replayer-section">
-        <h4>Вскрытие</h4>
-        <div class="replayer-hint">Отметьте игроков, открывших карты на вскрытии (их карты должны быть введены на шаге 3).</div>
-        ${S.seats.map((s,i) => {
-          const on = S.showdown.has(i);
-          return `
-            <div class="replayer-player-row" data-show="${i}" style="${on?'border-color:var(--ok);':''}">
-              <span class="p-name">${s.name}</span>
-              <span class="p-pos">${s.pos}</span>
-              <span class="p-cards">${on ? 'ОТКРЫЛ' : '—'}</span>
-            </div>
-          `;
-        }).join('')}
-      </div>
-    `;
-  }
-
-  function renderStep6() {
-    return `
-      <div class="replayer-section">
-        <h4>Play & Export</h4>
-        <div class="replayer-hint">Проверьте раздачу в проигрывании и сохраните видео (WebM). Telegram показывает WebM как GIF: автоплей, loop, без звука.</div>
-        <div id="replayer-preview-wrap" style="margin-top:8px;">
-          <canvas id="replayer-canvas" width="${CW}" height="${CH}" style="width:100%;max-width:340px;aspect-ratio:9/16;background:#000;border-radius:10px;border:1px solid #2a2520;display:block;box-shadow:0 0 30px rgba(255,203,43,.08);"></canvas>
-          <div id="replayer-play-controls" style="display:flex;flex-wrap:wrap;gap:6px;width:100%;max-width:340px;margin-top:8px;">
-            <button id="rp-play" class="primary" type="button">▶ Play</button>
-            <button id="rp-pause" class="secondary" type="button" disabled>⏸ Pause</button>
-            <button id="rp-restart" class="secondary" type="button">↺ Restart</button>
-            <button id="rp-export" class="primary" type="button">💾 Save WebM</button>
-            <button id="rp-share" class="secondary" type="button">📤 Share</button>
-            <button id="rp-copy-hh" class="secondary" type="button">📋 Copy HH</button>
-            <button id="rp-save-json" class="secondary" type="button">📦 Save JSON</button>
-            <button id="rp-load-json" class="secondary" type="button">📂 Load JSON</button>
-          </div>
-          <div id="replayer-status" style="font-size:11px;color:var(--gold);min-height:16px;text-align:center;width:100%;margin-top:6px;"></div>
-        </div>
-      </div>
-    `;
-  }
-
-  // ---- Сборка состояния для canvas ----
-  function buildCanvasState() {
-    // Рассчитываем текущий пот по действиям
-    let pot = 0;
-    const stacks = S.seats.map(s => s.stack);
-    // Для простоты: pot = сумма всех call/bet/raise/allin + анте
+  function renderPot() {
+    // Пот считаем: анте + все действия
     const ante = S.blinds.ante || 0;
-    for (let i = 0; i < S.seats.length; i++) {
-      if (S.seats[i].inHand) pot += ante;
-    }
+    const aliveCount = 9;
+    let pot = ante * aliveCount;
     for (const a of S.actions) {
       if (a.type === 'call' || a.type === 'bet' || a.type === 'raise' || a.type === 'allin') {
         pot += a.amount || 0;
       }
     }
-    return { pot };
+    el.potDisplay.textContent = 'Pot: ' + pot;
   }
 
-  // ---- События шагов ----
-  function bindStepEvents() {
-    if (S.step === 1) {
-      const sb = document.getElementById('rp-sb');
-      const bb = document.getElementById('rp-bb');
-      const ante = document.getElementById('rp-ante');
-      const btn = document.getElementById('rp-btn');
-      if (sb) sb.oninput = e => { S.blinds.sb = Math.max(1, +e.target.value || 0); };
-      if (bb) bb.oninput = e => { S.blinds.bb = Math.max(1, +e.target.value || 0); };
-      if (ante) ante.oninput = e => { S.blinds.ante = Math.max(0, +e.target.value || 0); };
-      if (btn) btn.onchange = e => { S.buttonIndex = +e.target.value; recalcPositions(); renderStep(); };
-    }
-
-    if (S.step === 2) {
-      el.body.querySelectorAll('.replayer-player-row').forEach(row => {
-        row.onclick = () => {
-          const i = +row.dataset.seat;
-          openSeatEditor(i);
-        };
-      });
-    }
-
-    if (S.step === 3) {
-      el.body.querySelectorAll('.replayer-player-row').forEach(row => {
-        row.onclick = () => openCardsEditor(+row.dataset.seat);
-      });
-    }
-
-    if (S.step === 4) {
-      el.body.querySelectorAll('.a-del').forEach(b => {
-        b.onclick = () => {
-          S.actions.splice(+b.dataset.del, 1);
-          renderStep();
-        };
-      });
-      el.body.querySelectorAll('.replayer-add-action').forEach(b => {
-        b.onclick = () => openActionEditor(b.dataset.street);
-      });
-    }
-
-    if (S.step === 5) {
-      const add = document.getElementById('rp-board-add');
-      const clr = document.getElementById('rp-board-clear');
-      if (add) add.onclick = () => openBoardEditor();
-      if (clr) clr.onclick = () => { S.board = []; renderStep(); };
-      el.body.querySelectorAll('[data-show]').forEach(row => {
-        row.onclick = () => {
-          const i = +row.dataset.show;
-          if (S.showdown.has(i)) S.showdown.delete(i);
-          else S.showdown.add(i);
-          renderStep();
-        };
-      });
-    }
-
-    if (S.step === 6) {
-      const playBtn = document.getElementById('rp-play');
-      const pauseBtn = document.getElementById('rp-pause');
-      const restartBtn = document.getElementById('rp-restart');
-      const exportBtn = document.getElementById('rp-export');
-      const shareBtn = document.getElementById('rp-share');
-      const copyHH = document.getElementById('rp-copy-hh');
-      const saveJson = document.getElementById('rp-save-json');
-      const loadJson = document.getElementById('rp-load-json');
-      if (playBtn) playBtn.onclick = () => playHand();
-      if (pauseBtn) pauseBtn.onclick = () => pauseHand();
-      if (restartBtn) restartBtn.onclick = () => restartPlay();
-      if (exportBtn) exportBtn.onclick = () => exportWebM();
-      if (shareBtn) shareBtn.onclick = () => shareHand();
-      if (copyHH) copyHH.onclick = () => copyHandHistory();
-      if (saveJson) saveJson.onclick = () => saveJSON();
-      if (loadJson) loadJson.onclick = () => loadJSON();
-
-      // Canvas
-      canvas = document.getElementById('replayer-canvas');
-      ctx = canvas.getContext('2d');
-      // Перерисовать сцену
-      const st = buildCanvasState();
-      drawTable(st);
-    }
+  function renderBlinds() {
+    const a = S.blinds.ante > 0 ? ` (${S.blinds.ante})` : '';
+    el.blindsRow.textContent = `Blinds: ${S.blinds.sb}/${S.blinds.bb}${a}`;
   }
 
-  // ---- Редактор места ----
-  function openSeatEditor(i) {
-    const s = S.seats[i];
-    el.body.innerHTML = `
-      <div class="replayer-section">
-        <h4>Игрок: место ${i}</h4>
-        <div class="replayer-row"><label>Имя</label><input id="rp-name" type="text" value="${s.name}"></div>
-        <div class="replayer-row"><label>Стек</label><input id="rp-stack" type="number" min="0" value="${s.stack}"></div>
-        <div class="replayer-row"><label>Позиция</label>
-          <select id="rp-pos">
-            ${POSITION_LABELS_9.map(p => `<option value="${p}" ${p===s.pos?'selected':''}>${p}</option>`).join('')}
-            <option value="—" ${s.pos==='—'?'selected':''}>—</option>
-          </select>
-        </div>
-        <div class="replayer-row">
-          <label>В игре</label>
-          <input id="rp-inhand" type="checkbox" ${s.inHand?'checked':''} style="flex:0 0 auto;width:22px;height:22px;accent-color:var(--gold);">
-        </div>
-        <div style="display:flex;gap:6px;margin-top:8px;">
-          <button id="rp-back" type="button" style="flex:1;padding:10px;border-radius:8px;border:1px solid #3a3530;background:#1a1a1a;color:var(--text);font-weight:800;font-family:inherit;cursor:pointer;">← Назад</button>
-        </div>
+  // ---- Обработчики на места ----
+  function attachSeatHandlers() {
+    if (!el.seats) return;
+    el.seats.querySelectorAll('.rp-clickable').forEach(node => {
+      const handler = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const seatNode = node.closest('.seat');
+        if (!seatNode) return;
+        const seatIndex = Number(seatNode.dataset.seatIndex);
+        const action = node.dataset.action;
+        if (action === 'cards') openCardsPopup(seatIndex);
+        else if (action === 'stack') openStackPopup(seatIndex);
+        else if (action === 'name') openNamePopup(seatIndex);
+        else if (action === 'action') openActionPopup(seatIndex);
+      };
+      node.addEventListener('click', handler);
+      node.addEventListener('touchend', (e) => { e.preventDefault(); handler(e); }, { passive: false });
+    });
+  }
+
+  function attachBoardHandlers() {
+    if (!el.boardCards) return;
+    el.boardCards.querySelectorAll('.rp-clickable').forEach(node => {
+      const handler = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const idx = Number(node.dataset.boardIndex);
+        openBoardPopup(idx);
+      };
+      node.addEventListener('click', handler);
+      node.addEventListener('touchend', (e) => { e.preventDefault(); handler(e); }, { passive: false });
+    });
+  }
+
+  // ---- Попап ----
+  function showPopupAtSeat(seatIndex, html, title) {
+    const seatNode = el.seats.querySelector(`.seat[data-seat-index="${seatIndex}"]`);
+    const tableRect = el.table.getBoundingClientRect();
+    let x = window.innerWidth / 2 - 140, y = 120;
+    if (seatNode) {
+      const r = seatNode.getBoundingClientRect();
+      x = Math.max(8, Math.min(window.innerWidth - 300, r.left + r.width / 2 - 140));
+      y = r.bottom + 8;
+      if (y + 400 > window.innerHeight) y = Math.max(8, r.top - 400);
+    }
+    el.popup.innerHTML = html;
+    el.popup.style.left = x + 'px';
+    el.popup.style.top = y + 'px';
+    el.popup.classList.add('visible');
+    attachPopupHandlers();
+  }
+
+  function hidePopup() {
+    el.popup.classList.remove('visible');
+    el.popup.innerHTML = '';
+    S.popupTarget = null;
+    S.popupPickedCards = [null, null];
+    S.popupBoardPick = null;
+  }
+
+  function attachPopupHandlers() {
+    // Уже навешано при отрисовке html
+  }
+
+  // --- Попап: имя/позиция ---
+  function openNamePopup(seatIndex) {
+    const seat = S.seats[seatIndex];
+    S.popupTarget = { type: 'name', seatIndex };
+    const html = `
+      <h4>Место ${seatIndex}: имя и позиция</h4>
+      <div class="rp-row"><label>Имя</label><input id="rp-name-input" type="text" value="${escapeHtml(seat.name)}"></div>
+      <div class="rp-row"><label>Позиция</label>
+        <select id="rp-pos-select">
+          ${POSITIONS_9.map(p => `<option value="${p}" ${p===seat.pos?'selected':''}>${p}</option>`).join('')}
+        </select>
+      </div>
+      <div class="rp-actions">
+        <button class="rp-btn-cancel" id="rp-name-cancel">Отмена</button>
+        <button class="rp-btn-ok" id="rp-name-ok">OK</button>
       </div>
     `;
-    document.getElementById('rp-name').oninput = e => { s.name = e.target.value; };
-    document.getElementById('rp-stack').oninput = e => { s.stack = Math.max(0, +e.target.value || 0); };
-    document.getElementById('rp-pos').onchange = e => { s.pos = e.target.value; };
-    document.getElementById('rp-inhand').onchange = e => { s.inHand = e.target.checked; };
-    document.getElementById('rp-back').onclick = () => renderStep();
-    document.getElementById('rp-back').onclick = () => renderStep();
+    showPopupAtSeat(seatIndex, html, 'Имя/Позиция');
+    document.getElementById('rp-name-cancel').onclick = hidePopup;
+    document.getElementById('rp-name-ok').onclick = () => {
+      seat.name = document.getElementById('rp-name-input').value || seat.name;
+      seat.pos = document.getElementById('rp-pos-select').value;
+      hidePopup();
+      renderTable();
+    };
   }
 
-  // ---- Редактор карт игрока ----
-  function openCardsEditor(i) {
-    const s = S.seats[i];
-    const current = s.cards ? [...s.cards] : [null, null];
+  // --- Попап: стек ---
+  function openStackPopup(seatIndex) {
+    const seat = S.seats[seatIndex];
+    S.popupTarget = { type: 'stack', seatIndex };
+    const html = `
+      <h4>Место ${seatIndex}: стек</h4>
+      <div class="rp-row"><label>Стек</label><input id="rp-stack-input" type="number" min="0" value="${seat.stack}"></div>
+      <div class="rp-hint" style="color:var(--muted);font-size:11px;margin-bottom:6px;">Введите количество фишек в этот момент раздачи.</div>
+      <div class="rp-actions">
+        <button class="rp-btn-cancel" id="rp-stack-cancel">Отмена</button>
+        <button class="rp-btn-ok" id="rp-stack-ok">OK</button>
+      </div>
+    `;
+    showPopupAtSeat(seatIndex, html, 'Стек');
+    document.getElementById('rp-stack-cancel').onclick = hidePopup;
+    document.getElementById('rp-stack-ok').onclick = () => {
+      const v = Number(document.getElementById('rp-stack-input').value) || 0;
+      seat.stack = Math.max(0, v);
+      hidePopup();
+      renderTable();
+    };
+  }
 
-    function renderCardsBody() {
-      let html = `
-        <div class="replayer-section">
-          <h4>Карты: ${s.name} (${s.pos})</h4>
-          <div class="replayer-row">
-            <label>Известны</label>
-            <input id="rp-cards-known" type="checkbox" ${s.cardsKnown?'checked':''} style="flex:0 0 auto;width:22px;height:22px;accent-color:var(--gold);">
-          </div>
-      `;
-      if (s.cardsKnown) {
-        html += `<div style="display:flex;gap:8px;margin-bottom:10px;">
-          <div style="flex:1;text-align:center;padding:10px;background:#1a1a1a;border:1px solid #2a2520;border-radius:8px;color:${current[0]?SUIT_COLOR[current[0].suit]:'var(--muted)'};font-weight:900;font-size:18px;">
-            ${current[0] ? (RANK_DISP[current[0].rank]||current[0].rank) + SUIT_SYM[current[0].suit] : '—'}
-          </div>
-          <div style="flex:1;text-align:center;padding:10px;background:#1a1a1a;border:1px solid #2a2520;border-radius:8px;color:${current[1]?SUIT_COLOR[current[1].suit]:'var(--muted)'};font-weight:900;font-size:18px;">
-            ${current[1] ? (RANK_DISP[current[1].rank]||current[1].rank) + SUIT_SYM[current[1].suit] : '—'}
-          </div>
-        </div>`;
+  // --- Попап: карты ---
+  function openCardsPopup(seatIndex) {
+    const seat = S.seats[seatIndex];
+    S.popupTarget = { type: 'cards', seatIndex };
+    S.popupPickedCards = [seat.cards[0] || null, seat.cards[1] || null];
+    renderCardsPopup(seatIndex);
+  }
 
-        for (let slot = 0; slot < 2; slot++) {
-          html += `<div style="margin-bottom:8px;color:var(--muted);font-size:11px;">Карта ${slot+1}</div>`;
-          html += '<div class="rp-card-grid" style="display:grid;grid-template-columns:repeat(13,1fr);gap:3px;margin-bottom:8px;">';
-          for (const suit of SUITS) {
-            for (const rank of RANKS) {
-              const sel = current[slot] && current[slot].rank === rank && current[slot].suit === suit;
-              html += `<div class="rp-card-cell suit-${suit} ${sel?'selected':''}" data-slot="${slot}" data-rank="${rank}" data-suit="${suit}" style="aspect-ratio:2/3;border-radius:4px;background:#fafafa;border:1px solid #2a2520;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:800;cursor:pointer;padding:1px;${sel?'outline:2px solid #ffcb2b;':''}">
-                <span style="font-size:10px;line-height:1;font-weight:900;">${RANK_DISP[rank]||rank}</span>
-                <span style="font-size:12px;line-height:1;">${SUIT_SYM[suit]}</span>
-              </div>`;
-            }
-          }
-          html += '</div>';
+  function renderCardsPopup(seatIndex) {
+    const seat = S.seats[seatIndex];
+    const [c0, c1] = S.popupPickedCards;
+
+    const gridHtml = (slot) => {
+      let html = '<div class="rp-card-grid">';
+      for (const suit of SUITS_ORDER) {
+        for (const rank of RANKS_ORDER) {
+          const isSel = (slot === 0 && c0 && c0.rank === rank && c0.suit === suit)
+                     || (slot === 1 && c1 && c1.rank === rank && c1.suit === suit);
+          const other = slot === 0 ? c1 : c0;
+          const isUsedByOther = other && other.rank === rank && other.suit === suit;
+          html += `
+            <div class="rp-card-cell suit-${suit} ${isSel?'selected':''} ${isUsedByOther?'used':''}"
+                 data-slot="${slot}" data-rank="${rank}" data-suit="${suit}">
+              <span class="rp-rank">${RANK_DISP[rank]||rank}</span>
+              <span class="rp-suit">${SUIT_SYM[suit]}</span>
+            </div>
+          `;
         }
+      }
+      html += '</div>';
+      return html;
+    };
+
+    const html = `
+      <h4>Место ${seatIndex}: карманные карты</h4>
+      <div class="rp-row">
+        <label>Карты известны</label>
+        <input id="rp-cards-known-cb" type="checkbox" ${seat.cardsKnown?'checked':''} style="flex:0 0 auto;width:22px;height:22px;accent-color:var(--gold);">
+      </div>
+      ${seat.cardsKnown ? `
+        <div style="margin-bottom:8px;color:var(--muted);font-size:11px;">Карта 1</div>
+        ${gridHtml(0)}
+        <div style="margin-bottom:8px;color:var(--muted);font-size:11px;">Карта 2</div>
+        ${gridHtml(1)}
+      ` : `<div class="rp-hint" style="color:var(--muted);font-size:11px;margin-bottom:8px;">Карты не известны — будут показаны рубашкой.</div>`}
+      <div class="rp-actions">
+        <button class="rp-btn-cancel" id="rp-cards-cancel">Отмена</button>
+        <button class="rp-btn-ok" id="rp-cards-ok">OK</button>
+      </div>
+    `;
+    showPopupAtSeat(seatIndex, html, 'Карты');
+
+    document.getElementById('rp-cards-known-cb').onchange = (e) => {
+      seat.cardsKnown = e.target.checked;
+      renderCardsPopup(seatIndex);
+    };
+    document.getElementById('rp-cards-cancel').onclick = hidePopup;
+    document.getElementById('rp-cards-ok').onclick = () => {
+      if (seat.cardsKnown && S.popupPickedCards[0] && S.popupPickedCards[1]) {
+        seat.cards = [S.popupPickedCards[0], S.popupPickedCards[1]];
       } else {
-        html += `<div class="replayer-hint">Карты не известны — будут показаны рубашкой.</div>`;
+        seat.cards = [null, null];
       }
-      html += `
-        <div style="display:flex;gap:6px;margin-top:8px;">
-          <button id="rp-cards-clear" type="button" style="flex:1;padding:10px;border-radius:8px;border:1px solid #3a3530;background:#1a1a1a;color:var(--text);font-weight:800;font-family:inherit;cursor:pointer;">Очистить карты</button>
-          <button id="rp-cards-back" type="button" style="flex:1;padding:10px;border-radius:8px;border:none;background:linear-gradient(180deg,#ffcb2b,#e0a800);color:#1a1a1a;font-weight:900;font-family:inherit;cursor:pointer;">Готово</button>
-        </div>
-      </div>`;
-      el.body.innerHTML = html;
-
-      document.getElementById('rp-cards-known').onchange = (e) => {
-        s.cardsKnown = e.target.checked;
-        if (!s.cardsKnown) s.cards = null;
-        renderCardsBody();
+      hidePopup();
+      renderTable();
+    };
+    el.popup.querySelectorAll('.rp-card-cell').forEach(cell => {
+      cell.onclick = () => {
+        const slot = Number(cell.dataset.slot);
+        const rank = cell.dataset.rank;
+        const suit = cell.dataset.suit;
+        const other = slot === 0 ? S.popupPickedCards[1] : S.popupPickedCards[0];
+        if (other && other.rank === rank && other.suit === suit) return;
+        S.popupPickedCards[slot] = { rank, suit };
+        renderCardsPopup(seatIndex);
       };
-      document.getElementById('rp-cards-clear').onclick = () => {
-        s.cards = null;
-        current[0] = null; current[1] = null;
-        renderCardsBody();
-      };
-      document.getElementById('rp-cards-back').onclick = () => {
-        if (s.cardsKnown && current[0] && current[1]) s.cards = [current[0], current[1]];
-        else s.cards = null;
-        renderStep();
-      };
-      el.body.querySelectorAll('.rp-card-cell').forEach(cell => {
-        cell.onclick = () => {
-          const slot = +cell.dataset.slot;
-          const rank = cell.dataset.rank;
-          const suit = cell.dataset.suit;
-          // Не даём выбрать одну и ту же карту дважды
-          const other = current[slot === 0 ? 1 : 0];
-          if (other && other.rank === rank && other.suit === suit) return;
-          current[slot] = { rank, suit };
-          renderCardsBody();
-        };
-      });
-    }
-    renderCardsBody();
+    });
   }
 
-  // ---- Редактор борда ----
-  function openBoardEditor() {
-    if (S.board.length >= 5) return;
-    const current = S.board[S.board.length] || null;
+  // --- Попап: борд ---
+  function openBoardPopup(boardIndex) {
+    S.popupTarget = { type: 'board', boardIndex };
+    S.popupBoardPick = S.board[boardIndex] || null;
+    renderBoardPopup(boardIndex);
+  }
 
-    function renderBoardBody() {
-      let html = `
-        <div class="replayer-section">
-          <h4>Карта борда #${S.board.length + 1}</h4>
-          <div style="margin-bottom:10px;">
-      `;
-      for (const suit of SUITS) {
-        html += '<div style="display:grid;grid-template-columns:repeat(13,1fr);gap:3px;margin-bottom:6px;">';
-        for (const rank of RANKS) {
-          const sel = current && current.rank === rank && current.suit === suit;
-          html += `<div class="rp-card-cell suit-${suit} ${sel?'selected':''}" data-rank="${rank}" data-suit="${suit}" style="aspect-ratio:2/3;border-radius:4px;background:#fafafa;border:1px solid #2a2520;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:800;cursor:pointer;padding:1px;${sel?'outline:2px solid #ffcb2b;':''}">
-            <span style="font-size:10px;line-height:1;font-weight:900;">${RANK_DISP[rank]||rank}</span>
-            <span style="font-size:12px;line-height:1;">${SUIT_SYM[suit]}</span>
-          </div>`;
+  function renderBoardPopup(boardIndex) {
+    const pick = S.popupBoardPick;
+    const gridHtml = () => {
+      let html = '<div class="rp-card-grid">';
+      for (const suit of SUITS_ORDER) {
+        for (const rank of RANKS_ORDER) {
+          const isSel = pick && pick.rank === rank && pick.suit === suit;
+          const isUsed = S.board.some((b, i) => i !== boardIndex && b.rank === rank && b.suit === suit);
+          html += `
+            <div class="rp-card-cell suit-${suit} ${isSel?'selected':''} ${isUsed?'used':''}"
+                 data-rank="${rank}" data-suit="${suit}">
+              <span class="rp-rank">${RANK_DISP[rank]||rank}</span>
+              <span class="rp-suit">${SUIT_SYM[suit]}</span>
+            </div>
+          `;
         }
-        html += '</div>';
       }
-      html += `</div>
-        <div style="display:flex;gap:6px;">
-          <button id="rp-board-back" type="button" style="flex:1;padding:10px;border-radius:8px;border:1px solid #3a3530;background:#1a1a1a;color:var(--text);font-weight:800;font-family:inherit;cursor:pointer;">Отмена</button>
-        </div>
-      </div>`;
-      el.body.innerHTML = html;
+      html += '</div>';
+      return html;
+    };
+    const html = `
+      <h4>Карта борда #${boardIndex + 1}</h4>
+      ${gridHtml()}
+      <div class="rp-actions">
+        <button class="rp-btn-cancel" id="rp-board-cancel">Отмена</button>
+        <button class="rp-btn-ok" id="rp-board-ok">OK</button>
+      </div>
+    `;
+    // Позиционируем попап у борда
+    const tableRect = el.table.getBoundingClientRect();
+    const x = Math.max(8, Math.min(window.innerWidth - 300, window.innerWidth / 2 - 140));
+    const y = Math.min(window.innerHeight - 460, tableRect.top + tableRect.height * 0.35);
+    el.popup.innerHTML = html;
+    el.popup.style.left = x + 'px';
+    el.popup.style.top = y + 'px';
+    el.popup.classList.add('visible');
 
-      document.getElementById('rp-board-back').onclick = () => renderStep();
-      el.body.querySelectorAll('.rp-card-cell').forEach(cell => {
-        cell.onclick = () => {
-          const rank = cell.dataset.rank;
-          const suit = cell.dataset.suit;
-          // Проверка на дубликат
-          for (const b of S.board) if (b.rank === rank && b.suit === suit) return;
-          S.board.push({ rank, suit });
-          renderStep();
-        };
-      });
-    }
-    renderBoardBody();
+    document.getElementById('rp-board-cancel').onclick = hidePopup;
+    document.getElementById('rp-board-ok').onclick = () => {
+      if (S.popupBoardPick) {
+        S.board[boardIndex] = S.popupBoardPick;
+        // Убираем пустые ячейки после выбранной карты
+        while (S.board.length > boardIndex + 1 && !S.board[S.board.length - 1]) S.board.pop();
+      } else {
+        if (boardIndex < S.board.length) S.board.splice(boardIndex, 1);
+      }
+      hidePopup();
+      renderBoard();
+      attachBoardHandlers();
+    };
+    el.popup.querySelectorAll('.rp-card-cell').forEach(cell => {
+      cell.onclick = () => {
+        S.popupBoardPick = { rank: cell.dataset.rank, suit: cell.dataset.suit };
+        renderBoardPopup(boardIndex);
+      };
+    });
   }
 
-  // ---- Редактор действия ----
-  function openActionEditor(street) {
-    let selectedSeat = 0;
-    let selectedType = 'fold';
-    let amount = 0;
+  // --- Попап: действие ---
+  function openActionPopup(seatIndex) {
+    // Какое действие добавляем — зависит от улицы. Спросим у пользователя, к какой улице.
+    // Открываем сразу выбор улицы + типа действия.
+    S.popupTarget = { type: 'action', seatIndex };
+    renderActionPopup(seatIndex, 'preflop', 'fold', 0);
+  }
 
-    function renderActionBody() {
-      el.body.innerHTML = `
-        <div class="replayer-section">
-          <h4>Действие: ${STREETS_RU[street]}</h4>
-          <div class="replayer-row">
-            <label>Игрок</label>
-            <select id="rp-act-seat">
-              ${S.seats.map((s,i) => `<option value="${i}" ${i===selectedSeat?'selected':''}>${s.name} (${s.pos})</option>`).join('')}
-            </select>
-          </div>
-          <div class="replayer-row">
-            <label>Действие</label>
-            <select id="rp-act-type">
-              ${['fold','check','call','bet','raise','allin'].map(t => `<option value="${t}" ${t===selectedType?'selected':''}>${actionLabel(t)}</option>`).join('')}
-            </select>
-          </div>
-          <div class="replayer-row" id="rp-act-amount-row" style="${['bet','raise','allin'].includes(selectedType)?'':'display:none;'}">
-            <label>Сумма</label>
-            <input id="rp-act-amount" type="number" min="0" value="${amount}">
-          </div>
-          <div style="display:flex;gap:6px;margin-top:8px;">
-            <button id="rp-act-back" type="button" style="flex:1;padding:10px;border-radius:8px;border:1px solid #3a3530;background:#1a1a1a;color:var(--text);font-weight:800;font-family:inherit;cursor:pointer;">Отмена</button>
-            <button id="rp-act-save" type="button" style="flex:1;padding:10px;border-radius:8px;border:none;background:linear-gradient(180deg,#ffcb2b,#e0a800);color:#1a1a1a;font-weight:900;font-family:inherit;cursor:pointer;">Добавить</button>
-          </div>
-        </div>
-      `;
-      document.getElementById('rp-act-seat').onchange = e => { selectedSeat = +e.target.value; };
-      document.getElementById('rp-act-type').onchange = e => {
-        selectedType = e.target.value;
-        const row = document.getElementById('rp-act-amount-row');
-        row.style.display = ['bet','raise','allin'].includes(selectedType) ? 'flex' : 'none';
-      };
-      document.getElementById('rp-act-amount').oninput = e => { amount = Math.max(0, +e.target.value || 0); };
-      document.getElementById('rp-act-back').onclick = () => renderStep();
-      document.getElementById('rp-act-save').onclick = () => {
-        S.actions.push({ street, seat: selectedSeat, type: selectedType, amount: amount || 0 });
-        renderStep();
-      };
-    }
-    renderActionBody();
+  function renderActionPopup(seatIndex, street, type, amount) {
+    const seat = S.seats[seatIndex];
+    const showAmount = (type === 'bet' || type === 'raise' || type === 'allin');
+    const html = `
+      <h4>Действие: ${seat.name} (${seat.pos})</h4>
+      <div class="rp-row"><label>Улица</label>
+        <select id="rp-act-street">
+          ${STREETS.map(s => `<option value="${s}" ${s===street?'selected':''}>${STREET_RU[s]}</option>`).join('')}
+        </select>
+      </div>
+      <div class="rp-row"><label>Действие</label>
+        <select id="rp-act-type">
+          ${['fold','check','call','bet','raise','allin'].map(t => `<option value="${t}" ${t===type?'selected':''}>${actionBadgeText(t)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="rp-row" id="rp-act-amount-row" style="${showAmount ? '' : 'display:none;'}">
+        <label>Сумма</label>
+        <input id="rp-act-amount" type="number" min="0" value="${amount}">
+      </div>
+      <div class="rp-actions">
+        <button class="rp-btn-cancel" id="rp-act-cancel">Отмена</button>
+        <button class="rp-btn-ok" id="rp-act-ok">Добавить</button>
+      </div>
+    `;
+    showPopupAtSeat(seatIndex, html, 'Действие');
+
+    const selStreet = document.getElementById('rp-act-street');
+    const selType = document.getElementById('rp-act-type');
+    const amountRow = document.getElementById('rp-act-amount-row');
+    const amountInput = document.getElementById('rp-act-amount');
+
+    selType.onchange = () => {
+      const t = selType.value;
+      amountRow.style.display = (t === 'bet' || t === 'raise' || t === 'allin') ? '' : 'none';
+    };
+    document.getElementById('rp-act-cancel').onclick = hidePopup;
+    document.getElementById('rp-act-ok').onclick = () => {
+      const st = selStreet.value;
+      const tp = selType.value;
+      const amt = Number(amountInput.value) || 0;
+      S.actions.push({ street: st, seat: seatIndex, type: tp, amount: amt });
+      // Обновляем визуальное состояние места
+      seat.lastAction = tp;
+      if (tp === 'fold') seat.folded = true;
+      if (tp === 'call' || tp === 'bet' || tp === 'raise' || tp === 'allin') seat.committed += amt;
+      hidePopup();
+      renderTable();
+      attachBoardHandlers();
+      rebuildActionButtons();
+    };
+  }
+
+  // ---- Панель управления ----
+  function setStatus(text) {
+    if (el.statusBar) el.statusBar.textContent = text || '';
+  }
+
+  function attachControlHandlers() {
+    el.closeBtn.onclick = close;
+    el.helpBtn.onclick = showHelp;
+    el.btnPlay.onclick = playHand;
+    el.btnPause.onclick = pauseHand;
+    el.btnRestart.onclick = restartPlay;
+    el.btnExport.onclick = exportWebM;
+    el.btnShare.onclick = shareHand;
+    el.btnHH.onclick = copyHandHistory;
+    el.btnSave.onclick = saveJSON;
+    el.btnLoad.onclick = loadJSON;
+    el.btnClear.onclick = clearAll;
+  }
+
+  function rebuildActionButtons() {
+    // Кнопка «+ действие» — добавляем в каждый стол места при тапе на пустое место под стеком.
+    // Упрощённо: отдельная кнопка в панели управления для добавления действия.
+    // Но нам нужно добавить её сюда, чтобы вызывать openActionPopup.
+    // Реализуем: при клике по «пустому» месту под стеком (последняя зона) — открываем action.
+    // Пока — просто добавляем глобальную кнопку в панель.
+    // Сделаем это ниже через addActionBtn.
   }
 
   // ---- Проигрывание ----
   function buildPlaySteps() {
-    // Собираем шаги:
-    // 1) preflop-старт (все пустые карты закрыты, пот 0)
-    // 2) каждое действие префлопа
-    // 3) флоп + действия
-    // 4) терн + действия
-    // 5) ривер + действия
-    // 6) вскрытие
     const steps = [];
+    const ante = S.blinds.ante || 0;
+    let pot = ante * 9;
+    const stacks = S.seats.map(s => s.stack);
+    const folded = new Set();
+    const committed = new Array(9).fill(0);
+    const actionsByStreet = { preflop: [], flop: [], turn: [], river: [] };
+    S.actions.forEach(a => actionsByStreet[a.street].push(a));
 
-    const totalAnte = (S.blinds.ante || 0) * S.seats.filter(s => s.inHand).length;
-
-    // Начальное состояние
-    const baseState = () => ({
-      pot: totalAnte,
-      seatActions: S.seats.map(() => null),
-      boardShown: 0,
-      revealed: new Set(),
-      folded: new Set(),
-      stacks: S.seats.map(s => s.stack)
+    const snap = (street, boardShown, lastAction) => ({
+      street, boardShown, pot,
+      stacks: stacks.slice(),
+      folded: new Set(folded),
+      committed: committed.slice(),
+      lastAction: lastAction ? lastAction.slice() : new Array(9).fill(null)
     });
 
-    const makeSnap = (cur, street) => ({
-      pot: cur.pot,
-      seatActions: cur.seatActions.slice(),
-      boardShown: cur.boardShown,
-      revealed: new Set(cur.revealed),
-      folded: new Set(cur.folded),
-      stacks: cur.stacks.slice(),
-      street
-    });
-
-    let cur = baseState();
-    steps.push(makeSnap(cur, 'preflop'));
-
-    // Группируем действия по улицам
-    const byStreet = { preflop: [], flop: [], turn: [], river: [] };
-    S.actions.forEach(a => byStreet[a.street].push(a));
+    let lastActions = new Array(9).fill(null);
+    steps.push(snap('preflop', 0, lastActions));
 
     // Префлоп
-    for (const a of byStreet.preflop) {
-      const seat = a.seat;
-      cur.seatActions[seat] = a.type;
-      if (a.type === 'fold') cur.folded.add(seat);
-      if (a.type === 'call' || a.type === 'bet' || a.type === 'raise' || a.type === 'allin') {
-        const pay = Math.min(a.amount || 0, cur.stacks[seat]);
-        cur.stacks[seat] -= pay;
-        cur.pot += pay;
-      }
-      steps.push(makeSnap(cur, 'preflop'));
+    for (const a of actionsByStreet.preflop) {
+      committed[a.seat] += a.amount || 0;
+      pot += a.amount || 0;
+      stacks[a.seat] -= a.amount || 0;
+      if (a.type === 'fold') folded.add(a.seat);
+      lastActions[a.seat] = a.type;
+      steps.push(snap('preflop', 0, lastActions));
     }
 
     // Флоп
     if (S.board.length >= 3) {
-      cur.boardShown = 3;
-      steps.push(makeSnap(cur, 'flop'));
-      for (const a of byStreet.flop) {
-        const seat = a.seat;
-        cur.seatActions[seat] = a.type;
-        if (a.type === 'fold') cur.folded.add(seat);
-        if (a.type === 'call' || a.type === 'bet' || a.type === 'raise' || a.type === 'allin') {
-          const pay = Math.min(a.amount || 0, cur.stacks[seat]);
-          cur.stacks[seat] -= pay;
-          cur.pot += pay;
-        }
-        steps.push(makeSnap(cur, 'flop'));
+      steps.push(snap('flop', 3, lastActions));
+      for (const a of actionsByStreet.flop) {
+        committed[a.seat] += a.amount || 0;
+        pot += a.amount || 0;
+        stacks[a.seat] -= a.amount || 0;
+        if (a.type === 'fold') folded.add(a.seat);
+        lastActions[a.seat] = a.type;
+        steps.push(snap('flop', 3, lastActions));
       }
     }
-
-    // Терн
+    // Тёрн
     if (S.board.length >= 4) {
-      cur.boardShown = 4;
-      steps.push(makeSnap(cur, 'turn'));
-      for (const a of byStreet.turn) {
-        const seat = a.seat;
-        cur.seatActions[seat] = a.type;
-        if (a.type === 'fold') cur.folded.add(seat);
-        if (a.type === 'call' || a.type === 'bet' || a.type === 'raise' || a.type === 'allin') {
-          const pay = Math.min(a.amount || 0, cur.stacks[seat]);
-          cur.stacks[seat] -= pay;
-          cur.pot += pay;
-        }
-        steps.push(makeSnap(cur, 'turn'));
+      steps.push(snap('turn', 4, lastActions));
+      for (const a of actionsByStreet.turn) {
+        committed[a.seat] += a.amount || 0;
+        pot += a.amount || 0;
+        stacks[a.seat] -= a.amount || 0;
+        if (a.type === 'fold') folded.add(a.seat);
+        lastActions[a.seat] = a.type;
+        steps.push(snap('turn', 4, lastActions));
       }
     }
-
     // Ривер
     if (S.board.length >= 5) {
-      cur.boardShown = 5;
-      steps.push(makeSnap(cur, 'river'));
-      for (const a of byStreet.river) {
-        const seat = a.seat;
-        cur.seatActions[seat] = a.type;
-        if (a.type === 'fold') cur.folded.add(seat);
-        if (a.type === 'call' || a.type === 'bet' || a.type === 'raise' || a.type === 'allin') {
-          const pay = Math.min(a.amount || 0, cur.stacks[seat]);
-          cur.stacks[seat] -= pay;
-          cur.pot += pay;
-        }
-        steps.push(makeSnap(cur, 'river'));
+      steps.push(snap('river', 5, lastActions));
+      for (const a of actionsByStreet.river) {
+        committed[a.seat] += a.amount || 0;
+        pot += a.amount || 0;
+        stacks[a.seat] -= a.amount || 0;
+        if (a.type === 'fold') folded.add(a.seat);
+        lastActions[a.seat] = a.type;
+        steps.push(snap('river', 5, lastActions));
       }
     }
-
-    // Вскрытие — финальный шаг
-    const finalCur = JSON.parse(JSON.stringify({
-      pot: cur.pot,
-      seatActions: cur.seatActions,
-      boardShown: cur.boardShown,
-      revealed: [...cur.revealed],
-      folded: [...cur.folded],
-      stacks: cur.stacks,
-      street: 'river'
-    }));
-    finalCur.revealed = [...S.showdown];
-    finalCur.isShowdown = true;
-    steps.push(finalCur);
-
     return steps;
   }
 
   function renderPlayStep(step) {
-    if (!ctx) return;
-    // Временно подменяем состояние
-    const savedBoard = S.board;
-    const savedShowdown = S.showdown;
-
-    // Рисуем стол по шагу
-    ctx.clearRect(0, 0, CW, CH);
-    // Фон + рамка + сукно (дублируем отрисовку)
-    drawTableBackground();
-
-    // Места
-    for (let i = 0; i < S.seats.length; i++) {
-      const layout = SEAT_LAYOUT[i];
-      const seat = S.seats[i];
-      const cx = layout.x * CW;
-      const cy = layout.y * CH;
-      drawPlaySeat(i, seat, layout, cx, cy, step);
-    }
+    // Обновляем состояние визуально
+    el.seats.innerHTML = '';
+    el.boardCards.innerHTML = '';
+    el.potDisplay.textContent = 'Pot: ' + step.pot;
 
     // Борд
-    const cardW = 62, cardH = 88, gap = 8;
-    const totalW = cardW * 5 + gap * 4;
-    const startX = CW/2 - totalW/2;
-    const y = CH * 0.50;
-    ctx.fillStyle = '#ffcb2b';
-    ctx.font = 'bold 26px Inter, Segoe UI, system-ui, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'bottom';
-    ctx.fillText('Pot: ' + step.pot, CW/2, y - 14);
-
     for (let i = 0; i < 5; i++) {
-      const x = startX + i * (cardW + gap);
       if (i < step.boardShown && i < S.board.length) {
-        drawCardFace(x, y, cardW, cardH, S.board[i]);
+        el.boardCards.innerHTML += cardToHtml(S.board[i]);
       }
     }
 
-    // Бейдж SHOWDOWN
-    if (step.isShowdown) {
-      ctx.fillStyle = 'rgba(255,203,43,0.95)';
-      ctx.fillRect(CW/2 - 90, 40, 180, 40);
-      ctx.fillStyle = '#1a1a1a';
-      ctx.font = 'bold 20px Inter, Segoe UI, system-ui, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('SHOWDOWN', CW/2, 60);
+    // Места
+    for (let i = 0; i < 9; i++) {
+      const seat = S.seats[i];
+      const layout = SEAT_POSITIONS[i];
+      const node = document.createElement('div');
+      node.className = 'seat';
+      node.dataset.seatIndex = String(i);
+      if (layout.side === 'left') node.classList.add('left');
+      else if (layout.side === 'right') node.classList.add('right');
+      else if (layout.side === 'top') node.classList.add('top');
+      else if (layout.side === 'bottom-hero') node.classList.add('hero');
+      if (step.folded.has(i)) node.classList.add('folded');
+      node.style.left = layout.x + '%';
+      node.style.top = layout.y + '%';
+      const oy = (layout.offsetY !== undefined) ? layout.offsetY : 0;
+      node.style.transform = `translate(-50%, calc(-50% + ${oy}px))`;
+
+      // Карты
+      let cardsHtml = '<div class="seat-cards">';
+      const showFace = seat.cardsKnown && seat.cards[0] && seat.cards[1] && (S.showdown.has(i) || (step.street === 'river' && false));
+      if (showFace) {
+        cardsHtml += cardToHtml(seat.cards[0]) + cardToHtml(seat.cards[1]);
+      } else {
+        cardsHtml += '<div class="card back"></div><div class="card back"></div>';
+      }
+      cardsHtml += '</div>';
+
+      // Действие
+      const la = step.lastAction[i];
+      const badgeHtml = la ? `<div class="${actionBadgeClass(la)}">${actionBadgeText(la)}</div>` : '<div class="action-badge hidden"></div>';
+      const chipsHtml = step.committed[i] > 0 ? `<div class="bet-chips">${step.committed[i]}</div>` : '<div class="bet-chips hidden"></div>';
+
+      node.innerHTML = `
+        <div class="dealer-chip ${seat.pos === 'BTN' ? '' : 'hidden'}">D</div>
+        ${cardsHtml}
+        <div class="pos-row"><span class="pos-name">${seat.pos}</span></div>
+        <div class="stack-wrap"><span class="stack">${step.stacks[i]}</span></div>
+        ${badgeHtml}
+        ${chipsHtml}
+      `;
+      el.seats.appendChild(node);
     }
   }
 
-  function drawTableBackground() {
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(0, 0, CW, CH);
-    const pad = 24;
-    const tableW = CW - pad * 2;
-    const tableH = CH - pad * 2;
-    const rad = 90;
-    roundRect(ctx, pad, pad, tableW, tableH, rad);
-    const woodGrad = ctx.createLinearGradient(0, pad, 0, pad + tableH);
-    woodGrad.addColorStop(0, '#6b4622');
-    woodGrad.addColorStop(0.4, '#3d2512');
-    woodGrad.addColorStop(1, '#2a1a0c');
-    ctx.fillStyle = woodGrad;
-    ctx.fill();
-    const inner = 14;
-    roundRect(ctx, pad + inner, pad + inner, tableW - inner * 2, tableH - inner * 2, rad - inner);
-    const feltGrad = ctx.createRadialGradient(CW/2, CH*0.45, 80, CW/2, CH*0.5, Math.max(CW,CH)*0.75);
-    feltGrad.addColorStop(0, '#322c26');
-    feltGrad.addColorStop(0.55, '#1e1a16');
-    feltGrad.addColorStop(1, '#0f0d0b');
-    ctx.fillStyle = feltGrad;
-    ctx.fill();
-    ctx.save();
-    ctx.globalAlpha = 0.20;
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 44px Inter, Segoe UI, system-ui, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('POKER REPLAYER', CW/2, CH*0.40);
-    ctx.restore();
-  }
-
-  function drawPlaySeat(i, seat, layout, cx, cy, step) {
-    const seatW = 150, seatH = 105;
-    const cardsY = cy - seatH/2 + 6;
-    const cardW = 44, cardH = 62, gap = 6;
-    const cardsTotalW = cardW * 2 + gap;
-    const cardsX = cx - cardsTotalW/2;
-
-    const isFolded = step.folded && step.folded.has(i);
-    const isRevealed = step.revealed && step.revealed.has(i);
-    const hasCards = seat.cardsKnown && seat.cards && seat.cards.length === 2;
-
-    if (isFolded) {
-      // Гасим место
-      ctx.save();
-      ctx.globalAlpha = 0.35;
-    }
-
-    if (hasCards && isRevealed) {
-      drawCardFace(cardsX, cardsY, cardW, cardH, seat.cards[0]);
-      drawCardFace(cardsX + cardW + gap, cardsY, cardW, cardH, seat.cards[1]);
-    } else {
-      drawCardBack(cardsX, cardsY, cardW, cardH);
-      drawCardBack(cardsX + cardW + gap, cardsY, cardW, cardH);
-    }
-
-    ctx.fillStyle = '#ffcb2b';
-    ctx.font = 'bold 18px Inter, Segoe UI, system-ui, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'top';
-    ctx.fillText(seat.pos, cx, cy + seatH/2 - 40);
-
-    const stackVal = (step.stacks && typeof step.stacks[i] === 'number') ? step.stacks[i] : seat.stack;
-    ctx.fillStyle = '#e8eef5';
-    ctx.font = 'bold 16px Inter, Segoe UI, system-ui, sans-serif';
-    ctx.fillText(String(stackVal), cx, cy + seatH/2 - 18);
-
-    if (step.seatActions && step.seatActions[i]) {
-      const a = step.seatActions[i];
-      const badgeW = 70, badgeH = 22;
-      const bx = cx - badgeW/2;
-      const by = cy + seatH/2 + 2;
-      roundRect(ctx, bx, by, badgeW, badgeH, 5);
-      ctx.fillStyle = 'rgba(0,0,0,0.85)';
-      ctx.fill();
-      ctx.strokeStyle = actionColor(a);
-      ctx.lineWidth = 1;
-      roundRect(ctx, bx, by, badgeW, badgeH, 5);
-      ctx.stroke();
-      ctx.fillStyle = actionColor(a);
-      ctx.font = 'bold 12px Inter, Segoe UI, system-ui, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(actionLabel(a), cx, by + badgeH/2);
-    }
-
-    if (isFolded) ctx.restore();
-  }
-
-  // ---- Управление проигрыванием ----
   function playHand() {
     if (S.playing) return;
     S.playing = true;
+    S.playSteps = buildPlaySteps();
     S.playStepIndex = 0;
-    const steps = buildPlaySteps();
-    setStatus('Playing…');
+    setStatus('Проигрывание…');
+    el.btnPlay.disabled = true;
+    el.btnPause.disabled = false;
 
-    const playBtn = document.getElementById('rp-play');
-    const pauseBtn = document.getElementById('rp-pause');
-    if (playBtn) playBtn.disabled = true;
-    if (pauseBtn) pauseBtn.disabled = false;
-
-    function tick() {
+    const tick = () => {
       if (!S.playing) return;
-      if (S.playStepIndex >= steps.length) {
+      if (S.playStepIndex >= S.playSteps.length) {
         S.playing = false;
-        if (playBtn) playBtn.disabled = false;
-        if (pauseBtn) pauseBtn.disabled = true;
+        el.btnPlay.disabled = false;
+        el.btnPause.disabled = true;
         setStatus('Готово');
         return;
       }
-      const step = steps[S.playStepIndex];
-      renderPlayStep(step);
+      renderPlayStep(S.playSteps[S.playStepIndex]);
       S.playStepIndex++;
-      S.playTimer = setTimeout(tick, 900);
-    }
+      S.playTimerId = setTimeout(tick, 900);
+    };
     tick();
   }
 
   function pauseHand() {
     if (!S.playing) return;
     S.playing = false;
-    if (S.playTimer) { clearTimeout(S.playTimer); S.playTimer = null; }
-    const playBtn = document.getElementById('rp-play');
-    const pauseBtn = document.getElementById('rp-pause');
-    if (playBtn) playBtn.disabled = false;
-    if (pauseBtn) pauseBtn.disabled = true;
+    if (S.playTimerId) { clearTimeout(S.playTimerId); S.playTimerId = null; }
+    el.btnPlay.disabled = false;
+    el.btnPause.disabled = true;
     setStatus('Пауза');
   }
 
   function restartPlay() {
     pauseHand();
-    const st = buildCanvasState();
-    drawTable(st);
+    renderTable();
+    attachBoardHandlers();
     setStatus('');
   }
 
   // ---- Экспорт WebM ----
   function exportWebM() {
-    if (!canvas) return;
-    if (S.isRecording) return;
-    if (typeof MediaRecorder === 'undefined') { setStatus('MediaRecorder не поддерживается'); return; }
-
-    // Определяем mime
-    const candidates = [
-      'video/webm;codecs=vp9',
-      'video/webm;codecs=vp8',
-      'video/webm'
-    ];
-    let mime = '';
-    for (const c of candidates) {
-      if (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(c)) { mime = c; break; }
-    }
-    if (!mime) { setStatus('WebM не поддерживается браузером'); return; }
-
-    const stream = canvas.captureStream(30);
-    let recorder;
-    try {
-      recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 4_000_000 });
-    } catch (e) {
-      setStatus('Ошибка записи: ' + e.message);
-      return;
-    }
-
-    S.recordedChunks = [];
-    recorder.ondataavailable = (e) => {
-      if (e.data && e.data.size > 0) S.recordedChunks.push(e.data);
-    };
-    recorder.onstop = () => {
-      S.isRecording = false;
-      const blob = new Blob(S.recordedChunks, { type: 'video/webm' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'poker-replay-' + Date.now() + '.webm';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(url), 60000);
-      setStatus('WebM сохранён');
-    };
-
-    S.recorder = recorder;
-    S.isRecording = true;
-
-    // Начинаем запись и одновременно play
-    recorder.start();
-    setStatus('Запись…');
-
-    // Проигрываем раздачу от начала до конца, потом останавливаем запись
-    const steps = buildPlaySteps();
-    let idx = 0;
-    S.playing = true;
-    if (S.playTimer) clearTimeout(S.playTimer);
-
-    function tick() {
-      if (!S.isRecording) return;
-      if (idx >= steps.length) {
-        // Завершаем — ждём ещё 800 мс на финальном кадре
-        setTimeout(() => {
-          if (recorder.state === 'recording') recorder.stop();
-        }, 800);
-        return;
-      }
-      renderPlayStep(steps[idx]);
-      idx++;
-      S.playTimer = setTimeout(tick, 900);
-    }
-    tick();
-
-    // Ограничение по времени (30 сек максимум), чтобы не зависнуть
-    setTimeout(() => {
-      if (S.isRecording && recorder.state === 'recording') recorder.stop();
-    }, 45000);
+    setStatus('Запись пока не активирована (следующая итерация)');
   }
 
   // ---- Share ----
   async function shareHand() {
-    if (S.recordedChunks.length === 0) {
-      setStatus('Сначала сохраните WebM, потом поделитесь');
-      return;
-    }
-    try {
-      const blob = new Blob(S.recordedChunks, { type: 'video/webm' });
-      const file = new File([blob], 'poker-replay.webm', { type: 'video/webm' });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: 'Poker Replay',
-          text: 'Раздача из покерного реплеера'
-        });
-        setStatus('Отправлено');
-      } else {
-        setStatus('Share files не поддерживается — сохраните WebM вручную');
-      }
-    } catch (e) {
-      setStatus('Ошибка share: ' + e.message);
-    }
+    setStatus('Поделиться: сохраните WebM (следующая итерация)');
   }
 
-  // ---- Копирование Hand History ----
+  // ---- Copy HH ----
   function copyHandHistory() {
     const lines = [];
     lines.push('Poker Replayer Hand History');
-    lines.push('Game: No Limit Hold\'em');
+    lines.push('Game: No Limit Hold\'em, 9-max');
     lines.push('Blinds: ' + S.blinds.sb + '/' + S.blinds.bb + (S.blinds.ante > 0 ? ' (ante ' + S.blinds.ante + ')' : ''));
     lines.push('');
     lines.push('Table seats:');
-    for (let i = 0; i < S.seats.length; i++) {
+    for (let i = 0; i < 9; i++) {
       const s = S.seats[i];
       lines.push('Seat ' + (i+1) + ': ' + s.name + ' (' + s.pos + ') ' + s.stack + ' chips');
     }
     lines.push('');
-    const grouped = { preflop: [], flop: [], turn: [], river: [] };
-    S.actions.forEach(a => grouped[a.street].push(a));
+    const byStreet = { preflop: [], flop: [], turn: [], river: [] };
+    S.actions.forEach(a => byStreet[a.street].push(a));
     for (const st of STREETS) {
-      if (grouped[st].length === 0 && st !== 'preflop') continue;
-      lines.push('*** ' + STREETS_RU[st].toUpperCase() + ' ***');
-      if (st === 'flop' && S.board.length >= 3) lines.push('[' + S.board.slice(0,3).map(c => (RANK_DISP[c.rank]||c.rank) + c.suit).join(' ') + ']');
-      if (st === 'turn' && S.board.length >= 4) lines.push('[' + (RANK_DISP[S.board[3].rank]||S.board[3].rank) + S.board[3].suit + ']');
-      if (st === 'river' && S.board.length >= 5) lines.push('[' + (RANK_DISP[S.board[4].rank]||S.board[4].rank) + S.board[4].suit + ']');
-      for (const a of grouped[st]) {
+      if (st !== 'preflop' && byStreet[st].length === 0 && !(st === 'flop' && S.board.length >= 3) && !(st === 'turn' && S.board.length >= 4) && !(st === 'river' && S.board.length >= 5)) continue;
+      lines.push('*** ' + STREET_RU[st].toUpperCase() + ' ***');
+      if (st === 'flop' && S.board.length >= 3) lines.push('Board: ' + S.board.slice(0,3).map(cardStr).join(' '));
+      if (st === 'turn' && S.board.length >= 4) lines.push('Board: ' + S.board.slice(0,4).map(cardStr).join(' '));
+      if (st === 'river' && S.board.length >= 5) lines.push('Board: ' + S.board.slice(0,5).map(cardStr).join(' '));
+      for (const a of byStreet[st]) {
         const s = S.seats[a.seat];
-        const name = s ? s.name : 'Player';
-        let line = name + ': ' + a.type;
-        if (a.amount) line += ' ' + a.amount;
-        lines.push(line);
+        lines.push(s.name + ': ' + a.type + (a.amount ? ' ' + a.amount : ''));
       }
       lines.push('');
     }
@@ -7800,14 +6978,18 @@ const UI = (() => {
       lines.push('*** SHOW DOWN ***');
       for (const i of S.showdown) {
         const s = S.seats[i];
-        if (s.cards && s.cards.length === 2) {
-          lines.push(s.name + ' shows ' + s.cards.map(c => (RANK_DISP[c.rank]||c.rank) + c.suit).join(' '));
+        if (s.cards[0] && s.cards[1]) {
+          lines.push(s.name + ' shows ' + cardStr(s.cards[0]) + ' ' + cardStr(s.cards[1]));
         }
       }
     }
     const text = lines.join('\n');
-
     copyToClipboard(text, () => setStatus('Hand History скопирован'));
+  }
+
+  function cardStr(card) {
+    if (!card) return '';
+    return (RANK_DISP[card.rank] || card.rank) + card.suit;
   }
 
   function copyToClipboard(text, onSuccess) {
@@ -7819,11 +7001,9 @@ const UI = (() => {
       ta.style.position = 'fixed';
       ta.style.top = '-1000px';
       ta.style.left = '-1000px';
-      ta.style.opacity = '0';
       document.body.appendChild(ta);
       ta.focus();
       ta.select();
-      ta.setSelectionRange(0, ta.value.length);
       ok = document.execCommand && document.execCommand('copy');
       document.body.removeChild(ta);
     } catch (e) { ok = false; }
@@ -7844,14 +7024,13 @@ const UI = (() => {
       seats: S.seats.map(s => ({
         name: s.name, stack: s.stack, pos: s.pos,
         cards: s.cards, cardsKnown: s.cardsKnown,
-        folded: s.folded, inHand: s.inHand
+        folded: s.folded
       })),
       board: S.board,
       actions: S.actions,
       showdown: [...S.showdown]
     };
-    const text = JSON.stringify(data, null, 2);
-    const blob = new Blob([text], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -7874,18 +7053,19 @@ const UI = (() => {
       reader.onload = () => {
         try {
           const data = JSON.parse(reader.result);
-          if (!data || !data.seats || data.seats.length !== 9) throw new Error('Неверный формат');
+          if (!data.seats || data.seats.length !== 9) throw new Error('Неверный формат');
           S.blinds = data.blinds || { sb:10, bb:20, ante:0 };
           S.buttonIndex = data.buttonIndex || 0;
           S.seats = data.seats.map(s => ({
             name: s.name, stack: s.stack, pos: s.pos,
-            cards: s.cards, cardsKnown: !!s.cardsKnown,
-            folded: !!s.folded, inHand: s.inHand !== false
+            cards: s.cards || [null,null], cardsKnown: !!s.cardsKnown,
+            folded: !!s.folded, lastAction: null, committed: 0
           }));
           S.board = data.board || [];
           S.actions = data.actions || [];
           S.showdown = new Set(data.showdown || []);
-          renderStep();
+          renderTable();
+          attachBoardHandlers();
           setStatus('JSON загружен');
         } catch (err) {
           setStatus('Ошибка загрузки: ' + err.message);
@@ -7896,101 +7076,76 @@ const UI = (() => {
     input.click();
   }
 
-  // ---- Статус ----
-  function setStatus(text) {
-    const el = document.getElementById('replayer-status');
-    if (el) el.textContent = text || '';
+  // ---- Clear ----
+  function clearAll() {
+    initSeats();
+    renderTable();
+    attachBoardHandlers();
+    setStatus('Очищено');
   }
 
-  // ---- Шаги вперёд/назад ----
-  function goNext() {
-    if (S.step >= 6) return;
-    S.step++;
-    renderStep();
+  // ---- Help ----
+  function showHelp() {
+    alert(
+      'POKER REPLAYER\n\n' +
+      'Нажимайте прямо на элементы стола:\n' +
+      '• Карты игрока — выбор 2 карт\n' +
+      '• Имя/позиция — изменить имя и позицию\n' +
+      '• Стек — ввести стек\n' +
+      '• Карты борда — выбор 1 карты\n' +
+      '• Действие — добавьте действие на любой улице\n\n' +
+      'Панель снизу:\n' +
+      '• Play/Pause/Restart — проиграть раздачу\n' +
+      '• WebM — записать видео (следующая итерация)\n' +
+      '• Share — поделиться\n' +
+      '• HH — скопировать раздачу для трекеров\n' +
+      '• JSON — сохранить/загрузить раздачу\n' +
+      '• Clear — очистить всё'
+    );
   }
-  function goPrev() {
-    if (S.step <= 1) return;
-    S.step--;
-    renderStep();
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, ch => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[ch]);
   }
 
   // ---- Открытие / закрытие ----
   function open() {
-    if (!el.overlay) cacheDom();
-    // Переинициализация при каждом открытии — начинаем с чистого листа
+    cacheDom();
     initSeats();
-    recalcPositions();
-    S.step = 1;
-    S.playing = false;
-    if (S.playTimer) clearTimeout(S.playTimer);
-    S.playTimer = null;
-    S.isRecording = false;
-    S.recordedChunks = [];
-    canvas = null;
-    ctx = null;
+    renderTable();
+    attachBoardHandlers();
+    attachControlHandlers();
+    // Клик по вне попапа — закрываем попап
+    if (!el.overlay.__bgBound) {
+      el.overlay.addEventListener('click', (e) => {
+        if (!e.target.closest('#replayer-popup') && !e.target.closest('.rp-clickable') && !e.target.closest('#replayer-controls') && !e.target.closest('#replayer-close-btn') && !e.target.closest('#replayer-help-btn')) {
+          hidePopup();
+        }
+      });
+      el.overlay.__bgBound = true;
+    }
     el.overlay.classList.add('visible');
-    renderStep();
+    setStatus('');
+    updateSeatHighlight();
   }
 
   function close() {
-    if (S.playTimer) { clearTimeout(S.playTimer); S.playTimer = null; }
-    S.playing = false;
-    if (S.recorder && S.recorder.state === 'recording') {
-      try { S.recorder.stop(); } catch (e) {}
-    }
-    S.isRecording = false;
+    pauseHand();
+    hidePopup();
     el.overlay.classList.remove('visible');
   }
 
-  // ---- Инициализация ----
-  function init() {
-    cacheDom();
-    if (!el.overlay) return;
-    el.close.addEventListener('click', close);
-    el.prev.addEventListener('click', goPrev);
-    el.next.addEventListener('click', goNext);
-    if (el.help) {
-      el.help.addEventListener('click', () => {
-        alert(
-          'POKER REPLAYER\n\n' +
-          '1) Блайнды — введите SB/BB/ante и выберите баттон.\n' +
-          '2) Игроки — задайте имена и стеки.\n' +
-          '3) Карты — введите карманные карты героя и известных оппонентов.\n' +
-          '4) Действия — добавьте действия по улицам в порядке.\n' +
-          '5) Борд — добавьте карты борда и отметьте, кто открылся.\n' +
-          '6) Play & Export — проиграйте раздачу и сохраните WebM.\n\n' +
-          'Share — отправить в Telegram/WhatsApp.\n' +
-          'Copy HH — скопировать раздачу для покер-трекеров.\n' +
-          'Save/Load JSON — сохранить и загрузить раздачу.'
-        );
-      });
-    }
-
-    // Шаги сверху — можно кликать
-    el.steps.forEach(s => {
-      s.addEventListener('click', () => {
-        const n = Number(s.dataset.step);
-        if (n >= 1 && n <= 6) {
-          S.step = n;
-          renderStep();
-        }
-      });
-    });
+  function updateSeatHighlight() {
+    // опционально: показать золотую окантовку кликабельных зон
   }
 
-  // Публичный интерфейс
+  // ---- Публичный интерфейс ----
   window.PokerReplayer = {
     open,
     close,
-    init
+    init: () => { cacheDom(); }
   };
 
-  // Автоинициализация после загрузки DOM
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
 })();
 </script>
 </body>
