@@ -499,8 +499,10 @@ button.disabled {
   line-height: 1;
 }
 .seat .strat-badge.hidden { display: none; }
-/* Сфолдивший игрок: бейдж типа приглушается так же, как и карты этого игрока. */
-.seat.folded .strat-badge { opacity: 0.35; }
+/* Примечание: прозрачность бейджа типа игрока задаётся не здесь,
+   а при отрисовке места — строго такая же, как у карт этого игрока.
+   Само правило .seat.folded .strat-badge удалено, чтобы бейдж
+   не имел собственного гашения и подхватывал гашение карт. */
 
 .seat .strat-badge.pro-gto      { background: #4a3a68; }
 .seat .strat-badge.pro-solver   { background: #4a3a68; }
@@ -5253,6 +5255,26 @@ const UI = (() => {
     return seat;
   }
 
+  /* Синхронизирует прозрачность бейджа типа игрока с прозрачностью его карт.
+     Вызывается после того, как карты отрисованы. Читает реально применённую
+     прозрачность карт (в том числе унаследованную от класса .seat.folded)
+     и ставит ровно ту же прозрачность бейджу типа. Карты — источник правды. */
+  function syncStratBadgeFade(player, seat) {
+    const badge = seat.querySelector('[data-role="strat"]');
+    const cardsEl = seat.querySelector('[data-role="cards"]');
+    if (!badge || !cardsEl) return;
+
+    /* Сбрасываем ранее выставленную inline-прозрачность бейджа,
+       чтобы прочитанное значение было актуальным. */
+    badge.style.opacity = '';
+
+    const computed = window.getComputedStyle(cardsEl).opacity;
+    const cardsOpacity = Number(computed);
+    if (!isNaN(cardsOpacity)) {
+      badge.style.opacity = String(cardsOpacity);
+    }
+  }
+
   function updateSeats(state, revealAll) {
     for (const p of state.players) {
       if (p.eliminated && !p.inHand) {
@@ -5293,6 +5315,10 @@ const UI = (() => {
       } else stratBadge.classList.add('hidden');
 
       renderSeatCards(p, state, revealAll);
+
+      /* Бейдж типа синхронизируем по гашению с картами строго после
+         отрисовки карт — чтобы он получил ровно ту же прозрачность. */
+      syncStratBadgeFade(p, seat);
 
       const betEl = seat.querySelector('[data-role="bet"]');
       if (p.committedThisStreet > 0 && !p.folded && !state.handOver) {
