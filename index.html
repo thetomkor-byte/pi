@@ -4092,15 +4092,20 @@ const Bots = (() => {
   const CLASS_PRO = 'PRO';
   const CLASS_VIP = 'VIP';
 
+  /* Аббревиатуры для бейджей типов игроков.
+     Класс PRO: LAG-Pro → PRO·1, ICM-Exploiter → PRO·2,
+                Solver-Hybrid → PRO·3, GTO-Reg → PRO·4.
+     Класс VIP: TAG-Lite → VIP·1, Loose-Passive → VIP·2,
+                Rock → VIP·3, Maniac → VIP·4. */
   const TYPES = {
-    PRO_GTO:    { key: 'PRO_GTO',    cls: CLASS_PRO, badgeClass: 'pro-gto',    tier: 1, label: 'PRO', equityIters: 200, useICM: false, usePlan: true,  useMeta: false },
-    PRO_SOLVER: { key: 'PRO_SOLVER', cls: CLASS_PRO, badgeClass: 'pro-solver', tier: 2, label: 'PRO', equityIters: 300, useICM: false, usePlan: true,  useMeta: false },
-    PRO_ICM:    { key: 'PRO_ICM',    cls: CLASS_PRO, badgeClass: 'pro-icm',    tier: 3, label: 'PRO', equityIters: 350, useICM: true,  usePlan: true,  useMeta: false },
-    PRO_LAG:    { key: 'PRO_LAG',    cls: CLASS_PRO, badgeClass: 'pro-lag',    tier: 4, label: 'PRO', equityIters: 400, useICM: true,  usePlan: true,  useMeta: true  },
-    VIP_TAGLITE:{ key: 'VIP_TAGLITE',cls: CLASS_VIP, badgeClass: 'vip-taglite',tier: 1, label: 'VIP', equityIters: 0,   useICM: false, usePlan: false, useMeta: false },
-    VIP_LOOSE:  { key: 'VIP_LOOSE',  cls: CLASS_VIP, badgeClass: 'vip-loose',  tier: 2, label: 'VIP', equityIters: 0,   useICM: false, usePlan: false, useMeta: false },
-    VIP_ROCK:   { key: 'VIP_ROCK',   cls: CLASS_VIP, badgeClass: 'vip-rock',   tier: 3, label: 'VIP', equityIters: 0,   useICM: false, usePlan: false, useMeta: false },
-    VIP_MANIAC: { key: 'VIP_MANIAC', cls: CLASS_VIP, badgeClass: 'vip-maniac', tier: 4, label: 'VIP', equityIters: 0,   useICM: false, usePlan: false, useMeta: false }
+    PRO_GTO:    { key: 'PRO_GTO',    cls: CLASS_PRO, badgeClass: 'pro-gto',    tier: 1, label: 'PRO·4', equityIters: 200, useICM: false, usePlan: true,  useMeta: false },
+    PRO_SOLVER: { key: 'PRO_SOLVER', cls: CLASS_PRO, badgeClass: 'pro-solver', tier: 2, label: 'PRO·3', equityIters: 300, useICM: false, usePlan: true,  useMeta: false },
+    PRO_ICM:    { key: 'PRO_ICM',    cls: CLASS_PRO, badgeClass: 'pro-icm',    tier: 3, label: 'PRO·2', equityIters: 350, useICM: true,  usePlan: true,  useMeta: false },
+    PRO_LAG:    { key: 'PRO_LAG',    cls: CLASS_PRO, badgeClass: 'pro-lag',    tier: 4, label: 'PRO·1', equityIters: 400, useICM: true,  usePlan: true,  useMeta: true  },
+    VIP_TAGLITE:{ key: 'VIP_TAGLITE',cls: CLASS_VIP, badgeClass: 'vip-taglite',tier: 1, label: 'VIP·1', equityIters: 0,   useICM: false, usePlan: false, useMeta: false },
+    VIP_LOOSE:  { key: 'VIP_LOOSE',  cls: CLASS_VIP, badgeClass: 'vip-loose',  tier: 2, label: 'VIP·2', equityIters: 0,   useICM: false, usePlan: false, useMeta: false },
+    VIP_ROCK:   { key: 'VIP_ROCK',   cls: CLASS_VIP, badgeClass: 'vip-rock',   tier: 3, label: 'VIP·3', equityIters: 0,   useICM: false, usePlan: false, useMeta: false },
+    VIP_MANIAC: { key: 'VIP_MANIAC', cls: CLASS_VIP, badgeClass: 'vip-maniac', tier: 4, label: 'VIP·4', equityIters: 0,   useICM: false, usePlan: false, useMeta: false }
   };
 
   const PROFILES = {
