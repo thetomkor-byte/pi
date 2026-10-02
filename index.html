@@ -8611,6 +8611,11 @@ const UI = (() => {
     UI.setHeroTimerOff();
   }
 
+  /* Строит шаги реплея для одной раздачи. Важно: обязательные ставки блайндов
+     SB и BB в actionLog не пишутся — их ставит движок напрямую в postBlinds.
+     Поэтому здесь, в самом начале реплея, мы сами выставляем SB и BB живым
+     игрокам по тем же правилам, что и postBlinds, чтобы в реплее были видны
+     и сами ставки, и бейджи BLIND. Живой движок при этом не трогаем. */
   function buildReplaySteps(snap) {
     const steps = [];
     const finalBoard = snap.board || [];
@@ -8648,6 +8653,75 @@ const UI = (() => {
       }))
     };
 
+    /* Обязательные ставки блайндов SB и BB на префлопе — только для реплея.
+       Правила те же, что в Engine.postBlinds:
+       - хедз-ап (два живых): кнопка = SB, второй живой = BB;
+       - иначе: SB = первый живой после кнопки, BB = первый живой после SB. */
+    (function applyReplayBlinds() {
+      const n = cur.players.length;
+      if (n === 0) return;
+
+      const aliveIdx = [];
+      for (let i = 0; i < n; i++) {
+        if (!cur.players[i].eliminated && cur.players[i].inHand) aliveIdx.push(i);
+      }
+      if (aliveIdx.length < 2) return;
+
+      const btnIdx = (typeof snap.buttonIndex === 'number') ? snap.buttonIndex : 0;
+
+      const nextAliveAfter = (startIdx) => {
+        for (let step = 1; step <= n; step++) {
+          const idx = (startIdx + step) % n;
+          if (!cur.players[idx].eliminated && cur.players[idx].inHand) return idx;
+        }
+        return -1;
+      };
+
+      let sbIdx;
+      let bbIdx;
+
+      if (aliveIdx.length === 2) {
+        sbIdx = btnIdx;
+        if (cur.players[sbIdx].eliminated || !cur.players[sbIdx].inHand) {
+          sbIdx = nextAliveAfter(btnIdx);
+        }
+        bbIdx = nextAliveAfter(sbIdx);
+      } else {
+        sbIdx = nextAliveAfter(btnIdx);
+        if (sbIdx < 0) return;
+        bbIdx = nextAliveAfter(sbIdx);
+      }
+
+      if (sbIdx < 0 || bbIdx < 0 || sbIdx === bbIdx) return;
+
+      const sbAmount = (snap.blinds && snap.blinds.sb) || 0;
+      const bbAmount = (snap.blinds && snap.blinds.bb) || 0;
+
+      const sbPlayer = cur.players[sbIdx];
+      const sbPay = Math.min(sbAmount, sbPlayer.stack);
+      if (sbPay > 0) {
+        sbPlayer.stack -= sbPay;
+        sbPlayer.committedThisStreet += sbPay;
+        sbPlayer.committedTotal += sbPay;
+        sbPlayer.blindPaid = sbPay;
+        sbPlayer.lastAction = 'sb';
+        cur.pot += sbPay;
+        if (sbPlayer.stack === 0) sbPlayer.allIn = true;
+      }
+
+      const bbPlayer = cur.players[bbIdx];
+      const bbPay = Math.min(bbAmount, bbPlayer.stack);
+      if (bbPay > 0) {
+        bbPlayer.stack -= bbPay;
+        bbPlayer.committedThisStreet += bbPay;
+        bbPlayer.committedTotal += bbPay;
+        bbPlayer.blindPaid = bbPay;
+        bbPlayer.lastAction = 'bb';
+        cur.pot += bbPay;
+        if (bbPlayer.stack === 0) bbPlayer.allIn = true;
+      }
+    })();
+
     const boardDeal = { preflop: 0, flop: 3, turn: 4, river: 5 };
 
     const takeBoardSnapshot = (street) => {
@@ -8677,7 +8751,7 @@ const UI = (() => {
         resetStreetCommits();
         takeBoardSnapshot(lastStreet);
         for (const p of cur.players) {
-          if (p.lastAction !== 'fold' && p.lastAction !== 'allin') p.lastAction = null;
+          if (p.lastAction !== 'fold' && p.lastAction !== 'allin' && p.lastAction !== 'sb' && p.lastAction !== 'bb') p.lastAction = null;
         }
         steps.push({ kind: 'street', snapshot: makeReplaySnapshot(cur, snap, lastStreet, false) });
       }
