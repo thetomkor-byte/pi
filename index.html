@@ -8611,11 +8611,10 @@ const UI = (() => {
     UI.setHeroTimerOff();
   }
 
-  /* Строит шаги реплея для одной раздачи. Важно: обязательные ставки блайндов
-     SB и BB в actionLog не пишутся — их ставит движок напрямую в postBlinds.
-     Поэтому здесь, в самом начале реплея, мы сами выставляем SB и BB живым
-     игрокам по тем же правилам, что и postBlinds, чтобы в реплее были видны
-     и сами ставки, и бейджи BLIND. Живой движок при этом не трогаем. */
+  /* Строит шаги реплея для одной раздачи.
+     Ключевой принцип: суммы ставок восстанавливаются НАПРЯМУЮ из самих действий
+     (act.amount для bet/raise/allin, текущая максимальная ставка улицы для call),
+     а не через разницу potAfter. Это устраняет любые расхождения с живой игрой. */
   function buildReplaySteps(snap) {
     const steps = [];
     const finalBoard = snap.board || [];
@@ -8741,6 +8740,7 @@ const UI = (() => {
     };
 
     let lastStreet = 'preflop';
+    let replayCurrentBet = 0;
     takeBoardSnapshot(lastStreet);
 
     steps.push({ kind: 'start', snapshot: makeReplaySnapshot(cur, snap, 'preflop', false) });
@@ -8749,9 +8749,10 @@ const UI = (() => {
       if (act.street !== lastStreet) {
         lastStreet = act.street;
         resetStreetCommits();
+        replayCurrentBet = 0;
         takeBoardSnapshot(lastStreet);
         for (const p of cur.players) {
-          if (p.lastAction !== 'fold' && p.lastAction !== 'allin' && p.lastAction !== 'sb' && p.lastAction !== 'bb') p.lastAction = null;
+          if (p.lastAction !== 'fold' && p.lastAction !== 'allin') p.lastAction = null;
         }
         steps.push({ kind: 'street', snapshot: makeReplaySnapshot(cur, snap, lastStreet, false) });
       }
@@ -8759,7 +8760,8 @@ const UI = (() => {
       const pl = cur.players.find(p => p.seatIndex === act.playerIndex);
       if (!pl) continue;
 
-      const diff = Math.max(0, act.potAfter - cur.pot);
+      /* Восстановление суммы ставки напрямую из действия. */
+      const actionAmount = act.amount || 0;
 
       if (act.actionType === 'fold') {
         pl.folded = true;
@@ -8768,37 +8770,57 @@ const UI = (() => {
         pl.lastAction = 'check';
         pl.acted = true;
       } else if (act.actionType === 'call') {
+        /* Колл доводит ставку игрока ровно до текущей максимальной ставки улицы. */
+        const target = replayCurrentBet;
+        const need = Math.max(0, target - pl.committedThisStreet);
+        if (need > 0) {
+          const pay = Math.min(need, pl.stack);
+          pl.stack -= pay;
+          pl.committedThisStreet += pay;
+          pl.committedTotal += pay;
+          cur.pot += pay;
+          if (pl.stack === 0) pl.allIn = true;
+        }
         pl.lastAction = 'call';
         pl.acted = true;
-        pl.stack -= diff;
-        pl.committedThisStreet += diff;
-        pl.committedTotal += diff;
-        cur.pot += diff;
       } else if (act.actionType === 'bet') {
+        /* Бет: ставка игрока становится ровно той, что он объявил. */
+        const target = actionAmount;
+        const need = Math.max(0, target - pl.committedThisStreet);
+        const pay = Math.min(need, pl.stack);
+        pl.stack -= pay;
+        pl.committedThisStreet += pay;
+        pl.committedTotal += pay;
+        cur.pot += pay;
+        if (pl.committedThisStreet > replayCurrentBet) replayCurrentBet = pl.committedThisStreet;
         pl.lastAction = 'bet';
         pl.acted = true;
-        pl.stack -= diff;
-        pl.committedThisStreet += diff;
-        pl.committedTotal += diff;
-        cur.pot += diff;
+        if (pl.stack === 0) pl.allIn = true;
       } else if (act.actionType === 'raise') {
+        /* Рейз: ставка игрока становится ровно той, до которой он поднял. */
+        const target = actionAmount;
+        const need = Math.max(0, target - pl.committedThisStreet);
+        const pay = Math.min(need, pl.stack);
+        pl.stack -= pay;
+        pl.committedThisStreet += pay;
+        pl.committedTotal += pay;
+        cur.pot += pay;
+        if (pl.committedThisStreet > replayCurrentBet) replayCurrentBet = pl.committedThisStreet;
         pl.lastAction = 'raise';
         pl.acted = true;
-        pl.stack -= diff;
-        pl.committedThisStreet += diff;
-        pl.committedTotal += diff;
-        cur.pot += diff;
+        if (pl.stack === 0) pl.allIn = true;
       } else if (act.actionType === 'allin') {
+        /* Олл-ин: ставка игрока становится равной всей его ставке после пуша. */
+        const target = actionAmount;
+        const need = Math.max(0, target - pl.committedThisStreet);
+        const pay = Math.min(need, pl.stack);
+        pl.stack -= pay;
+        pl.committedThisStreet += pay;
+        pl.committedTotal += pay;
+        cur.pot += pay;
+        if (pl.committedThisStreet > replayCurrentBet) replayCurrentBet = pl.committedThisStreet;
         pl.lastAction = 'allin';
         pl.acted = true;
-        pl.allIn = true;
-        pl.stack -= diff;
-        pl.committedThisStreet += diff;
-        pl.committedTotal += diff;
-        cur.pot += diff;
-      }
-
-      if (pl.stack <= 0 && !pl.folded && act.actionType !== 'check' && act.actionType !== 'fold') {
         pl.allIn = true;
       }
 
