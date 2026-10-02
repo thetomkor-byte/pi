@@ -158,6 +158,15 @@ button.disabled {
   box-sizing: border-box;
 }
 
+/* Серый обод стола в режиме истории раздач / реплея:
+   визуально отделяет просмотр сыгранных раздач от живой игры. */
+#poker-table-wood.history-mode {
+  background: linear-gradient(180deg, #5a5a5a 0%, #3a3a3a 40%, #262626 100%);
+  box-shadow:
+    0 0 0 3px #141414,
+    0 0 60px rgba(0,0,0,.95);
+}
+
 #poker-table {
   position: relative;
   width: 100%;
@@ -4087,8 +4096,7 @@ const Meta = (() => {
 
 
 /* ============================================================
-   BOTS
-   ============================================================ */
+   BOTS   ============================================================ */
 
 const Bots = (() => {
 
@@ -7005,6 +7013,7 @@ const UI = (() => {
     el.handsHistoryRow = document.getElementById('hands-history-row');
     el.handsHistoryLabel = document.getElementById('hands-history-label');
     el.handsHistoryCopied = document.getElementById('hands-history-copied');
+    el.pokerTableWood = document.getElementById('poker-table-wood');
   }
 
   window.__ptToggleTurnTime = function() { toggleTurnTimeOption(); };
@@ -7029,10 +7038,17 @@ const UI = (() => {
     updateHuGlowFromState();
   }
 
+  function updateTableWoodMode() {
+    if (!el.pokerTableWood) return;
+    const inHistory = (session.viewingIndex >= 0) || (session.replay.active);
+    el.pokerTableWood.classList.toggle('history-mode', inHistory);
+  }
+
   function syncHandsHistoryVisibility() {
     const inHistory = (session.viewingIndex >= 0) || (session.replay.active);
     window.__sessionShowHistoryLabel = inHistory;
     UI.updateHandsHistoryVisibility();
+    updateTableWoodMode();
     if (inHistory) {
       UI.setHeroTimerOff();
     } else {
