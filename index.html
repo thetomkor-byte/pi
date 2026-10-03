@@ -6835,16 +6835,22 @@ const UI = (() => {
     if (zone.__bound) return;
     zone.__bound = true;
 
+    let lastTouchEndTs = 0;
+
     zone.addEventListener('touchend', (e) => {
       if (zone.classList.contains('disabled')) return;
       e.stopPropagation();
       e.preventDefault();
+      lastTouchEndTs = Date.now();
       if (typeof window.__ptToggleTurnTime === 'function') window.__ptToggleTurnTime();
     }, { passive: false });
 
     zone.addEventListener('click', (e) => {
       if (e.pointerType && e.pointerType !== 'mouse') return;
       if (zone.classList.contains('disabled')) return;
+      /* Защита от двойного срабатывания: если только что был touchend,
+         этот же тап уже обработан, повторно не переключаем. */
+      if (Date.now() - lastTouchEndTs < 400) return;
       if (typeof window.__ptRegisterDoubleTap === 'function' && window.__ptRegisterDoubleTap(zone)) {
         e.preventDefault();
         e.stopPropagation();
@@ -6922,6 +6928,8 @@ const UI = (() => {
 
     huGlowOn: false,
     huAutoActive: false,
+
+    streetEndTimerId: null,
 
     replay: {
       active: false,
@@ -7945,6 +7953,8 @@ const UI = (() => {
     clearTimeout(session.autoNextTimerId);
     clearTimeout(session.botTimerId);
     clearTimeout(session.revealTimerId);
+    clearTimeout(session.streetEndTimerId);
+    session.streetEndTimerId = null;
     session.active = false;
     session.state = null;
     session.history = [];
@@ -7991,6 +8001,8 @@ const UI = (() => {
     clearTimeout(session.autoNextTimerId);
     clearTimeout(session.botTimerId);
     clearTimeout(session.revealTimerId);
+    clearTimeout(session.streetEndTimerId);
+    session.streetEndTimerId = null;
     session.active = true;
     session.waitingForHero = false;
     session.heroEntered = false;
@@ -8047,6 +8059,8 @@ const UI = (() => {
     if (!session.active) return;
     stopReplay(true);
     stopHeroTimer();
+    clearTimeout(session.streetEndTimerId);
+    session.streetEndTimerId = null;
 
     if (session.tournamentOver) return;
 
@@ -8400,28 +8414,47 @@ const UI = (() => {
     if (state.handOver) { finishHand(); return; }
 
     if (Engine.isBettingRoundComplete(state)) {
-      const res = Engine.endBettingRound(state);
-      UI.updateBoard(state);
-      UI.updatePot(state);
-      refreshQuickPercentList();
-      if (res.done) { finishHand(); return; }
-      UI.updateSeats(state);
-      UI.updateActiveHighlight(state);
-      checkHuAutoActivation();
-      processTurn();
+      /* Улица завершена. Раньше сразу шло обновление стола и бейдж последнего
+         чекающего не успевал отрисоваться. Теперь даём паузу 1 секунда,
+         чтобы бейдж появился, потом делаем то же самое, что и раньше. */
+      if (session.streetEndTimerId !== null) return;
+      session.streetEndTimerId = setTimeout(() => {
+        session.streetEndTimerId = null;
+        if (session.isPaused) return;
+        if (session.viewingIndex >= 0) return;
+        if (session.replay.active) return;
+
+        const res = Engine.endBettingRound(state);
+        UI.updateBoard(state);
+        UI.updatePot(state);
+        refreshQuickPercentList();
+        if (res.done) { finishHand(); return; }
+        UI.updateSeats(state);
+        UI.updateActiveHighlight(state);
+        checkHuAutoActivation();
+        processTurn();
+      }, 1000);
       return;
     }
 
     const next = Engine.nextActor(state);
     if (next < 0) {
-      const res = Engine.endBettingRound(state);
-      UI.updateBoard(state);
-      UI.updatePot(state);
-      refreshQuickPercentList();
-      if (res.done) { finishHand(); return; }
-      UI.updateSeats(state);
-      checkHuAutoActivation();
-      processTurn();
+      if (session.streetEndTimerId !== null) return;
+      session.streetEndTimerId = setTimeout(() => {
+        session.streetEndTimerId = null;
+        if (session.isPaused) return;
+        if (session.viewingIndex >= 0) return;
+        if (session.replay.active) return;
+
+        const res = Engine.endBettingRound(state);
+        UI.updateBoard(state);
+        UI.updatePot(state);
+        refreshQuickPercentList();
+        if (res.done) { finishHand(); return; }
+        UI.updateSeats(state);
+        checkHuAutoActivation();
+        processTurn();
+      }, 1000);
       return;
     }
 
@@ -8571,8 +8604,10 @@ const UI = (() => {
     session.isPaused = true;
     clearTimeout(session.botTimerId);
     clearTimeout(session.autoNextTimerId);
+    clearTimeout(session.streetEndTimerId);
     session.botTimerId = null;
     session.autoNextTimerId = null;
+    session.streetEndTimerId = null;
     UI.setHeroActionsActive(false);
     stopHeroTimer();
     if (!window.__sessionShowHistoryLabel) {
@@ -8612,10 +8647,6 @@ const UI = (() => {
     UI.setHeroTimerOff();
   }
 
-  /* Строит шаги реплея для одной раздачи.
-     Ключевой принцип: суммы ставок восстанавливаются НАПРЯМУЮ из самих действий
-     (act.amount для bet/raise/allin, текущая максимальная ставка улицы для call),
-     а не через разницу potAfter. Это устраняет любые расхождения с живой игрой. */
   function buildReplaySteps(snap) {
     const steps = [];
     const finalBoard = snap.board || [];
@@ -8653,10 +8684,6 @@ const UI = (() => {
       }))
     };
 
-    /* Обязательные ставки блайндов SB и BB на префлопе — только для реплея.
-       Правила те же, что в Engine.postBlinds:
-       - хедз-ап (два живых): кнопка = SB, второй живой = BB;
-       - иначе: SB = первый живой после кнопки, BB = первый живой после SB. */
     (function applyReplayBlinds() {
       const n = cur.players.length;
       if (n === 0) return;
@@ -8761,7 +8788,6 @@ const UI = (() => {
       const pl = cur.players.find(p => p.seatIndex === act.playerIndex);
       if (!pl) continue;
 
-      /* Восстановление суммы ставки напрямую из действия. */
       const actionAmount = act.amount || 0;
 
       if (act.actionType === 'fold') {
@@ -8771,7 +8797,6 @@ const UI = (() => {
         pl.lastAction = 'check';
         pl.acted = true;
       } else if (act.actionType === 'call') {
-        /* Колл доводит ставку игрока ровно до текущей максимальной ставки улицы. */
         const target = replayCurrentBet;
         const need = Math.max(0, target - pl.committedThisStreet);
         if (need > 0) {
@@ -8785,7 +8810,6 @@ const UI = (() => {
         pl.lastAction = 'call';
         pl.acted = true;
       } else if (act.actionType === 'bet') {
-        /* Бет: ставка игрока становится ровно той, что он объявил. */
         const target = actionAmount;
         const need = Math.max(0, target - pl.committedThisStreet);
         const pay = Math.min(need, pl.stack);
@@ -8798,7 +8822,6 @@ const UI = (() => {
         pl.acted = true;
         if (pl.stack === 0) pl.allIn = true;
       } else if (act.actionType === 'raise') {
-        /* Рейз: ставка игрока становится ровно той, до которой он поднял. */
         const target = actionAmount;
         const need = Math.max(0, target - pl.committedThisStreet);
         const pay = Math.min(need, pl.stack);
@@ -8811,7 +8834,6 @@ const UI = (() => {
         pl.acted = true;
         if (pl.stack === 0) pl.allIn = true;
       } else if (act.actionType === 'allin') {
-        /* Олл-ин: ставка игрока становится равной всей его ставке после пуша. */
         const target = actionAmount;
         const need = Math.max(0, target - pl.committedThisStreet);
         const pay = Math.min(need, pl.stack);
