@@ -775,7 +775,7 @@ button.disabled {
   top: 50%;
   left: 100%;
   margin-left: calc(clamp(8px, 1.2vmin, 10px) + 2px);
-  margin-top: calc(var(--hero-timer-size) / -2);
+  transform: translateY(-50%);
   width: var(--hero-timer-size);
   height: var(--hero-timer-size);
   pointer-events: none;
@@ -833,7 +833,7 @@ button.disabled {
   top: 50%;
   left: 100%;
   margin-left: calc(clamp(8px, 1.2vmin, 10px) + 2px);
-  margin-top: calc(var(--hero-timer-size) / -2);
+  transform: translateY(-50%);
   width: var(--hero-timer-size);
   height: var(--hero-timer-size);
   pointer-events: auto;
@@ -1604,6 +1604,14 @@ button.disabled {
 
 #hn-replay { color: var(--gold); }
 #hn-settings { color: var(--gold); }
+
+/* Символ шестерёнки на кнопке Настройки в мобильной версии
+   увеличен на 1 пиксель. Размер кнопки и тап-зона не тронуты. */
+@media (max-width: 767px) {
+  #hn-settings {
+    font-size: calc(var(--nav-icon-size) + 1px);
+  }
+}
 
 #hero-slider-row {
   display: flex;
@@ -2887,12 +2895,6 @@ const Engine = (() => {
   const SEATS = 8;
   const STREETS = ['preflop', 'flop', 'turn', 'river'];
 
-  /* Порядок ярлыков — ОТ КНОПКИ, а не от UTG.
-     Кнопка (BTN) → малый блайнд (SB) → большой блайнд (BB) → далее по кругу
-     UTG → UTG1 → LJ → HJ → CO.
-     Функция assignPositions обходит живых игроков начиная с кнопки,
-     поэтому именно такой порядок даёт правильную привязку ярлыков
-     к реальным местам кнопки, SB и BB. */
   const POSITION_LABELS = {
     8: ['BTN','SB','BB','UTG','UTG1','LJ','HJ','CO'],
     7: ['BTN','SB','BB','UTG1','LJ','HJ','CO'],
@@ -4111,11 +4113,6 @@ const Bots = (() => {
   const CLASS_PRO = 'PRO';
   const CLASS_VIP = 'VIP';
 
-  /* Аббревиатуры для бейджей типов игроков.
-     Класс PRO: LAG-Pro → PRO·1, ICM-Exploiter → PRO·2,
-                Solver-Hybrid → PRO·3, GTO-Reg → PRO·4.
-     Класс VIP: TAG-Lite → VIP·1, Loose-Passive → VIP·2,
-                Rock → VIP·3, Maniac → VIP·4. */
   const TYPES = {
     PRO_GTO:    { key: 'PRO_GTO',    cls: CLASS_PRO, badgeClass: 'pro-gto',    tier: 1, label: 'PRO·4', equityIters: 200, useICM: false, usePlan: true,  useMeta: false },
     PRO_SOLVER: { key: 'PRO_SOLVER', cls: CLASS_PRO, badgeClass: 'pro-solver', tier: 2, label: 'PRO·3', equityIters: 300, useICM: false, usePlan: true,  useMeta: false },
@@ -4660,11 +4657,6 @@ const UI = (() => {
 
   const el = {};
 
-  /* Место героя поднято на 1 px вверх (offsetY: -23).
-     Места 1, 2, 6, 7 опущены вниз. Места 1 и 7 — дополнительно на 2 px.
-     Затем все четыре места дополнительно опущены ещё на 2 px.
-     Затем места 1 и 7 дополнительно опущены ещё на 2 px.
-     Место 0 (герой) и места 3, 4, 5 — без изменений. */
   const SEAT_POSITIONS = [
     { x: 50, y: 70, side: 'bottom', offsetY: -23 },
     { x: 14, y: 56, side: 'left',   offsetY: -1 - 6 - 4 + 2 + 3 + 2 + 2 + 2 },
@@ -4676,7 +4668,6 @@ const UI = (() => {
     { x: 86, y: 56, side: 'right',  offsetY: 1 + 1 - 6 - 3 - 4 + 2 + 3 + 2 + 2 + 2 }
   ];
 
-  /* Сдвиг блока борда целиком вниз. */
   const BOARD_AREA_SHIFT_DOWN = 8;
 
   const SUIT_CLASS = { s: 'suit-spades', h: 'suit-hearts', d: 'suit-diamonds', c: 'suit-clubs' };
@@ -4685,7 +4676,6 @@ const UI = (() => {
 
   const seatAssignments = new Map();
 
-  /* Длина окружности кольца таймера (радиус 16): C = 2 * π * 16 ≈ 100.53 */
   const TIMER_CIRCUMFERENCE = 100.53;
 
   let placeRankOffset = 0;
@@ -4825,7 +4815,6 @@ const UI = (() => {
     const totalShift = rankH + gapVal - 6 - 2;
     placeRankOffset = totalShift;
     const baseTop = 'calc(46% - 8px)';
-    /* К базовому положению прибавляем фиксированный сдвиг вниз BOARD_AREA_SHIFT_DOWN. */
     el.boardArea.style.top = `calc(${baseTop} - ${totalShift}px + 2px + ${BOARD_AREA_SHIFT_DOWN}px)`;
   }
 
@@ -5015,9 +5004,6 @@ const UI = (() => {
     /* Таймер теперь живёт внутри места героя. Ничего пересчитывать не нужно. */
   }
 
-  /* Единая установка состояния таймера героя через data-state на обёртке.
-     Дополнительно управляет inline-значением stroke-dashoffset на .timer-fill:
-     в off — пустой (C), в ready — полный (0), в active — по остатку из JS. */
   function setTimerState(state) {
     const heroSeat = document.getElementById('seat-hero');
     if (!heroSeat) return;
@@ -5033,7 +5019,6 @@ const UI = (() => {
     } else if (state === 'ready') {
       fill.style.strokeDashoffset = '0';
     }
-    /* В active ничего не пишем — там управляет updateHeroTimer по остатку. */
   }
 
   function setHeroTimerNumber(n) {
@@ -5046,7 +5031,6 @@ const UI = (() => {
     num.textContent = String(n);
   }
 
-  /* OFF — история/реплей: пустой круг, цифра 0, полупрозрачно, тап отключён. */
   function setHeroTimerOff() {
     setTimerState('off');
     setHeroTimerNumber(0);
@@ -5056,9 +5040,7 @@ const UI = (() => {
     if (zone) zone.classList.add('disabled');
   }
 
-  /* READY — живая игра, режим 10 сек, ход ещё не героя: полный круг, цифра 10, полупрозрачно, тап включён. */
   function setHeroTimerReady() {
-    /* В истории раздач и реплее таймер всегда off, в ready не переводим. */
     if (window.__sessionShowHistoryLabel === true) {
       setHeroTimerOff();
       return;
@@ -5076,7 +5058,6 @@ const UI = (() => {
     if (zone) zone.classList.remove('disabled');
   }
 
-  /* ACTIVE — ход героя: полный круг изначально, дальше updateHeroTimer уменьшает кружок. */
   function showHeroTimer(seconds) {
     setTimerState('active');
     setHeroTimerNumber(seconds);
@@ -5086,18 +5067,16 @@ const UI = (() => {
     if (!wrap) return;
     const fill = wrap.querySelector('.timer-fill');
     if (!fill) return;
-    /* На старте отсчёта кружок полный (0 offset). */
     fill.style.strokeDashoffset = '0';
   }
 
-  /* IDLE — режим «Без времени»: пустой круг, цифра 0. */
   function setHeroTimerIdle() {
     setTimerState('off');
     setHeroTimerNumber(0);
   }
 
   function hideHeroTimerActive() {
-    /* Оставлено для совместимости, отдельная работа не нужна. */
+    /* Оставлено для совместимости. */
   }
 
   function setHeroTimerZoneEnabled(enabled) {
@@ -5108,8 +5087,6 @@ const UI = (() => {
     zone.classList.toggle('disabled', !enabled);
   }
 
-  /* Обновляет и цифру, и кружок таймера героя. Кружок убывает синхронно с цифрой.
-     ratio = currentSec / totalSec; stroke-dashoffset = C * (1 - ratio). */
   function updateHeroTimer(currentSec, totalSec) {
     setHeroTimerNumber(Math.max(0, currentSec));
     const heroSeat = document.getElementById('seat-hero');
@@ -5124,9 +5101,6 @@ const UI = (() => {
     fill.style.strokeDashoffset = String(TIMER_CIRCUMFERENCE * (1 - ratio));
   }
 
-  /* Явная установка готового состояния таймера для только что созданного SVG:
-     без мигания, круг сразу полный в живой игре.
-     В истории раздач и реплее таймер должен оставаться off. */
   function applyReadyToNewSeat() {
     if (window.__sessionShowHistoryLabel === true) {
       setHeroTimerOff();
@@ -5154,7 +5128,6 @@ const UI = (() => {
       if (seat) el.seats.appendChild(seat);
     }
 
-    /* Применяем готовое состояние таймера сразу после того, как места созданы. */
     applyReadyToNewSeat();
 
     updateStacks(state);
@@ -5205,10 +5178,7 @@ const UI = (() => {
     seat.style.top  = pos.y + '%';
 
     const oy = (pos.offsetY !== undefined) ? pos.offsetY : 0;
-    const oySuffix = (oy < 0)
-      ? `- ${Math.abs(oy)}px`
-      : `+ ${oy}px`;
-    seat.style.transform = `translate(-50%, calc(-50% ${oySuffix}))`;
+    seat.style.transform = `translate(-50%, calc(-50% + ${oy}px))`;
 
     if (pos.side) seat.classList.add(pos.side);
     if (player.isHero) seat.classList.add('hero');
@@ -5344,8 +5314,6 @@ const UI = (() => {
       badge.classList.add('hidden');
       return;
     }
-    /* Блайнды (sb / bb) на префлопе показываем как отдельный бейдж «BLIND»
-       жёлто-оранжевого цвета — это тоже обязательное действие на префлопе. */
     if (p.lastAction === 'sb' || p.lastAction === 'bb') {
       badge.textContent = 'BLIND';
       badge.className = 'action-badge blind';
@@ -5473,9 +5441,6 @@ const UI = (() => {
       cardsEl.appendChild(node);
     }
 
-    /* Бейдж типа должен совпадать с тем, как сейчас выглядят карты этого игрока.
-       Если карты закрыты рубашкой и игрок сфолдил — бейдж гасится так же, как они.
-       Если карты открыты лицом — бейдж не гасится, как и карты. */
     const stratBadgeEl = seat.querySelector('[data-role="strat"]');
     if (stratBadgeEl && !stratBadgeEl.classList.contains('hidden')) {
       const cardsClosedAndFolded = (!show) && player.folded;
@@ -8273,7 +8238,8 @@ const UI = (() => {
 
   function botTurn(bot, idx) {
     const state = session.state;
-    const delay = Engine.cryptoRandomInt(2) === 0 ? 500 : 1000;
+    /* Время перед действием бота: случайно 1 секунда или 3 секунды. */
+    const delay = Engine.cryptoRandomInt(2) === 0 ? 1000 : 3000;
     clearTimeout(session.botTimerId);
     session.botTimerId = setTimeout(() => {
       if (session.isPaused) return;
