@@ -775,7 +775,7 @@ button.disabled {
   top: 50%;
   left: 100%;
   margin-left: calc(clamp(8px, 1.2vmin, 10px) + 2px);
-  transform: translateY(-50%);
+  margin-top: calc(var(--hero-timer-size) / -2);
   width: var(--hero-timer-size);
   height: var(--hero-timer-size);
   pointer-events: none;
@@ -833,7 +833,7 @@ button.disabled {
   top: 50%;
   left: 100%;
   margin-left: calc(clamp(8px, 1.2vmin, 10px) + 2px);
-  transform: translateY(-50%);
+  margin-top: calc(var(--hero-timer-size) / -2);
   width: var(--hero-timer-size);
   height: var(--hero-timer-size);
   pointer-events: auto;
@@ -5205,7 +5205,10 @@ const UI = (() => {
     seat.style.top  = pos.y + '%';
 
     const oy = (pos.offsetY !== undefined) ? pos.offsetY : 0;
-    seat.style.transform = `translate(-50%, calc(-50% + ${oy}px))`;
+    const oySuffix = (oy < 0)
+      ? `- ${Math.abs(oy)}px`
+      : `+ ${oy}px`;
+    seat.style.transform = `translate(-50%, calc(-50% ${oySuffix}))`;
 
     if (pos.side) seat.classList.add(pos.side);
     if (player.isHero) seat.classList.add('hero');
@@ -6848,8 +6851,6 @@ const UI = (() => {
     zone.addEventListener('click', (e) => {
       if (e.pointerType && e.pointerType !== 'mouse') return;
       if (zone.classList.contains('disabled')) return;
-      /* Защита от двойного срабатывания: если только что был touchend,
-         этот же тап уже обработан, повторно не переключаем. */
       if (Date.now() - lastTouchEndTs < 400) return;
       if (typeof window.__ptRegisterDoubleTap === 'function' && window.__ptRegisterDoubleTap(zone)) {
         e.preventDefault();
@@ -8414,9 +8415,6 @@ const UI = (() => {
     if (state.handOver) { finishHand(); return; }
 
     if (Engine.isBettingRoundComplete(state)) {
-      /* Улица завершена. Раньше сразу шло обновление стола и бейдж последнего
-         чекающего не успевал отрисоваться. Теперь даём паузу 1 секунда,
-         чтобы бейдж появился, потом делаем то же самое, что и раньше. */
       if (session.streetEndTimerId !== null) return;
       session.streetEndTimerId = setTimeout(() => {
         session.streetEndTimerId = null;
