@@ -158,8 +158,6 @@ button.disabled {
   box-sizing: border-box;
 }
 
-/* Серый обод стола в режиме истории раздач / реплея:
-   визуально отделяет просмотр сыгранных раздач от живой игры. */
 #poker-table-wood.history-mode {
   background: linear-gradient(180deg, #5a5a5a 0%, #3a3a3a 40%, #262626 100%);
   box-shadow:
@@ -509,9 +507,6 @@ button.disabled {
 }
 .seat .strat-badge.hidden { display: none; }
 
-/* Бейдж типа у сфолдившего с закрытыми картами гасится так же,
-   как и эти закрытые карты. Класс выставляется из кода в момент
-   отрисовки карт (renderSeatCards), чтобы совпадать с их состоянием. */
 .seat .strat-badge.badge-dim { opacity: 0.35; }
 
 .seat .strat-badge.pro-gto      { background: #4a3a68; }
@@ -783,12 +778,17 @@ button.disabled {
   display: block;
 }
 
+/* Постоянный композитный слой, чтобы при смене прозрачности
+   таймер не смещался на 1 пиксель. */
 .seat .hero-timer-wrap .hero-timer-svg {
   width: 100%;
   height: 100%;
   display: block;
   opacity: 0.2;
   transition: opacity .2s ease;
+  will-change: opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 .seat .hero-timer-wrap .timer-track {
   fill: none;
@@ -815,11 +815,6 @@ button.disabled {
   stroke-width: 1.5px;
 }
 
-/* Состояния таймера задаются атрибутом data-state на обёртке.
-   off    — история/реплей: пустой круг, цифра 0, полупрозрачно;
-   ready  — живая игра, ход не героя: полный круг, цифра 10, полупрозрачно;
-   active — ход героя: полный круг, цифра отсчитывается, полностью видимо.
-   В active inline-стиль stroke-dashoffset управляется из JS по остатку времени. */
 .seat .hero-timer-wrap[data-state="off"] .hero-timer-svg { opacity: 0.2; }
 .seat .hero-timer-wrap[data-state="off"] .timer-fill { stroke-dashoffset: 100.53; }
 
@@ -1249,17 +1244,10 @@ button.disabled {
     padding-bottom: calc(clamp(20px, 4vmin, 28px) + 6px);
     transform: translateY(-3px);
   }
-  /* Текст «Для развития приложения» на 1 px меньше только на мобильной. */
   #support-footer {
     font-size: clamp(12px, 1.6vmin, 14px);
   }
 }
-
-/* ============================================================
-   КОНТАКТНЫЕ ПЛИТКИ В ОКОШКЕ «ПОДДЕРЖАТЬ АВТОРА»
-   (плитки уменьшены на 2 px по каждой стороне,
-    SVG-эмблемы внутри оставлены прежнего размера)
-   ============================================================ */
 
 .lnd-contact-btn {
   display: inline-flex;
@@ -1304,8 +1292,6 @@ button.disabled {
   border-radius: inherit;
 }
 
-/* Размеры SVG не привязаны к размеру плитки — оставлены прежними:
-   почта 36, телега 40. Пропорционального сжатия нет. */
 .lnd-contact-btn .lnd-contact-svg {
   position: relative;
   z-index: 2;
@@ -1344,7 +1330,6 @@ button.disabled {
   }
 }
 
-/* Мобильная: плитка 46x46 (−2 px), SVG-эмблемы остаются прежними 34/38. */
 @media (max-width: 480px) {
   .lnd-contact-btn { width: 46px; height: 46px; min-width: 46px; min-height: 46px; }
   .lnd-contact-btn.mail .lnd-contact-svg { width: 34px; height: 34px; }
@@ -1606,10 +1591,11 @@ button.disabled {
 #hn-settings { color: var(--gold); }
 
 /* Символ шестерёнки на кнопке Настройки в мобильной версии
-   увеличен на 1 пиксель. Размер кнопки и тап-зона не тронуты. */
+   увеличен ещё на 1 пиксель (итого +2 px от базового).
+   Размер кнопки и тап-зона не тронуты. */
 @media (max-width: 767px) {
   #hn-settings {
-    font-size: calc(var(--nav-icon-size) + 1px);
+    font-size: calc(var(--nav-icon-size) + 2px);
   }
 }
 
@@ -1621,10 +1607,6 @@ button.disabled {
   padding: 3px 0;
   transform: translateY(calc(-2px - 1px));
 }
-
-/* ============================================================
-   ДВУХСЕКЦИОННЫЙ СЛАЙДЕР
-   ============================================================ */
 
 #raise-slider-track {
   position: relative;
@@ -1955,10 +1937,6 @@ button.disabled {
   box-shadow: 0 1px 0 #8a6508, inset 0 1px 0 rgba(255,255,255,.35);
 }
 
-/* ============================================================
-   ОКНО РУКОВОДСТВА
-   ============================================================ */
-
 #guide-panel {
   position: absolute;
   top: 0;
@@ -2012,9 +1990,6 @@ button.disabled {
   overflow: hidden;
 }
 
-/* Нижний внутренний отступ у области текста: последняя строка текста
-   всегда остаётся на 2 px выше верхнего края кнопки «вверх» (▲),
-   чтобы стрелка не закрывала буквы в конце руководства. */
 #guide-text-viewport {
   position: relative;
   overflow-y: auto;
@@ -5001,7 +4976,7 @@ const UI = (() => {
   }
 
   function placeHeroTimer() {
-    /* Таймер теперь живёт внутри места героя. Ничего пересчитывать не нужно. */
+    /* Таймер живёт внутри места героя. Ничего пересчитывать не нужно. */
   }
 
   function setTimerState(state) {
@@ -8238,8 +8213,8 @@ const UI = (() => {
 
   function botTurn(bot, idx) {
     const state = session.state;
-    /* Время перед действием бота: случайно 1 секунда или 3 секунды. */
-    const delay = Engine.cryptoRandomInt(2) === 0 ? 1000 : 3000;
+    /* Время перед действием бота — всегда 1 секунда. */
+    const delay = 1000;
     clearTimeout(session.botTimerId);
     session.botTimerId = setTimeout(() => {
       if (session.isPaused) return;
