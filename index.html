@@ -8806,10 +8806,12 @@ const UI = (() => {
     const steps = [];
     const finalBoard = snap.board || [];
     const actionLog = snap.actionLog || [];
+    const payouts = (snap.showdownResults && snap.showdownResults.payouts) || {};
 
     const baseStacks = {};
     for (const p of snap.players) {
-      baseStacks[p.id] = p.stack + (p.committedTotal || 0);
+      const payout = payouts[p.id] || 0;
+      baseStacks[p.id] = p.stack + (p.committedTotal || 0) - payout;
     }
 
     const cur = {
