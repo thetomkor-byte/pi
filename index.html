@@ -55,6 +55,7 @@
   --table-border-w: clamp(8px, 1.4vmin, 14px);
 
   --hero-timer-size: clamp(40px, 5.6vmin, 52px);
+  --hero-timer-left: calc(clamp(8px, 1.2vmin, 10px) + 2px);
   --support-btn-h: clamp(28px, 3.6vmin, 34px);
   --support-btn-fs: clamp(10px, 1.3vmin, 12px);
 
@@ -764,18 +765,34 @@ button.disabled {
 }
 .seat .bet-chips.hidden { display: none; }
 
-/* Таймер внутри места героя, привязан к блоку карт */
-.seat .hero-timer-wrap {
+/* Таймер внутри места героя, привязан к блоку карт.
+   Тап-зона и визуальный круг используют одни и те же координаты. */
+.seat .hero-timer-wrap,
+.seat .hero-timer-zone {
   position: absolute;
   top: 50%;
   left: 100%;
-  margin-left: calc(clamp(8px, 1.2vmin, 10px) + 2px);
+  margin-left: var(--hero-timer-left);
   transform: translateY(-50%);
   width: var(--hero-timer-size);
   height: var(--hero-timer-size);
+  display: block;
+}
+
+.seat .hero-timer-wrap {
   pointer-events: none;
   z-index: 30;
-  display: block;
+}
+
+.seat .hero-timer-zone {
+  pointer-events: auto;
+  z-index: 31;
+  background: transparent;
+  touch-action: manipulation;
+  cursor: default;
+}
+.seat .hero-timer-zone.disabled {
+  pointer-events: none;
 }
 
 /* Постоянный композитный слой, чтобы при смене прозрачности
@@ -822,25 +839,6 @@ button.disabled {
 .seat .hero-timer-wrap[data-state="ready"] .timer-fill { stroke-dashoffset: 0; }
 
 .seat .hero-timer-wrap[data-state="active"] .hero-timer-svg { opacity: 1; }
-
-.seat .hero-timer-zone {
-  position: absolute;
-  top: 50%;
-  left: 100%;
-  margin-left: calc(clamp(8px, 1.2vmin, 10px) + 2px);
-  transform: translateY(-50%);
-  width: var(--hero-timer-size);
-  height: var(--hero-timer-size);
-  pointer-events: auto;
-  z-index: 31;
-  background: transparent;
-  touch-action: manipulation;
-  cursor: default;
-  display: block;
-}
-.seat .hero-timer-zone.disabled {
-  pointer-events: none;
-}
 
 #support-overlay {
   position: absolute;
@@ -3446,8 +3444,6 @@ const Engine = (() => {
   }
 
   function endBettingRound(state) { return advanceStreet(state); }
-
-  /* ---- Утилиты для пре-рендера улиц без изменения состояния ---- */
 
   function peekNextStreetCards(state, street) {
     const cur = state.board.length;
@@ -8447,7 +8443,6 @@ const UI = (() => {
         if (session.replay.active) return;
 
         const res = Engine.endBettingRound(state);
-        /* После завершения торгов: пауза 1 секунда, затем показываем новые карты. */
         const timerId = setTimeout(() => {
           if (session.isPaused) return;
           if (session.viewingIndex >= 0) return;
