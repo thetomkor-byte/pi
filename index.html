@@ -1601,12 +1601,12 @@ button.disabled {
 #hn-replay { color: var(--gold); }
 #hn-settings { color: var(--gold); }
 
-/* Иконка шестерёнки на кнопке Настройки — SVG. По размеру и
-   центрированию совпадает с текстовыми символами остальных кнопок. */
+/* Иконка шестерёнки на кнопке Настройки — SVG. По размеру
+   на 3 пикселя меньше остальных символов, центрируется по кнопке. */
 #hn-settings .hn-settings-svg {
   display: block;
-  width: var(--nav-icon-size);
-  height: var(--nav-icon-size);
+  width: calc(var(--nav-icon-size) - 3px);
+  height: calc(var(--nav-icon-size) - 3px);
   fill: currentColor;
   pointer-events: none;
 }
@@ -9262,4 +9262,4 @@ const UI = (() => {
 })();
 </script>
 </body>
-</html> 
+</html>
