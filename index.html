@@ -5721,6 +5721,16 @@ const UI = (() => {
     const isPostflopNoBet = (state.street !== 'preflop') && state.currentBet === 0;
     const isPreflopLimp = state.street === 'preflop' && state.currentBet === bb;
 
+    const facingAllin =
+      toCall > 0 &&
+      state.players.some(p =>
+        p !== hero &&
+        !p.folded &&
+        !p.eliminated &&
+        p.allIn &&
+        p.committedThisStreet >= state.currentBet
+      );
+
     let callValue;
     if (isPreflopLimp) callValue = bb;
     else if (isPostflopNoBet) callValue = bb;
@@ -5735,6 +5745,14 @@ const UI = (() => {
       minRaiseValue = minRaiseTarget;
       if (minRaiseValue > maxTarget) minRaiseValue = maxTarget;
       if (minRaiseValue <= callValue) minRaiseValue = Math.min(callValue + step, maxTarget);
+    }
+
+    if (facingAllin) {
+      if (callValue > maxTarget) callValue = maxTarget;
+      if (minRaiseValue <= callValue) {
+        minRaiseValue = Math.min(maxTarget, callValue + step);
+      }
+      if (minRaiseValue > maxTarget) minRaiseValue = maxTarget;
     }
 
     sliderState.active = true;
@@ -5761,6 +5779,16 @@ const UI = (() => {
 
     const isPostflopNoBet = (state.street !== 'preflop') && state.currentBet === 0;
     const isPreflopLimp = state.street === 'preflop' && state.currentBet === bb;
+
+    const facingAllin =
+      toCall > 0 &&
+      state.players.some(p =>
+        p !== hero &&
+        !p.folded &&
+        !p.eliminated &&
+        p.allIn &&
+        p.committedThisStreet >= state.currentBet
+      );
 
     const sv = sliderState.currentValue;
     const inCallZone = sliderState.active && sv <= sliderState.callValue;
@@ -5797,12 +5825,18 @@ const UI = (() => {
         amountEl.classList.remove('allin-text');
         amountEl.textContent = toCall > 0 ? formatChips(toCall, state) : formatChips(state.blinds.bb, state);
       }
-      if (isPreflopLimp && toCall > 0 && toCall < hero.stack) {
-        btn.disabled = false;
-      } else if (toCall > 0 && toCall < hero.stack) {
-        btn.disabled = false;
-      } else {
+
+      if (toCall <= 0) {
         btn.disabled = true;
+      } else if (toCall >= hero.stack) {
+        btn.disabled = (hero.stack <= 0);
+      } else {
+        btn.disabled = false;
+      }
+
+      if (facingAllin && toCall > 0) {
+        if (labelEl) labelEl.textContent = 'Call ALL-IN';
+        btn.disabled = (hero.stack <= 0);
       }
     } else if (mode === 'raise') {
       btn.classList.add('mode-raise');
@@ -6078,6 +6112,16 @@ const UI = (() => {
     const isPostflopNoBet = (state.street !== 'preflop') && state.currentBet === 0;
     const isPreflopLimp = state.street === 'preflop' && state.currentBet === bb;
 
+    const facingAllin =
+      toCall > 0 &&
+      state.players.some(p =>
+        p !== hero &&
+        !p.folded &&
+        !p.eliminated &&
+        p.allIn &&
+        p.committedThisStreet >= state.currentBet
+      );
+
     const sv = sliderState.active ? sliderState.currentValue : 0;
     const cv = sliderState.active ? sliderState.callValue : 0;
 
@@ -6093,14 +6137,10 @@ const UI = (() => {
     }
 
     if (sv <= cv) {
-      if (toCall > 0 && toCall < hero.stack) {
-        handlers.onCall();
-      } else if (isPreflopLimp && toCall > 0 && toCall < hero.stack) {
-        handlers.onCall();
-      } else if (toCall > 0) {
-        handlers.onCall();
-      } else {
+      if (toCall <= 0) {
         handlers.onCheck();
+      } else {
+        handlers.onCall();
       }
       return;
     }
@@ -6115,7 +6155,12 @@ const UI = (() => {
       return;
     }
 
-    if (toCall > 0 && toCall < hero.stack) {
+    if (toCall > 0) {
+      handlers.onCall();
+      return;
+    }
+
+    if (isPreflopLimp) {
       handlers.onCall();
       return;
     }
