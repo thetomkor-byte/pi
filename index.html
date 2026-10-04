@@ -3447,7 +3447,31 @@ const Engine = (() => {
     if (idx < 0 || idx >= STREETS.length - 1) { showdown(state); return { done: true, results: state.showdownResults }; }
 
     const nextStreet = STREETS[idx + 1];
+
+    /*
+     * Развилка для олл-ина.
+     *
+     * Если оставшиеся игроки в олл-ине и никто больше не может
+     * действовать (торгов больше нет), то улицу открываем отдельно
+     * и возвращаем наружу признак «это олл-ин, есть ещё улицы».
+     * Наверху (в advanceOrFinish) на этот признак повешена пауза 1 сек
+     * перед каждой следующей улицей. Так борд выкладывается по одной
+     * улице за раз, а не все сразу.
+     *
+     * Если же остались живые игроки, способные действовать — работаем
+     * как обычно: открываем улицу и продолжаем торговлю.
+     */
+    const actionable = state.players.filter(p => canAct(p) && !p.folded && !p.eliminated);
+    const isAllInScenario = actionable.length < 2;
+
     const canContinue = startStreet(state, nextStreet);
+
+    if (isAllInScenario) {
+      // Олл-ин: отдаём управление наружу с указанием, что торговать не с кем,
+      // но есть ещё улицы для открытия. Наверху — пауза и следующий вызов.
+      const moreStreets = STREETS.indexOf(state.street) < STREETS.length - 1;
+      return { done: false, allIn: true, moreStreets, street: state.street };
+    }
 
     if (!canContinue) {
       while (STREETS.indexOf(state.street) < STREETS.length - 1) {
@@ -8564,6 +8588,46 @@ const UI = (() => {
         if (session.replay.active) return;
 
         const res = Engine.endBettingRound(state);
+
+        /*
+         * Олл-ин-сценарий: борд выкладывается по одной улице
+         * с паузой 1 секунда перед каждой следующей улицей.
+         * Внутри одной улицы: флоп — 3 карты сразу, тёрн — 1,
+         * ривер — 1.
+         */
+        if (res && res.done === false && res.allIn) {
+          const afterStreetDelay = () => {
+            if (session.isPaused) return;
+            if (session.viewingIndex >= 0) return;
+            if (session.replay.active) return;
+            if (!session.active) return;
+            if (!state || state.handOver) return;
+
+            const inner = Engine.endBettingRound(state);
+            UI.updateBoard(state);
+            UI.updatePot(state);
+            UI.updateSeats(state);
+            refreshQuickPercentList();
+
+            if (inner.done) {
+              finishHand();
+              return;
+            }
+            if (inner.allIn) {
+              afterStreetDelay();
+              return;
+            }
+            // Сценарий перестал быть олл-ином (не должно случаться при all-in,
+            // но оставляем на случай редких веток) — возвращаемся к обычному ходу.
+            UI.updateActiveHighlight(state);
+            checkHuAutoActivation();
+            processTurn();
+          };
+          const tid = setTimeout(afterStreetDelay, 1000);
+          session.streetRevealTimers.push(tid);
+          return;
+        }
+
         const timerId = setTimeout(() => {
           if (session.isPaused) return;
           if (session.viewingIndex >= 0) return;
@@ -8593,6 +8657,38 @@ const UI = (() => {
         if (session.replay.active) return;
 
         const res = Engine.endBettingRound(state);
+
+        if (res && res.done === false && res.allIn) {
+          const afterStreetDelay = () => {
+            if (session.isPaused) return;
+            if (session.viewingIndex >= 0) return;
+            if (session.replay.active) return;
+            if (!session.active) return;
+            if (!state || state.handOver) return;
+
+            const inner = Engine.endBettingRound(state);
+            UI.updateBoard(state);
+            UI.updatePot(state);
+            UI.updateSeats(state);
+            refreshQuickPercentList();
+
+            if (inner.done) {
+              finishHand();
+              return;
+            }
+            if (inner.allIn) {
+              afterStreetDelay();
+              return;
+            }
+            UI.updateActiveHighlight(state);
+            checkHuAutoActivation();
+            processTurn();
+          };
+          const tid = setTimeout(afterStreetDelay, 1000);
+          session.streetRevealTimers.push(tid);
+          return;
+        }
+
         const timerId = setTimeout(() => {
           if (session.isPaused) return;
           if (session.viewingIndex >= 0) return;
