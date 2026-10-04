@@ -1601,12 +1601,12 @@ button.disabled {
 #hn-replay { color: var(--gold); }
 #hn-settings { color: var(--gold); }
 
-/* Иконка шестерёнки на кнопке Настройки — SVG. По размеру
-   на 3 пикселя меньше остальных символов, центрируется по кнопке. */
+/* Иконка шестерёнки на кнопке Настройки — SVG.
+   Размер и центрирование — как у текстового символа ▶︎ панели истории раздач. */
 #hn-settings .hn-settings-svg {
   display: block;
-  width: calc(var(--nav-icon-size) - 3px);
-  height: calc(var(--nav-icon-size) - 3px);
+  width: var(--nav-icon-size);
+  height: var(--nav-icon-size);
   fill: currentColor;
   pointer-events: none;
 }
