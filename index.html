@@ -779,7 +779,8 @@ button.disabled {
 .seat .bet-chips.hidden { display: none; }
 
 /* Таймер внутри места героя, привязан к блоку карт.
-   Тап-зона и визуальный круг используют одни и те же координаты. */
+   Тап-зона и визуальный круг лежат внутри одного родителя (.seat-cards)
+   и используют одни и те же координаты, поэтому центрируются одинаково. */
 .seat .hero-timer-wrap,
 .seat .hero-timer-zone {
   position: absolute;
@@ -819,6 +820,7 @@ button.disabled {
   will-change: opacity;
   transform: translateZ(0);
   backface-visibility: hidden;
+  pointer-events: none;
 }
 .seat .hero-timer-wrap .timer-track {
   fill: none;
@@ -5200,8 +5202,8 @@ const UI = (() => {
               <text class="timer-num" x="20" y="20">0</text>
             </svg>
           </div>
+          <div class="hero-timer-zone" data-role="timer-zone"></div>
         </div>
-        <div class="hero-timer-zone" data-role="timer-zone"></div>
         <div class="pos-row">
           <span class="pos-name" data-role="pos">—</span>
         </div>
@@ -5403,10 +5405,9 @@ const UI = (() => {
     const cardsEl = seat.querySelector('[data-role="cards"]');
     if (!cardsEl) return;
 
-    const existingTimer = cardsEl.querySelector('[data-role="timer"]');
-
     Array.from(cardsEl.children).forEach(child => {
-      if (child.getAttribute('data-role') !== 'timer') {
+      const role = child.getAttribute('data-role');
+      if (role !== 'timer' && role !== 'timer-zone') {
         cardsEl.removeChild(child);
       }
     });
@@ -5440,8 +5441,16 @@ const UI = (() => {
       }
     }
 
+    const timerWrap = cardsEl.querySelector('[data-role="timer"]');
+    const timerZone = cardsEl.querySelector('[data-role="timer-zone"]');
     for (const node of nodes) {
-      cardsEl.appendChild(node);
+      if (timerWrap) {
+        cardsEl.insertBefore(node, timerWrap);
+      } else if (timerZone) {
+        cardsEl.insertBefore(node, timerZone);
+      } else {
+        cardsEl.appendChild(node);
+      }
     }
 
     const stratBadgeEl = seat.querySelector('[data-role="strat"]');
