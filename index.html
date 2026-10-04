@@ -3447,6 +3447,23 @@ const Engine = (() => {
 
   function endBettingRound(state) { return advanceStreet(state); }
 
+  /* ---- Утилиты для пре-рендера улиц без изменения состояния ---- */
+
+  function peekNextStreetCards(state, street) {
+    const cur = state.board.length;
+    let needed = 0;
+    if (street === 'flop') needed = 3;
+    else if (street === 'turn') needed = 4;
+    else if (street === 'river') needed = 5;
+    const result = [];
+    let idx = state._deckIdx + 1;
+    while (state.board.length + result.length < needed && idx < state.deck.length) {
+      result.push(state.deck[idx]);
+      idx++;
+    }
+    return result;
+  }
+
   return {
     SUITS, RANKS, RANK_VALUE, HAND_CATEGORIES,
     BLIND_LEVELS, STARTING_STACK, SEATS, STREETS, POSITION_LABELS,
@@ -3458,7 +3475,8 @@ const Engine = (() => {
     canAct, isBettingRoundComplete, applyAction, nextActor,
     resetStreetState, startStreet,
     startHand, advanceStreet, endBettingRound,
-    showdown, awardToLastStanding, finalizeHand
+    showdown, awardToLastStanding, finalizeHand,
+    peekNextStreetCards
   };
 
 })();
@@ -5442,6 +5460,10 @@ const UI = (() => {
     }
   }
 
+  function clearActiveHighlight() {
+    document.querySelectorAll('.seat.active').forEach(s => s.classList.remove('active'));
+  }
+
   function updatePlaceCenter(state) {
     if (!el.placeCenter) return;
     if (!state) { el.placeCenter.classList.add('hidden'); return; }
@@ -5503,6 +5525,15 @@ const UI = (() => {
       if (state.handOver && i >= liveCount) {
         c.classList.add('dimmed');
       }
+      el.boardCards.appendChild(c);
+    }
+  }
+
+  function updateBoardPartial(state, count) {
+    el.boardCards.innerHTML = '';
+    const actualCount = Math.min(state.board.length, count);
+    for (let i = 0; i < actualCount; i++) {
+      const c = createCardElement(state.board[i]);
       el.boardCards.appendChild(c);
     }
   }
@@ -5832,11 +5863,6 @@ const UI = (() => {
         btn.disabled = (hero.stack <= 0);
       } else {
         btn.disabled = false;
-      }
-
-      if (facingAllin && toCall > 0) {
-        if (labelEl) labelEl.textContent = 'Call ALL-IN';
-        btn.disabled = (hero.stack <= 0);
       }
     } else if (mode === 'raise') {
       btn.classList.add('mode-raise');
@@ -6848,8 +6874,8 @@ const UI = (() => {
 
   return {
     settings, init, el,
-    renderTable, updateSeats, updateBoard, updatePot, updateLevel,
-    updateStacks, updateActiveHighlight, updatePlaceCenter, updateBoardAreaOffset,
+    renderTable, updateSeats, updateBoard, updateBoardPartial, updatePot, updateLevel,
+    updateStacks, updateActiveHighlight, clearActiveHighlight, updatePlaceCenter, updateBoardAreaOffset,
     alignPercentBlockBottom,
     showActions, setHeroActionsActive,
     openBottomPanel, closeBottomPanel, openGuidePanel, closeGuidePanel,
@@ -6917,6 +6943,7 @@ const UI = (() => {
     huAutoActive: false,
 
     streetEndTimerId: null,
+    streetRevealTimers: [],
 
     replay: {
       active: false,
@@ -7081,6 +7108,11 @@ const UI = (() => {
         resumeReplay();
       }
     }
+  }
+
+  function clearStreetRevealTimers() {
+    for (const t of session.streetRevealTimers) clearTimeout(t);
+    session.streetRevealTimers = [];
   }
 
   function bindCopyHandlers() {
@@ -7941,6 +7973,7 @@ const UI = (() => {
     clearTimeout(session.botTimerId);
     clearTimeout(session.revealTimerId);
     clearTimeout(session.streetEndTimerId);
+    clearStreetRevealTimers();
     session.streetEndTimerId = null;
     session.active = false;
     session.state = null;
@@ -7989,6 +8022,7 @@ const UI = (() => {
     clearTimeout(session.botTimerId);
     clearTimeout(session.revealTimerId);
     clearTimeout(session.streetEndTimerId);
+    clearStreetRevealTimers();
     session.streetEndTimerId = null;
     session.active = true;
     session.waitingForHero = false;
@@ -8047,6 +8081,7 @@ const UI = (() => {
     stopReplay(true);
     stopHeroTimer();
     clearTimeout(session.streetEndTimerId);
+    clearStreetRevealTimers();
     session.streetEndTimerId = null;
 
     if (session.tournamentOver) return;
@@ -8204,6 +8239,7 @@ const UI = (() => {
               UI.updateSeats(state);
               UI.updatePot(state);
             }
+            UI.clearActiveHighlight();
             advanceOrFinish();
           }
         }
@@ -8247,6 +8283,7 @@ const UI = (() => {
     pushActionLog(state, session.heroIndex, action.type, action.amount || 0);
     UI.updateSeats(state);
     UI.updatePot(state);
+    UI.clearActiveHighlight();
     const s = Number(UI.settings.turnTime) || 0;
     if (s > 0) UI.setHeroTimerReady();
     else UI.setHeroTimerIdle();
@@ -8310,7 +8347,7 @@ const UI = (() => {
 
       UI.updateSeats(state);
       UI.updatePot(state);
-      UI.updateActiveHighlight(state);
+      UI.clearActiveHighlight();
       refreshQuickPercentList();
       advanceOrFinish();
     }, delay);
@@ -8410,15 +8447,23 @@ const UI = (() => {
         if (session.replay.active) return;
 
         const res = Engine.endBettingRound(state);
-        UI.updateBoard(state);
-        UI.updatePot(state);
-        refreshQuickPercentList();
-        if (res.done) { finishHand(); return; }
-        UI.updateSeats(state);
-        UI.updateActiveHighlight(state);
-        checkHuAutoActivation();
-        processTurn();
-      }, 1000);
+        /* После завершения торгов: пауза 1 секунда, затем показываем новые карты. */
+        const timerId = setTimeout(() => {
+          if (session.isPaused) return;
+          if (session.viewingIndex >= 0) return;
+          if (session.replay.active) return;
+
+          UI.updateBoard(state);
+          UI.updatePot(state);
+          UI.updateSeats(state);
+          refreshQuickPercentList();
+          if (res.done) { finishHand(); return; }
+          UI.updateActiveHighlight(state);
+          checkHuAutoActivation();
+          processTurn();
+        }, 1000);
+        session.streetRevealTimers.push(timerId);
+      }, 0);
       return;
     }
 
@@ -8432,14 +8477,22 @@ const UI = (() => {
         if (session.replay.active) return;
 
         const res = Engine.endBettingRound(state);
-        UI.updateBoard(state);
-        UI.updatePot(state);
-        refreshQuickPercentList();
-        if (res.done) { finishHand(); return; }
-        UI.updateSeats(state);
-        checkHuAutoActivation();
-        processTurn();
-      }, 1000);
+        const timerId = setTimeout(() => {
+          if (session.isPaused) return;
+          if (session.viewingIndex >= 0) return;
+          if (session.replay.active) return;
+
+          UI.updateBoard(state);
+          UI.updatePot(state);
+          UI.updateSeats(state);
+          refreshQuickPercentList();
+          if (res.done) { finishHand(); return; }
+          UI.updateActiveHighlight(state);
+          checkHuAutoActivation();
+          processTurn();
+        }, 1000);
+        session.streetRevealTimers.push(timerId);
+      }, 0);
       return;
     }
 
@@ -8590,6 +8643,7 @@ const UI = (() => {
     clearTimeout(session.botTimerId);
     clearTimeout(session.autoNextTimerId);
     clearTimeout(session.streetEndTimerId);
+    clearStreetRevealTimers();
     session.botTimerId = null;
     session.autoNextTimerId = null;
     session.streetEndTimerId = null;
