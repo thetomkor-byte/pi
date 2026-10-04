@@ -630,6 +630,16 @@ button.disabled {
   text-shadow: 0 1px 3px rgba(0,0,0,.95);
   position: relative;
   display: inline-block;
+}
+
+/* У ботов стек и delta-текст не перехватывают тап.
+   У героя стек оставляем кликабельным (двойной тап — BB / фишки). */
+.seat:not(.hero) .stack,
+.seat .delta-text {
+  pointer-events: none;
+}
+
+.seat.hero .stack {
   pointer-events: auto;
   touch-action: manipulation;
 }
@@ -705,6 +715,7 @@ button.disabled {
   letter-spacing: .5px;
   bottom: clamp(-26px, -3.2vmin, -22px);
   top: auto;
+  pointer-events: none;
 }
 .seat .action-badge.fold  { color: #d0d0d0; border-color: #4a4a4a; }
 .seat .action-badge.call  { color: #7ab8ff; border-color: #25445a; }
@@ -730,6 +741,7 @@ button.disabled {
   letter-spacing: .8px;
   bottom: clamp(-54px, -6.6vmin, -48px);
   top: auto;
+  pointer-events: none;
 }
 .seat .winner-badge.hidden { display: none; }
 .seat .winner-badge.win {
@@ -762,6 +774,7 @@ button.disabled {
   transform: translateX(-50%);
   bottom: clamp(-54px, -6.6vmin, -48px);
   top: auto;
+  pointer-events: none;
 }
 .seat .bet-chips.hidden { display: none; }
 
@@ -786,7 +799,7 @@ button.disabled {
 
 .seat .hero-timer-zone {
   pointer-events: auto;
-  z-index: 31;
+  z-index: 200;
   background: transparent;
   touch-action: manipulation;
   cursor: default;
