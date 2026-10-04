@@ -1602,11 +1602,12 @@ button.disabled {
 #hn-settings { color: var(--gold); }
 
 /* Символ шестерёнки на кнопке Настройки в мобильной версии
-   увеличен ещё на 1 пиксель (итого +2 px от базового).
-   Размер кнопки и тап-зона не тронуты. */
+   увеличен ещё на 1 пиксель (итого +2 px от базового) и поднят
+   на 1 пиксель вверх. Размер кнопки и тап-зона не тронуты. */
 @media (max-width: 767px) {
   #hn-settings {
     font-size: calc(var(--nav-icon-size) + 2px);
+    transform: translateY(calc(1px - 1px));
   }
 }
 
@@ -3439,19 +3440,6 @@ const Engine = (() => {
     return state;
   }
 
-  /*
-   * Открывает следующую улицу.
-   *
-   * Если торговать есть с кем — открывает улицу как обычно и возвращает
-   * { done: false, street } (дальше идёт торговля).
-   *
-   * Если все оставшиеся в олл-ине (торговать не с кем):
-   *   — открывает ровно ОДНУ следующую улицу (без докрутки до конца),
-   *   — и возвращает { done: false, allIn: true, street }.
-   * Наверху, в advanceOrFinish, на признак allIn повешена пауза 1 секунда,
-   * после которой снова вызывается endBettingRound — и так по одной улице.
-   * Борд выкладывается отдельными улицами: флоп 3 карты, тёрн 1, ривер 1.
-   */
   function advanceStreet(state) {
     const alive = state.players.filter(p => !p.folded && !p.eliminated);
     if (alive.length === 1) { awardToLastStanding(state); return { done: true, results: state.showdownResults }; }
@@ -3463,16 +3451,13 @@ const Engine = (() => {
     const canContinue = startStreet(state, nextStreet);
 
     if (!canContinue) {
-      // Торговать не с кем. Открыли ровно одну улицу — стоп.
-      // Наверху пауза 1 сек и следующий вызов откроет следующую улицу.
-      const moreLeft = STREETS.indexOf(state.street) < STREETS.length - 1;
-      if (moreLeft) {
-        return { done: false, allIn: true, street: state.street };
+      while (STREETS.indexOf(state.street) < STREETS.length - 1) {
+        const nIdx = STREETS.indexOf(state.street) + 1;
+        startStreet(state, STREETS[nIdx]);
       }
       showdown(state);
       return { done: true, results: state.showdownResults };
     }
-
     return { done: false, street: state.street };
   }
 
@@ -8571,62 +8556,6 @@ const UI = (() => {
     const state = session.state;
     if (state.handOver) { finishHand(); return; }
 
-    const runStreetStep = (res) => {
-      /*
-       * Пауза 1 секунда перед каждым шагом открытия борда.
-       *
-       * Если res.allIn — движок отдал только ОДНУ следующую улицу
-       * и торговать не с кем. Наверху мы ждём 1 секунду, рисуем улицу
-       * и снова вызываем endBettingRound, чтобы открыть следующую.
-       * Так борд выкладывается по одной улице с паузой.
-       *
-       * Если res.done — раздача закончилась (вскрытие или фолд до вскрытия).
-       *
-       * Иначе — идёт обычная торговля: обновляем борд, возвращаемся к ходу.
-       */
-      if (res && res.done === false && res.allIn) {
-        const stepAllIn = () => {
-          if (session.isPaused) return;
-          if (session.viewingIndex >= 0) return;
-          if (session.replay.active) return;
-          if (!session.active) return;
-          if (!state || state.handOver) return;
-
-          UI.updateBoard(state);
-          UI.updatePot(state);
-          UI.updateSeats(state);
-          refreshQuickPercentList();
-
-          const more = Engine.endBettingRound(state);
-          if (more.done) { finishHand(); return; }
-          if (more.allIn) { runStreetStep(more); return; }
-
-          UI.updateActiveHighlight(state);
-          checkHuAutoActivation();
-          processTurn();
-        };
-        const tid = setTimeout(stepAllIn, 1000);
-        session.streetRevealTimers.push(tid);
-        return;
-      }
-
-      const tid = setTimeout(() => {
-        if (session.isPaused) return;
-        if (session.viewingIndex >= 0) return;
-        if (session.replay.active) return;
-
-        UI.updateBoard(state);
-        UI.updatePot(state);
-        UI.updateSeats(state);
-        refreshQuickPercentList();
-        if (res.done) { finishHand(); return; }
-        UI.updateActiveHighlight(state);
-        checkHuAutoActivation();
-        processTurn();
-      }, 1000);
-      session.streetRevealTimers.push(tid);
-    };
-
     if (Engine.isBettingRoundComplete(state)) {
       if (session.streetEndTimerId !== null) return;
       session.streetEndTimerId = setTimeout(() => {
@@ -8636,7 +8565,21 @@ const UI = (() => {
         if (session.replay.active) return;
 
         const res = Engine.endBettingRound(state);
-        runStreetStep(res);
+        const timerId = setTimeout(() => {
+          if (session.isPaused) return;
+          if (session.viewingIndex >= 0) return;
+          if (session.replay.active) return;
+
+          UI.updateBoard(state);
+          UI.updatePot(state);
+          UI.updateSeats(state);
+          refreshQuickPercentList();
+          if (res.done) { finishHand(); return; }
+          UI.updateActiveHighlight(state);
+          checkHuAutoActivation();
+          processTurn();
+        }, 1000);
+        session.streetRevealTimers.push(timerId);
       }, 0);
       return;
     }
@@ -8651,7 +8594,21 @@ const UI = (() => {
         if (session.replay.active) return;
 
         const res = Engine.endBettingRound(state);
-        runStreetStep(res);
+        const timerId = setTimeout(() => {
+          if (session.isPaused) return;
+          if (session.viewingIndex >= 0) return;
+          if (session.replay.active) return;
+
+          UI.updateBoard(state);
+          UI.updatePot(state);
+          UI.updateSeats(state);
+          refreshQuickPercentList();
+          if (res.done) { finishHand(); return; }
+          UI.updateActiveHighlight(state);
+          checkHuAutoActivation();
+          processTurn();
+        }, 1000);
+        session.streetRevealTimers.push(timerId);
       }, 0);
       return;
     }
