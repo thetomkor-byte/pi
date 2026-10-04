@@ -1601,10 +1601,9 @@ button.disabled {
 #hn-replay { color: var(--gold); }
 #hn-settings { color: var(--gold); }
 
-/* Иконки панели истории раздач — SVG одного размера.
-   Формы совпадают с прежними текстовыми символами (залитые
-   треугольники и стрелки). Кнопки и тап-зоны не тронуты. */
-#hand-nav .hn-svg {
+/* Иконка шестерёнки на кнопке Настройки — SVG. По размеру и
+   центрированию совпадает с текстовыми символами остальных кнопок. */
+#hn-settings .hn-settings-svg {
   display: block;
   width: var(--nav-icon-size);
   height: var(--nav-icon-size);
@@ -2327,23 +2326,13 @@ button.disabled {
         <div id="hero-actions" class="inactive">
           <div id="hand-nav">
             <div class="nav-history">
-              <button id="hn-prev" title="Назад" disabled>
-                <svg class="hn-svg" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M8.5 1.2 3.4 6l5.1 4.8z"/></svg>
-              </button>
+              <button id="hn-prev" title="Назад" disabled>◀︎</button>
               <span class="nav-counter"><span id="hn-cur">0</span><span class="total"> / </span><span id="hn-tot">0</span></span>
-              <button id="hn-next" title="Вперёд" disabled>
-                <svg class="hn-svg" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M3.5 1.2 8.6 6l-5.1 4.8z"/></svg>
-              </button>
+              <button id="hn-next" title="Вперёд" disabled>▶︎</button>
             </div>
-            <button id="hn-replay" title="Реплей">
-              <svg class="hn-svg" data-icon="replay" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M1.5 1.5h1.6v9H1.5zM11 1.5v9L3.1 6z"/></svg>
-            </button>
-            <button id="hn-resume" title="Продолжить" disabled>
-              <svg class="hn-svg" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M1.5 1.5h1.6v9H1.5zM11 1.5v9L3.1 6z"/></svg>
-            </button>
-            <button id="hn-settings" title="Настройки">
-              <svg class="hn-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96a7.02 7.02 0 0 0-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84a.48.48 0 0 0-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 0 0-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
-            </button>
+            <button id="hn-replay" title="Реплей">▶︎⏸︎</button>
+            <button id="hn-resume" title="Продолжить" disabled>▶︎▶︎</button>
+            <button id="hn-settings" title="Настройки"><svg class="hn-settings-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96a7.02 7.02 0 0 0-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84a.48.48 0 0 0-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 0 0-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg></button>
           </div>
           <div id="hero-slider-row">
             <div id="raise-slider-track">
@@ -4701,12 +4690,6 @@ const UI = (() => {
   let placeRankOffset = 0;
   let percentButtonsContext = null;
 
-  const SVG_ICONS = {
-    replay: '<svg class="hn-svg" data-icon="replay" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M1.5 1.5h1.6v9H1.5zM11 1.5v9L3.1 6z"/></svg>',
-    pause:  '<svg class="hn-svg" data-icon="pause" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M1.5 1.5h2.5v9H1.5zM8 1.5h2.5v9H8z"/></svg>',
-    play:   '<svg class="hn-svg" data-icon="play" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M2.5 1.5 11 6l-8.5 4.5z"/></svg>'
-  };
-
   const sliderState = {
     active: false,
     callValue: 0,
@@ -4959,13 +4942,13 @@ const UI = (() => {
   function setReplayButtonState(state) {
     if (!el.hnReplay) return;
     if (state === 'replay') {
-      el.hnReplay.innerHTML = SVG_ICONS.replay;
+      el.hnReplay.textContent = '▶︎⏸︎';
       el.hnReplay.title = 'Реплей';
     } else if (state === 'pause') {
-      el.hnReplay.innerHTML = SVG_ICONS.pause;
+      el.hnReplay.textContent = '⏸︎';
       el.hnReplay.title = 'Пауза';
     } else if (state === 'play') {
-      el.hnReplay.innerHTML = SVG_ICONS.play;
+      el.hnReplay.textContent = '▶︎';
       el.hnReplay.title = 'Продолжить';
     }
   }
@@ -9279,4 +9262,4 @@ const UI = (() => {
 })();
 </script>
 </body>
-</html>
+</html> 
