@@ -2581,6 +2581,10 @@ button.disabled {
       <input type="checkbox" id="set-show-all-hands" />
     </label>
     <label class="setting">
+      <span>Скрыть карты героя</span>
+      <input type="checkbox" id="set-hide-hero-hand" />
+    </label>
+    <label class="setting">
       <span>На вскрытии показывать карты всех</span>
       <input type="checkbox" id="set-show-all-showdown" />
     </label>
@@ -4657,6 +4661,7 @@ const UI = (() => {
     turnTime: 10,
     showStrategies: false,
     showAllHands: false,
+    hideHeroHand: false,
     showAllShowdown: false
   };
 
@@ -4793,6 +4798,7 @@ const UI = (() => {
     el.setTurnTime       = document.getElementById('set-turn-time');
     el.setShowStrategies = document.getElementById('set-show-strategies');
     el.setShowAllHands   = document.getElementById('set-show-all-hands');
+    el.setHideHeroHand   = document.getElementById('set-hide-hero-hand');
     el.setShowAllShowdown = document.getElementById('set-show-all-showdown');
 
     el.btnRestartPanel   = document.getElementById('btn-restart-panel');
@@ -5415,7 +5421,13 @@ const UI = (() => {
     if (player.holeCards.length === 0) return;
 
     let show;
-    if (settings.showAllHands) {
+    if (state.handOver && state.showdownResults && !state.showdownResults.uncontested) {
+      /* На вскрытии карты героя показываются всегда, даже если опция скрытия включена. */
+      show = true;
+    } else if (settings.hideHeroHand && player.isHero) {
+      /* Скрытие карт героя включено и это не вскрытие. */
+      show = false;
+    } else if (settings.showAllHands) {
       show = true;
     } else if (state.handOver) {
       if (settings.showAllShowdown && revealAll) {
@@ -6301,6 +6313,7 @@ const UI = (() => {
     el.setTurnTime.value       = String(settings.turnTime);
     el.setShowStrategies.checked = settings.showStrategies;
     el.setShowAllHands.checked   = settings.showAllHands;
+    el.setHideHeroHand.checked   = settings.hideHeroHand;
     el.setShowAllShowdown.checked = settings.showAllShowdown;
   }
 
@@ -6313,6 +6326,7 @@ const UI = (() => {
     settings.turnTime          = Number(el.setTurnTime.value);
     settings.showStrategies    = el.setShowStrategies.checked;
     settings.showAllHands      = el.setShowAllHands.checked;
+    settings.hideHeroHand      = el.setHideHeroHand.checked;
     settings.showAllShowdown   = el.setShowAllShowdown.checked;
     applyCardStyle();
     if (settings.onChange) settings.onChange(settings);
@@ -6324,6 +6338,7 @@ const UI = (() => {
     el.setStackDisplay.value       = settings.stackDisplay;
     el.setShowStrategies.checked   = settings.showStrategies;
     el.setShowAllHands.checked     = settings.showAllHands;
+    el.setHideHeroHand.checked     = settings.hideHeroHand;
     el.setShowAllShowdown.checked  = settings.showAllShowdown;
   }
 
@@ -6341,6 +6356,12 @@ const UI = (() => {
 
   function toggleShowAllHands() {
     settings.showAllHands = !settings.showAllHands;
+    syncSettingsUI();
+    if (settings.onChange) settings.onChange(settings);
+  }
+
+  function toggleHideHeroHand() {
+    settings.hideHeroHand = !settings.hideHeroHand;
     syncSettingsUI();
     if (settings.onChange) settings.onChange(settings);
   }
@@ -6901,7 +6922,7 @@ const UI = (() => {
     closeAllPanels, anyPanelOpen, anyOverlayOpen,
     updateHistoryInfo,
     readSettingsFromUI, applySettingsToUI,
-    syncSettingsUI, toggleStackDisplay, toggleShowStrategies, toggleShowAllHands,
+    syncSettingsUI, toggleStackDisplay, toggleShowStrategies, toggleShowAllHands, toggleHideHeroHand,
     createCardElement, createSeatElement, formatChips,
     renderQuickRaiseOptions,
     clearWinnerHighlights,
@@ -6978,6 +6999,8 @@ const UI = (() => {
 
   const DOUBLE_TAP_WINDOW = 500;
 
+  const HOLD_HERO_CARDS_MS = 2000;
+
   window.__ptRestartCallback = () => {
     UI.hideFinalOverlay();
     UI.cancelFinalAutoReload();
@@ -6994,6 +7017,7 @@ const UI = (() => {
     bindDesktopDoubleClick();
     bindCopyHandlers();
     bindHandsHistoryTap();
+    bindHeroCardsHoldGesture();
     window.addEventListener('resize', () => {
       UI.updateBoardAreaOffset();
       UI.alignPercentBlockBottom();
@@ -7460,6 +7484,83 @@ const UI = (() => {
               target.closest('#hands-history-row'));
   }
 
+  function bindHeroCardsHoldGesture() {
+    if (!el.seats) return;
+
+    const holdState = {
+      timerId: null,
+      active: false,
+      triggered: false,
+      startTs: 0,
+      pointerId: null
+    };
+
+    function clearHold() {
+      if (holdState.timerId) {
+        clearTimeout(holdState.timerId);
+        holdState.timerId = null;
+      }
+      holdState.active = false;
+      holdState.triggered = false;
+      holdState.startTs = 0;
+      holdState.pointerId = null;
+    }
+
+    function startHold(e) {
+      const cardsEl = e.target.closest('.seat.hero .seat-cards');
+      if (!cardsEl) return;
+      if (e.target.closest('.hero-timer-zone')) return;
+
+      holdState.active = true;
+      holdState.triggered = false;
+      holdState.startTs = Date.now();
+      holdState.pointerId = (e.pointerId !== undefined) ? e.pointerId : null;
+
+      if (holdState.timerId) clearTimeout(holdState.timerId);
+      holdState.timerId = setTimeout(() => {
+        holdState.timerId = null;
+        if (!holdState.active) return;
+        holdState.triggered = true;
+        UI.toggleHideHeroHand();
+        if (session.state) {
+          const state = session.state;
+          const showAll = state.handOver || session.viewingIndex >= 0;
+          if (session.viewingIndex >= 0) {
+            UI.updateSeats(session.history[session.viewingIndex], true);
+          } else {
+            UI.updateSeats(state, showAll);
+          }
+        }
+      }, HOLD_HERO_CARDS_MS);
+    }
+
+    function endHold() {
+      clearHold();
+    }
+
+    el.seats.addEventListener('touchstart', (e) => {
+      if (e.touches.length !== 1) return;
+      startHold(e);
+    }, { passive: true });
+
+    el.seats.addEventListener('touchend', (e) => {
+      endHold();
+    }, { passive: true });
+
+    el.seats.addEventListener('touchcancel', (e) => {
+      endHold();
+    }, { passive: true });
+
+    el.seats.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return;
+      startHold(e);
+    });
+
+    window.addEventListener('mouseup', () => {
+      endHold();
+    });
+  }
+
   function bindGlobalHandlers() {
     el.btnStart.addEventListener('click', () => {
       el.startOverlay.classList.add('hidden');
@@ -7713,7 +7814,7 @@ const UI = (() => {
       el.bottomPanel.addEventListener('touchend', (e) => e.stopPropagation(), { passive: false });
     }
 
-    ['set-language','set-difficulty','set-card-style','set-stack-display','set-blind-growth','set-turn-time','set-show-strategies','set-show-all-hands','set-show-all-showdown'].forEach(id => {
+    ['set-language','set-difficulty','set-card-style','set-stack-display','set-blind-growth','set-turn-time','set-show-strategies','set-show-all-hands','set-hide-hero-hand','set-show-all-showdown'].forEach(id => {
       const node = document.getElementById(id);
       if (!node) return;
       node.addEventListener('change', () => {
