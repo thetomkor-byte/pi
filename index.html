@@ -616,7 +616,7 @@ button.disabled {
   display: flex;
   align-items: center;
   position: relative;
-  padding-top: clamp(4px, 1.2vw, 14px);
+  padding-top: clamp(28px, 6vw, 56px);
   padding-bottom: clamp(28px, 6vw, 56px);
   overflow: hidden;
 }
@@ -664,7 +664,7 @@ button.disabled {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: clamp(14px, 2.4vw, 22px);
+  margin-bottom: clamp(20px, 4vw, 30px);
   font-weight: 900;
   letter-spacing: 3px;
   font-size: clamp(12px, 1.8vmin, 14px);
@@ -1213,6 +1213,13 @@ button.disabled {
   }
 }
 
+.lnd-contact-hint {
+  color: #555;
+  font-size: clamp(11px, 1.7vmin, 13px);
+  letter-spacing: .3px;
+  text-align: center;
+}
+
 @media (max-width: 480px) {
   .lnd-contact-btn { width: 48px; height: 48px; min-width: 48px; min-height: 48px; }
   .lnd-contact-btn .lnd-contact-svg { width: 26px; height: 26px; }
@@ -1264,52 +1271,12 @@ button.disabled {
   .lnd-play-card { transition: none; }
 }
 
-/* ==== МОБИЛЬНОЕ ЦЕНТРИРОВАНИЕ HERO ==== */
-
-@media (max-width: 520px) {
-  #landing .lnd-hero {
-    padding-top: 2px;
-  }
-
-  .lnd-hero-copy {
-    text-align: center;
-  }
-
-  .lnd-logo {
-    justify-content: center;
-    width: 100%;
-  }
-
-  .lnd-hero-actions {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-  }
-
-  .lnd-hero-actions .lnd-btn {
-    width: auto;
-    align-self: center;
-  }
-
-  .lnd-hero-mobile-badge {
-    align-self: center;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .lnd-hero-note {
-    text-align: center;
-    width: 100%;
-  }
-}
-
 /* ==== /LANDING ==== */
 </style>
 </head>
 <body>
 
-  <!-- ==== POST MODAL ==== -->
+  <!-- ==== POST MODAL (снаружи, поверх всего) ==== -->
   <div id="tg-modal" role="dialog" aria-modal="true" aria-labelledby="tg-modal-title-el">
     <div class="tg-modal-box">
       <button class="tg-modal-close" type="button" id="tg-modal-close" aria-label="Закрыть">✕</button>
@@ -1328,7 +1295,7 @@ button.disabled {
   <!-- ==== LANDING ==== -->
   <div id="landing" aria-label="Poker Trainer — лендинг">
 
-    <!-- ==== TELEGRAM FEED ==== -->
+    <!-- ==== TELEGRAM FEED (первым блоком внутри лендинга) ==== -->
     <section id="tg-feed" aria-label="Последние посты из Telegram">
       <div class="tg-feed-head">
         <a class="tg-feed-channel" href="https://t.me/ThePokerWay" target="_blank" rel="noopener noreferrer" aria-label="Открыть канал The Poker Way">
@@ -1361,8 +1328,10 @@ button.disabled {
           </h1>
 
           <p class="lnd-sub">
-            Симулятор турнирного стола: Sit &amp; Go, 8-Max, Texas Hold'em.
-            Боты игроков уровней PRO и VIP.
+            Симулятор турнирного стола: Sit &amp; Go, 8-max, Texas Hold'em.
+            Боты уровней PRO и VIP с памятью, характером и адаптацией.
+            Тренажёр того, как думает покерист, когда математика уже посчитана,
+            а решение всё ещё нужно принять.
           </p>
 
           <div class="lnd-hero-actions">
@@ -1689,7 +1658,7 @@ button.disabled {
             Начать тренировку
           </button>
         </div>
-        <p class="lnd-final-note">Тренажёр для тренировки покерных навыков. Некоммерческий продукт. Не является азартной игрой на реальные деньги.</p>
+        <p class="lnd-final-note">Тренажёр для тренировки покерных навыков. Не является азартной игрой на реальные деньги. Некоммерческий продукт.</p>
       </div>
     </section>
 
@@ -1701,8 +1670,8 @@ button.disabled {
         </div>
         <p class="disclaimer" style="margin-top:14px;">
           Тренажёр для тренировки покерных навыков.
-          Некоммерческий продукт.
           Не является азартной игрой на реальные деньги.
+          Некоммерческий продукт.
         </p>
 
         <div class="lnd-contacts">
@@ -1720,6 +1689,7 @@ button.disabled {
               </svg>
             </a>
           </div>
+          <div class="lnd-contact-hint">Открывайте прямо в приложении — Telegram или почта</div>
         </div>
       </div>
     </footer>
