@@ -1612,6 +1612,14 @@ button.disabled {
   pointer-events: none;
 }
 
+/* На мобильной версии символы панели истории раздач — того же размера,
+   что и шестерёнка. На десктопе — размеры не меняются. */
+@media (max-width: 767px) {
+  #hand-nav button {
+    font-size: calc(var(--nav-icon-size) + 2px);
+  }
+}
+
 #hero-slider-row {
   display: flex;
   align-items: center;
