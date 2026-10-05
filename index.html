@@ -1308,6 +1308,12 @@ button.disabled {
   background: linear-gradient(180deg, #4aa8ff 0%, #1f7fe0 55%, #0b5fb3 100%);
 }
 
+/* Самолётик внутри telegram-кнопки больше на 8px, размер самой кнопки не меняется */
+.lnd-contact-btn.tg .lnd-contact-svg {
+  width: 36px;
+  height: 36px;
+}
+
 .lnd-contact-btn.mail {
   background: linear-gradient(180deg, #4aa8ff 0%, #1f7fe0 55%, #0b5fb3 100%);
 }
@@ -1335,6 +1341,7 @@ button.disabled {
 @media (max-width: 480px) {
   .lnd-contact-btn { width: 48px; height: 48px; min-width: 48px; min-height: 48px; }
   .lnd-contact-btn .lnd-contact-svg { width: 26px; height: 26px; }
+  .lnd-contact-btn.tg .lnd-contact-svg { width: 34px; height: 34px; }
 }
 
 .lnd-mobile-note {
