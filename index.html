@@ -86,7 +86,7 @@ button.disabled {
   z-index: 1;
   background: linear-gradient(180deg, #0a0a0a 0%, #000 100%);
   border-bottom: 1px solid rgba(255,203,43,.12);
-  padding: 18px 0 14px;
+  padding: 16px 0 14px;
   flex-shrink: 0;
 }
 
@@ -96,8 +96,81 @@ button.disabled {
   justify-content: space-between;
   gap: 12px;
   max-width: 1120px;
-  margin: 0 auto 10px;
+  margin: 0 auto 12px;
   padding: 0 clamp(18px, 4vw, 40px);
+}
+
+.tg-feed-channel {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  text-decoration: none;
+  color: inherit;
+}
+
+.tg-feed-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: radial-gradient(circle at 50% 40%, #1f1a0e 0%, #0f0d08 100%);
+  border: 1px solid #3a3018;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold);
+  font-size: 20px;
+  font-weight: 900;
+  position: relative;
+}
+
+.tg-feed-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.tg-feed-avatar .fb {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold);
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.tg-feed-name {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.tg-feed-name .n {
+  color: #fff;
+  font-size: clamp(14px, 2.1vmin, 16px);
+  font-weight: 900;
+  letter-spacing: .2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.15;
+}
+
+.tg-feed-name .u {
+  color: var(--muted);
+  font-size: clamp(11px, 1.6vmin, 12px);
+  font-weight: 600;
+  letter-spacing: .3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+  margin-top: 2px;
 }
 
 .tg-feed-title {
@@ -109,6 +182,7 @@ button.disabled {
   font-weight: 800;
   letter-spacing: 2px;
   text-transform: uppercase;
+  flex-shrink: 0;
 }
 
 .tg-feed-title .dot {
@@ -125,19 +199,14 @@ button.disabled {
   50% { opacity: .5; transform: scale(.85); }
 }
 
-.tg-feed-hint {
-  color: var(--muted);
-  font-size: clamp(11px, 1.7vmin, 13px);
-  letter-spacing: .3px;
-}
-
 .tg-feed-track-wrap {
   overflow: hidden;
   max-width: 1120px;
   margin: 0 auto;
   padding: 0 clamp(18px, 4vw, 40px);
   position: relative;
-  touch-action: pan-y;
+  touch-action: pan-x;
+  overscroll-behavior: contain;
   cursor: grab;
 }
 
@@ -216,7 +285,6 @@ button.disabled {
   background: radial-gradient(circle at 50% 40%, #1f1a0e 0%, #0f0d08 100%);
 }
 
-/* Размеры текста = как у .lnd-card на лендинге */
 .tg-card-title {
   color: #fff;
   font-size: clamp(15px, 2.4vmin, 18px);
@@ -1230,8 +1298,16 @@ button.disabled {
     <!-- ==== TELEGRAM FEED (первым блоком внутри лендинга) ==== -->
     <section id="tg-feed" aria-label="Последние посты из Telegram">
       <div class="tg-feed-head">
+        <a class="tg-feed-channel" href="https://t.me/ThePokerWay" target="_blank" rel="noopener noreferrer" aria-label="Открыть канал The Poker Way">
+          <span class="tg-feed-avatar" id="tg-feed-avatar">
+            <span class="fb">♠</span>
+          </span>
+          <span class="tg-feed-name">
+            <span class="n" id="tg-feed-name">The Poker Way</span>
+            <span class="u" id="tg-feed-username">@ThePokerWay</span>
+          </span>
+        </a>
         <div class="tg-feed-title"><span class="dot"></span> Из Telegram-канала</div>
-        <div class="tg-feed-hint">Свайп · колесо · нажмите, чтобы читать</div>
       </div>
       <div class="tg-feed-track-wrap" id="tg-feed-wrap">
         <div class="tg-feed-track" id="tg-feed-track"></div>
@@ -1897,6 +1973,7 @@ button.disabled {
   'use strict';
 
   var TG_CHANNEL = 'ThePokerWay';
+  var TG_CHANNEL_NAME = 'The Poker Way';
   var RSS_URL = 'https://rsshub.app/telegram/channel/' + TG_CHANNEL;
   var TG_LINK = 'https://t.me/' + TG_CHANNEL;
   var MAX_POSTS = 5;
@@ -1914,25 +1991,45 @@ button.disabled {
   var modalMedia = document.getElementById('tg-modal-media');
   var modalBody = document.getElementById('tg-modal-body');
   var modalCta = document.getElementById('tg-modal-cta');
+  var avatarEl = document.getElementById('tg-feed-avatar');
+  var nameEl = document.getElementById('tg-feed-name');
+  var usernameEl = document.getElementById('tg-feed-username');
 
   if (!track || !modal) return;
 
   modalCta.setAttribute('href', TG_LINK);
+
+  // имя и username
+  if (nameEl) nameEl.textContent = TG_CHANNEL_NAME;
+  if (usernameEl) usernameEl.textContent = '@' + TG_CHANNEL;
+
+  // аватарка канала (публичный CDN telegram)
+  (function loadAvatar() {
+    if (!avatarEl) return;
+    var img = new Image();
+    img.alt = TG_CHANNEL_NAME;
+    img.onload = function() {
+      avatarEl.innerHTML = '';
+      avatarEl.appendChild(img);
+    };
+    img.onerror = function() {
+      // оставляем fallback ♠
+    };
+    img.src = 'https://t.me/i/userpic/320/' + TG_CHANNEL + '.jpg';
+  })();
 
   var posts = [];
   var activeIdx = 0;
   var autoplayTimer = null;
   var isPaused = false;
 
-  // drag state
   var isDragging = false;
   var dragStartX = 0;
   var dragStartY = 0;
   var dragDeltaX = 0;
-  var dragLockedAxis = null; // 'x' | 'y' | null
+  var dragLockedAxis = null;
   var suppressClick = false;
 
-  // wheel state
   var lastWheelTime = 0;
 
   function stripHtml(html) {
@@ -2089,7 +2186,7 @@ button.disabled {
     wrap.classList.add('dragging');
   }
 
-  function onPointerMove(clientX, clientY) {
+  function onPointerMove(clientX, clientY, evt) {
     if (!isDragging) return;
     var dx = clientX - dragStartX;
     var dy = clientY - dragStartY;
@@ -2101,14 +2198,13 @@ button.disabled {
     }
 
     if (dragLockedAxis === 'y') {
-      // пользователь скроллит страницу — отменяем drag
-      isDragging = false;
-      track.classList.remove('no-transition');
-      wrap.classList.remove('dragging');
-      isPaused = false;
-      restartAutoplay();
+      // вертикальный жест — блокируем прокрутку страницы пока палец в карусели
+      if (evt && evt.cancelable) evt.preventDefault();
       return;
     }
+
+    // горизонтальный жест — блокируем нативный горизонтальный скролл
+    if (evt && evt.cancelable) evt.preventDefault();
 
     dragDeltaX = dx;
     var step = getCardStep();
@@ -2138,7 +2234,7 @@ button.disabled {
     restartAutoplay();
   }
 
-  // Touch events
+  // Touch events (non-passive для preventDefault)
   wrap.addEventListener('touchstart', function(e) {
     if (e.touches.length !== 1) return;
     onPointerDown(e.touches[0].clientX, e.touches[0].clientY);
@@ -2146,13 +2242,13 @@ button.disabled {
 
   wrap.addEventListener('touchmove', function(e) {
     if (e.touches.length !== 1) return;
-    onPointerMove(e.touches[0].clientX, e.touches[0].clientY);
-  }, { passive: true });
+    onPointerMove(e.touches[0].clientX, e.touches[0].clientY, e);
+  }, { passive: false });
 
   wrap.addEventListener('touchend', onPointerUp, { passive: true });
   wrap.addEventListener('touchcancel', onPointerUp, { passive: true });
 
-  // Mouse events (desktop drag)
+  // Mouse drag (desktop)
   wrap.addEventListener('mousedown', function(e) {
     if (e.button !== 0) return;
     e.preventDefault();
@@ -2161,14 +2257,13 @@ button.disabled {
 
   document.addEventListener('mousemove', function(e) {
     if (!isDragging) return;
-    onPointerMove(e.clientX, e.clientY);
+    onPointerMove(e.clientX, e.clientY, e);
   });
 
   document.addEventListener('mouseup', function() {
     if (isDragging) onPointerUp();
   });
 
-  // Mouse leave — если увели далеко, завершаем
   wrap.addEventListener('mouseleave', function() {
     if (isDragging) onPointerUp();
   });
@@ -2184,7 +2279,6 @@ button.disabled {
       return;
     }
 
-    // Горизонтальный скролл — тоже поддерживаем
     var delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
     if (Math.abs(delta) < 5) return;
 
