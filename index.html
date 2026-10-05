@@ -173,30 +173,54 @@ button.disabled {
   margin-top: 2px;
 }
 
-.tg-feed-title {
+/* Флаги-переключатели */
+.lang-switch {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: var(--gold);
-  font-size: clamp(11px, 1.6vmin, 13px);
-  font-weight: 800;
-  letter-spacing: 2px;
-  text-transform: uppercase;
   flex-shrink: 0;
 }
 
-.tg-feed-title .dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--gold);
-  box-shadow: 0 0 10px rgba(255,203,43,.7);
-  animation: tgPulse 1.8s ease-in-out infinite;
+.lang-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid #3a3018;
+  border-radius: 6px;
+  background: rgba(255,203,43,.04);
+  cursor: pointer;
+  overflow: hidden;
+  transition: opacity .2s ease, border-color .2s ease, transform .1s ease, background .2s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
-@keyframes tgPulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: .5; transform: scale(.85); }
+.lang-btn svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.lang-btn:active { transform: scale(.94); }
+
+@media (hover: hover) {
+  .lang-btn:hover { border-color: #5a4a1a; background: rgba(255,203,43,.09); }
+}
+
+.lang-btn.active {
+  opacity: 1;
+  border-color: #5a4a1a;
+  box-shadow: 0 0 0 1px rgba(255,203,43,.18), 0 0 12px rgba(255,203,43,.10);
+}
+
+.lang-btn.inactive {
+  opacity: .35;
+}
+
+@media (max-width: 480px) {
+  .lang-btn { width: 34px; height: 25px; }
 }
 
 .tg-feed-track-wrap {
@@ -208,6 +232,9 @@ button.disabled {
   touch-action: pan-x;
   overscroll-behavior: contain;
   cursor: grab;
+  /* Плавное исчезновение краёв */
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 6%, #000 94%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 6%, #000 94%, transparent 100%);
 }
 
 .tg-feed-track-wrap.dragging {
@@ -523,11 +550,6 @@ button.disabled {
   border-top: 1px solid rgba(255,255,255,.05);
 }
 
-/* Линия между hero и первой секцией — такая же, как между секциями ниже */
-.lnd-hero + .lnd-section {
-  border-top: 1px solid rgba(255,255,255,.05);
-}
-
 .lnd-kicker {
   color: var(--gold);
   font-size: clamp(11px, 1.6vmin, 13px);
@@ -628,13 +650,14 @@ button.disabled {
   overflow: visible;
 }
 
+/* Свечение в правом верхнем углу hero, прижато к правой границе контента (1120px) */
 #landing .lnd-hero::before {
   content: "";
   position: absolute;
   top: 0;
-  right: 0;
-  width: 70vmin;
-  height: 70vmin;
+  right: calc((100% - min(100%, 1120px)) / 2 + clamp(18px, 4vw, 40px));
+  width: 60vmin;
+  height: 60vmin;
   background: radial-gradient(circle at 100% 0%, rgba(255,203,43,.22) 0%, rgba(255,203,43,.07) 32%, transparent 62%);
   pointer-events: none;
   z-index: 0;
@@ -1309,7 +1332,26 @@ button.disabled {
             <span class="u" id="tg-feed-username">@ThePokerWay</span>
           </span>
         </a>
-        <div class="tg-feed-title"><span class="dot"></span> Из Telegram</div>
+
+        <!-- Флаги-переключатели языка -->
+        <div class="lang-switch" role="group" aria-label="Переключение языка">
+          <button type="button" class="lang-btn active" data-lang="ru" aria-label="Русский" aria-pressed="true">
+            <svg viewBox="0 0 30 20" preserveAspectRatio="none" aria-hidden="true">
+              <rect width="30" height="20" fill="#ffffff"/>
+              <rect y="6.67" width="30" height="6.67" fill="#0039a6"/>
+              <rect y="13.33" width="30" height="6.67" fill="#d52b1e"/>
+            </svg>
+          </button>
+          <button type="button" class="lang-btn inactive" data-lang="en" aria-label="English" aria-pressed="false">
+            <svg viewBox="0 0 30 20" preserveAspectRatio="none" aria-hidden="true">
+              <rect width="30" height="20" fill="#012169"/>
+              <path d="M0 0 L30 20 M30 0 L0 20" stroke="#ffffff" stroke-width="4"/>
+              <path d="M0 0 L30 20 M30 0 L0 20" stroke="#c8102e" stroke-width="2"/>
+              <path d="M15 0 V20 M0 10 H30" stroke="#ffffff" stroke-width="6"/>
+              <path d="M15 0 V20 M0 10 H30" stroke="#c8102e" stroke-width="3"/>
+            </svg>
+          </button>
+        </div>
       </div>
       <div class="tg-feed-track-wrap" id="tg-feed-wrap">
         <div class="tg-feed-track" id="tg-feed-track"></div>
@@ -1966,6 +2008,37 @@ button.disabled {
 
 })();
 // ==== /LANDING ====
+</script>
+
+<script>
+// ==== LANGUAGE SWITCH ====
+(function() {
+  'use strict';
+
+  var btns = document.querySelectorAll('.lang-btn');
+  if (!btns.length) return;
+
+  function setLang(lang) {
+    for (var i = 0; i < btns.length; i++) {
+      var b = btns[i];
+      var isActive = b.getAttribute('data-lang') === lang;
+      b.classList.toggle('active', isActive);
+      b.classList.toggle('inactive', !isActive);
+      b.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    }
+  }
+
+  for (var i = 0; i < btns.length; i++) {
+    (function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        setLang(btn.getAttribute('data-lang'));
+      });
+    })(btns[i]);
+  }
+})();
+// ==== /LANGUAGE SWITCH ====
 </script>
 
 <script>
