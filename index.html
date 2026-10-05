@@ -611,13 +611,12 @@ button.disabled {
   font-size: clamp(11px, 1.7vmin, 13px);
 }
 
+/* Hero — обычный блок, без vertical centering, чтобы padding-top реально работал */
 #landing .lnd-hero {
-  min-height: 100svh;
-  display: flex;
-  align-items: center;
+  display: block;
   position: relative;
-  padding-top: clamp(12px, 2.5vw, 20px);
-  padding-bottom: clamp(28px, 6vw, 56px);
+  padding-top: 6px;
+  padding-bottom: clamp(36px, 6vw, 60px);
   overflow: hidden;
 }
 
@@ -1258,6 +1257,33 @@ button.disabled {
   .lnd-btn { padding: 15px 22px; }
 }
 
+/* Мобильное центрирование hero-блока */
+@media (max-width: 520px) {
+  .lnd-hero-copy { text-align: center; }
+  .lnd-hero-actions {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .lnd-hero-actions .lnd-btn {
+    width: auto;
+    align-self: center;
+  }
+  .lnd-hero-mobile-badge {
+    align-self: center;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .lnd-hero-note {
+    text-align: center;
+    width: 100%;
+  }
+  .lnd-logo {
+    justify-content: center;
+    width: 100%;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   #landing { scroll-behavior: auto; }
   .lnd-reveal { transition: none; opacity: 1; transform: none; }
@@ -1269,7 +1295,7 @@ button.disabled {
 </head>
 <body>
 
-  <!-- ==== POST MODAL (снаружи, поверх всего) ==== -->
+  <!-- ==== POST MODAL ==== -->
   <div id="tg-modal" role="dialog" aria-modal="true" aria-labelledby="tg-modal-title-el">
     <div class="tg-modal-box">
       <button class="tg-modal-close" type="button" id="tg-modal-close" aria-label="Закрыть">✕</button>
@@ -1288,7 +1314,6 @@ button.disabled {
   <!-- ==== LANDING ==== -->
   <div id="landing" aria-label="Poker Trainer — лендинг">
 
-    <!-- ==== TELEGRAM FEED ==== -->
     <section id="tg-feed" aria-label="Последние посты из Telegram">
       <div class="tg-feed-head">
         <a class="tg-feed-channel" href="https://t.me/ThePokerWay" target="_blank" rel="noopener noreferrer" aria-label="Открыть канал The Poker Way">
