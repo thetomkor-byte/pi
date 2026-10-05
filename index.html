@@ -1602,11 +1602,12 @@ button.disabled {
 #hn-settings { color: var(--gold); }
 
 /* Иконка шестерёнки на кнопке Настройки — SVG.
-   Размер и центрирование — как у текстового символа ▶︎ панели истории раздач. */
+   Размер: как у символа ▶︎ плюс 2 пикселя. Центрирование как у остальных символов.
+   Тап-зона кнопки не затронута. */
 #hn-settings .hn-settings-svg {
   display: block;
-  width: var(--nav-icon-size);
-  height: var(--nav-icon-size);
+  width: calc(var(--nav-icon-size) + 2px);
+  height: calc(var(--nav-icon-size) + 2px);
   fill: currentColor;
   pointer-events: none;
 }
