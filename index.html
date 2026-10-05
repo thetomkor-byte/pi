@@ -35,6 +35,8 @@
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --pro-color: #8a4fd1;
+  --ph-bg: radial-gradient(circle at 50% 40%, #1f1a0e 0%, #0f0d08 100%);
+  --ph-heart: #c9a34e;
 }
 
 html, body {
@@ -79,6 +81,25 @@ button.disabled {
   cursor: default;
 }
 
+/* ==== УНИВЕРСАЛЬНАЯ ЗАГЛУШКА (мягкий тёмно-золотистый фон + мягкое светлое сердце) ==== */
+.ph-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ph-heart);
+  font-size: 22px;
+  font-weight: 900;
+  background: var(--ph-bg);
+  pointer-events: none;
+  user-select: none;
+  text-shadow: 0 0 14px rgba(255,203,43,.25);
+}
+
+.ph-fallback.lg { font-size: 26px; }
+.ph-fallback.sm { font-size: 18px; }
+
 /* ==== TELEGRAM FEED CAROUSEL ==== */
 
 #tg-feed {
@@ -115,12 +136,12 @@ button.disabled {
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
-  background: radial-gradient(circle at 50% 40%, #1f1a0e 0%, #0f0d08 100%);
+  background: var(--ph-bg);
   border: 1px solid #3a3018;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--gold);
+  color: var(--ph-heart);
   font-size: 20px;
   font-weight: 900;
   position: relative;
@@ -139,9 +160,10 @@ button.disabled {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--gold);
+  color: var(--ph-heart);
   font-size: 20px;
   font-weight: 900;
+  text-shadow: 0 0 14px rgba(255,203,43,.25);
 }
 
 .tg-feed-name {
@@ -205,10 +227,7 @@ button.disabled {
   50% { opacity: .5; transform: scale(.85); }
 }
 
-/* Выпадающее меню языка */
-.lang-select {
-  position: relative;
-}
+.lang-select { position: relative; }
 
 .lang-trigger {
   display: inline-flex;
@@ -242,9 +261,7 @@ button.disabled {
   margin-left: 2px;
 }
 
-.lang-select.open .lang-trigger .arrow {
-  transform: rotate(180deg);
-}
+.lang-select.open .lang-trigger .arrow { transform: rotate(180deg); }
 
 .lang-menu {
   position: absolute;
@@ -261,9 +278,7 @@ button.disabled {
   animation: langFadeIn .15s ease;
 }
 
-.lang-select.open .lang-menu {
-  display: block;
-}
+.lang-select.open .lang-menu { display: block; }
 
 @keyframes langFadeIn {
   from { opacity: 0; transform: translateY(-4px); }
@@ -297,9 +312,7 @@ button.disabled {
   background: rgba(255,203,43,.06);
 }
 
-.lang-option.inactive {
-  opacity: .55;
-}
+.lang-option.inactive { opacity: .55; }
 
 .tg-feed-track-wrap {
   overflow: hidden;
@@ -314,9 +327,7 @@ button.disabled {
   mask-image: linear-gradient(to right, transparent 0, #000 6%, #000 94%, transparent 100%);
 }
 
-.tg-feed-track-wrap.dragging {
-  cursor: grabbing;
-}
+.tg-feed-track-wrap.dragging { cursor: grabbing; }
 
 .tg-feed-track {
   display: flex;
@@ -325,11 +336,8 @@ button.disabled {
   will-change: transform;
 }
 
-.tg-feed-track.no-transition {
-  transition: none;
-}
+.tg-feed-track.no-transition { transition: none; }
 
-/* Десктоп — 3 карточки в ряд */
 .tg-card {
   flex: 0 0 calc((100% - 28px) / 3);
   min-width: 0;
@@ -378,16 +386,18 @@ button.disabled {
   display: block;
 }
 
-.tg-card-thumb .ph {
+.tg-card-thumb .ph,
+.tg-card-thumb .ph-fallback {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #3a3018;
+  color: #c9a34e;
   font-size: 22px;
   font-weight: 900;
-  background: radial-gradient(circle at 50% 40%, #1f1a0e 0%, #0f0d08 100%);
+  background: var(--ph-bg);
+  text-shadow: 0 0 14px rgba(255,203,43,.25);
 }
 
 .tg-card-title {
@@ -544,15 +554,23 @@ button.disabled {
 }
 
 .tg-modal-media {
+  position: relative;
   margin: 0 0 18px;
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid #2a2520;
+  min-height: 80px;
 }
 
 .tg-modal-media img {
   width: 100%;
   display: block;
+}
+
+.tg-modal-media .ph-fallback {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
 }
 
 .tg-modal-body {
@@ -615,9 +633,7 @@ button.disabled {
   padding-bottom: calc(env(safe-area-inset-bottom, 0px));
 }
 
-#landing.hidden {
-  display: none !important;
-}
+#landing.hidden { display: none !important; }
 
 .lnd-inner {
   width: 100%;
@@ -626,15 +642,12 @@ button.disabled {
   padding: 0 clamp(18px, 4vw, 40px);
 }
 
-.lnd-section {
-  padding: clamp(40px, 8vw, 84px) 0;
-}
+.lnd-section { padding: clamp(40px, 8vw, 84px) 0; }
 
 .lnd-section + .lnd-section {
   border-top: 1px solid rgba(255,255,255,.05);
 }
 
-/* Линия между hero и первой секцией — точно такая же, как между секциями */
 #landing .lnd-hero + .lnd-section {
   border-top: 1px solid rgba(255,255,255,.05);
 }
@@ -918,26 +931,11 @@ button.disabled {
   align-self: flex-end;
 }
 
-.lnd-play-card.ten-diamonds {
-  color: #d63535;
-  transform: rotate(-22deg) translate(-92%, 10%);
-}
-.lnd-play-card.jack-diamonds {
-  color: #d63535;
-  transform: rotate(-11deg) translate(-64%, 5%);
-}
-.lnd-play-card.queen-diamonds {
-  color: #d63535;
-  transform: rotate(0deg) translate(-32%, 0%);
-}
-.lnd-play-card.king-diamonds {
-  color: #d63535;
-  transform: rotate(11deg) translate(0%, 0%);
-}
-.lnd-play-card.ace-diamonds {
-  color: #d63535;
-  transform: rotate(22deg) translate(32%, 5%);
-}
+.lnd-play-card.ten-diamonds { color: #d63535; transform: rotate(-22deg) translate(-92%, 10%); }
+.lnd-play-card.jack-diamonds { color: #d63535; transform: rotate(-11deg) translate(-64%, 5%); }
+.lnd-play-card.queen-diamonds { color: #d63535; transform: rotate(0deg) translate(-32%, 0%); }
+.lnd-play-card.king-diamonds { color: #d63535; transform: rotate(11deg) translate(0%, 0%); }
+.lnd-play-card.ace-diamonds { color: #d63535; transform: rotate(22deg) translate(32%, 5%); }
 
 .lnd-chip {
   position: absolute;
@@ -1033,9 +1031,7 @@ button.disabled {
 
 .lnd-card p + p { margin-top: 8px; }
 
-.lnd-bot-group {
-  margin-top: clamp(22px, 4vw, 34px);
-}
+.lnd-bot-group { margin-top: clamp(22px, 4vw, 34px); }
 
 .lnd-bot-group-title {
   display: flex;
@@ -1382,7 +1378,7 @@ button.disabled {
 </head>
 <body>
 
-  <!-- ==== POST MODAL (снаружи, поверх всего) ==== -->
+  <!-- ==== POST MODAL ==== -->
   <div id="tg-modal" role="dialog" aria-modal="true" aria-labelledby="tg-modal-title-el">
     <div class="tg-modal-box">
       <button class="tg-modal-close" type="button" id="tg-modal-close" aria-label="Закрыть">✕</button>
@@ -1401,7 +1397,6 @@ button.disabled {
   <!-- ==== LANDING ==== -->
   <div id="landing" aria-label="Poker Trainer — лендинг">
 
-    <!-- ==== TELEGRAM FEED (первым блоком внутри лендинга) ==== -->
     <section id="tg-feed" aria-label="Последние посты из Telegram">
       <div class="tg-feed-head">
         <a class="tg-feed-channel" href="https://t.me/ThePokerWay" target="_blank" rel="noopener noreferrer" aria-label="Открыть канал The Poker Way">
@@ -1962,6 +1957,51 @@ button.disabled {
 </script>
 
 <script>
+// ==== УНИВЕРСАЛЬНАЯ ЗАГЛУШКА ДЛЯ НЕЗАГРУЖЕННЫХ ИЗОБРАЖЕНИЙ ====
+(function() {
+  'use strict';
+
+  function makeFallback(extraClass) {
+    var el = document.createElement('div');
+    el.className = 'ph-fallback' + (extraClass ? ' ' + extraClass : '');
+    el.setAttribute('aria-hidden', 'true');
+    el.textContent = '♥';
+    return el;
+  }
+
+  function handleImgError(img) {
+    if (!img || img.dataset.phDone === '1') return;
+    img.dataset.phDone = '1';
+    var parent = img.parentNode;
+    if (!parent) return;
+    // Очищаем родителя и вставляем заглушку
+    while (parent.firstChild) parent.removeChild(parent.firstChild);
+    parent.appendChild(makeFallback());
+  }
+
+  // Ловим onerror на всех существующих и будущих img через capture
+  document.addEventListener('error', function(e) {
+    var t = e.target;
+    if (t && t.tagName === 'IMG') {
+      handleImgError(t);
+    }
+  }, true);
+
+  // Также подстраховываемся: если картинка уже не загрузилась к моменту скрипта
+  window.addEventListener('load', function() {
+    var imgs = document.querySelectorAll('img');
+    for (var i = 0; i < imgs.length; i++) {
+      var img = imgs[i];
+      if (img.complete && img.naturalWidth === 0 && img.src) {
+        handleImgError(img);
+      }
+    }
+  });
+})();
+// ==== /УНИВЕРСАЛЬНАЯ ЗАГЛУШКА ====
+</script>
+
+<script>
 // ==== LANDING ====
 (function() {
   'use strict';
@@ -2185,6 +2225,14 @@ button.disabled {
   if (nameEl) nameEl.textContent = TG_CHANNEL_NAME;
   if (usernameEl) usernameEl.textContent = '@' + TG_CHANNEL;
 
+  function makePhFallback(cls) {
+    var el = document.createElement('div');
+    el.className = 'ph-fallback' + (cls ? ' ' + cls : '');
+    el.setAttribute('aria-hidden', 'true');
+    el.textContent = '♥';
+    return el;
+  }
+
   (function loadAvatar() {
     if (!avatarEl) return;
     var img = new Image();
@@ -2193,7 +2241,9 @@ button.disabled {
       avatarEl.innerHTML = '';
       avatarEl.appendChild(img);
     };
-    img.onerror = function() {};
+    img.onerror = function() {
+      // оставляем fallback ♥
+    };
     img.src = 'https://t.me/i/userpic/320/' + TG_CHANNEL + '.jpg';
   })();
 
@@ -2281,9 +2331,12 @@ button.disabled {
       card.setAttribute('aria-label', 'Открыть пост: ' + p.title);
       card.dataset.idx = i;
 
-      var thumbHtml = p.img
-        ? '<div class="tg-card-thumb"><img src="' + p.img + '" alt="" loading="lazy" onerror="this.parentNode.innerHTML=\'<div class=&quot;ph&quot;>♥</div>\'"></div>'
-        : '<div class="tg-card-thumb"><div class="ph">♥</div></div>';
+      var thumbHtml;
+      if (p.img) {
+        thumbHtml = '<div class="tg-card-thumb"><img src="' + p.img + '" alt="" loading="lazy"></div>';
+      } else {
+        thumbHtml = '<div class="tg-card-thumb"><div class="ph-fallback">♥</div></div>';
+      }
 
       card.innerHTML =
         thumbHtml +
@@ -2472,7 +2525,7 @@ button.disabled {
     if (p.img) {
       modalMedia.innerHTML = '<div class="tg-modal-media"><img src="' + p.img + '" alt=""></div>';
     } else {
-      modalMedia.innerHTML = '';
+      modalMedia.innerHTML = '<div class="tg-modal-media"><div class="ph-fallback lg">♥</div></div>';
     }
 
     modalBody.textContent = p.text || '(без текста)';
