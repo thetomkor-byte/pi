@@ -714,6 +714,7 @@ button.disabled {
   flex-wrap: wrap;
   gap: 12px;
   align-items: center;
+  justify-content: center;
 }
 
 .lnd-hero-note {
@@ -721,11 +722,14 @@ button.disabled {
   font-size: clamp(11px, 1.7vmin, 13px);
   margin-top: 16px;
   letter-spacing: .3px;
+  text-align: center;
+  width: 100%;
 }
 
 .lnd-hero-mobile-badge {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   margin-top: 18px;
   padding: 8px 14px;
@@ -736,6 +740,8 @@ button.disabled {
   font-size: clamp(11px, 1.7vmin, 13px);
   font-weight: 700;
   letter-spacing: .4px;
+  align-self: center;
+  text-align: center;
 }
 
 .lnd-hero-mobile-badge .dot {
@@ -744,6 +750,12 @@ button.disabled {
   border-radius: 50%;
   background: var(--gold);
   box-shadow: 0 0 10px rgba(255,203,43,.6);
+  flex-shrink: 0;
+}
+
+.lnd-hero-copy {
+  display: flex;
+  flex-direction: column;
 }
 
 .lnd-card-fan {
@@ -1213,13 +1225,6 @@ button.disabled {
   }
 }
 
-.lnd-contact-hint {
-  color: #555;
-  font-size: clamp(11px, 1.7vmin, 13px);
-  letter-spacing: .3px;
-  text-align: center;
-}
-
 @media (max-width: 480px) {
   .lnd-contact-btn { width: 48px; height: 48px; min-width: 48px; min-height: 48px; }
   .lnd-contact-btn .lnd-contact-svg { width: 26px; height: 26px; }
@@ -1328,10 +1333,8 @@ button.disabled {
           </h1>
 
           <p class="lnd-sub">
-            Симулятор турнирного стола: Sit &amp; Go, 8-max, Texas Hold'em.
-            Боты уровней PRO и VIP с памятью, характером и адаптацией.
-            Тренажёр того, как думает покерист, когда математика уже посчитана,
-            а решение всё ещё нужно принять.
+            Симулятор турнирного стола: Sit &amp; Go, 8-Max, Texas Hold'em.
+            Боты игроков уровней PRO и VIP.
           </p>
 
           <div class="lnd-hero-actions">
@@ -1658,7 +1661,7 @@ button.disabled {
             Начать тренировку
           </button>
         </div>
-        <p class="lnd-final-note">Тренажёр для тренировки покерных навыков. Не является азартной игрой на реальные деньги. Некоммерческий продукт.</p>
+        <p class="lnd-final-note">Тренажёр для тренировки покерных навыков. Некоммерческий продукт. Не является азартной игрой на реальные деньги.</p>
       </div>
     </section>
 
@@ -1670,8 +1673,8 @@ button.disabled {
         </div>
         <p class="disclaimer" style="margin-top:14px;">
           Тренажёр для тренировки покерных навыков.
-          Не является азартной игрой на реальные деньги.
           Некоммерческий продукт.
+          Не является азартной игрой на реальные деньги.
         </p>
 
         <div class="lnd-contacts">
@@ -1689,7 +1692,6 @@ button.disabled {
               </svg>
             </a>
           </div>
-          <div class="lnd-contact-hint">Открывайте прямо в приложении — Telegram или почта</div>
         </div>
       </div>
     </footer>
