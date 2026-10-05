@@ -329,7 +329,7 @@ button.disabled {
   transition: none;
 }
 
-/* По умолчанию — 3 карточки в ряд (десктоп, шире чем было) */
+/* Десктоп — 3 карточки в ряд */
 .tg-card {
   flex: 0 0 calc((100% - 28px) / 3);
   min-width: 0;
@@ -442,15 +442,12 @@ button.disabled {
   box-shadow: 0 0 8px rgba(255,203,43,.6);
 }
 
-/* Планшет — 3 в ряд (как было) */
 @media (max-width: 980px) {
   .tg-card { flex: 0 0 calc((100% - 28px) / 3); }
 }
-/* Мобильный — 2 в ряд (как было) */
 @media (max-width: 640px) {
   .tg-card { flex: 0 0 calc((100% - 14px) / 2); }
 }
-/* Узкий мобильный — 1 в ряд (как было) */
 @media (max-width: 420px) {
   .tg-card { flex: 0 0 100%; min-height: 260px; }
   .tg-card-thumb { aspect-ratio: 16 / 9; }
@@ -634,6 +631,11 @@ button.disabled {
 }
 
 .lnd-section + .lnd-section {
+  border-top: 1px solid rgba(255,255,255,.05);
+}
+
+/* Линия между hero и первой секцией — точно такая же, как между секциями */
+#landing .lnd-hero + .lnd-section {
   border-top: 1px solid rgba(255,255,255,.05);
 }
 
@@ -1415,7 +1417,6 @@ button.disabled {
         <div class="tg-feed-right">
           <div class="tg-feed-title"><span class="dot"></span> Из Telegram</div>
 
-          <!-- Выпадающее меню выбора языка -->
           <div class="lang-select" id="lang-select">
             <button type="button" class="lang-trigger" id="lang-trigger" aria-haspopup="listbox" aria-expanded="false">
               <span id="lang-current">RU</span>
