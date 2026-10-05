@@ -383,10 +383,10 @@ button.disabled {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #3a3018;
-  font-size: 22px;
+  color: #8a2a2a;
+  font-size: 30px;
   font-weight: 900;
-  background: radial-gradient(circle at 50% 40%, #1f1a0e 0%, #0f0d08 100%);
+  background: radial-gradient(circle at 50% 40%, #1f0e0e 0%, #0f0808 100%);
 }
 
 .tg-card-title {
@@ -721,7 +721,8 @@ button.disabled {
   font-size: clamp(11px, 1.7vmin, 13px);
 }
 
-/* ===== HERO ===== */
+/* ===== HERO =====
+   overflow: hidden — свечение обрезается по верхней линии, на карусель не заходит */
 
 #landing .lnd-hero {
   position: relative;
@@ -730,10 +731,9 @@ button.disabled {
   align-items: flex-start;
   padding: 0;
   padding-bottom: clamp(28px, 6vw, 56px);
-  overflow: visible;
+  overflow: hidden;
 }
 
-/* Свечение — точно как в .lnd-final::before, только прижато к верху hero */
 #landing .lnd-hero::before {
   content: "";
   position: absolute;
@@ -1409,7 +1409,7 @@ button.disabled {
       <div class="tg-feed-head">
         <a class="tg-feed-channel" href="https://t.me/ThePokerWay" target="_blank" rel="noopener noreferrer" aria-label="Открыть канал The Poker Way">
           <span class="tg-feed-avatar" id="tg-feed-avatar">
-            <span class="fb">♠</span>
+            <span class="fb">♥</span>
           </span>
           <span class="tg-feed-name">
             <span class="n" id="tg-feed-name">The Poker Way</span>
@@ -1420,7 +1420,6 @@ button.disabled {
         <div class="tg-feed-right">
           <div class="tg-feed-title"><span class="dot"></span> Из Telegram</div>
 
-          <!-- Выпадающее меню выбора языка -->
           <div class="lang-select" id="lang-select">
             <button type="button" class="lang-trigger" id="lang-trigger" aria-haspopup="listbox" aria-expanded="false">
               <span id="lang-current">RU</span>
@@ -1443,7 +1442,7 @@ button.disabled {
       <div class="lnd-inner lnd-hero-grid">
         <div class="lnd-hero-copy lnd-reveal">
           <div class="lnd-logo">
-            <span class="lnd-logo-mark">♠</span>
+            <span class="lnd-logo-mark">♥</span>
             <span>Poker Trainer</span>
           </div>
 
@@ -2288,8 +2287,8 @@ button.disabled {
       card.dataset.idx = i;
 
       var thumbHtml = p.img
-        ? '<div class="tg-card-thumb"><img src="' + p.img + '" alt="" loading="lazy" onerror="this.parentNode.innerHTML=\'<div class=&quot;ph&quot;>♠</div>\'"></div>'
-        : '<div class="tg-card-thumb"><div class="ph">♠</div></div>';
+        ? '<div class="tg-card-thumb"><img src="' + p.img + '" alt="" loading="lazy" onerror="this.parentNode.innerHTML=\'<div class=&quot;ph&quot;>♥</div>\'"></div>'
+        : '<div class="tg-card-thumb"><div class="ph">♥</div></div>';
 
       card.innerHTML =
         thumbHtml +
