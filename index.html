@@ -611,12 +611,13 @@ button.disabled {
   font-size: clamp(11px, 1.7vmin, 13px);
 }
 
-/* Hero — обычный блок, без vertical centering, чтобы padding-top реально работал */
 #landing .lnd-hero {
-  display: block;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
   position: relative;
-  padding-top: 6px;
-  padding-bottom: clamp(36px, 6vw, 60px);
+  padding-top: clamp(4px, 1.2vw, 14px);
+  padding-bottom: clamp(28px, 6vw, 56px);
   overflow: hidden;
 }
 
@@ -1257,37 +1258,50 @@ button.disabled {
   .lnd-btn { padding: 15px 22px; }
 }
 
-/* Мобильное центрирование hero-блока */
+@media (prefers-reduced-motion: reduce) {
+  #landing { scroll-behavior: auto; }
+  .lnd-reveal { transition: none; opacity: 1; transform: none; }
+  .lnd-play-card { transition: none; }
+}
+
+/* ==== МОБИЛЬНОЕ ЦЕНТРИРОВАНИЕ HERO ==== */
+
 @media (max-width: 520px) {
-  .lnd-hero-copy { text-align: center; }
+  #landing .lnd-hero {
+    padding-top: 2px;
+  }
+
+  .lnd-hero-copy {
+    text-align: center;
+  }
+
+  .lnd-logo {
+    justify-content: center;
+    width: 100%;
+  }
+
   .lnd-hero-actions {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 12px;
   }
+
   .lnd-hero-actions .lnd-btn {
     width: auto;
     align-self: center;
   }
+
   .lnd-hero-mobile-badge {
     align-self: center;
     margin-left: auto;
     margin-right: auto;
   }
+
   .lnd-hero-note {
     text-align: center;
     width: 100%;
   }
-  .lnd-logo {
-    justify-content: center;
-    width: 100%;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  #landing { scroll-behavior: auto; }
-  .lnd-reveal { transition: none; opacity: 1; transform: none; }
-  .lnd-play-card { transition: none; }
 }
 
 /* ==== /LANDING ==== */
@@ -1314,6 +1328,7 @@ button.disabled {
   <!-- ==== LANDING ==== -->
   <div id="landing" aria-label="Poker Trainer — лендинг">
 
+    <!-- ==== TELEGRAM FEED ==== -->
     <section id="tg-feed" aria-label="Последние посты из Telegram">
       <div class="tg-feed-head">
         <a class="tg-feed-channel" href="https://t.me/ThePokerWay" target="_blank" rel="noopener noreferrer" aria-label="Открыть канал The Poker Way">
