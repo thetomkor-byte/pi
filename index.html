@@ -173,7 +173,6 @@ button.disabled {
   margin-top: 2px;
 }
 
-/* Правая группа: текст "Из Telegram" + селектор языка */
 .tg-feed-right {
   display: inline-flex;
   align-items: center;
@@ -734,20 +733,18 @@ button.disabled {
   overflow: visible;
 }
 
-/* Свечение: прижато к правой границе контейнера, мягко затухает со всех сторон */
+/* Свечение — точно как в .lnd-final::before, только прижато к верху hero */
 #landing .lnd-hero::before {
   content: "";
   position: absolute;
   top: 0;
-  right: calc((100% - min(100%, 1120px)) / 2 + clamp(18px, 4vw, 40px) - 15vmin);
-  width: 80vmin;
-  height: 80vmin;
-  background:
-    radial-gradient(circle at 70% 25%, rgba(255,203,43,.18) 0%, rgba(255,203,43,.06) 30%, transparent 55%),
-    radial-gradient(circle at 70% 25%, rgba(255,203,43,.10) 0%, transparent 75%);
+  left: 50%;
+  width: 90vmin;
+  height: 90vmin;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(255,203,43,.10) 0%, transparent 60%);
   pointer-events: none;
   z-index: 0;
-  filter: blur(20px);
 }
 
 #landing .lnd-hero::after {
