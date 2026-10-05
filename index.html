@@ -355,7 +355,6 @@ button.disabled {
   overflow: hidden;
 }
 
-/* Обводка только у центральной карточки или при hover */
 .tg-card.active {
   border-color: #5a4a1a;
   box-shadow: 0 0 0 1px rgba(255,203,43,.18), 0 0 24px rgba(255,203,43,.08);
@@ -1304,8 +1303,9 @@ button.disabled {
   display: block;
 }
 
+/* Telegram иконка — градиент как у почты */
 .lnd-contact-btn.tg {
-  background: linear-gradient(180deg, #37aee2 0%, #1e96c8 55%, #0e7bb0 100%);
+  background: linear-gradient(180deg, #4aa8ff 0%, #1f7fe0 55%, #0b5fb3 100%);
 }
 
 .lnd-contact-btn.mail {
@@ -1771,7 +1771,7 @@ button.disabled {
     <section class="lnd-section lnd-final" aria-labelledby="lnd-final-title">
       <div class="lnd-inner">
         <h2 class="lnd-h2 lnd-reveal" id="lnd-final-title">
-          Готов тренировать <span class="gold">логику</span> <span class="gold">и</span> <span class="gold">интуицию</span>?
+          Готов тренировать <span class="gold">логику</span> и <span class="gold">интуицию</span>?
         </h2>
         <p class="lnd-p lnd-reveal" style="margin-left:auto;margin-right:auto;">
           Бесплатно. Без установки. Без регистрации.
@@ -2317,7 +2317,6 @@ button.disabled {
   }
 
   function getVisibleCount() {
-    // сколько карточек сейчас видно в ряд
     if (wrap && wrap.clientWidth <= 380) return 1;
     if (wrap && wrap.clientWidth <= 640) return 2;
     if (wrap && wrap.clientWidth <= 980) return 3;
@@ -2380,14 +2379,11 @@ button.disabled {
     var step = getCardStep();
     track.style.transform = 'translateX(' + (-activeIdx * step) + 'px)';
 
-    // Определяем центральную карточку в видимой области
     var visibleCount = getVisibleCount();
     var cards = track.querySelectorAll('.tg-card');
     var centerIdx;
     if (visibleCount >= 3) {
       centerIdx = activeIdx + 1;
-    } else if (visibleCount === 2) {
-      centerIdx = activeIdx;
     } else {
       centerIdx = activeIdx;
     }
