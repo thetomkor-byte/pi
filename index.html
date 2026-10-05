@@ -616,7 +616,7 @@ button.disabled {
   display: flex;
   align-items: center;
   position: relative;
-  padding-top: clamp(28px, 6vw, 56px);
+  padding-top: clamp(12px, 2.5vw, 20px);
   padding-bottom: clamp(28px, 6vw, 56px);
   overflow: hidden;
 }
@@ -664,7 +664,7 @@ button.disabled {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: clamp(20px, 4vw, 30px);
+  margin-bottom: clamp(14px, 2.4vw, 22px);
   font-weight: 900;
   letter-spacing: 3px;
   font-size: clamp(12px, 1.8vmin, 14px);
@@ -714,7 +714,6 @@ button.disabled {
   flex-wrap: wrap;
   gap: 12px;
   align-items: center;
-  justify-content: center;
 }
 
 .lnd-hero-note {
@@ -722,14 +721,11 @@ button.disabled {
   font-size: clamp(11px, 1.7vmin, 13px);
   margin-top: 16px;
   letter-spacing: .3px;
-  text-align: center;
-  width: 100%;
 }
 
 .lnd-hero-mobile-badge {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 8px;
   margin-top: 18px;
   padding: 8px 14px;
@@ -740,8 +736,6 @@ button.disabled {
   font-size: clamp(11px, 1.7vmin, 13px);
   font-weight: 700;
   letter-spacing: .4px;
-  align-self: center;
-  text-align: center;
 }
 
 .lnd-hero-mobile-badge .dot {
@@ -750,12 +744,6 @@ button.disabled {
   border-radius: 50%;
   background: var(--gold);
   box-shadow: 0 0 10px rgba(255,203,43,.6);
-  flex-shrink: 0;
-}
-
-.lnd-hero-copy {
-  display: flex;
-  flex-direction: column;
 }
 
 .lnd-card-fan {
@@ -1300,7 +1288,7 @@ button.disabled {
   <!-- ==== LANDING ==== -->
   <div id="landing" aria-label="Poker Trainer — лендинг">
 
-    <!-- ==== TELEGRAM FEED (первым блоком внутри лендинга) ==== -->
+    <!-- ==== TELEGRAM FEED ==== -->
     <section id="tg-feed" aria-label="Последние посты из Telegram">
       <div class="tg-feed-head">
         <a class="tg-feed-channel" href="https://t.me/ThePokerWay" target="_blank" rel="noopener noreferrer" aria-label="Открыть канал The Poker Way">
