@@ -36,7 +36,7 @@
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --pro-color: #8a4fd1;
   --ph-bg: radial-gradient(circle at 50% 40%, #1f1a0e 0%, #0f0d08 100%);
-  --ph-heart: #c9a34e;
+  --ph-heart: #b8924a;
 }
 
 html, body {
@@ -81,7 +81,7 @@ button.disabled {
   cursor: default;
 }
 
-/* ==== УНИВЕРСАЛЬНАЯ ЗАГЛУШКА (мягкий тёмно-золотистый фон + мягкое светлое сердце) ==== */
+/* ==== УНИВЕРСАЛЬНАЯ ЗАГЛУШКА ==== */
 .ph-fallback {
   position: absolute;
   inset: 0;
@@ -94,7 +94,6 @@ button.disabled {
   background: var(--ph-bg);
   pointer-events: none;
   user-select: none;
-  text-shadow: 0 0 14px rgba(255,203,43,.25);
 }
 
 .ph-fallback.lg { font-size: 26px; }
@@ -163,7 +162,6 @@ button.disabled {
   color: var(--ph-heart);
   font-size: 20px;
   font-weight: 900;
-  text-shadow: 0 0 14px rgba(255,203,43,.25);
 }
 
 .tg-feed-name {
@@ -332,6 +330,7 @@ button.disabled {
 .tg-feed-track {
   display: flex;
   gap: 14px;
+  padding-top: 2px;
   transition: transform .55s cubic-bezier(.22,.61,.36,1);
   will-change: transform;
 }
@@ -393,11 +392,10 @@ button.disabled {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #c9a34e;
+  color: var(--ph-heart);
   font-size: 22px;
   font-weight: 900;
   background: var(--ph-bg);
-  text-shadow: 0 0 14px rgba(255,203,43,.25);
 }
 
 .tg-card-title {
@@ -805,21 +803,6 @@ button.disabled {
   font-size: clamp(12px, 1.8vmin, 14px);
   color: #fff;
   text-transform: uppercase;
-}
-
-.lnd-logo-mark {
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
-  background: linear-gradient(180deg, var(--gold), var(--gold-2));
-  box-shadow: 0 0 18px rgba(255,203,43,.35);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #1a1a1a;
-  font-size: 15px;
-  font-weight: 900;
-  letter-spacing: 0;
 }
 
 .lnd-h1 {
@@ -1434,7 +1417,6 @@ button.disabled {
       <div class="lnd-inner lnd-hero-grid">
         <div class="lnd-hero-copy lnd-reveal">
           <div class="lnd-logo">
-            <span class="lnd-logo-mark">♠</span>
             <span>Poker Trainer</span>
           </div>
 
@@ -1974,12 +1956,10 @@ button.disabled {
     img.dataset.phDone = '1';
     var parent = img.parentNode;
     if (!parent) return;
-    // Очищаем родителя и вставляем заглушку
     while (parent.firstChild) parent.removeChild(parent.firstChild);
     parent.appendChild(makeFallback());
   }
 
-  // Ловим onerror на всех существующих и будущих img через capture
   document.addEventListener('error', function(e) {
     var t = e.target;
     if (t && t.tagName === 'IMG') {
@@ -1987,7 +1967,6 @@ button.disabled {
     }
   }, true);
 
-  // Также подстраховываемся: если картинка уже не загрузилась к моменту скрипта
   window.addEventListener('load', function() {
     var imgs = document.querySelectorAll('img');
     for (var i = 0; i < imgs.length; i++) {
@@ -2225,14 +2204,6 @@ button.disabled {
   if (nameEl) nameEl.textContent = TG_CHANNEL_NAME;
   if (usernameEl) usernameEl.textContent = '@' + TG_CHANNEL;
 
-  function makePhFallback(cls) {
-    var el = document.createElement('div');
-    el.className = 'ph-fallback' + (cls ? ' ' + cls : '');
-    el.setAttribute('aria-hidden', 'true');
-    el.textContent = '♥';
-    return el;
-  }
-
   (function loadAvatar() {
     if (!avatarEl) return;
     var img = new Image();
@@ -2241,9 +2212,7 @@ button.disabled {
       avatarEl.innerHTML = '';
       avatarEl.appendChild(img);
     };
-    img.onerror = function() {
-      // оставляем fallback ♥
-    };
+    img.onerror = function() {};
     img.src = 'https://t.me/i/userpic/320/' + TG_CHANNEL + '.jpg';
   })();
 
