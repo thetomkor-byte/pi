@@ -225,7 +225,6 @@ button.disabled {
   transition: none;
 }
 
-/* По умолчанию — 4 карточки в ряд (десктоп) */
 .tg-card {
   flex: 0 0 calc((100% - 42px) / 4);
   min-width: 0;
@@ -338,15 +337,12 @@ button.disabled {
   box-shadow: 0 0 8px rgba(255,203,43,.6);
 }
 
-/* Планшет: 3 в ряд */
 @media (max-width: 980px) {
   .tg-card { flex: 0 0 calc((100% - 28px) / 3); }
 }
-/* Мобильный: 2 в ряд */
 @media (max-width: 640px) {
   .tg-card { flex: 0 0 calc((100% - 14px) / 2); }
 }
-/* Узкий мобильный: 1 в ряд */
 @media (max-width: 420px) {
   .tg-card { flex: 0 0 100%; min-height: 260px; }
   .tg-card-thumb { aspect-ratio: 16 / 9; }
@@ -1328,7 +1324,7 @@ button.disabled {
           </div>
 
           <h1 class="lnd-h1" id="lnd-hero-title">
-            Тренируй <span class="gold">логику</span> и <span class="gold">интуицию</span> — играй против оппонента, а не против карт
+            Тренируй <span class="gold">логику</span> и <span class="gold">интуицию</span>
           </h1>
 
           <p class="lnd-sub">
@@ -1346,10 +1342,10 @@ button.disabled {
 
           <div class="lnd-hero-mobile-badge">
             <span class="dot"></span>
-            Сделано для мобильных — открывается прямо в браузере
+            Сделано для мобильных устройств.
           </div>
 
-          <p class="lnd-hero-note">Один файл. Без установки. Без регистрации.</p>
+          <p class="lnd-hero-note">Бесплатно. Без установки. Без регистрации.</p>
         </div>
 
         <div class="lnd-hero-visual lnd-reveal" aria-hidden="true">
@@ -1654,7 +1650,7 @@ button.disabled {
           Готов тренировать <span class="gold">логику и интуицию</span>?
         </h2>
         <p class="lnd-p lnd-reveal" style="margin-left:auto;margin-right:auto;">
-          Один файл. Без установки. Без регистрации.
+          Бесплатно. Без установки. Без регистрации.
           Садитесь за стол и играйте против оппонентов, а не против карт.
         </p>
         <div class="lnd-reveal" style="margin-top:26px;">
@@ -1662,7 +1658,7 @@ button.disabled {
             Начать тренировку
           </button>
         </div>
-        <p class="lnd-final-note">Тренажёр для тренировки покерных навыков. Не является азартной игрой на реальные деньги. Не является коммерческим продуктом.</p>
+        <p class="lnd-final-note">Тренажёр для тренировки покерных навыков. Не является азартной игрой на реальные деньги. Некоммерческий продукт.</p>
       </div>
     </section>
 
@@ -1675,7 +1671,7 @@ button.disabled {
         <p class="disclaimer" style="margin-top:14px;">
           Тренажёр для тренировки покерных навыков.
           Не является азартной игрой на реальные деньги.
-          Не является коммерческим продуктом.
+          Некоммерческий продукт.
         </p>
 
         <div class="lnd-contacts">
@@ -2006,7 +2002,6 @@ button.disabled {
   if (nameEl) nameEl.textContent = TG_CHANNEL_NAME;
   if (usernameEl) usernameEl.textContent = '@' + TG_CHANNEL;
 
-  // Аватарка канала (публичный CDN telegram)
   (function loadAvatar() {
     if (!avatarEl) return;
     var img = new Image();
@@ -2015,9 +2010,7 @@ button.disabled {
       avatarEl.innerHTML = '';
       avatarEl.appendChild(img);
     };
-    img.onerror = function() {
-      // оставляем fallback ♠
-    };
+    img.onerror = function() {};
     img.src = 'https://t.me/i/userpic/320/' + TG_CHANNEL + '.jpg';
   })();
 
@@ -2173,8 +2166,6 @@ button.disabled {
     autoplayTimer = setInterval(next, AUTOPLAY_MS);
   }
 
-  // ---------- DRAG / SWIPE ----------
-
   function onPointerDown(clientX, clientY) {
     if (posts.length < 2) return;
     isDragging = true;
@@ -2267,8 +2258,6 @@ button.disabled {
     if (isDragging) onPointerUp();
   });
 
-  // ---------- WHEEL (desktop) ----------
-
   wrap.addEventListener('wheel', function(e) {
     if (posts.length < 2) return;
 
@@ -2287,8 +2276,6 @@ button.disabled {
     if (delta > 0) next();
     else prev();
   }, { passive: false });
-
-  // ---------- MODAL ----------
 
   function openModal(i) {
     var p = posts[i];
@@ -2325,8 +2312,6 @@ button.disabled {
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
   });
-
-  // ---------- LOAD ----------
 
   function loadFeed() {
     fetch(RSS_URL, { mode: 'cors' })
