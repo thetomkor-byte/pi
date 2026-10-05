@@ -611,25 +611,26 @@ button.disabled {
   font-size: clamp(11px, 1.7vmin, 13px);
 }
 
-/* ===== HERO: свечение видно и на десктопе, отступ под линией минимальный ===== */
+/* ===== HERO ===== */
+
 #landing .lnd-hero {
   position: relative;
   z-index: 2;
-  display: block;
+  display: flex;
+  align-items: flex-start;
   padding: 0;
-  margin: 0;
-  min-height: 0;
+  padding-bottom: clamp(28px, 6vw, 56px);
   overflow: visible;
 }
 
 #landing .lnd-hero::before {
   content: "";
   position: absolute;
-  top: -60px;
+  top: 0;
   right: 0;
-  width: 90vmin;
-  height: 90vmin;
-  background: radial-gradient(circle, rgba(255,203,43,.18) 0%, rgba(255,203,43,.06) 38%, transparent 65%);
+  width: 70vmin;
+  height: 70vmin;
+  background: radial-gradient(circle at 100% 0%, rgba(255,203,43,.22) 0%, rgba(255,203,43,.07) 32%, transparent 62%);
   pointer-events: none;
   z-index: 0;
 }
@@ -652,15 +653,14 @@ button.disabled {
   display: grid;
   grid-template-columns: 1fr;
   gap: clamp(28px, 6vw, 48px);
-  align-items: start;
-  padding-top: clamp(8px, 1.4vw, 14px);
-  padding-bottom: clamp(28px, 6vw, 56px);
+  align-items: center;
+  padding-top: clamp(10px, 1.6vw, 16px);
+  width: 100%;
 }
 
 @media (min-width: 860px) {
   .lnd-hero-grid {
     grid-template-columns: 1.15fr .85fr;
-    align-items: center;
   }
 }
 
