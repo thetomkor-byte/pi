@@ -8937,7 +8937,7 @@ const UI = (() => {
     let replayCurrentBet = 0;
     takeBoardSnapshot(lastStreet);
 
-    steps.push({ kind: 'start', snapshot: makeReplaySnapshot(cur, snap, 'preflop', false) });
+    steps.push({ kind: 'start', snapshot: makeReplaySnapshot(cur, snap, 'preflop', false, -1) });
 
     for (const act of actionLog) {
       if (act.street !== lastStreet) {
@@ -8948,7 +8948,7 @@ const UI = (() => {
         for (const p of cur.players) {
           if (p.lastAction !== 'fold' && p.lastAction !== 'allin') p.lastAction = null;
         }
-        steps.push({ kind: 'street', snapshot: makeReplaySnapshot(cur, snap, lastStreet, false) });
+        steps.push({ kind: 'street', snapshot: makeReplaySnapshot(cur, snap, lastStreet, false, -1) });
       }
 
       const pl = cur.players.find(p => p.seatIndex === act.playerIndex);
@@ -9013,7 +9013,7 @@ const UI = (() => {
         pl.allIn = true;
       }
 
-      steps.push({ kind: 'action', snapshot: makeReplaySnapshot(cur, snap, lastStreet, false) });
+      steps.push({ kind: 'action', snapshot: makeReplaySnapshot(cur, snap, lastStreet, false, act.playerIndex) });
     }
 
     while (cur.board.length < finalBoard.length) {
@@ -9027,7 +9027,7 @@ const UI = (() => {
     return steps;
   }
 
-  function makeReplaySnapshot(cur, baseSnap, street, handOver) {
+  function makeReplaySnapshot(cur, baseSnap, street, handOver, actingSeatIndex) {
     return {
       handNumber: baseSnap.handNumber,
       levelIndex: baseSnap.levelIndex,
@@ -9037,6 +9037,7 @@ const UI = (() => {
       pot: cur.pot,
       buttonIndex: baseSnap.buttonIndex,
       blinds: { ...baseSnap.blinds },
+      replayActingIndex: (typeof actingSeatIndex === 'number') ? actingSeatIndex : -1,
       players: cur.players.map(p => ({
         id: p.id,
         seatIndex: p.seatIndex,
@@ -9113,7 +9114,7 @@ const UI = (() => {
     UI.updateSeats(s, false);
     UI.updatePot(s);
     UI.updateLevel(s);
-    UI.updateActiveHighlight({ actingIndex: -1, handOver: !!s.handOver, players: s.players });
+    UI.updateActiveHighlight({ actingIndex: (typeof s.replayActingIndex === 'number' ? s.replayActingIndex : -1), handOver: !!s.handOver, players: s.players });
     if (s.handOver) {
       highlightWinners(s);
     } else {
