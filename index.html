@@ -329,8 +329,9 @@ button.disabled {
   transition: none;
 }
 
+/* По умолчанию — 3 карточки в ряд (десктоп, шире чем было) */
 .tg-card {
-  flex: 0 0 calc((100% - 42px) / 4);
+  flex: 0 0 calc((100% - 28px) / 3);
   min-width: 0;
   background: linear-gradient(180deg, #131313 0%, #0a0a0a 100%);
   border: 1px solid #2a2520;
@@ -441,12 +442,15 @@ button.disabled {
   box-shadow: 0 0 8px rgba(255,203,43,.6);
 }
 
+/* Планшет — 3 в ряд (как было) */
 @media (max-width: 980px) {
   .tg-card { flex: 0 0 calc((100% - 28px) / 3); }
 }
+/* Мобильный — 2 в ряд (как было) */
 @media (max-width: 640px) {
   .tg-card { flex: 0 0 calc((100% - 14px) / 2); }
 }
+/* Узкий мобильный — 1 в ряд (как было) */
 @media (max-width: 420px) {
   .tg-card { flex: 0 0 100%; min-height: 260px; }
   .tg-card-thumb { aspect-ratio: 16 / 9; }
@@ -733,7 +737,6 @@ button.disabled {
   overflow: visible;
 }
 
-/* Свечение — как в .lnd-final::before, обрезано сверху по линии карусели, снизу не режется */
 #landing .lnd-hero::before {
   content: "";
   position: absolute;
@@ -767,7 +770,7 @@ button.disabled {
   grid-template-columns: 1fr;
   gap: clamp(28px, 6vw, 48px);
   align-items: center;
-  padding-top: clamp(10px, 1.6vw, 16px);
+  padding-top: calc(clamp(10px, 1.6vw, 16px) + 8px);
   width: 100%;
 }
 
@@ -1183,15 +1186,6 @@ button.disabled {
 
 .lnd-final .lnd-h2 { margin-left: auto; margin-right: auto; max-width: 18ch; }
 .lnd-final .lnd-p { margin-left: auto; margin-right: auto; }
-
-.lnd-final-note {
-  position: relative;
-  z-index: 1;
-  margin-top: 16px;
-  color: var(--muted);
-  font-size: clamp(11px, 1.7vmin, 13px);
-  letter-spacing: .3px;
-}
 
 .lnd-footer {
   border-top: 1px solid rgba(255,255,255,.06);
@@ -1776,14 +1770,12 @@ button.disabled {
         </h2>
         <p class="lnd-p lnd-reveal" style="margin-left:auto;margin-right:auto;">
           Бесплатно. Без установки. Без регистрации.
-          Садитесь за стол и играйте против оппонентов, а не против карт.
         </p>
         <div class="lnd-reveal" style="margin-top:26px;">
           <button class="lnd-btn" type="button" data-action="enter-app" aria-label="Начать тренировку">
             Начать тренировку
           </button>
         </div>
-        <p class="lnd-final-note">Тренажёр для тренировки покерных навыков. Некоммерческий продукт. Не является азартной игрой на реальные деньги.</p>
       </div>
     </section>
 
