@@ -611,24 +611,24 @@ button.disabled {
   font-size: clamp(11px, 1.7vmin, 13px);
 }
 
+/* Hero: контент прижат к верху, свечение видно и на десктопе */
 #landing .lnd-hero {
-  min-height: 100svh;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   position: relative;
-  padding-top: clamp(12px, 2vw, 18px);
-  padding-bottom: clamp(28px, 6vw, 56px);
-  overflow: hidden;
+  padding-top: clamp(10px, 1.6vw, 16px);
+  padding-bottom: clamp(32px, 6vw, 56px);
+  overflow: visible;
 }
 
 #landing .lnd-hero::before {
   content: "";
   position: absolute;
-  top: -20%;
-  right: -30%;
-  width: 80vmin;
-  height: 80vmin;
-  background: radial-gradient(circle, rgba(255,203,43,.10) 0%, transparent 62%);
+  top: 0;
+  right: -12%;
+  width: 85vmin;
+  height: 85vmin;
+  background: radial-gradient(circle, rgba(255,203,43,.16) 0%, rgba(255,203,43,.06) 35%, transparent 62%);
   pointer-events: none;
   z-index: 0;
 }
