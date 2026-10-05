@@ -8850,6 +8850,9 @@ const UI = (() => {
       }))
     };
 
+    let sbIdxForReplay = -1;
+    let bbIdxForReplay = -1;
+
     (function applyReplayBlinds() {
       const n = cur.players.length;
       if (n === 0) return;
@@ -8870,27 +8873,28 @@ const UI = (() => {
         return -1;
       };
 
-      let sbIdx;
-      let bbIdx;
-
       if (aliveIdx.length === 2) {
-        sbIdx = btnIdx;
-        if (cur.players[sbIdx].eliminated || !cur.players[sbIdx].inHand) {
-          sbIdx = nextAliveAfter(btnIdx);
+        sbIdxForReplay = btnIdx;
+        if (cur.players[sbIdxForReplay].eliminated || !cur.players[sbIdxForReplay].inHand) {
+          sbIdxForReplay = nextAliveAfter(btnIdx);
         }
-        bbIdx = nextAliveAfter(sbIdx);
+        bbIdxForReplay = nextAliveAfter(sbIdxForReplay);
       } else {
-        sbIdx = nextAliveAfter(btnIdx);
-        if (sbIdx < 0) return;
-        bbIdx = nextAliveAfter(sbIdx);
+        sbIdxForReplay = nextAliveAfter(btnIdx);
+        if (sbIdxForReplay < 0) return;
+        bbIdxForReplay = nextAliveAfter(sbIdxForReplay);
       }
 
-      if (sbIdx < 0 || bbIdx < 0 || sbIdx === bbIdx) return;
+      if (sbIdxForReplay < 0 || bbIdxForReplay < 0 || sbIdxForReplay === bbIdxForReplay) {
+        sbIdxForReplay = -1;
+        bbIdxForReplay = -1;
+        return;
+      }
 
       const sbAmount = (snap.blinds && snap.blinds.sb) || 0;
       const bbAmount = (snap.blinds && snap.blinds.bb) || 0;
 
-      const sbPlayer = cur.players[sbIdx];
+      const sbPlayer = cur.players[sbIdxForReplay];
       const sbPay = Math.min(sbAmount, sbPlayer.stack);
       if (sbPay > 0) {
         sbPlayer.stack -= sbPay;
@@ -8902,7 +8906,7 @@ const UI = (() => {
         if (sbPlayer.stack === 0) sbPlayer.allIn = true;
       }
 
-      const bbPlayer = cur.players[bbIdx];
+      const bbPlayer = cur.players[bbIdxForReplay];
       const bbPay = Math.min(bbAmount, bbPlayer.stack);
       if (bbPay > 0) {
         bbPlayer.stack -= bbPay;
@@ -8933,11 +8937,82 @@ const UI = (() => {
       }
     };
 
+    // Определяем, кто ходит первым на улице.
+    // preflop: первый после BB (для мультивей) или BTN/SB (для HU).
+    // postflop: первый после BTN (в позиции SB) — для мультивей, для HU — BB первым.
+    const computeFirstActorOnStreet = (street) => {
+      const n = cur.players.length;
+      if (n === 0) return -1;
+
+      const isAliveInHand = (p) => !p.eliminated && p.inHand;
+
+      const nextAliveAfter = (startIdx) => {
+        for (let step = 1; step <= n; step++) {
+          const idx = (startIdx + step) % n;
+          if (isAliveInHand(cur.players[idx])) return idx;
+        }
+        return -1;
+      };
+
+      const aliveCount = cur.players.filter(isAliveInHand).length;
+
+      if (street === 'preflop') {
+        if (aliveCount === 2) {
+          // HU: BTN = SB — ходит первым префлоп
+          if (sbIdxForReplay >= 0) return sbIdxForReplay;
+          return nextAliveAfter(bbIdxForReplay >= 0 ? bbIdxForReplay : 0);
+        }
+        if (bbIdxForReplay >= 0) return nextAliveAfter(bbIdxForReplay);
+        return -1;
+      }
+
+      // Postflop
+      if (aliveCount === 2) {
+        // HU: первым после BTN — BB
+        if (bbIdxForReplay >= 0) return bbIdxForReplay;
+        if (sbIdxForReplay >= 0) return nextAliveAfter(sbIdxForReplay);
+        return -1;
+      }
+      // Мультивей: первым после BTN (SB)
+      const btnIdx = (typeof snap.buttonIndex === 'number') ? snap.buttonIndex : 0;
+      return nextAliveAfter(btnIdx);
+    };
+
+    // Кто походил на текущей улице (множество seatIndex).
+    const actedThisStreet = new Set();
+
+    // Найти игрока, к кому переходит ход: идём по кругу от lastActorSeat вперёд,
+    // пропускаем folded/eliminated/allIn, и находим первого, кто должен ходить:
+    // не действовал на этой улице ИЛИ его committed < currentBet.
+    const findCurrentActorSeat = (fromSeatExclusive, currentBet) => {
+      const n = cur.players.length;
+      if (n === 0) return -1;
+      for (let step = 1; step <= n; step++) {
+        const idx = (fromSeatExclusive + step) % n;
+        const p = cur.players[idx];
+        if (p.eliminated || !p.inHand) continue;
+        if (p.folded) continue;
+        if (p.allIn) continue;
+        if (!actedThisStreet.has(p.seatIndex)) return p.seatIndex;
+        if (p.committedThisStreet < currentBet) return p.seatIndex;
+      }
+      return -1;
+    };
+
     let lastStreet = 'preflop';
     let replayCurrentBet = 0;
+
+    // Применяем блайнды в текущий снимок
     takeBoardSnapshot(lastStreet);
 
-    steps.push({ kind: 'start', snapshot: makeReplaySnapshot(cur, snap, 'preflop', false, -1) });
+    // Ход первого игрока на префлопе
+    actedThisStreet.clear();
+    let currentActorSeat = computeFirstActorOnStreet('preflop');
+
+    steps.push({
+      kind: 'start',
+      snapshot: makeReplaySnapshot(cur, snap, 'preflop', false, currentActorSeat)
+    });
 
     for (const act of actionLog) {
       if (act.street !== lastStreet) {
@@ -8948,7 +9023,12 @@ const UI = (() => {
         for (const p of cur.players) {
           if (p.lastAction !== 'fold' && p.lastAction !== 'allin') p.lastAction = null;
         }
-        steps.push({ kind: 'street', snapshot: makeReplaySnapshot(cur, snap, lastStreet, false, -1) });
+        actedThisStreet.clear();
+        currentActorSeat = computeFirstActorOnStreet(lastStreet);
+        steps.push({
+          kind: 'street',
+          snapshot: makeReplaySnapshot(cur, snap, lastStreet, false, currentActorSeat)
+        });
       }
 
       const pl = cur.players.find(p => p.seatIndex === act.playerIndex);
@@ -9013,7 +9093,17 @@ const UI = (() => {
         pl.allIn = true;
       }
 
-      steps.push({ kind: 'action', snapshot: makeReplaySnapshot(cur, snap, lastStreet, false, act.playerIndex) });
+      actedThisStreet.add(pl.seatIndex);
+
+      // После действия ищем следующего активного игрока, кому переходит ход.
+      const nextSeat = findCurrentActorSeat(pl.seatIndex, replayCurrentBet);
+
+      steps.push({
+        kind: 'action',
+        snapshot: makeReplaySnapshot(cur, snap, lastStreet, false, nextSeat)
+      });
+
+      currentActorSeat = nextSeat;
     }
 
     while (cur.board.length < finalBoard.length) {
@@ -9022,6 +9112,7 @@ const UI = (() => {
 
     const finalSnap = JSON.parse(JSON.stringify(snap));
     finalSnap.handOver = true;
+    finalSnap.replayActingIndex = -1;
     steps.push({ kind: 'final', snapshot: finalSnap });
 
     return steps;
