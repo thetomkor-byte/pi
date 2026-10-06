@@ -409,6 +409,8 @@ button.disabled {
   text-overflow: ellipsis;
 }
 
+/* Текст в карточке карусели: ровно 3 строки через line-clamp.
+   padding-right резервирует место под значок тап-зоны (16px + отступ). */
 .tg-card-text {
   color: var(--muted-soft-2);
   font-size: clamp(12px, 1.9vmin, 14px);
@@ -419,8 +421,7 @@ button.disabled {
   overflow: hidden;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  padding-right: 26px;
-  padding-bottom: 4px;
+  padding-right: 24px;
 }
 
 .tg-card-date {
@@ -428,7 +429,7 @@ button.disabled {
   color: #555;
   font-size: clamp(11px, 1.7vmin, 13px);
   letter-spacing: .3px;
-  padding-right: 26px;
+  padding-right: 24px;
 }
 
 .tg-card-tap-icon {
@@ -2314,8 +2315,6 @@ button.disabled {
 
   function openInfo(title, body) {
     infoTitle.textContent = title || '';
-    // Преобразуем абзацы (разделенные \n) в <p>, чтобы браузер
-    // автоматически переносил текст по ширине окошка.
     var paragraphs = String(body || '').split('\n\n');
     var html = '';
     for (var i = 0; i < paragraphs.length; i++) {
@@ -2333,7 +2332,6 @@ button.disabled {
     document.body.style.overflow = '';
   }
 
-  // Закрытие по клику в любом месте экрана
   infoModal.addEventListener('click', closeInfo);
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape' && infoModal.classList.contains('open')) closeInfo();
@@ -2402,6 +2400,9 @@ button.disabled {
   })();
 
   // 10 постов на темы проекта и лендинга. Заголовки — не более 4 слов.
+  // Тексты увеличены, чтобы:
+  //  1) в карточке карусели гарантированно заполнялись 3 строки;
+  //  2) в модалке было что показать на 11 строк.
   var DEMO_POSTS = [
     {
       title: 'Логика и интуиция',
@@ -2423,7 +2424,7 @@ button.disabled {
     },
     {
       title: 'Польза для игроков',
-      text: 'Начинающему: научиться думать за столом, а не запоминать руки. Понять, что покер — это не карты, а оппоненты и их решения.\n\nОпытному: перестать играть «по учебнику» и начать играть против конкретного оппонента. Увидеть, где чарты вас ограничивают, и выйти за их рамки.\n\nПрофессионалу: уйти от перегруженных математических решений к чистой логике и абсолютной интуиции. Найти то, что не считается в солвере: момент, ритм, образ, ловушку.\n\nНавык, который вы здесь развиваете, работает против любого соперника — и против человека, и против программы. Читать линию поведения, замечать ошибки, выстраивать действия под чужое мышление — всё это не зависит от того, кто сидит напротив.',
+      text: 'Начинающему Poker Trainer даёт главное — привычку думать за столом, а не запоминать стартовые руки. Покер — это не карты, а оппоненты и их решения. Чем раньше вы это поймёте, тем быстрее начнёте выигрывать.\n\nОпытному игроку тренажёр помогает перестать играть «по учебнику» и начать играть против конкретного оппонента. Увидеть, где чарты ограничивают вас, а где вы просто боитесь отойти от привычной линии.\n\nПрофессионалу Poker Trainer даёт то, что не считается в солвере: момент, ритм, образ, ловушку. Чистая логика и абсолютная интуиция вместо перегруженных математических расчётов.\n\nНавык, который вы здесь развиваете, работает против любого соперника — и против человека, и против программы. Читать линию поведения, замечать ошибки, выстраивать действия под чужое мышление — всё это не зависит от того, кто сидит напротив.',
       img: '',
       date: ''
     },
@@ -2510,7 +2511,7 @@ button.disabled {
 
   var TAP_ICON_SVG = '<svg class="tg-card-tap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3H5a2 2 0 0 0-2 2v4M9 21H5a2 2 0 0 1-2-2v-4M15 3h4a2 2 0 0 1 2 2v4M15 21h4a2 2 0 0 0 2-2v-4"/></svg>';
 
-  // Мобильный эталон для подсчёта строк: ~38 символов в строке.
+  // Мобильный эталон для подсчёта строк в модалке: ~38 символов в строке.
   var MOBILE_LINE_CHARS = 38;
 
   // Обрезает текст до maxLines "строк" по мобильному эталону,
@@ -2526,7 +2527,6 @@ button.disabled {
     for (var p = 0; p < paragraphs.length && !truncated; p++) {
       var line = paragraphs[p];
       if (!line.trim()) {
-        // Пустая строка (отступ между абзацами) — тоже считается за строку
         if (usedLines + 1 <= maxLines) {
           result.push('');
           usedLines += 1;
@@ -2584,9 +2584,9 @@ button.disabled {
     return out;
   }
 
-  // Разбивает обрезанный текст на абзацы для вставки в модалку
-  // в виде набора <p>. Пустые строки (результат обрезки между абзацами)
-  // пропускаются, но разделение на абзацы сохраняется.
+  // Собирает HTML для модалки: обрезанный текст → набор <p>.
+  // Пустые строки (разделители абзацев после обрезки) отбрасываются,
+  // но сам факт отдельного абзаца сохраняется — каждый абзац в своём <p>.
   function buildModalHTML(text) {
     if (!text) return '<p></p>';
     var paragraphs = String(text).split(/\n{2,}/);
@@ -2601,6 +2601,9 @@ button.disabled {
     return any ? html : '<p></p>';
   }
 
+  // В карточке карусели текст НЕ обрезаем — отдаём весь текст,
+  // а CSS `-webkit-line-clamp: 3` сам покажет ровно 3 строки до края карточки
+  // и обрежет строго на границе слов.
   function renderCards() {
     track.innerHTML = '';
     dotsWrap.innerHTML = '';
@@ -2619,12 +2622,10 @@ button.disabled {
         thumbHtml = '<div class="tg-card-thumb"><div class="ph-fallback">♥</div></div>';
       }
 
-      var cardText = truncateMobile(p.text, 3);
-
       card.innerHTML =
         thumbHtml +
         '<div class="tg-card-title">' + escapeHtml(p.title) + '</div>' +
-        '<div class="tg-card-text">' + escapeHtml(cardText) + '</div>' +
+        '<div class="tg-card-text">' + escapeHtml(p.text) + '</div>' +
         '<div class="tg-card-date">' + formatDate(p.date) + '</div>' +
         TAP_ICON_SVG;
 
@@ -2764,12 +2765,10 @@ button.disabled {
         thumbHtml = '<div class="tg-card-thumb"><div class="ph-fallback">♥</div></div>';
       }
 
-      var cardText = truncateMobile(p.text, 3);
-
       card.innerHTML =
         thumbHtml +
         '<div class="tg-card-title">' + escapeHtml(p.title) + '</div>' +
-        '<div class="tg-card-text">' + escapeHtml(cardText) + '</div>' +
+        '<div class="tg-card-text">' + escapeHtml(p.text) + '</div>' +
         '<div class="tg-card-date">' + formatDate(p.date) + '</div>' +
         TAP_ICON_SVG;
 
@@ -2801,12 +2800,10 @@ button.disabled {
         thumbHtml = '<div class="tg-card-thumb"><div class="ph-fallback">♥</div></div>';
       }
 
-      var cardText = truncateMobile(p.text, 3);
-
       card.innerHTML =
         thumbHtml +
         '<div class="tg-card-title">' + escapeHtml(p.title) + '</div>' +
-        '<div class="tg-card-text">' + escapeHtml(cardText) + '</div>' +
+        '<div class="tg-card-text">' + escapeHtml(p.text) + '</div>' +
         '<div class="tg-card-date">' + formatDate(p.date) + '</div>' +
         TAP_ICON_SVG;
 
@@ -2959,12 +2956,10 @@ button.disabled {
       modalMedia.innerHTML = '<div class="tg-modal-media"><div class="ph-fallback lg">♥</div></div>';
     }
 
-    // 12 строк всего: 1 строка — заголовок (в отдельном блоке),
-    // 11 строк — текст поста, рассчитанный по мобильному эталону.
+    // 12 строк всего: 1 строка — заголовок (отдельный блок),
+    // 11 строк — текст поста по мобильному эталону.
     // Пустые строки между абзацами считаются отдельными строками.
     // Один и тот же текст используется и на мобильной, и на десктопной версии.
-    // Текст вставляется в виде <p>-абзацев, чтобы браузер сам делал
-    // перенос по ширине окошка.
     var truncatedText = truncateMobile(p.text, 11);
     modalBody.innerHTML = buildModalHTML(truncatedText);
 
@@ -2979,7 +2974,6 @@ button.disabled {
     restartAutoplay();
   }
 
-  // Закрытие по клику в любом месте, КРОМЕ кнопки "Читать в Telegram"
   modal.addEventListener('click', function(e) {
     if (e.target.closest && e.target.closest('#tg-modal-cta')) {
       return;
