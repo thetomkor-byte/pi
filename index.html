@@ -1376,6 +1376,12 @@ button.disabled {
 
 .lnd-mobile-note .txt b { color: var(--text); font-weight: 700; }
 
+/* Одиночная карточка «Поддержка автора» — растянута на всю ширину лендинга */
+.lnd-card-wide {
+  grid-column: 1 / -1;
+  max-width: none;
+}
+
 @media (max-width: 520px) {
   .lnd-hero-actions { flex-direction: column; align-items: stretch; }
   .lnd-hero-actions .lnd-btn { width: 100%; }
@@ -1766,11 +1772,9 @@ button.disabled {
           <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Боты с памятью и адаптацией</b> (PRO) и эксплуатируемые слабые боты (VIP).</span></div>
           <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Слайдер ставок</b>, быстрые проценты банка, BB-пресеты — всё под большой палец.</span></div>
           <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Таймер на ход</b> и тонкие настройки: сложность, стеки, стиль карт, рост блайндов, показ карт/типов.</span></div>
-          <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>История раздач</b> с копированием в буфер обмена в один тап.</span></div>
           <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Реплей раздачи по шагам</b> — увидеть линию со стороны и найти свою ошибку.</span></div>
           <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>ICM-логика</b> на баббле и в призах — турнирные решения, а не кэш-игра.</span></div>
-          <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Тренировочный раздел «Тренировка»</b> — интуиция и логика покерного мышления.</span></div>
-          <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Мобильный first</b>: safe-area, жесты, свайпы, двойные тапы — всё как надо на телефоне.</span></div>
+          <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Удобное управление</b>: жесты, свайпы, тапы — всё для тренировки на телефоне.</span></div>
         </div>
       </div>
     </section>
@@ -1792,17 +1796,12 @@ button.disabled {
             <h3>Руководство</h3>
             <p>Что такое Poker Trainer, чем отличается от солверов, против кого вы играете, почему это работает на реальном столе.</p>
           </article>
-
-          <article class="lnd-card lnd-reveal">
-            <h3>Тренировка</h3>
-            <p>Принципы и техники тренировки логики и интуиции. Упражнения на поле информации, чтение состояния, доверие к первому тихому отклику.</p>
-          </article>
-
-          <article class="lnd-card lnd-reveal">
-            <h3>Поддержка автора</h3>
-            <p>Карты для перевода (GGPoker, USDT TRC20, Беларусбанк VISA, БЕЛКАРТ) и контакты Gmail/Telegram. Проект развивается на эти средства.</p>
-          </article>
         </div>
+
+        <article class="lnd-card lnd-reveal lnd-card-wide" style="margin-top:clamp(14px, 2.4vw, 22px);">
+          <h3>Поддержка автора</h3>
+          <p>Карты для перевода (GGPoker, USDT TRC20, Беларусбанк VISA, БЕЛКАРТ) и контакты Gmail/Telegram. Проект развивается на эти средства.</p>
+        </article>
       </div>
     </section>
 
