@@ -367,8 +367,6 @@ button.disabled {
   .tg-card:hover .tg-card-tap-icon { opacity: .55; }
 }
 
-/* Картинка поста в карусели: всегда 16:9 (эталон Telegram 1920x1080).
-   Заглушка ♥ — в том же блоке 16:9. */
 .tg-card-thumb {
   width: 100%;
   aspect-ratio: 16 / 9;
@@ -399,8 +397,6 @@ button.disabled {
   background: var(--ph-bg);
 }
 
-/* Заголовок поста — ВСЕГДА одна строка, никогда не переносится.
-   При переполнении — многоточие. */
 .tg-card-title {
   color: #fff;
   font-size: clamp(15px, 2.4vmin, 18px);
@@ -527,7 +523,8 @@ button.disabled {
 }
 
 /* Мобильная версия: окно фиксированной высоты.
-   Картинка 16:9 + заголовок + 11 строк текста + CTA внизу. */
+   Шапка «THE POKER WAY» + картинка 16:9 + заголовок + 11 строк текста
+   + футер с CTA и текстом под ней внизу. */
 @media (max-width: 859px) {
   .tg-modal-box {
     min-height: 620px;
@@ -556,8 +553,18 @@ button.disabled {
   to { transform: translateY(0); opacity: 1; }
 }
 
-/* Картинка поста в модалке: всегда 16:9 (1920x1080).
-   Идёт ПЕРЕД заголовком. Заглушка ♥ — в том же блоке 16:9. */
+/* Шапка поста: THE POKER WAY, золотой uppercase. Идёт перед картинкой. */
+.tg-modal-meta {
+  color: var(--gold);
+  font-size: clamp(10px, 1.6vmin, 12px);
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+/* Картинка поста в модалке: всегда 16:9 (1920x1080). Кроп любой ориентации.
+   Идёт ПОСЛЕ шапки и ПЕРЕД заголовком. Заглушка ♥ — в том же блоке 16:9. */
 .tg-modal-media {
   position: relative;
   margin: 0 0 16px;
@@ -619,19 +626,22 @@ button.disabled {
 
 .tg-modal-body a { color: var(--gold); text-decoration: underline; }
 
-/* CTA «Читать в Telegram» — прижат к низу окна через margin-top: auto
-   (родитель .tg-modal-box — flex column). */
+/* Футер модалки: кнопка «Читать в Telegram» + текст под ней.
+   Прижат к нижнему краю окна через margin-top: auto.
+   Ни кнопка, ни текст не заходят ни на текст поста (отступ сверху 24px),
+   ни на нижний край окна (padding-bottom обеспечивает сам .tg-modal-box). */
+.tg-modal-footer {
+  margin-top: auto;
+  padding-top: 24px;
+}
+
 .tg-modal-cta {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  margin-top: auto;
-  padding-top: 15px;
   width: 100%;
-  padding-left: 22px;
-  padding-right: 22px;
-  padding-bottom: 15px;
+  padding: 15px 22px;
   border-radius: 12px;
   background: linear-gradient(180deg, #37aee2 0%, #1e96c8 55%, #0e7bb0 100%);
   color: #fff;
@@ -644,22 +654,18 @@ button.disabled {
   transition: transform .1s ease, filter .1s ease;
 }
 
-/* Верхний отступ для CTA, чтобы при длинном тексте он не был вплотную */
-.tg-modal-body + .tg-modal-cta {
-  margin-top: 24px;
-}
-
-/* На десктопе margin-top: auto не нужен — CTA прямо под текстом */
-@media (min-width: 860px) {
-  .tg-modal-cta {
-    margin-top: 24px;
-  }
-}
-
 .tg-modal-cta:active { transform: scale(.98); filter: brightness(1.08); }
 @media (hover: hover) { .tg-modal-cta:hover { filter: brightness(1.08); } }
 
 .tg-modal-cta svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+/* Текст под кнопкой — приклеен к нижнему краю окна вместе с кнопкой. */
+.tg-modal-note {
+  margin-top: 12px;
+  text-align: center;
+  color: #555;
+  font-size: clamp(11px, 1.7vmin, 13px);
+}
 
 /* ==== INFO MODAL (для карточек-тапзон) ==== */
 
@@ -1499,13 +1505,17 @@ button.disabled {
 
   <div id="tg-modal" role="dialog" aria-modal="true" aria-labelledby="tg-modal-title-el">
     <div class="tg-modal-box">
+      <div class="tg-modal-meta">The Poker Way</div>
       <div id="tg-modal-media"></div>
       <h2 class="tg-modal-title" id="tg-modal-title-el"></h2>
       <div class="tg-modal-body" id="tg-modal-body"></div>
-      <a class="tg-modal-cta" id="tg-modal-cta" href="https://t.me/ThePokerWay" target="_blank" rel="noopener noreferrer">
-        <svg viewBox="0 0 32 32" aria-hidden="true"><path fill="#ffffff" d="M23.06 9.07 8.32 14.76c-.98.4-.97 1.78.01 2.17l3.66 1.4 1.4 4.5c.2.64 1.02.82 1.48.32l1.98-2.14 3.86 2.83c.55.4 1.34.11 1.49-.56l2.66-12.62c.16-.75-.6-1.35-1.8-1.59zM12.7 17.36l8.02-5.02-6.55 6.14-.18 2.55-1.29-3.67z"/></svg>
-        Читать в Telegram
-      </a>
+      <div class="tg-modal-footer">
+        <a class="tg-modal-cta" id="tg-modal-cta" href="https://t.me/ThePokerWay" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 32 32" aria-hidden="true"><path fill="#ffffff" d="M23.06 9.07 8.32 14.76c-.98.4-.97 1.78.01 2.17l3.66 1.4 1.4 4.5c.2.64 1.02.82 1.48.32l1.98-2.14 3.86 2.83c.55.4 1.34.11 1.49-.56l2.66-12.62c.16-.75-.6-1.35-1.8-1.59zM12.7 17.36l8.02-5.02-6.55 6.14-.18 2.55-1.29-3.67z"/></svg>
+          Читать в Telegram
+        </a>
+        <div class="tg-modal-note">Откроется в приложении Telegram</div>
+      </div>
     </div>
   </div>
 
@@ -2377,10 +2387,15 @@ button.disabled {
 // ============================================================
 //
 // 1. ПОРЯДОК БЛОКОВ В ПОСТЕ (одинаковый везде):
-//    Картинка → Заголовок → Текст → Дата (в карусели) → CTA (в модалке).
-//    Дата в постах НЕ используется — посты БЕЗ ДАТЫ.
-//    В модалке сверху нет ни меты, ни даты, ни "The Poker Way" —
-//    сразу картинка, потом заголовок, потом текст, потом CTA.
+//    Шапка THE POKER WAY (только в модалке)
+//    → Картинка
+//    → Заголовок
+//    → Текст
+//    → Дата (в карусели — снизу, как прижим; в модалке — отсутствует)
+//    → Футер (только в модалке): кнопка «Читать в Telegram» + текст
+//      «Откроется в приложении Telegram» под ней.
+//    В карусели дата прижимается к низу карточки через margin-top: auto.
+//    В модалке футер (кнопка + текст) прижат к низу окна через margin-top: auto.
 //
 // 2. ЗАГОЛОВОК:
 //    - Всегда одна строка.
@@ -2427,7 +2442,9 @@ button.disabled {
 //      фиксированного размера, текст подгоняется под окно.
 //    - Десктоп (≥ 860px): высота окна подгоняется под текст — короткий
 //      текст → маленькое окно, 11 строк → окно как на мобиле.
-//    - CTA «Читать в Telegram» прижат к низу окна (margin-top: auto).
+//    - Футер (кнопка + текст под ней) всегда прижат к нижнему краю окна
+//      через margin-top: auto. Не заходит ни на текст (padding-top: 24px),
+//      ни на нижний край (обеспечивает padding-bottom самого окна).
 //
 // 8. ПРИМЕНЕНИЕ:
 //    Все правила применяются автоматически к любому новому посту
@@ -2587,9 +2604,6 @@ button.disabled {
     return { text: out, lines: countLines(out), truncated: true };
   }
 
-  // ПРАВИЛО МНОГОТОЧИЯ: если хоть что-то обрезано — добавляем ' ...'
-  // в конец последнего абзаца через пробел от последнего целого слова.
-  // Суффикс участвует в подсчёте строк: если нужно — отрезаем слово.
   function fitParagraphsToBudget(paragraphs, maxLines) {
     var result = [];
     var used = 0;
@@ -2624,8 +2638,6 @@ button.disabled {
       break;
     }
 
-    // Если хоть что-то обрезано, и у последнего абзаца нет ELLIPSIS — добавляем
-    // (с пересчётом высоты, чтобы суффикс влез).
     if (truncated && result.length > 0) {
       var last = result[result.length - 1];
       if (!endsWithEllipsis(last)) {
@@ -2663,10 +2675,6 @@ button.disabled {
     return typeof s === 'string' && /\.\.\.$/.test(s.trim());
   }
 
-  // ==== ОБРЕЗКА ТЕКСТА В КАРТОЧКЕ КАРУСЕЛИ ====
-  // Та же логика многоточия: если весь текст влез — многоточия нет;
-  // если обрезан — ' ...' через пробел от целого слова; суффикс
-  // участвует в подсчёте строк.
   function fitCardText(el, fullText, maxLines) {
     if (!el) return;
     var words = String(fullText || '')
@@ -2714,10 +2722,6 @@ button.disabled {
       guard++;
     }
   }
-
-  // ============================================================
-  // ДЕМО-ПОСТЫ
-  // ============================================================
 
   var DEMO_POSTS = [
     {
@@ -3107,8 +3111,8 @@ button.disabled {
   }, { passive: false });
 
   // ПОРЯДОК БЛОКОВ В МОДАЛКЕ:
-  // Картинка → Заголовок → Текст → CTA (внизу).
-  // Даты/меты/"The Poker Way" сверху нет.
+  // Шапка THE POKER WAY → Картинка → Заголовок → Текст
+  // → Футер (кнопка + текст под ней), прижатый к низу окна.
   function openModal(i) {
     var p = posts[i];
     if (!p) return;
