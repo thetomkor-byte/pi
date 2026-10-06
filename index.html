@@ -409,9 +409,8 @@ button.disabled {
   text-overflow: ellipsis;
 }
 
-/* Текст в карточке карусели: обрезается JS-функцией truncateMobile
-   до 3 строк по мобильному эталону. CSS не делает line-clamp,
-   чтобы «...» вставлялось через пробел от слова, а не впритык. */
+/* Текст карточки: 3 строки. Обрезается JS-функцией fitTextToLines
+   по реальному DOM-замеру. padding-right резервирует место под значок. */
 .tg-card-text {
   color: var(--muted-soft-2);
   font-size: clamp(12px, 1.9vmin, 14px);
@@ -564,6 +563,10 @@ button.disabled {
   border-radius: 12px;
 }
 
+/* Тело модалки: фиксированная высота ровно в 14 строк (по эталону
+   мобильного размера). На десктопе и мобиле высота одна и та же —
+   разница только в том, сколько символов влезает в одну строку.
+   Текст обрезается JS-функцией по реальному замеру до этой высоты. */
 .tg-modal-body {
   color: var(--muted-soft-2);
   font-size: clamp(13px, 2vmin, 15px);
@@ -572,6 +575,9 @@ button.disabled {
   overflow-wrap: break-word;
   user-select: text;
   -webkit-user-select: text;
+  /* 14 строк × 1.65 line-height = 23.1em; берём с запасом 23.2em */
+  max-height: 23.2em;
+  overflow: hidden;
 }
 
 .tg-modal-body p {
@@ -2371,7 +2377,6 @@ button.disabled {
     img.src = 'https://t.me/i/userpic/320/' + TG_CHANNEL + '.jpg';
   })();
 
-  // 10 постов на темы проекта и лендинга. Заголовки — не более 4 слов.
   var DEMO_POSTS = [
     {
       title: 'Логика и интуиция',
@@ -2480,94 +2485,131 @@ button.disabled {
 
   var TAP_ICON_SVG = '<svg class="tg-card-tap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3H5a2 2 0 0 0-2 2v4M9 21H5a2 2 0 0 1-2-2v-4M15 3h4a2 2 0 0 1 2 2v4M15 21h4a2 2 0 0 0 2-2v-4"/></svg>';
 
-  // Мобильный эталон для подсчёта строк: ~38 символов в строке.
-  var MOBILE_LINE_CHARS = 38;
+  // ============================================================
+  // FIT-TEXT: реальный DOM-замер.
+  //
+  // fitTextToLines(el, fullText, maxLines) кладёт текст в элемент,
+  // замеряет высоту и, если она превышает maxLines * line-height,
+  // бинарным поиском отрезает по одному слову с конца, пока не
+  // влезет. Многоточие добавляется через пробел (' ...') от
+  // последнего целого слова.
+  //
+  // Работает для карточек карусели (3 строки) и для модалки
+  // (14 строк текста = 15 строк вместе с заголовком).
+  // ============================================================
 
-  // Обрезает текст до maxLines "строк" по мобильному эталону.
-  // Обрезка идёт ТОЛЬКО на границе целых слов: последнее слово
-  // остаётся целым, а после него (через пробел) добавляется "...".
-  // Пустые строки между абзацами считаются за строку.
-  function truncateMobile(text, maxLines) {
-    if (!text) return '';
-    var paragraphs = String(text).split('\n');
-    var result = [];
-    var usedLines = 0;
-    var truncated = false;
+  function fitTextToLines(el, fullText, maxLines) {
+    if (!el) return;
+    var text = String(fullText || '');
+    // Нормализуем переводы строк: \n\n → разделитель между абзацами.
+    // Внутри строки — обычные пробелы.
+    el.textContent = text;
 
-    for (var p = 0; p < paragraphs.length && !truncated; p++) {
-      var line = paragraphs[p];
-      if (!line.trim()) {
-        if (usedLines + 1 <= maxLines) {
-          result.push('');
-          usedLines += 1;
-        } else {
-          truncated = true;
-        }
-        continue;
-      }
+    var lh = lineHeight(el);
+    var maxH = maxLines * lh + 1;
 
-      var words = line.split(/\s+/).filter(function(w) { return w.length > 0; });
-      var curLine = '';
-      var paraOut = [];
+    // Если весь текст влезает — оставляем как есть.
+    if (el.scrollHeight <= maxH) return;
 
-      for (var w = 0; w < words.length; w++) {
-        var word = words[w];
-        var tryLine = curLine ? (curLine + ' ' + word) : word;
-        if (tryLine.length <= MOBILE_LINE_CHARS) {
-          curLine = tryLine;
-        } else {
-          if (usedLines + 1 > maxLines) {
-            truncated = true;
-            break;
-          }
-          paraOut.push(curLine);
-          usedLines += 1;
-          curLine = word;
-        }
-      }
-      if (truncated) {
-        for (var k = 0; k < paraOut.length; k++) {
-          result.push(paraOut[k]);
-        }
-        break;
-      }
+    // Разбиваем на токены (слова). Пустые строки отбрасываем —
+    // нам важно только общее число слов, которое влезает в maxLines.
+    var tokens = text.split(/\s+/).filter(function(w) { return w.length > 0; });
+    if (!tokens.length) { el.textContent = ''; return; }
 
-      if (curLine) {
-        if (usedLines + 1 > maxLines) {
-          truncated = true;
-          break;
-        }
-        paraOut.push(curLine);
-        usedLines += 1;
-      }
+    // Бинарный поиск максимального количества слов, при котором
+    // текст с добавленным суффиксом ' ...' ещё влезает.
+    var lo = 0;
+    var hi = tokens.length;
+    var bestCut = 0;
+    var suffix = ' ...';
 
-      for (var m = 0; m < paraOut.length; m++) {
-        result.push(paraOut[m]);
+    while (lo <= hi) {
+      var mid = Math.floor((lo + hi) / 2);
+      var candidate = (mid < tokens.length)
+        ? tokens.slice(0, mid).join(' ') + suffix
+        : tokens.join(' ');
+      el.textContent = candidate;
+      if (el.scrollHeight <= maxH) {
+        bestCut = mid;
+        lo = mid + 1;
+      } else {
+        hi = mid - 1;
       }
     }
 
-    var out = result.join('\n');
-    if (truncated) {
-      // Убираем хвостовые пробелы и вставляем "..." через пробел от последнего слова.
-      out = out.replace(/\s+$/, '');
-      if (out) out = out + ' ...';
+    // Применяем лучший вариант (если влезает весь — bestCut будет tokens.length).
+    if (bestCut >= tokens.length) {
+      el.textContent = tokens.join(' ');
+    } else {
+      el.textContent = tokens.slice(0, bestCut).join(' ') + suffix;
     }
-    return out;
+
+    // Защитный цикл: если из-за суффикса всё же чуть переполнили — отрезаем
+    // по слову, пока не влезем (страховка от редких случаев).
+    var safety = 0;
+    while (el.scrollHeight > maxH && bestCut > 0 && safety < 60) {
+      bestCut -= 1;
+      el.textContent = tokens.slice(0, bestCut).join(' ') + suffix;
+      safety++;
+    }
   }
 
-  // Собирает HTML для модалки: обрезанный текст → набор <p>.
-  function buildModalHTML(text) {
-    if (!text) return '<p></p>';
-    var paragraphs = String(text).split(/\n{2,}/);
-    var html = '';
-    var any = false;
-    for (var i = 0; i < paragraphs.length; i++) {
-      var p = paragraphs[i].replace(/\n/g, ' ').trim();
-      if (!p) continue;
-      html += '<p>' + escapeHtml(p) + '</p>';
-      any = true;
+  // line-height у элемента в пикселях (с кэшем).
+  var _lineHeightCache = new WeakMap();
+  function lineHeight(el) {
+    var cached = _lineHeightCache.get(el);
+    if (cached) return cached;
+    var cs = window.getComputedStyle(el);
+    var lh = parseFloat(cs.lineHeight);
+    if (!lh || isNaN(lh)) {
+      var fs = parseFloat(cs.fontSize) || 14;
+      lh = fs * 1.5;
     }
-    return any ? html : '<p></p>';
+    _lineHeightCache.set(el, lh);
+    return lh;
+  }
+
+  // ============================================================
+  // КАРТОЧКИ КАРУСЕЛИ
+  // ============================================================
+
+  function buildCardNode(p, i) {
+    var card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'tg-card';
+    card.setAttribute('aria-label', 'Открыть пост: ' + p.title);
+    card.dataset.idx = i;
+
+    var thumbHtml;
+    if (p.img) {
+      thumbHtml = '<div class="tg-card-thumb"><img src="' + p.img + '" alt="" loading="lazy"></div>';
+    } else {
+      thumbHtml = '<div class="tg-card-thumb"><div class="ph-fallback">♥</div></div>';
+    }
+
+    card.innerHTML =
+      thumbHtml +
+      '<div class="tg-card-title">' + escapeHtml(p.title) + '</div>' +
+      '<div class="tg-card-text"></div>' +
+      '<div class="tg-card-date">' + formatDate(p.date) + '</div>' +
+      TAP_ICON_SVG;
+
+    var textEl = card.querySelector('.tg-card-text');
+    // Заполняем после вставки в DOM (rAF), чтобы ширина была уже известна.
+    requestAnimationFrame(function() {
+      try { fitTextToLines(textEl, p.text, 3); }
+      catch (e) { textEl.textContent = p.text; }
+    });
+
+    card.addEventListener('click', function(e) {
+      if (suppressClick) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      openModal(i);
+    });
+    return card;
   }
 
   function renderCards() {
@@ -2575,40 +2617,7 @@ button.disabled {
     dotsWrap.innerHTML = '';
 
     posts.forEach(function(p, i) {
-      var card = document.createElement('button');
-      card.type = 'button';
-      card.className = 'tg-card';
-      card.setAttribute('aria-label', 'Открыть пост: ' + p.title);
-      card.dataset.idx = i;
-
-      var thumbHtml;
-      if (p.img) {
-        thumbHtml = '<div class="tg-card-thumb"><img src="' + p.img + '" alt="" loading="lazy"></div>';
-      } else {
-        thumbHtml = '<div class="tg-card-thumb"><div class="ph-fallback">♥</div></div>';
-      }
-
-      // Текст карточки обрезаем через JS до 3 строк по мобильному эталону —
-      // так «...» встаёт через пробел от последнего целого слова,
-      // а не впритык, как делает встроенный line-clamp.
-      var cardText = truncateMobile(p.text, 3);
-
-      card.innerHTML =
-        thumbHtml +
-        '<div class="tg-card-title">' + escapeHtml(p.title) + '</div>' +
-        '<div class="tg-card-text">' + escapeHtml(cardText) + '</div>' +
-        '<div class="tg-card-date">' + formatDate(p.date) + '</div>' +
-        TAP_ICON_SVG;
-
-      card.addEventListener('click', function(e) {
-        if (suppressClick) {
-          e.preventDefault();
-          e.stopPropagation();
-          return;
-        }
-        openModal(i);
-      });
-      track.appendChild(card);
+      track.appendChild(buildCardNode(p, i));
 
       var dot = document.createElement('span');
       dot.className = 'd' + (i === 0 ? ' active' : '');
@@ -2625,6 +2634,28 @@ button.disabled {
     updateCarousel();
   }
 
+  function appendCardsOnce() {
+    posts.forEach(function(p, i) {
+      track.appendChild(buildCardNode(p, i));
+    });
+  }
+
+  function prependCardsOnce() {
+    var frag = document.createDocumentFragment();
+    posts.forEach(function(p, i) {
+      frag.appendChild(buildCardNode(p, i));
+    });
+    var first = track.firstChild;
+    var nodes = frag.childNodes;
+    for (var k = nodes.length - 1; k >= 0; k--) {
+      track.insertBefore(nodes[k], first);
+    }
+  }
+
+  // ============================================================
+  // КАРУСЕЛЬ
+  // ============================================================
+
   function getCardStep() {
     var card = track.querySelector('.tg-card');
     if (!card) return 0;
@@ -2638,12 +2669,7 @@ button.disabled {
 
     var visibleCount = getVisibleCount();
     var cards = track.querySelectorAll('.tg-card');
-    var centerIdx;
-    if (visibleCount >= 3) {
-      centerIdx = activeIdx + 1;
-    } else {
-      centerIdx = activeIdx;
-    }
+    var centerIdx = (visibleCount >= 3) ? activeIdx + 1 : activeIdx;
 
     for (var i = 0; i < cards.length; i++) {
       cards[i].classList.toggle('active', i === centerIdx);
@@ -2676,12 +2702,7 @@ button.disabled {
 
     var visibleCount = getVisibleCount();
     var allCards = track.querySelectorAll('.tg-card');
-    var centerIdx;
-    if (visibleCount >= 3) {
-      centerIdx = activeIdx + 1;
-    } else {
-      centerIdx = activeIdx;
-    }
+    var centerIdx = (visibleCount >= 3) ? activeIdx + 1 : activeIdx;
     for (var i = 0; i < allCards.length; i++) {
       allCards[i].classList.toggle('active', i === centerIdx);
     }
@@ -2706,12 +2727,7 @@ button.disabled {
 
     var visibleCount = getVisibleCount();
     var allCards = track.querySelectorAll('.tg-card');
-    var centerIdx;
-    if (visibleCount >= 3) {
-      centerIdx = activeIdx + 1;
-    } else {
-      centerIdx = activeIdx;
-    }
+    var centerIdx = (visibleCount >= 3) ? activeIdx + 1 : activeIdx;
     for (var i = 0; i < allCards.length; i++) {
       allCards[i].classList.toggle('active', i === centerIdx);
     }
@@ -2721,88 +2737,15 @@ button.disabled {
     }
   }
 
-  function appendCardsOnce() {
-    posts.forEach(function(p, i) {
-      var card = document.createElement('button');
-      card.type = 'button';
-      card.className = 'tg-card';
-      card.setAttribute('aria-label', 'Открыть пост: ' + p.title);
-      card.dataset.idx = i;
-
-      var thumbHtml;
-      if (p.img) {
-        thumbHtml = '<div class="tg-card-thumb"><img src="' + p.img + '" alt="" loading="lazy"></div>';
-      } else {
-        thumbHtml = '<div class="tg-card-thumb"><div class="ph-fallback">♥</div></div>';
-      }
-
-      var cardText = truncateMobile(p.text, 3);
-
-      card.innerHTML =
-        thumbHtml +
-        '<div class="tg-card-title">' + escapeHtml(p.title) + '</div>' +
-        '<div class="tg-card-text">' + escapeHtml(cardText) + '</div>' +
-        '<div class="tg-card-date">' + formatDate(p.date) + '</div>' +
-        TAP_ICON_SVG;
-
-      card.addEventListener('click', function(e) {
-        if (suppressClick) {
-          e.preventDefault();
-          e.stopPropagation();
-          return;
-        }
-        openModal(i);
-      });
-      track.appendChild(card);
-    });
-  }
-
-  function prependCardsOnce() {
-    var frag = document.createDocumentFragment();
-    posts.forEach(function(p, i) {
-      var card = document.createElement('button');
-      card.type = 'button';
-      card.className = 'tg-card';
-      card.setAttribute('aria-label', 'Открыть пост: ' + p.title);
-      card.dataset.idx = i;
-
-      var thumbHtml;
-      if (p.img) {
-        thumbHtml = '<div class="tg-card-thumb"><img src="' + p.img + '" alt="" loading="lazy"></div>';
-      } else {
-        thumbHtml = '<div class="tg-card-thumb"><div class="ph-fallback">♥</div></div>';
-      }
-
-      var cardText = truncateMobile(p.text, 3);
-
-      card.innerHTML =
-        thumbHtml +
-        '<div class="tg-card-title">' + escapeHtml(p.title) + '</div>' +
-        '<div class="tg-card-text">' + escapeHtml(cardText) + '</div>' +
-        '<div class="tg-card-date">' + formatDate(p.date) + '</div>' +
-        TAP_ICON_SVG;
-
-      card.addEventListener('click', function(e) {
-        if (suppressClick) {
-          e.preventDefault();
-          e.stopPropagation();
-          return;
-        }
-        openModal(i);
-      });
-      frag.appendChild(card);
-    });
-    var first = track.firstChild;
-    for (var k = posts.length - 1; k >= 0; k--) {
-      track.insertBefore(frag.childNodes[k], first);
-    }
-  }
-
   function restartAutoplay() {
     if (autoplayTimer) clearInterval(autoplayTimer);
     if (isPaused || posts.length < 2) return;
     autoplayTimer = setInterval(next, AUTOPLAY_MS);
   }
+
+  // ============================================================
+  // СВАЙПЫ / ТАЧ / КОЛЕСО
+  // ============================================================
 
   function onPointerDown(clientX, clientY) {
     if (posts.length < 2) return;
@@ -2916,6 +2859,23 @@ button.disabled {
     else prev();
   }, { passive: false });
 
+  // ============================================================
+  // МОДАЛКА ПОСТА
+  //
+  // Модалка должна вмещать не более 15 строк текста: 1 строка —
+  // заголовок, 14 строк — тело поста. Реальное ограничение задано
+  // в CSS через max-height: 23.2em (14 × 1.65 line-height).
+  //
+  // Логика: кладём ПОЛНЫЙ текст в modalBody, замеряем scrollHeight.
+  // Если превышает max-height — бинарным поиском отрезаем по одному
+  // слову с конца, добавляем ' ...' через пробел. Слова остаются
+  // целыми, многоточие — от последнего целого слова через пробел.
+  //
+  // Одно и то же число строк получается и на мобиле, и на десктопе,
+  // потому что max-height в em зависит только от font-size и
+  // line-height, а не от ширины окна.
+  // ============================================================
+
   function openModal(i) {
     var p = posts[i];
     if (!p) return;
@@ -2931,14 +2891,75 @@ button.disabled {
       modalMedia.innerHTML = '<div class="tg-modal-media"><div class="ph-fallback lg">♥</div></div>';
     }
 
-    // 12 строк всего: 1 строка — заголовок (отдельный блок),
-    // 11 строк — текст поста по мобильному эталону.
-    // «...» вставляется через пробел от последнего целого слова.
-    var truncatedText = truncateMobile(p.text, 11);
-    modalBody.innerHTML = buildModalHTML(truncatedText);
+    // Кладём весь текст как единый поток слов (без <p>), чтобы замер
+    // был честным — без больших margin между абзацами. Абзацы
+    // эмулируем обычным пробелом (для постов Telegram это приемлемо).
+    modalBody.innerHTML = '';
+    var textNode = document.createElement('span');
+    textNode.style.display = 'block';
+    textNode.style.whiteSpace = 'pre-wrap';
+    textNode.style.wordWrap = 'break-word';
+    textNode.style.overflowWrap = 'break-word';
+    // Сохраняем абзацные отступы как реальные переносы.
+    textNode.textContent = p.text;
+    modalBody.appendChild(textNode);
 
+    // Показываем модалку — иначе замер высоты невозможен.
     modal.classList.add('open');
     document.body.style.overflow = 'hidden';
+
+    // Замер и подгонка по строкам после layout.
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        fitModalBody(textNode, p.text, 14);
+      });
+    });
+  }
+
+  // fitModalBody: подгоняет <span> в modalBody так, чтобы его высота
+  // не превышала maxLines строк. Слова не рвём, ' ...' через пробел.
+  function fitModalBody(el, fullText, maxLines) {
+    if (!el) return;
+    var text = String(fullText || '');
+    el.textContent = text;
+
+    var lh = lineHeight(el);
+    var maxH = maxLines * lh + 1;
+
+    if (el.scrollHeight <= maxH) return;
+
+    var tokens = text.split(/\s+/).filter(function(w){ return w.length > 0; });
+    if (!tokens.length) { el.textContent = ''; return; }
+
+    var lo = 0, hi = tokens.length, bestCut = 0;
+    var suffix = ' ...';
+
+    while (lo <= hi) {
+      var mid = Math.floor((lo + hi) / 2);
+      var candidate = (mid < tokens.length)
+        ? tokens.slice(0, mid).join(' ') + suffix
+        : tokens.join(' ');
+      el.textContent = candidate;
+      if (el.scrollHeight <= maxH) {
+        bestCut = mid;
+        lo = mid + 1;
+      } else {
+        hi = mid - 1;
+      }
+    }
+
+    if (bestCut >= tokens.length) {
+      el.textContent = tokens.join(' ');
+    } else {
+      el.textContent = tokens.slice(0, bestCut).join(' ') + suffix;
+    }
+
+    var safety = 0;
+    while (el.scrollHeight > maxH && bestCut > 0 && safety < 60) {
+      bestCut -= 1;
+      el.textContent = tokens.slice(0, bestCut).join(' ') + suffix;
+      safety++;
+    }
   }
 
   function closeModal() {
@@ -2976,6 +2997,26 @@ button.disabled {
   window.addEventListener('resize', function() {
     var step = getCardStep();
     track.style.transform = 'translateX(' + (-activeIdx * step) + 'px)';
+    // Пересчитываем подгонку текста в карточках под новую ширину.
+    var cards = track.querySelectorAll('.tg-card');
+    for (var i = 0; i < cards.length; i++) {
+      var el = cards[i].querySelector('.tg-card-text');
+      var idx = parseInt(cards[i].dataset.idx, 10);
+      if (el && posts[idx]) {
+        try { fitTextToLines(el, posts[idx].text, 3); } catch (e) {}
+      }
+    }
+    // И в открытой модалке, если она есть.
+    if (modal.classList.contains('open')) {
+      var span = modalBody.querySelector('span');
+      // Найти текст поста по текущему заголовку
+      for (var k = 0; k < posts.length; k++) {
+        if (posts[k].title === modalTitle.textContent) {
+          try { fitModalBody(span, posts[k].text, 14); } catch (e) {}
+          break;
+        }
+      }
+    }
   });
 
   loadFeed();
