@@ -46,9 +46,6 @@ html, body {
   font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   font-size: 14px;
   overflow: hidden;
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
   overscroll-behavior: none;
   position: fixed;
   top: 0;
@@ -577,6 +574,8 @@ button.disabled {
   line-height: 1.65;
   white-space: pre-wrap;
   word-wrap: break-word;
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 .tg-modal-body a { color: var(--gold); text-decoration: underline; }
@@ -1390,6 +1389,39 @@ button.disabled {
 }
 
 /* ==== /LANDING ==== */
+
+/* ==== РАЗРЕШЕНИЕ ВЫДЕЛЕНИЯ ТЕКСТА НА ЛЕНДИНГЕ ==== */
+#landing,
+#landing *:not(button):not(.lnd-btn):not(.tg-card):not(.lang-trigger):not(.lang-option):not(.tg-modal-close):not(.lnd-contact-btn) {
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  -webkit-touch-callout: default;
+}
+
+#landing .lnd-h1,
+#landing .lnd-h2,
+#landing .lnd-lead,
+#landing .lnd-p,
+#landing .lnd-sub,
+#landing .lnd-kicker,
+#landing .lnd-hero-note,
+#landing .lnd-card p,
+#landing .lnd-card h3,
+#landing .lnd-bot p,
+#landing .lnd-bot h4,
+#landing .lnd-feature span,
+#landing .lnd-mobile-note .txt,
+#landing .lnd-footer,
+#landing .lnd-contacts-label,
+#landing .disclaimer {
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: text;
+}
+
+/* ==== /РАЗРЕШЕНИЕ ВЫДЕЛЕНИЯ ТЕКСТА ==== */
 </style>
 </head>
 <body>
@@ -1843,7 +1875,6 @@ button.disabled {
 (function() {
   try {
     document.addEventListener('contextmenu', (e) => { e.preventDefault(); return false; }, { capture: true });
-    document.addEventListener('selectstart', (e) => { e.preventDefault(); return false; }, { capture: true });
     document.addEventListener('dragstart', (e) => { e.preventDefault(); return false; }, { capture: true });
 
     document.addEventListener('keydown', (e) => {
@@ -1852,8 +1883,6 @@ button.disabled {
       if (e.ctrlKey && e.shiftKey && (k === 'i' || k === 'j' || k === 'c' || k === 'k')) { e.preventDefault(); return false; }
       if (e.metaKey && e.altKey && (k === 'i' || k === 'j' || k === 'c' || k === 'k')) { e.preventDefault(); return false; }
       if ((e.ctrlKey || e.metaKey) && k === 'u') { e.preventDefault(); return false; }
-      if ((e.ctrlKey || e.metaKey) && k === 's') { e.preventDefault(); return false; }
-      if ((e.ctrlKey || e.metaKey) && k === 'a') { e.preventDefault(); return false; }
     }, { capture: true });
   } catch (e) {}
 })();
