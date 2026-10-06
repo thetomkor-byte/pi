@@ -350,6 +350,7 @@ button.disabled {
   color: inherit;
   font-family: inherit;
   overflow: hidden;
+  position: relative;
 }
 
 .tg-card.active {
@@ -363,6 +364,7 @@ button.disabled {
     transform: translateY(-2px);
     box-shadow: 0 0 0 1px rgba(255,203,43,.12), 0 12px 28px rgba(0,0,0,.5);
   }
+  .tg-card:hover .tg-card-tap-icon { opacity: .55; }
 }
 
 .tg-card-thumb {
@@ -422,6 +424,19 @@ button.disabled {
   color: #555;
   font-size: clamp(11px, 1.7vmin, 13px);
   letter-spacing: .3px;
+}
+
+.tg-card-tap-icon {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  width: 16px;
+  height: 16px;
+  opacity: .25;
+  color: var(--gold);
+  transition: opacity .18s ease;
+  pointer-events: none;
+  display: block;
 }
 
 .tg-feed-dots {
@@ -610,6 +625,84 @@ button.disabled {
   text-align: center;
   color: #555;
   font-size: clamp(11px, 1.7vmin, 13px);
+}
+
+/* ==== INFO MODAL (для карточек-тапзон) ==== */
+
+#info-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 950;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0,0,0,.82);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+#info-modal.open {
+  display: flex;
+  animation: tgFadeIn .2s ease;
+}
+
+.info-modal-box {
+  position: relative;
+  width: 100%;
+  max-width: 620px;
+  max-height: 86vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  background: linear-gradient(180deg, #141414 0%, #0a0a0a 100%);
+  border: 1px solid #3a3018;
+  border-radius: 18px;
+  padding: clamp(20px, 4vw, 32px);
+  box-shadow: 0 30px 80px rgba(0,0,0,.8), 0 0 0 1px rgba(255,203,43,.08);
+  animation: tgSlideUp .28s cubic-bezier(.22,.61,.36,1);
+}
+
+.info-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid #3a3018;
+  background: rgba(255,203,43,.05);
+  color: var(--gold);
+  font-size: 20px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background .15s ease, transform .15s ease;
+  z-index: 2;
+}
+
+.info-modal-close:active { transform: scale(.92); }
+@media (hover: hover) { .info-modal-close:hover { background: rgba(255,203,43,.12); } }
+
+.info-modal-title {
+  color: #fff;
+  font-size: clamp(18px, 3.4vmin, 24px);
+  font-weight: 900;
+  line-height: 1.2;
+  margin-bottom: 16px;
+  padding-right: 30px;
+}
+
+.info-modal-body {
+  color: var(--muted-soft-2);
+  font-size: clamp(13px, 2vmin, 15px);
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 /* ==== LANDING ==== */
@@ -805,11 +898,11 @@ button.disabled {
 }
 
 .lnd-h1 {
-  font-size: clamp(32px, 7.4vmin, 62px);
+  font-size: clamp(24px, 5vmin, 40px);
   font-weight: 900;
-  line-height: 1.05;
-  letter-spacing: -1px;
-  margin-bottom: clamp(16px, 3vw, 22px);
+  line-height: 1.12;
+  letter-spacing: -.3px;
+  margin-bottom: 14px;
   color: #fff;
 }
 
@@ -833,34 +926,13 @@ button.disabled {
   align-items: center;
 }
 
+/* Размер такой же, как .lnd-p в финальном CTA */
 .lnd-hero-note {
-  color: var(--muted);
-  font-size: clamp(11px, 1.7vmin, 13px);
+  color: var(--muted-soft-2);
+  font-size: clamp(13px, 2vmin, 15px);
+  line-height: 1.6;
   margin-top: 16px;
   letter-spacing: .3px;
-}
-
-.lnd-hero-mobile-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 18px;
-  padding: 8px 14px;
-  border: 1px solid #3a3018;
-  border-radius: 999px;
-  background: rgba(255,203,43,.05);
-  color: var(--gold);
-  font-size: clamp(11px, 1.7vmin, 13px);
-  font-weight: 700;
-  letter-spacing: .4px;
-}
-
-.lnd-hero-mobile-badge .dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--gold);
-  box-shadow: 0 0 10px rgba(255,203,43,.6);
 }
 
 .lnd-card-fan {
@@ -959,6 +1031,18 @@ button.disabled {
   .lnd-grid-2 { grid-template-columns: repeat(2, 1fr); }
 }
 
+/* Сетка из 3 карточек в ряд для секции «Разделы и режимы» */
+.lnd-grid-3-sections {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(14px, 2.4vw, 22px);
+  margin-top: clamp(18px, 3vw, 28px);
+}
+
+@media (min-width: 760px) {
+  .lnd-grid-3-sections { grid-template-columns: repeat(3, 1fr); }
+}
+
 .lnd-card {
   background: linear-gradient(180deg, #131313 0%, #0a0a0a 100%);
   border: 1px solid #2a2520;
@@ -969,17 +1053,64 @@ button.disabled {
   transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
 }
 
+/* Ховер только для карточек без класса tappable (без значка) — убираем hover */
+.lnd-card:not(.tappable):hover {
+  border-color: #2a2520;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Ховер только для карточек-тапзон */
 @media (hover: hover) {
-  .lnd-card:hover {
+  .lnd-card.tappable:hover {
     border-color: #4a3f18;
     box-shadow: 0 0 0 1px rgba(255,203,43,.10), 0 18px 40px rgba(0,0,0,.5);
     transform: translateY(-2px);
   }
+  .lnd-card.tappable:hover .lnd-card-tap-icon { opacity: .55; }
 }
 
+/* Тап-зона карточка */
+.lnd-card.tappable {
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  font-family: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.lnd-card.tappable:active {
+  transform: translateY(0);
+}
+
+/* Значок — правый нижний угол, как у карточек карусели */
+.lnd-card-tap-icon {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  width: 16px;
+  height: 16px;
+  opacity: .25;
+  color: var(--gold);
+  transition: opacity .18s ease;
+  pointer-events: none;
+  display: block;
+}
+
+/* Всегда золотая окантовка у "золотых" карточек */
 .lnd-card.gold-edge {
   border-color: #5a4a1a;
   box-shadow: 0 0 0 1px rgba(255,203,43,.08), 0 0 40px rgba(255,203,43,.05);
+}
+
+/* Убираем ховерное изменение рамки у gold-edge, чтобы окантовка не пропадала */
+.lnd-card.gold-edge:hover {
+  border-color: #5a4a1a;
+  box-shadow: 0 0 0 1px rgba(255,203,43,.08), 0 0 40px rgba(255,203,43,.05);
+  transform: none;
 }
 
 .lnd-card .icon {
@@ -1312,10 +1443,6 @@ button.disabled {
   height: 36px;
 }
 
-.lnd-contact-btn.mail {
-  background: linear-gradient(180deg, #4aa8ff 0%, #1f7fe0 55%, #0b5fb3 100%);
-}
-
 .lnd-contact-btn:active {
   transform: scale(0.94);
   filter: brightness(1.08);
@@ -1346,8 +1473,9 @@ button.disabled {
   margin-top: clamp(18px, 3vw, 26px);
   padding: clamp(16px, 2.6vw, 22px);
   border-radius: 14px;
-  border: 1px solid #2a2520;
+  border: 1px solid #5a4a1a;
   background: linear-gradient(180deg, #101010, #0a0a0a);
+  box-shadow: 0 0 0 1px rgba(255,203,43,.08), 0 0 40px rgba(255,203,43,.05);
   display: flex;
   align-items: flex-start;
   gap: 14px;
@@ -1376,12 +1504,6 @@ button.disabled {
 
 .lnd-mobile-note .txt b { color: var(--text); font-weight: 700; }
 
-/* Одиночная карточка «Поддержка» — растянута на всю ширину лендинга */
-.lnd-card-wide {
-  grid-column: 1 / -1;
-  max-width: none;
-}
-
 @media (max-width: 520px) {
   .lnd-hero-actions { flex-direction: column; align-items: stretch; }
   .lnd-hero-actions .lnd-btn { width: 100%; }
@@ -1398,7 +1520,7 @@ button.disabled {
 
 /* ==== РАЗРЕШЕНИЕ ВЫДЕЛЕНИЯ ТЕКСТА НА ЛЕНДИНГЕ ==== */
 #landing,
-#landing *:not(button):not(.lnd-btn):not(.tg-card):not(.lang-trigger):not(.lang-option):not(.tg-modal-close):not(.lnd-contact-btn) {
+#landing *:not(button):not(.lnd-btn):not(.tg-card):not(.lang-trigger):not(.lang-option):not(.tg-modal-close):not(.lnd-contact-btn):not(.lnd-card.tappable):not(.info-modal-close) {
   user-select: text;
   -webkit-user-select: text;
   -moz-user-select: text;
@@ -1445,6 +1567,15 @@ button.disabled {
         Читать в Telegram
       </a>
       <div class="tg-modal-note">Откроется в приложении Telegram</div>
+    </div>
+  </div>
+
+  <!-- ==== INFO MODAL ==== -->
+  <div id="info-modal" role="dialog" aria-modal="true" aria-labelledby="info-modal-title-el">
+    <div class="info-modal-box">
+      <button class="info-modal-close" type="button" id="info-modal-close" aria-label="Закрыть">✕</button>
+      <h2 class="info-modal-title" id="info-modal-title-el"></h2>
+      <div class="info-modal-body" id="info-modal-body"></div>
     </div>
   </div>
 
@@ -1508,11 +1639,6 @@ button.disabled {
             </button>
           </div>
 
-          <div class="lnd-hero-mobile-badge">
-            <span class="dot"></span>
-            Сделано для мобильных устройств.
-          </div>
-
           <p class="lnd-hero-note">Бесплатно. Без установки. Без регистрации.</p>
         </div>
 
@@ -1559,7 +1685,13 @@ button.disabled {
         </div>
 
         <div class="lnd-grid-3">
-          <article class="lnd-card lnd-reveal">
+          <button class="lnd-card lnd-reveal tappable" type="button"
+                  data-info-title="Логика"
+                  data-info-body="Логика в покере — это не про правильные решения «по чарту», а про построение линии, при которой оппонент совершает ошибку. Каждое ваше действие должно иметь цель: заставить его сделать колл, когда он позади, фолд, когда он впереди, или рейз, когда он блефует.
+
+Вы учитесь задавать вопрос «зачем» перед каждым действием. Не «что я должен сделать по GTO», а «что я хочу, чтобы сделал оппонент после моего действия». Это ключевое отличие «правильной» игры от «точной».
+
+За столом Poker Trainer логика тренируется через анализ линии каждого бота: почему LAG-Pro рейзит именно тут, почему ICM-Exploiter на баббле играет тайтовее, почему Solver-Hybrid меняет паттерн против вас. Вы начинаете видеть логику за чужими решениями — и строить свою так, чтобы управлять чужой.">
             <div class="icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
@@ -1567,9 +1699,18 @@ button.disabled {
             </div>
             <h3>Логика</h3>
             <p>Выстроить линию так, чтобы оппонент совершил ошибку, а не просто «сыграл по чарту». Каждое действие — осознанный ответ на вопрос «зачем».</p>
-          </article>
+            <svg class="lnd-card-tap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 3H5a2 2 0 0 0-2 2v4M9 21H5a2 2 0 0 1-2-2v-4M15 3h4a2 2 0 0 1 2 2v4M15 21h4a2 2 0 0 0 2-2v-4"/>
+            </svg>
+          </button>
 
-          <article class="lnd-card lnd-reveal">
+          <button class="lnd-card lnd-reveal tappable" type="button"
+                  data-info-title="Интуиция"
+                  data-info-body="Интуиция в покере — это способность считать исход раздачи из поля информации до того, как карты открылись. Это не мистика и не «чуйка». Это накопленный опыт, который мозг обрабатывает быстрее, чем сознание успевает сформулировать.
+
+Вы учитесь читать линию поведения оппонента: темп ставок, размеры, повторяющиеся ошибки, смену образа. Замечать, когда он блефует в третий раз за орбиту. Чувствовать, когда «слишком тихо» — это сила, а не слабость.
+
+В Poker Trainer интуиция тренируется через многократное повторение и наблюдение. Боты играют по-разному каждый раз, но их характеры стабильны — и со временем вы начинаете «узнавать» их решения ещё до того, как они сделаны. Это и есть интуиция в чистом виде: быстрое считывание повторяющегося поведения.">
             <div class="icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
@@ -1578,9 +1719,18 @@ button.disabled {
             </div>
             <h3>Интуиция</h3>
             <p>Считать исход раздачи из поля информации до того, как карты открылись. Читать линию поведения и замечать повторяющиеся ошибки.</p>
-          </article>
+            <svg class="lnd-card-tap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 3H5a2 2 0 0 0-2 2v4M9 21H5a2 2 0 0 1-2-2v-4M15 3h4a2 2 0 0 1 2 2v4M15 21h4a2 2 0 0 0 2-2v-4"/>
+            </svg>
+          </button>
 
-          <article class="lnd-card lnd-reveal">
+          <button class="lnd-card lnd-reveal tappable" type="button"
+                  data-info-title="Связка логики и интуиции"
+                  data-info-body="Логика и интуиция в покере — не два отдельных навыка, а два конца одной линии. Логика говорит: «здесь я должен ставить 60% банка, чтобы у оппонента не было правильных шансов на колл». Интуиция говорит: «этот конкретный игрок на этой конкретной улице на такую ставку выкинет».
+
+Проблема в том, что по отдельности оба навыка ограничены. Чистая логика без интуиции превращается в игру по чарту — она правильная, но не эксплуатирует ошибки. Чистая интуиция без логики превращается в догадки — иногда гениальные, иногда катастрофические.
+
+В Poker Trainer вы тренируете связку: сначала считаете логически, какое действие должно быть «правильным в вакууме», потом через интуицию корректируете его под конкретного оппонента. И в этот момент ваша игра из «правильной» становится «точной» — она не просто соответствует теории, она забирает максимум фишек именно у этого игрока именно сейчас.">
             <div class="icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5"/>
@@ -1589,7 +1739,10 @@ button.disabled {
             </div>
             <h3>Связка логики и интуиции</h3>
             <p>Мало знать, кто сильнее на вскрытии. Нужно выстроить действия так, чтобы выиграть максимум фишек, а не просто забрать банк.</p>
-          </article>
+            <svg class="lnd-card-tap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 3H5a2 2 0 0 0-2 2v4M9 21H5a2 2 0 0 1-2-2v-4M15 3h4a2 2 0 0 1 2 2v4M15 21h4a2 2 0 0 0 2-2v-4"/>
+            </svg>
+          </button>
         </div>
       </div>
     </section>
@@ -1675,7 +1828,7 @@ button.disabled {
       <div class="lnd-inner">
         <div class="lnd-reveal">
           <div class="lnd-kicker">Чему ты научишься</div>
-          <h2 class="lnd-h2" id="lnd-benefit-title">Польза для всех игроков</h2>
+          <h2 class="lnd-h2" id="lnd-benefit-title">Польза <span class="gold">для всех игроков</span></h2>
         </div>
 
         <div class="lnd-grid-3">
@@ -1774,7 +1927,6 @@ button.disabled {
           <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Таймер на ход</b> и тонкие настройки: сложность, стеки, стиль карт, рост блайндов, показ карт/типов.</span></div>
           <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Реплей раздачи по шагам</b> — увидеть линию со стороны и найти свою ошибку.</span></div>
           <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>ICM-логика</b> на баббле и в призах — турнирные решения, а не кэш-игра.</span></div>
-          <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Удобное управление</b>: жесты, свайпы, тапы — всё для тренировки на телефоне.</span></div>
         </div>
       </div>
     </section>
@@ -1786,22 +1938,59 @@ button.disabled {
           <h2 class="lnd-h2" id="lnd-sections-title">Как <span class="gold">ориентироваться</span> внутри</h2>
         </div>
 
-        <div class="lnd-grid-2">
-          <article class="lnd-card lnd-reveal">
+        <div class="lnd-grid-3-sections">
+          <button class="lnd-card lnd-reveal tappable" type="button"
+                  data-info-title="Настройки"
+                  data-info-body="В разделе «Настройки» вы полностью управляете условиями тренировки. Язык интерфейса — русский или английский. Уровень сложности — от расслабленной игры против слабых VIP-ботов до жёсткого стола с PRO-классом.
+
+Стеки настраиваются в BB или в фишках — в зависимости от того, что вам удобнее для тренировки конкретного спота. Стиль карт: 2-цветные (для классического вида) или 4-цветные (для быстрого считывания мастей).
+
+Рост блайндов: медленный, средний, быстрый — или фиксированный, если вы хотите отработать конкретную глубину стека. Время на ход настраивается под ваш темп: от быстрого (стресс-тренировка) до расслабленного (обдумывание каждого решения).
+
+Типы игроков позволяют включать и выключать конкретные характеры ботов. Хотите тренироваться только против LAG-Pro и Solver-Hybrid? Отключите остальных. Хотите посмотреть, как вы справляетесь с одним Maniac? Оставьте только его.
+
+Показ карт — отдельная опция. Можно включить, чтобы видеть карты ботов после раздачи (для разбора), можно скрыть — для честной тренировки без подсказок. Это превращает Poker Trainer из тренажёра в полноценный симулятор реального стола.">
             <h3>Настройки</h3>
             <p>Язык, уровень сложности, стеки (BB/фишки), стиль карт (2/4-цветные), рост блайндов, время на ход, типы игроков, показ карт (скрытие/открытие).</p>
-          </article>
+            <svg class="lnd-card-tap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 3H5a2 2 0 0 0-2 2v4M9 21H5a2 2 0 0 1-2-2v-4M15 3h4a2 2 0 0 1 2 2v4M15 21h4a2 2 0 0 0 2-2v-4"/>
+            </svg>
+          </button>
 
-          <article class="lnd-card lnd-reveal">
+          <button class="lnd-card lnd-reveal tappable" type="button"
+                  data-info-title="Управление"
+                  data-info-body="Всё управление в Poker Trainer построено под большой палец — так, чтобы тренировка на телефоне была такой же удобной, как на большом экране, а может, даже удобнее.
+
+Свайпы вверх и вниз открывают настройки и руководство — не нужно тянуться к кнопкам в углу экрана. Слайдеры ставок настраиваются одним движением: точная подстройка размера бета без необходимости вводить цифры.
+
+Тапы по активным зонам: стек, карты, банк — все элементы, с которыми вы взаимодействуете чаще всего, реагируют на простое касание. Никаких двойных кликов и зажатий там, где нужно быстрое решение.
+
+Тапы с задержкой — для действий, где важна точность. Случайное касание не приведёт к фатальной ошибке, а осознанное нажатие сработает ровно тогда, когда вы этого хотите.
+
+Крупные тач-таргеты — минимальный размер 44 пикселя по гайдлайнам Apple и Google. Даже на маленьком экране вы не промахнётесь. Safe-area учитывает «монобровь» и «домашнюю полоску» на современных телефонах — ничто не перекрывает важные элементы управления.">
             <h3>Управление</h3>
             <p>Всё управление строится под большой палец для удобства тренировки на телефоне: свайпы, слайдеры, тапы по активным зонам, тапы с задержкой.</p>
-          </article>
-        </div>
+            <svg class="lnd-card-tap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 3H5a2 2 0 0 0-2 2v4M9 21H5a2 2 0 0 1-2-2v-4M15 3h4a2 2 0 0 1 2 2v4M15 21h4a2 2 0 0 0 2-2v-4"/>
+            </svg>
+          </button>
 
-        <article class="lnd-card lnd-reveal lnd-card-wide" style="margin-top:clamp(14px, 2.4vw, 22px);">
-          <h3>Поддержка</h3>
-          <p>Проект развивается только на средства от ваших донатов. Адреса для переводов (GGPoker, USDT TRC20) и контакты в Telegram.</p>
-        </article>
+          <button class="lnd-card lnd-reveal tappable" type="button"
+                  data-info-title="Поддержка"
+                  data-info-body="Poker Trainer — некоммерческий проект. Он не продаёт подписки, не показывает рекламу и не зарабатывает на игроках. Проект развивается исключительно на средства от ваших донатов.
+
+Адреса для переводов: GGPoker (перевод через покер-рум), USDT TRC20 (криптовалюта в сети Tron), VISA (карта для переводов в рублях и других валютах). Полные реквизиты и инструкции — в блоге проекта и в Telegram.
+
+Контакты в Telegram — основной канал связи. Через него можно задать вопрос, предложить идею, сообщить об ошибке или просто поделиться впечатлениями от тренировки.
+
+Каждый донат идёт на конкретные вещи: развитие ботов, новые режимы тренировки, улучшение интерфейса, поддержку серверов. Без вашей поддержки проект не смог бы существовать в том виде, в котором он есть сейчас.">
+            <h3>Поддержка</h3>
+            <p>Проект развивается только на средства от ваших донатов. Адреса для переводов (GGPoker, USDT TRC20, VISA), блог и контакты в Telegram.</p>
+            <svg class="lnd-card-tap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 3H5a2 2 0 0 0-2 2v4M9 21H5a2 2 0 0 1-2-2v-4M15 3h4a2 2 0 0 1 2 2v4M15 21h4a2 2 0 0 0 2-2v-4"/>
+            </svg>
+          </button>
+        </div>
       </div>
     </section>
 
@@ -1839,12 +2028,6 @@ button.disabled {
             <a class="lnd-contact-btn tg" id="lnd-contact-tg" href="https://t.me/ThePokerWay" target="_blank" rel="noopener noreferrer" aria-label="Написать в Telegram">
               <svg class="lnd-contact-svg" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
                 <path fill="#ffffff" d="M23.06 9.07 8.32 14.76c-.98.4-.97 1.78.01 2.17l3.66 1.4 1.4 4.5c.2.64 1.02.82 1.48.32l1.98-2.14 3.86 2.83c.55.4 1.34.11 1.49-.56l2.66-12.62c.16-.75-.6-1.35-1.8-1.59zM12.7 17.36l8.02-5.02-6.55 6.14-.18 2.55-1.29-3.67z"/>
-              </svg>
-            </a>
-            <a class="lnd-contact-btn mail" id="lnd-contact-mail" href="#" aria-label="Написать на Email">
-              <svg class="lnd-contact-svg" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-                <rect x="5" y="8.5" width="22" height="15" rx="2.6" fill="none" stroke="#ffffff" stroke-width="2"/>
-                <path d="M6.5 10.6 L16 17.6 L25.5 10.6" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </a>
           </div>
@@ -2087,25 +2270,6 @@ button.disabled {
     });
   }
 
-  function bindFooterContacts() {
-    var mail = document.getElementById('lnd-contact-mail');
-
-    if (mail) {
-      var openMail = function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        try {
-          var scheme = ['ma','il','to',':'].join('');
-          var user = ['the','tom','tot'].join('');
-          var domain = ['gm','ail','.','com'].join('');
-          window.location.href = scheme + user + '@' + domain;
-        } catch (err) {}
-      };
-      mail.addEventListener('click', openMail);
-      mail.addEventListener('touchend', openMail, { passive: false });
-    }
-  }
-
   var revealObserver = null;
   var heroObserver = null;
 
@@ -2146,7 +2310,6 @@ button.disabled {
 
   function boot() {
     initObservers();
-    bindFooterContacts();
   }
 
   if (document.readyState === 'loading') {
@@ -2228,6 +2391,54 @@ button.disabled {
   window.addEventListener('pagehide', close);
 })();
 // ==== /LANGUAGE SELECT ====
+</script>
+
+<script>
+// ==== INFO MODAL (карточки-тапзоны) ====
+(function() {
+  'use strict';
+
+  var infoModal = document.getElementById('info-modal');
+  var infoModalClose = document.getElementById('info-modal-close');
+  var infoTitle = document.getElementById('info-modal-title-el');
+  var infoBody = document.getElementById('info-modal-body');
+
+  if (!infoModal) return;
+
+  function openInfo(title, body) {
+    infoTitle.textContent = title || '';
+    infoBody.textContent = body || '';
+    infoModal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeInfo() {
+    infoModal.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  infoModalClose.addEventListener('click', closeInfo);
+  infoModal.addEventListener('click', function(e) {
+    if (e.target === infoModal) closeInfo();
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && infoModal.classList.contains('open')) closeInfo();
+  });
+
+  var tappables = document.querySelectorAll('.lnd-card.tappable');
+  for (var i = 0; i < tappables.length; i++) {
+    (function(card) {
+      card.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var t = card.getAttribute('data-info-title') || '';
+        var b = card.getAttribute('data-info-body') || '';
+        openInfo(t, b);
+      });
+    })(tappables[i]);
+  }
+})();
+// ==== /INFO MODAL ====
 </script>
 
 <script>
@@ -2357,6 +2568,8 @@ button.disabled {
     return 3;
   }
 
+  var TAP_ICON_SVG = '<svg class="tg-card-tap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3H5a2 2 0 0 0-2 2v4M9 21H5a2 2 0 0 1-2-2v-4M15 3h4a2 2 0 0 1 2 2v4M15 21h4a2 2 0 0 0 2-2v-4"/></svg>';
+
   function renderCards() {
     track.innerHTML = '';
     dotsWrap.innerHTML = '';
@@ -2379,7 +2592,8 @@ button.disabled {
         thumbHtml +
         '<div class="tg-card-title">' + escapeHtml(p.title) + '</div>' +
         '<div class="tg-card-text">' + escapeHtml(p.text.slice(0, 160)) + '</div>' +
-        '<div class="tg-card-date">' + formatDate(p.date) + '</div>';
+        '<div class="tg-card-date">' + formatDate(p.date) + '</div>' +
+        TAP_ICON_SVG;
 
       card.addEventListener('click', function(e) {
         if (suppressClick) {
