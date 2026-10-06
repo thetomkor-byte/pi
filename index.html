@@ -561,10 +561,6 @@ button.disabled {
   border-radius: 12px;
 }
 
-/* Тело модалки. Жёсткий лимит высоты 14 строк по эталонной ширине.
-   Размер окна и правила формирования абзацев одинаковы для мобильной
-   и десктопной версий — гарантируется офскрин-замером по ширине
-   мобильного эталона (см. JS, STAGE_WIDTH_FOR_MEASURE). */
 .tg-modal-body {
   color: var(--muted-soft-2);
   font-size: 14px;
@@ -573,7 +569,6 @@ button.disabled {
   overflow-wrap: break-word;
   user-select: text;
   -webkit-user-select: text;
-  /* 14 строк × 1.65 = 23.1em; берём чуть с запасом. */
   max-height: 23.2em;
   overflow: hidden;
 }
@@ -2341,7 +2336,7 @@ button.disabled {
 //
 // 2. Абзацы берутся из исходного текста поста как есть:
 //    разделитель абзацев — двойной перевод строки '\n\n' (или более).
-//    Внутри абзаца перевод строки одиночный — он превращается в пробел.
+//    Внутри абзаца одиночный '\n' превращается в пробел.
 //
 // 3. Эталон для подсчёта строк — мобильная ширина блока текста
 //    (STAGE_WIDTH = 326px: стандартный iPhone 390px минус padding
@@ -2355,15 +2350,24 @@ button.disabled {
 //    бюджет 14 строк исчерпан — обрезаем текущий абзац по словам
 //    на границе целого слова и ставим ' ...' через пробел.
 //
-// 5. Обрезка внутри абзаца: бинарный поиск по числу слов, при
-//    котором абзац ещё влезает в оставшиеся строки. Слова не
-//    рвутся никогда. Многоточие только в самом конце всего текста.
+// 5. ПРАВИЛО МНОГОТОЧИЯ:
+//    - Если ВЕСЬ текст поста (все абзацы + пустые строки между
+//      ними) укладывается в maxLines строк — многоточие НЕ ставится.
+//    - Если хоть что-то обрезано (абзац укорочен, или часть абзацев
+//      не вошла) — в САМОМ КОНЦЕ последнего абзаца ставится ' ...'
+//      через пробел от последнего целого слова.
+//    - Обрезка идёт строго по массиву слов — разрыв по буквам
+//      невозможен.
+//    - Суффикс ' ...' участвует в подсчёте строк: если из-за него
+//      последний абзац перестаёт влезать, отрезаем ещё одно слово
+//      с конца, пока не влезет вместе с суффиксом. То есть текст
+//      заполняется максимально плотно, а последнее слово всегда
+//      остаётся целым и перед ' ...' есть пробел.
+//    - Короткие союзы/предлоги («и», «а», «не», «к», «в», «с»)
+//      могут оказаться последним словом перед ' ...' — это допустимо,
+//      спец. фильтра нет.
 //
-// 6. Если весь текст влезает целиком (все абзацы + пустые строки
-//    между ними ≤ 14 строк) — обрезки не происходит, многоточие
-//    не ставится.
-//
-// 7. Это правило работает автоматически для любого будущего поста
+// 6. Это правило работает автоматически для любого будущего поста
 //    из Telegram: ничего не надо править руками под каждый пост.
 //
 // ============================================================
@@ -2378,16 +2382,16 @@ button.disabled {
   var SWIPE_THRESHOLD = 40;
   var WHEEL_THROTTLE = 600;
 
+  // Единая константа многоточия: пробел + три обычные точки.
+  // Никаких «умных» многоточий '…' и никаких склеек 'слово...'
+  // без пробела — везде используем эту константу.
+  var ELLIPSIS = ' ...';
+
   // === КОНСТАНТЫ ДЛЯ ФОРМИРОВАНИЯ ТЕКСТА В МОДАЛКЕ ===
-  // Эталонная ширина блока текста в модалке (мобильный iPhone 390px
-  // минус padding модалки 2×32px = 326px). Используется как «метр»
-  // для подсчёта строк — так текст гарантированно одинаковый
-  // и на мобиле, и на десктопе.
   var STAGE_WIDTH = 326;
-  // Размер шрифта и line-height должны совпадать с CSS .tg-modal-body
   var STAGE_FONT_SIZE = 14;
   var STAGE_LINE_HEIGHT = 1.65;
-  // Лимиты строк в модалке: 1 заголовок + 14 текста = 15 всего.
+  // 1 строка заголовка + 14 строк тела = 15 строк всего.
   var MODAL_TEXT_MAX_LINES = 14;
   // Лимит строк в карточке карусели
   var CARD_TEXT_MAX_LINES = 3;
@@ -2427,9 +2431,7 @@ button.disabled {
   })();
 
   // ============================================================
-  // ОФСКРИН-МЕТР: невидимый элемент фиксированной ширины 326px,
-  // стилизованный под .tg-modal-body. В нём считаем реальные
-  // строки абзацев.
+  // ОФСКРИН-МЕТР (эталонная ширина 326px)
   // ============================================================
 
   var measureEl = null;
@@ -2455,7 +2457,6 @@ button.disabled {
     return measureEl;
   }
 
-  // Возвращает число строк, которое займёт текст на эталонной ширине.
   function countLines(text) {
     if (!text) return 0;
     var el = getMeasureEl();
@@ -2464,9 +2465,7 @@ button.disabled {
     return Math.max(1, Math.round(el.scrollHeight / lh));
   }
 
-  // Разбивает текст поста на абзацы (по '\n\n' и более) и нормализует
-  // каждый абзац: одиночные '\n' превращает в пробел, лишние пробелы
-  // убирает. Пустые абзацы отбрасывает.
+  // Разбивает текст поста на абзацы (по '\n\n' и более).
   function parseParagraphs(text) {
     if (!text) return [];
     var raw = String(text).split(/\n{2,}/);
@@ -2478,20 +2477,22 @@ button.disabled {
     return out;
   }
 
-  // Отрезает от абзаца слова с конца так, чтобы он уложился в maxLines.
-  // Возвращает { text, lines }. Многоточие (' ...') добавляется только
-  // если слово реально было отрезано.
+  // Отрезает от абзаца слова с конца так, чтобы он уложился в maxLines
+  // вместе с суффиксом многоточия.
+  // Возвращает { text, lines, truncated }.
   function fitParagraph(paragraph, maxLines, addEllipsis) {
-    if (!paragraph) return { text: '', lines: 0 };
-    if (countLines(paragraph) <= maxLines) {
-      return { text: paragraph, lines: countLines(paragraph) };
+    if (!paragraph) return { text: '', lines: 0, truncated: false };
+
+    var full = countLines(paragraph);
+    if (full <= maxLines) {
+      return { text: paragraph, lines: full, truncated: false };
     }
-    if (maxLines <= 0) return { text: '', lines: 0 };
+    if (maxLines <= 0) return { text: '', lines: 0, truncated: true };
 
     var words = paragraph.split(/\s+/).filter(function(w){ return w.length; });
-    if (!words.length) return { text: '', lines: 0 };
+    if (!words.length) return { text: '', lines: 0, truncated: true };
 
-    var suffix = addEllipsis ? ' ...' : '';
+    var suffix = addEllipsis ? ELLIPSIS : '';
     var lo = 0, hi = words.length, bestCut = 0, bestLines = 0;
 
     while (lo <= hi) {
@@ -2509,7 +2510,7 @@ button.disabled {
       }
     }
 
-    // Защитный шаг: если из-за суффикса всё же чуть-чуть переполнили —
+    // Защитный проход: если из-за суффикса всё же чуть-чуть переполнили —
     // уменьшаем ещё на слово.
     var guard = 0;
     while (bestCut > 0 && guard < 30) {
@@ -2522,60 +2523,110 @@ button.disabled {
     }
 
     if (bestCut >= words.length) {
-      var full = words.join(' ');
-      return { text: full, lines: countLines(full) };
+      var fullText = words.join(' ');
+      return { text: fullText, lines: countLines(fullText), truncated: false };
     }
     var out = bestCut > 0 ? (words.slice(0, bestCut).join(' ') + suffix) : '';
-    return { text: out, lines: countLines(out) };
+    return { text: out, lines: countLines(out), truncated: true };
   }
 
   // Формирует массив абзацев, которые поместятся в бюджет maxLines.
   // Между абзацами резервирует 1 строку (пустая строка).
-  // Возвращает массив строк-абзацев (готовых к вставке в <p>).
+  // Возвращает { paragraphs: [...], truncated: bool }.
   function fitParagraphsToBudget(paragraphs, maxLines) {
     var result = [];
     var used = 0;
+    var truncated = false;
 
     for (var i = 0; i < paragraphs.length; i++) {
       var p = paragraphs[i];
       var needBlankBefore = (i > 0 && result.length > 0) ? 1 : 0;
       var available = maxLines - used - needBlankBefore;
 
-      if (available <= 0) break;
+      if (available <= 0) {
+        // Бюджет исчерпан, остались необработанные абзацы — текст обрезан.
+        truncated = true;
+        break;
+      }
 
       var pLines = countLines(p);
 
       if (pLines <= available) {
-        // Абзац влезает целиком.
         if (needBlankBefore) used += 1;
         result.push(p);
         used += pLines;
         continue;
       }
 
-      // Абзац не влезает — обрезаем по словам и останавливаемся.
+      // Абзац не влезает — обрезаем и останавливаемся.
       var fitted = fitParagraph(p, available, true);
       if (fitted.text) {
         if (needBlankBefore) used += 1;
         result.push(fitted.text);
         used += fitted.lines;
       }
+      truncated = true;
       break;
     }
 
-    return result;
+    // ПРАВИЛО МНОГОТОЧИЯ (см. блок комментария в начале модуля):
+    // если хоть что-то обрезано, и у последнего абзаца ещё нет ELLIPSIS —
+    // добавляем его, но с пересчётом высоты: если суффикс выталкивает
+    // текст за бюджет — отрезаем одно слово с конца, пока не влезет.
+    if (truncated && result.length > 0) {
+      var last = result[result.length - 1];
+      // Уже есть ' ...' в конце?
+      if (!endsWithEllipsis(last)) {
+        // Пробуем добавить суффикс с проверкой строк.
+        var words = last.split(/\s+/).filter(function(w){ return w.length; });
+        var suffix = ELLIPSIS;
+
+        // Сколько строк уйдёт на все абзацы до последнего?
+        var usedBeforeLast = 0;
+        for (var k = 0; k < result.length - 1; k++) {
+          usedBeforeLast += countLines(result[k]) + 1; // +1 пустая строка
+        }
+        var lastBudget = maxLines - usedBeforeLast;
+
+        // Ищем максимальное число слов, при котором '<words> ...' влезает
+        // в lastBudget строк.
+        var loW = 1, hiW = words.length, bestW = 0;
+        while (loW <= hiW) {
+          var midW = Math.floor((loW + hiW) / 2);
+          var cand = words.slice(0, midW).join(' ') + suffix;
+          if (countLines(cand) <= lastBudget) {
+            bestW = midW;
+            loW = midW + 1;
+          } else {
+            hiW = midW - 1;
+          }
+        }
+
+        if (bestW >= 1) {
+          result[result.length - 1] = words.slice(0, bestW).join(' ') + suffix;
+        } else {
+          // Не влезает даже одно слово — оставляем как есть без ELLIPSIS.
+        }
+      }
+    }
+
+    return { paragraphs: result, truncated: truncated };
+  }
+
+  function endsWithEllipsis(s) {
+    return typeof s === 'string' && /\.\.\.$/.test(s.trim());
   }
 
   // ============================================================
-  // КАРТОЧКИ В КАРУСЕЛИ: обрезка текста по реальной ширине карточки,
-  // 3 строки максимум. Используем реальный DOM карточки для замера,
-  // а не офскрин — здесь ширина карточки разная на разных экранах,
-  // и важно именно её заполнить.
+  // КАРТОЧКИ В КАРУСЕЛИ
+  // Правило многоточия — то же самое:
+  //  - если весь текст влез в 3 строки → многоточия нет;
+  //  - если обрезан → ' ...' через пробел от последнего целого слова;
+  //  - суффикс участвует в подсчёте строк.
   // ============================================================
 
   function fitCardText(el, fullText, maxLines) {
     if (!el) return;
-    // Поток слов: абзацы склеиваем в пробелы.
     var words = String(fullText || '')
       .replace(/\s+/g, ' ')
       .trim()
@@ -2591,7 +2642,7 @@ button.disabled {
 
     if (el.scrollHeight <= maxH) return;
 
-    var suffix = ' ...';
+    var suffix = ELLIPSIS;
     var lo = 0, hi = words.length, bestCut = 0;
 
     while (lo <= hi) {
@@ -2614,12 +2665,11 @@ button.disabled {
       el.textContent = words.slice(0, bestCut).join(' ') + suffix;
     }
 
-    // Защитный проход
     var guard = 0;
     while (el.scrollHeight > maxH && bestCut > 0 && guard < 30) {
       bestCut -= 1;
       el.textContent = words.slice(0, bestCut).join(' ') + suffix;
-      guard += 1;
+      guard++;
     }
   }
 
@@ -3031,17 +3081,13 @@ button.disabled {
       modalMedia.innerHTML = '<div class="tg-modal-media"><div class="ph-fallback lg">♥</div></div>';
     }
 
-    // Обрабатываем текст по правилам:
-    //  1. Разбиваем на абзацы по исходным '\n\n'.
-    //  2. Отбираем абзацы так, чтобы суммарный бюджет был ≤ 14 строк,
-    //     при этом между абзацами резервируется 1 строка под пустую.
-    //  3. Рендерим набор <p> — каждый абзац своим параграфом.
+    // Обрабатываем текст по правилам модуля:
     var paragraphs = parseParagraphs(p.text);
     var fitted = fitParagraphsToBudget(paragraphs, MODAL_TEXT_MAX_LINES);
 
     var html = '';
-    for (var k = 0; k < fitted.length; k++) {
-      html += '<p>' + escapeHtml(fitted[k]) + '</p>';
+    for (var k = 0; k < fitted.paragraphs.length; k++) {
+      html += '<p>' + escapeHtml(fitted.paragraphs[k]) + '</p>';
     }
     modalBody.innerHTML = html || '<p></p>';
 
@@ -3084,7 +3130,6 @@ button.disabled {
   window.addEventListener('resize', function() {
     var step = getCardStep();
     track.style.transform = 'translateX(' + (-activeIdx * step) + 'px)';
-    // Пересчёт текста в карточках под новую ширину.
     var cards = track.querySelectorAll('.tg-card');
     for (var i = 0; i < cards.length; i++) {
       var el = cards[i].querySelector('.tg-card-text');
