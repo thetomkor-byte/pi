@@ -409,15 +409,13 @@ button.disabled {
   text-overflow: ellipsis;
 }
 
-/* Текст в карточке карусели: ровно 3 строки через line-clamp.
-   padding-right резервирует место под значок тап-зоны (16px + отступ). */
+/* Текст в карточке карусели: обрезается JS-функцией truncateMobile
+   до 3 строк по мобильному эталону. CSS не делает line-clamp,
+   чтобы «...» вставлялось через пробел от слова, а не впритык. */
 .tg-card-text {
   color: var(--muted-soft-2);
   font-size: clamp(12px, 1.9vmin, 14px);
   line-height: 1.55;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
   overflow: hidden;
   word-wrap: break-word;
   overflow-wrap: break-word;
@@ -566,8 +564,6 @@ button.disabled {
   border-radius: 12px;
 }
 
-/* Текст в модалке: автоматический перенос по ширине окошка,
-   абзацы разделены <p>, а не символами \n */
 .tg-modal-body {
   color: var(--muted-soft-2);
   font-size: clamp(13px, 2vmin, 15px);
@@ -714,7 +710,6 @@ button.disabled {
   position: relative;
 }
 
-/* Разделительная линия с плавным исчезновением по краям */
 .lnd-section + .lnd-section::before,
 #landing .lnd-hero + .lnd-section::before {
   content: "";
@@ -917,7 +912,6 @@ button.disabled {
   align-items: center;
 }
 
-/* Размер такой же, как .lnd-p в финальном CTA */
 .lnd-hero-note {
   color: var(--muted-soft-2);
   font-size: clamp(13px, 2vmin, 15px);
@@ -1022,7 +1016,6 @@ button.disabled {
   .lnd-grid-2 { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* Сетка из 3 карточек в ряд для секции «Разделы и режимы» */
 .lnd-grid-3-sections {
   display: grid;
   grid-template-columns: 1fr;
@@ -1044,14 +1037,12 @@ button.disabled {
   transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
 }
 
-/* Ховер только для карточек без класса tappable (без значка) — убираем hover */
 .lnd-card:not(.tappable):hover {
   border-color: #2a2520;
   box-shadow: none;
   transform: none;
 }
 
-/* Ховер только для карточек-тапзон */
 @media (hover: hover) {
   .lnd-card.tappable:hover {
     border-color: #4a3f18;
@@ -1061,7 +1052,6 @@ button.disabled {
   .lnd-card.tappable:hover .lnd-card-tap-icon { opacity: .55; }
 }
 
-/* Тап-зона карточка */
 .lnd-card.tappable {
   cursor: pointer;
   text-align: left;
@@ -1077,7 +1067,6 @@ button.disabled {
   transform: translateY(0);
 }
 
-/* Подсветка на мобильных при нажатии */
 @media (hover: none) {
   .lnd-card.tappable:active,
   .tg-card:active {
@@ -1087,7 +1076,6 @@ button.disabled {
   }
 }
 
-/* Значок — правый нижний угол, как у карточек карусели */
 .lnd-card-tap-icon {
   position: absolute;
   right: 10px;
@@ -1101,13 +1089,11 @@ button.disabled {
   display: block;
 }
 
-/* Всегда золотая окантовка у "золотых" карточек */
 .lnd-card.gold-edge {
   border-color: #5a4a1a;
   box-shadow: 0 0 0 1px rgba(255,203,43,.08), 0 0 40px rgba(255,203,43,.05);
 }
 
-/* Убираем ховерное изменение рамки у gold-edge, чтобы окантовка не пропадала */
 .lnd-card.gold-edge:hover {
   border-color: #5a4a1a;
   box-shadow: 0 0 0 1px rgba(255,203,43,.08), 0 0 40px rgba(255,203,43,.05);
@@ -1270,7 +1256,6 @@ button.disabled {
 
 .lnd-feature span b { color: var(--text); font-weight: 700; }
 
-/* Кнопка «Начать игру» после Maniac — центрирована на десктопе, растянута на мобильном */
 .lnd-bot-cta {
   display: flex;
   justify-content: center;
@@ -1404,7 +1389,6 @@ button.disabled {
 
 .lnd-mobile-note .txt b { color: var(--text); font-weight: 700; }
 
-/* Мобильная адаптация: кнопка hero растянута, note центрирован под кнопкой */
 @media (max-width: 520px) {
   .lnd-hero-actions {
     flex-direction: column;
@@ -1416,8 +1400,6 @@ button.disabled {
   .lnd-hero-note { text-align: center; }
 }
 
-/* ==== МОБИЛЬНОЕ ЦЕНТРИРОВАНИЕ ВЕЕРА КАРТ ==== */
-/* В десктопной версии ничего не меняется. На мобильном веер карт центрируется. */
 @media (max-width: 859px) {
   .lnd-hero-visual {
     height: clamp(180px, 42vw, 280px);
@@ -1425,7 +1407,6 @@ button.disabled {
   .lnd-card-fan {
     position: relative;
   }
-  /* Карты центрируются через сдвиг всей группы влево: веер изначально смещён вправо */
   .lnd-play-card.ten-diamonds { transform: rotate(-22deg) translate(calc(-92% + 32%), 10%); }
   .lnd-play-card.jack-diamonds { transform: rotate(-11deg) translate(calc(-64% + 32%), 5%); }
   .lnd-play-card.queen-diamonds { transform: rotate(0deg) translate(calc(-32% + 32%), 0%); }
@@ -1439,9 +1420,6 @@ button.disabled {
   .lnd-play-card { transition: none; }
 }
 
-/* ==== /LANDING ==== */
-
-/* ==== РАЗРЕШЕНИЕ ВЫДЕЛЕНИЯ ТЕКСТА НА ЛЕНДИНГЕ ==== */
 #landing,
 #landing *:not(button):not(.lnd-btn):not(.tg-card):not(.lang-trigger):not(.lang-option):not(.lnd-card.tappable) {
   user-select: text;
@@ -1470,13 +1448,10 @@ button.disabled {
   -webkit-user-select: text;
   cursor: text;
 }
-
-/* ==== /РАЗРЕШЕНИЕ ВЫДЕЛЕНИЯ ТЕКСТА ==== */
 </style>
 </head>
 <body>
 
-  <!-- ==== POST MODAL ==== -->
   <div id="tg-modal" role="dialog" aria-modal="true" aria-labelledby="tg-modal-title-el">
     <div class="tg-modal-box">
       <div class="tg-modal-meta" id="tg-modal-meta"></div>
@@ -1491,7 +1466,6 @@ button.disabled {
     </div>
   </div>
 
-  <!-- ==== INFO MODAL ==== -->
   <div id="info-modal" role="dialog" aria-modal="true" aria-labelledby="info-modal-title-el">
     <div class="info-modal-box">
       <h2 class="info-modal-title" id="info-modal-title-el"></h2>
@@ -1499,7 +1473,6 @@ button.disabled {
     </div>
   </div>
 
-  <!-- ==== LANDING ==== -->
   <div id="landing" aria-label="Poker Trainer — лендинг">
 
     <section id="tg-feed" aria-label="Последние посты из Telegram">
@@ -1945,7 +1918,6 @@ button.disabled {
     </footer>
 
   </div>
-  <!-- ==== /LANDING ==== -->
 
   <div id="landing-sticky-cta" aria-hidden="true">
     <button class="lnd-btn" type="button" data-action="enter-app" aria-label="Играть">
@@ -2400,9 +2372,6 @@ button.disabled {
   })();
 
   // 10 постов на темы проекта и лендинга. Заголовки — не более 4 слов.
-  // Тексты увеличены, чтобы:
-  //  1) в карточке карусели гарантированно заполнялись 3 строки;
-  //  2) в модалке было что показать на 11 строк.
   var DEMO_POSTS = [
     {
       title: 'Логика и интуиция',
@@ -2511,11 +2480,12 @@ button.disabled {
 
   var TAP_ICON_SVG = '<svg class="tg-card-tap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3H5a2 2 0 0 0-2 2v4M9 21H5a2 2 0 0 1-2-2v-4M15 3h4a2 2 0 0 1 2 2v4M15 21h4a2 2 0 0 0 2-2v-4"/></svg>';
 
-  // Мобильный эталон для подсчёта строк в модалке: ~38 символов в строке.
+  // Мобильный эталон для подсчёта строк: ~38 символов в строке.
   var MOBILE_LINE_CHARS = 38;
 
-  // Обрезает текст до maxLines "строк" по мобильному эталону,
-  // обрезая ТОЛЬКО на границе слов и добавляя " ..." в конце.
+  // Обрезает текст до maxLines "строк" по мобильному эталону.
+  // Обрезка идёт ТОЛЬКО на границе целых слов: последнее слово
+  // остаётся целым, а после него (через пробел) добавляется "...".
   // Пустые строки между абзацами считаются за строку.
   function truncateMobile(text, maxLines) {
     if (!text) return '';
@@ -2578,6 +2548,7 @@ button.disabled {
 
     var out = result.join('\n');
     if (truncated) {
+      // Убираем хвостовые пробелы и вставляем "..." через пробел от последнего слова.
       out = out.replace(/\s+$/, '');
       if (out) out = out + ' ...';
     }
@@ -2585,8 +2556,6 @@ button.disabled {
   }
 
   // Собирает HTML для модалки: обрезанный текст → набор <p>.
-  // Пустые строки (разделители абзацев после обрезки) отбрасываются,
-  // но сам факт отдельного абзаца сохраняется — каждый абзац в своём <p>.
   function buildModalHTML(text) {
     if (!text) return '<p></p>';
     var paragraphs = String(text).split(/\n{2,}/);
@@ -2601,9 +2570,6 @@ button.disabled {
     return any ? html : '<p></p>';
   }
 
-  // В карточке карусели текст НЕ обрезаем — отдаём весь текст,
-  // а CSS `-webkit-line-clamp: 3` сам покажет ровно 3 строки до края карточки
-  // и обрежет строго на границе слов.
   function renderCards() {
     track.innerHTML = '';
     dotsWrap.innerHTML = '';
@@ -2622,10 +2588,15 @@ button.disabled {
         thumbHtml = '<div class="tg-card-thumb"><div class="ph-fallback">♥</div></div>';
       }
 
+      // Текст карточки обрезаем через JS до 3 строк по мобильному эталону —
+      // так «...» встаёт через пробел от последнего целого слова,
+      // а не впритык, как делает встроенный line-clamp.
+      var cardText = truncateMobile(p.text, 3);
+
       card.innerHTML =
         thumbHtml +
         '<div class="tg-card-title">' + escapeHtml(p.title) + '</div>' +
-        '<div class="tg-card-text">' + escapeHtml(p.text) + '</div>' +
+        '<div class="tg-card-text">' + escapeHtml(cardText) + '</div>' +
         '<div class="tg-card-date">' + formatDate(p.date) + '</div>' +
         TAP_ICON_SVG;
 
@@ -2765,10 +2736,12 @@ button.disabled {
         thumbHtml = '<div class="tg-card-thumb"><div class="ph-fallback">♥</div></div>';
       }
 
+      var cardText = truncateMobile(p.text, 3);
+
       card.innerHTML =
         thumbHtml +
         '<div class="tg-card-title">' + escapeHtml(p.title) + '</div>' +
-        '<div class="tg-card-text">' + escapeHtml(p.text) + '</div>' +
+        '<div class="tg-card-text">' + escapeHtml(cardText) + '</div>' +
         '<div class="tg-card-date">' + formatDate(p.date) + '</div>' +
         TAP_ICON_SVG;
 
@@ -2800,10 +2773,12 @@ button.disabled {
         thumbHtml = '<div class="tg-card-thumb"><div class="ph-fallback">♥</div></div>';
       }
 
+      var cardText = truncateMobile(p.text, 3);
+
       card.innerHTML =
         thumbHtml +
         '<div class="tg-card-title">' + escapeHtml(p.title) + '</div>' +
-        '<div class="tg-card-text">' + escapeHtml(p.text) + '</div>' +
+        '<div class="tg-card-text">' + escapeHtml(cardText) + '</div>' +
         '<div class="tg-card-date">' + formatDate(p.date) + '</div>' +
         TAP_ICON_SVG;
 
@@ -2958,8 +2933,7 @@ button.disabled {
 
     // 12 строк всего: 1 строка — заголовок (отдельный блок),
     // 11 строк — текст поста по мобильному эталону.
-    // Пустые строки между абзацами считаются отдельными строками.
-    // Один и тот же текст используется и на мобильной, и на десктопной версии.
+    // «...» вставляется через пробел от последнего целого слова.
     var truncatedText = truncateMobile(p.text, 11);
     modalBody.innerHTML = buildModalHTML(truncatedText);
 
