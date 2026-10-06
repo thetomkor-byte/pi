@@ -502,10 +502,7 @@ button.disabled {
 
 @keyframes tgFadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-/* МОБИЛЬНАЯ версия (базовая): окно 390×620, padding 20px.
-   Внутренняя ширина контента = 350px.
-   Высота 620px: картинка 16:9 (197px) + заголовок + 11 строк текста + футер
-   влезают полностью, текст снизу не обрезается. */
+/* МОБИЛЬНАЯ версия: окно 390×620, padding 20px, внутренняя ширина 350px. */
 .tg-modal-box {
   position: relative;
   width: 100%;
@@ -523,9 +520,7 @@ button.disabled {
   overflow: hidden;
 }
 
-/* ДЕСКТОПНАЯ версия (≥ 860px): окно 540px,
-   высота auto по содержимому, но не больше 700px.
-   padding 20px → внутренняя ширина 500px. */
+/* ДЕСКТОП: окно 540px, height auto (max 700px), внутренняя ширина 500px. */
 @media (min-width: 860px) {
   .tg-modal-box {
     max-width: 540px;
@@ -540,7 +535,6 @@ button.disabled {
   to { transform: translateY(0); opacity: 1; }
 }
 
-/* Картинка поста: 16:9, заполняет всю внутреннюю ширину окна. */
 .tg-modal-media {
   position: relative;
   margin: 0 0 12px;
@@ -566,7 +560,6 @@ button.disabled {
   border-radius: 12px;
 }
 
-/* Заголовок — всегда 1 строка, никогда не сжимается. */
 .tg-modal-title {
   color: #fff;
   font-size: clamp(18px, 3.4vmin, 22px);
@@ -579,9 +572,8 @@ button.disabled {
   flex-shrink: 0;
 }
 
-/* Тело текста: 100% внутренней ширины окна.
-   Мобила = 350px, десктоп = 500px.
-   overflow: hidden — защита от переполнения. */
+/* ГЛАВНОЕ: body занимает ровно остаток места в flex-контейнере
+   и жёстко обрезается снизу, не залезая под кнопку. */
 .tg-modal-body {
   color: var(--muted-soft-2);
   font-size: 14px;
@@ -590,28 +582,17 @@ button.disabled {
   overflow-wrap: break-word;
   user-select: text;
   -webkit-user-select: text;
+  white-space: pre-wrap;
   width: 100%;
-  overflow: hidden;
+  flex: 1 1 auto;
   min-height: 0;
-}
-
-/* Отступ между абзацами — компактный, 0.9em.
-   Раньше было 1.65em — слишком много пустоты. */
-.tg-modal-body p {
-  margin: 0 0 0.9em;
-  padding: 0;
-}
-
-.tg-modal-body p:last-child {
-  margin-bottom: 0;
+  overflow: hidden;
 }
 
 .tg-modal-body a { color: var(--gold); text-decoration: underline; }
 
-/* Футер: кнопка + текст под ней, прижаты к нижнему краю окна. */
 .tg-modal-footer {
-  margin-top: auto;
-  padding-top: 16px;
+  margin-top: 16px;
   flex-shrink: 0;
 }
 
@@ -646,7 +627,7 @@ button.disabled {
   font-size: clamp(11px, 1.7vmin, 13px);
 }
 
-/* ==== INFO MODAL (для карточек-тапзон) ==== */
+/* ==== INFO MODAL ==== */
 
 #info-modal {
   position: fixed;
@@ -1126,7 +1107,7 @@ button.disabled {
 
 .lnd-card.gold-edge:hover {
   border-color: #5a4a1a;
-  box-shadow: 0 0 0 1px rgba(255,203,43,.08), 0 0 40px rgba(255,203,43,.05);
+  box-shadow: 0 0 0 1px rgba(255,203,43,.08), 0 0 0 40px rgba(255,203,43,.05);
   transform: none;
 }
 
@@ -2363,42 +2344,31 @@ button.disabled {
 // ЕДИНЫЕ ПРАВИЛА ПУБЛИКАЦИИ ПОСТОВ ИЗ TELEGRAM
 // ============================================================
 //
-// 1. ПОРЯДОК БЛОКОВ В ПОСТЕ:
-//    МОДАЛКА: Картинка → Заголовок → Текст
-//             → Футер: кнопка «Читать в Telegram» + текст
-//               «Откроется в приложении Telegram» под ней.
-//    КАРУСЕЛЬ: Картинка → Заголовок → Текст → Дата (снизу).
+// 1. ПОРЯДОК БЛОКОВ:
+//    МОДАЛКА: Картинка → Заголовок → Текст → Футер (кнопка + note).
+//    КАРУСЕЛЬ: Картинка → Заголовок → Текст → Дата.
 //
-// 2. ЗАГОЛОВОК: всегда 1 строка, ellipsis, flex-shrink: 0.
+// 2. ЗАГОЛОВОК: одна строка, ellipsis, flex-shrink: 0.
 //
-// 3. КАРТИНКА: всегда 16:9, кроп object-fit: cover,
-//    width: 100% (заполняет всю внутреннюю ширину окна).
+// 3. КАРТИНКА: 16:9, object-fit: cover, width: 100%.
 //
-// 4. ТЕКСТ В КАРУСЕЛИ: 3 строки max, обрезка по словам,
-//    ' ...' через пробел от целого слова.
+// 4. ТЕКСТ В КАРУСЕЛИ: 3 строки max, ' ...' от целого слова.
 //
 // 5. ТЕКСТ В МОДАЛКЕ:
-//    - МОБИЛА (≤ 859px): окно 390×620, padding 20px,
-//      внутренняя ширина текста 350px, лимит 11 строк тела
-//      (1 строка заголовка + 11 = 12 строк всего).
-//    - ДЕСКТОП (≥ 860px): окно 540×auto (max 700), padding 20px,
-//      внутренняя ширина текста 500px, лимит строк динамический —
-//      считается от реальной доступной высоты окна, потолок 15 строк тела.
-//    - Обрезка строго по массиву слов, разрыв по буквам невозможен.
-//    - МНОГОТОЧИЕ ГАРАНТИРОВАНО: если хоть слово отрезано — ' ...'
-//      через пробел от последнего целого слова ставится ОБЯЗАТЕЛЬНО.
-//      Если места под ' ...' нет — добавляется принудительно, лишнее
-//      отрезается overflow: hidden, но ' ...' всё равно видно.
+//    - МОБИЛА: окно 390×620, padding 20px, ширина текста 350px,
+//      лимит 11 строк тела. Текст в .tg-modal-body с flex: 1 1 auto,
+//      overflow: hidden — занимает ровно остаток места до кнопки,
+//      не залезает под неё. Рендер через white-space: pre-wrap,
+//      абзацы разделены \n\n (реальная пустая строка).
+//    - ДЕСКТОП: окно 540×auto (max 700), padding 20px, ширина текста 500px,
+//      лимит динамический (от высоты окна, потолок 15 строк тела).
+//    - Обрезка по массиву слов, разрыв по буквам невозможен.
+//    - МНОГОТОЧИЕ ' ...' гарантировано, если хоть слово отрезано.
 //
-// 6. МНОГОТОЧИЕ: ELLIPSIS = ' ...' (пробел + три обычные точки).
+// 6. ELLIPSIS = ' ...' (пробел + три точки).
 //
-// 7. РАЗМЕРЫ ОКНА МОДАЛКИ:
-//    - МОБИЛА: height 620px фиксированная, всё статично.
-//    - ДЕСКТОП: height auto по контенту, max-height 700px.
-//    - flex-shrink: 0 на картинке, заголовке, футере.
-//    - .tg-modal-body — overflow: hidden.
-//    - Футер прижат к нижнему краю через margin-top: auto.
-//    - Отступ между абзацами компактный (0.9em вместо 1.65em).
+// 7. flex-shrink: 0 у картинки, заголовка, футера.
+//    Футер с margin-top: auto — прижат к нижнему краю окна.
 //
 // 8. ПРИМЕНЕНИЕ: автоматически к любому новому посту.
 //
@@ -2414,19 +2384,15 @@ button.disabled {
   var SWIPE_THRESHOLD = 40;
   var WHEEL_THROTTLE = 600;
 
-  // Многоточие: пробел + три точки.
   var ELLIPSIS = ' ...';
 
-  // Эталонные ширины блока текста в модалке.
-  // Мобила: 390 − 2×20 = 350.
-  // Десктоп: 540 − 2×20 = 500.
+  // Эталонные ширины текста.
   var STAGE_WIDTH_MOBILE = 350;
   var STAGE_WIDTH_DESKTOP = 500;
 
   var STAGE_FONT_SIZE = 14;
   var STAGE_LINE_HEIGHT = 1.65;
 
-  // Лимиты строк тела.
   var MODAL_TEXT_MAX_LINES_MOBILE = 11;
   var MODAL_TEXT_MAX_LINES_DESKTOP = 15;
 
@@ -2472,7 +2438,8 @@ button.disabled {
   }
 
   // ============================================================
-  // ОФСКРИН-МЕТР
+  // ОФСКРИН-МЕТР — с white-space: pre-wrap, чтобы считал
+  // пустые строки между абзацами точно так же, как реальный рендер.
   // ============================================================
 
   var measureEl = null;
@@ -2491,12 +2458,13 @@ button.disabled {
       'font-weight:400',
       'word-wrap:break-word',
       'overflow-wrap:break-word',
-      'white-space:normal'
+      'white-space:pre-wrap'
     ].join(';');
     document.body.appendChild(measureEl);
     return measureEl;
   }
 
+  // Считает строки текста с \n\n внутри как реальные пустые строки.
   function countLines(text, stageWidth) {
     if (!text) return 0;
     var el = getMeasureEl();
@@ -2506,6 +2474,7 @@ button.disabled {
     return Math.max(1, Math.round(el.scrollHeight / lh));
   }
 
+  // Возвращает массив абзацев (без пустых строк).
   function parseParagraphs(text) {
     if (!text) return [];
     var raw = String(text).split(/\n{2,}/);
@@ -2517,6 +2486,11 @@ button.disabled {
     return out;
   }
 
+  function endsWithEllipsis(s) {
+    return typeof s === 'string' && /\.\.\.$/.test(s.trim());
+  }
+
+  // Обрезка одного абзаца до maxLines.
   function fitParagraph(paragraph, maxLines, addEllipsis, stageWidth) {
     if (!paragraph) return { text: '', lines: 0, truncated: false };
 
@@ -2565,8 +2539,9 @@ button.disabled {
     return { text: out, lines: countLines(out, stageWidth), truncated: true };
   }
 
-  // ГЛАВНАЯ ФУНКЦИЯ ОБРЕЗКИ.
-  // ГАРАНТИРУЕТ: если хоть что-то отрезано — в конце будет ' ...'.
+  // Возвращает массив абзацев, которые влезли в maxLines,
+  // и флаг truncated. Пустая строка между абзацами считается за строку.
+  // ГАРАНТИРУЕТ ' ...' в конце последнего абзаца, если текст обрезан.
   function fitParagraphsToBudget(paragraphs, maxLines, stageWidth) {
     var result = [];
     var used = 0;
@@ -2578,7 +2553,6 @@ button.disabled {
       var available = maxLines - used - needBlankBefore;
 
       if (available <= 0) {
-        // Бюджет исчерпан, следующие абзацы не влезают — текст обрезан.
         truncated = true;
         break;
       }
@@ -2592,7 +2566,6 @@ button.disabled {
         continue;
       }
 
-      // Абзац не влезает — обрезаем и останавливаемся.
       var fitted = fitParagraph(p, available, true, stageWidth);
       if (fitted.text) {
         if (needBlankBefore) used += 1;
@@ -2603,25 +2576,18 @@ button.disabled {
       break;
     }
 
-    // ГАРАНТИРОВАННОЕ МНОГОТОЧИЕ.
-    // Если truncated === true и последний абзац результата
-    // ещё не заканчивается на ' ...' — добавляем его ПРИНУДИТЕЛЬНО.
-    // Сначала пробуем уложиться в бюджет, отрезая слова. Если места
-    // под суффикс совсем нет — добавляем без пересчёта (overflow: hidden
-    // отрежет лишнее, но ' ...' будет видно).
+    // ГАРАНТИРОВАННОЕ МНОГОТОЧИЕ
     if (truncated && result.length > 0) {
       var last = result[result.length - 1];
       if (!endsWithEllipsis(last)) {
         var words = last.split(/\s+/).filter(function(w){ return w.length; });
 
-        // Сколько строк занято абзацами до последнего (+ пустые строки).
         var usedBeforeLast = 0;
         for (var k = 0; k < result.length - 1; k++) {
           usedBeforeLast += countLines(result[k], stageWidth) + 1;
         }
         var lastBudget = maxLines - usedBeforeLast;
 
-        // Ищем максимальное число слов, при котором '<words> ...' влезает.
         var loW = 1, hiW = words.length, bestW = 0;
         while (loW <= hiW) {
           var midW = Math.floor((loW + hiW) / 2);
@@ -2635,15 +2601,10 @@ button.disabled {
         }
 
         if (bestW >= 1) {
-          // Уложились в бюджет с суффиксом.
           result[result.length - 1] = words.slice(0, bestW).join(' ') + ELLIPSIS;
         } else if (words.length >= 1) {
-          // Места под суффикс нет совсем.
-          // ПРИНУДИТЕЛЬНО: берём последнее слово + ' ...' — так многоточие
-          // гарантированно появится, а лишнее отрежет overflow: hidden.
           result[result.length - 1] = words[words.length - 1] + ELLIPSIS;
         } else {
-          // Совсем пусто — просто ' ...'.
           result[result.length - 1] = ELLIPSIS.trim();
         }
       }
@@ -2652,10 +2613,7 @@ button.disabled {
     return { paragraphs: result, truncated: truncated };
   }
 
-  function endsWithEllipsis(s) {
-    return typeof s === 'string' && /\.\.\.$/.test(s.trim());
-  }
-
+  // ==== Обрезка текста карточки карусели (3 строки) ====
   function fitCardText(el, fullText, maxLines) {
     if (!el) return;
     var words = String(fullText || '')
@@ -2695,7 +2653,6 @@ button.disabled {
     } else if (bestCut >= 1) {
       el.textContent = words.slice(0, bestCut).join(' ') + suffix;
     } else {
-      // Гарантируем многоточие даже если места нет.
       el.textContent = words[words.length - 1] + suffix;
     }
 
@@ -2707,7 +2664,7 @@ button.disabled {
     }
   }
 
-  // ==== ДИНАМИЧЕСКИЙ ЛИМИТ СТРОК ДЛЯ ДЕСКТОПА ====
+  // ==== Динамический лимит строк для десктопа ====
   function computeDesktopMaxLines() {
     if (!modalBox || !modalBody || !modalMedia || !modalTitle || !modalFooter) {
       return MODAL_TEXT_MAX_LINES_DESKTOP;
@@ -3160,11 +3117,10 @@ button.disabled {
     var paragraphs = parseParagraphs(p.text);
     var fitted = fitParagraphsToBudget(paragraphs, maxLines, stageWidth);
 
-    var html = '';
-    for (var k = 0; k < fitted.paragraphs.length; k++) {
-      html += '<p>' + escapeHtml(fitted.paragraphs[k]) + '</p>';
-    }
-    modalBody.innerHTML = html || '<p></p>';
+    // Рендер через textContent — абзацы разделены \n\n.
+    // CSS white-space: pre-wrap сохраняет пустые строки как есть,
+    // и офскрин-метр считал то же самое.
+    modalBody.textContent = fitted.paragraphs.join('\n\n');
   }
 
   function closeModal() {
