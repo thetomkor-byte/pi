@@ -565,15 +565,24 @@ button.disabled {
   border-radius: 12px;
 }
 
+/* Текст в модалке: автоматический перенос по ширине окошка,
+   абзацы разделены <p>, а не символами \n */
 .tg-modal-body {
   color: var(--muted-soft-2);
   font-size: clamp(13px, 2vmin, 15px);
   line-height: 1.65;
-  white-space: pre-wrap;
   word-wrap: break-word;
   overflow-wrap: break-word;
   user-select: text;
   -webkit-user-select: text;
+}
+
+.tg-modal-body p {
+  margin: 0 0 14px;
+}
+
+.tg-modal-body p:last-child {
+  margin-bottom: 0;
 }
 
 .tg-modal-body a { color: var(--gold); text-decoration: underline; }
@@ -658,11 +667,18 @@ button.disabled {
   color: var(--muted-soft-2);
   font-size: clamp(13px, 2vmin, 15px);
   line-height: 1.65;
-  white-space: pre-wrap;
   word-wrap: break-word;
   overflow-wrap: break-word;
   user-select: text;
   -webkit-user-select: text;
+}
+
+.info-modal-body p {
+  margin: 0 0 14px;
+}
+
+.info-modal-body p:last-child {
+  margin-bottom: 0;
 }
 
 /* ==== LANDING ==== */
@@ -2298,7 +2314,16 @@ button.disabled {
 
   function openInfo(title, body) {
     infoTitle.textContent = title || '';
-    infoBody.textContent = body || '';
+    // Преобразуем абзацы (разделенные \n) в <p>, чтобы браузер
+    // автоматически переносил текст по ширине окошка.
+    var paragraphs = String(body || '').split('\n\n');
+    var html = '';
+    for (var i = 0; i < paragraphs.length; i++) {
+      var p = paragraphs[i].trim();
+      if (!p) continue;
+      html += '<p>' + p.replace(/\n/g, '<br>') + '</p>';
+    }
+    infoBody.innerHTML = html || '<p></p>';
     infoModal.classList.add('open');
     document.body.style.overflow = 'hidden';
   }
@@ -2485,38 +2510,12 @@ button.disabled {
 
   var TAP_ICON_SVG = '<svg class="tg-card-tap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3H5a2 2 0 0 0-2 2v4M9 21H5a2 2 0 0 1-2-2v-4M15 3h4a2 2 0 0 1 2 2v4M15 21h4a2 2 0 0 0 2-2v-4"/></svg>';
 
-  // Разбиваем текст на строки по ширине мобильного экрана, чтобы получить примерное
-  // количество "строк" для подсчёта. Никакого принудительного переноса в выводе.
+  // Мобильный эталон для подсчёта строк: ~38 символов в строке.
   var MOBILE_LINE_CHARS = 38;
-
-  // Считает количество строк, которое займёт текст на мобильном экране
-  function countMobileLines(text, maxChars) {
-    if (!text) return 0;
-    var paragraphs = String(text).split('\n');
-    var total = 0;
-    for (var i = 0; i < paragraphs.length; i++) {
-      var line = paragraphs[i];
-      if (!line.trim()) { total += 1; continue; }
-      var words = line.split(/\s+/);
-      var cur = 0;
-      var linesInParagraph = 1;
-      for (var w = 0; w < words.length; w++) {
-        var word = words[w];
-        var add = word.length + (cur > 0 ? 1 : 0);
-        if (cur + add <= maxChars) {
-          cur += add;
-        } else {
-          linesInParagraph++;
-          cur = word.length;
-        }
-      }
-      total += linesInParagraph;
-    }
-    return total;
-  }
 
   // Обрезает текст до maxLines "строк" по мобильному эталону,
   // обрезая ТОЛЬКО на границе слов и добавляя " ..." в конце.
+  // Пустые строки между абзацами считаются за строку.
   function truncateMobile(text, maxLines) {
     if (!text) return '';
     var paragraphs = String(text).split('\n');
@@ -2527,6 +2526,7 @@ button.disabled {
     for (var p = 0; p < paragraphs.length && !truncated; p++) {
       var line = paragraphs[p];
       if (!line.trim()) {
+        // Пустая строка (отступ между абзацами) — тоже считается за строку
         if (usedLines + 1 <= maxLines) {
           result.push('');
           usedLines += 1;
@@ -2546,9 +2546,7 @@ button.disabled {
         if (tryLine.length <= MOBILE_LINE_CHARS) {
           curLine = tryLine;
         } else {
-          // добавляем текущую строку и начинаем новую
           if (usedLines + 1 > maxLines) {
-            // уже использовали лимит — добавляем "..." к последней добавленной строке
             truncated = true;
             break;
           }
@@ -2558,14 +2556,12 @@ button.disabled {
         }
       }
       if (truncated) {
-        // записываем уже набранные строки абзаца
         for (var k = 0; k < paraOut.length; k++) {
           result.push(paraOut[k]);
         }
         break;
       }
 
-      // добавляем оставшуюся неполную строку
       if (curLine) {
         if (usedLines + 1 > maxLines) {
           truncated = true;
@@ -2575,7 +2571,6 @@ button.disabled {
         usedLines += 1;
       }
 
-      // добавляем абзац в результат
       for (var m = 0; m < paraOut.length; m++) {
         result.push(paraOut[m]);
       }
@@ -2583,15 +2578,27 @@ button.disabled {
 
     var out = result.join('\n');
     if (truncated) {
-      // обрезаем возможный хвост и добавляем " ..." к последнему слову
       out = out.replace(/\s+$/, '');
-      if (out && !/[.!?]$/.test(out.slice(-1))) {
-        out = out + ' ...';
-      } else if (out) {
-        out = out + ' ...';
-      }
+      if (out) out = out + ' ...';
     }
     return out;
+  }
+
+  // Разбивает обрезанный текст на абзацы для вставки в модалку
+  // в виде набора <p>. Пустые строки (результат обрезки между абзацами)
+  // пропускаются, но разделение на абзацы сохраняется.
+  function buildModalHTML(text) {
+    if (!text) return '<p></p>';
+    var paragraphs = String(text).split(/\n{2,}/);
+    var html = '';
+    var any = false;
+    for (var i = 0; i < paragraphs.length; i++) {
+      var p = paragraphs[i].replace(/\n/g, ' ').trim();
+      if (!p) continue;
+      html += '<p>' + escapeHtml(p) + '</p>';
+      any = true;
+    }
+    return any ? html : '<p></p>';
   }
 
   function renderCards() {
@@ -2612,7 +2619,6 @@ button.disabled {
         thumbHtml = '<div class="tg-card-thumb"><div class="ph-fallback">♥</div></div>';
       }
 
-      // В карточке карусели — примерно 3 строки текста на мобильном эталоне
       var cardText = truncateMobile(p.text, 3);
 
       card.innerHTML =
@@ -2953,10 +2959,14 @@ button.disabled {
       modalMedia.innerHTML = '<div class="tg-modal-media"><div class="ph-fallback lg">♥</div></div>';
     }
 
-    // В модалке строго 10 строк: 1 заголовок + 9 строк текста (мобильный эталон).
-    // Никакого принудительного переноса — перенос делает браузер.
-    // Обрезаем по границе целых слов, добавляем " ..." в конце при обрезке.
-    modalBody.textContent = truncateMobile(p.text, 9) || '(без текста)';
+    // 12 строк всего: 1 строка — заголовок (в отдельном блоке),
+    // 11 строк — текст поста, рассчитанный по мобильному эталону.
+    // Пустые строки между абзацами считаются отдельными строками.
+    // Один и тот же текст используется и на мобильной, и на десктопной версии.
+    // Текст вставляется в виде <p>-абзацев, чтобы браузер сам делал
+    // перенос по ширине окошка.
+    var truncatedText = truncateMobile(p.text, 11);
+    modalBody.innerHTML = buildModalHTML(truncatedText);
 
     modal.classList.add('open');
     document.body.style.overflow = 'hidden';
