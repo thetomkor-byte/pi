@@ -1086,6 +1086,16 @@ button.disabled {
   transform: translateY(0);
 }
 
+/* Подсветка на мобильных при нажатии */
+@media (hover: none) {
+  .lnd-card.tappable:active,
+  .tg-card:active {
+    border-color: #5a4a1a;
+    box-shadow: 0 0 0 1px rgba(255,203,43,.20), 0 0 28px rgba(255,203,43,.14);
+    background: linear-gradient(180deg, #1a1710 0%, #0f0d08 100%);
+  }
+}
+
 /* Значок — правый нижний угол, как у карточек карусели */
 .lnd-card-tap-icon {
   position: absolute;
@@ -1281,11 +1291,8 @@ button.disabled {
 }
 
 @media (max-width: 640px) {
-  .lnd-bot-cta {
-    display: block;
-  }
   .lnd-bot-cta .lnd-btn {
-    width: 100%;
+    width: auto;
     min-width: 0;
   }
 }
@@ -1325,7 +1332,7 @@ button.disabled {
 
 .lnd-footer {
   border-top: 1px solid rgba(255,255,255,.06);
-  padding: clamp(28px, 5vw, 44px) 0 calc(clamp(80px, 12vw, 100px) + env(safe-area-inset-bottom, 0px));
+  padding: clamp(28px, 5vw, 44px) 0 calc(clamp(40px, 8vw, 60px) + env(safe-area-inset-bottom, 0px));
   color: var(--muted);
   font-size: clamp(11px, 1.7vmin, 13px);
   line-height: 1.6;
@@ -1352,121 +1359,6 @@ button.disabled {
 .lnd-footer .disclaimer {
   max-width: 58ch;
   color: var(--muted);
-}
-
-.lnd-contacts {
-  margin-top: clamp(20px, 3.4vw, 30px);
-  padding-top: clamp(18px, 3vw, 26px);
-  border-top: 1px solid rgba(255,255,255,.05);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-.lnd-contacts-label {
-  color: var(--muted);
-  font-size: clamp(11px, 1.7vmin, 13px);
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  font-weight: 700;
-  text-align: center;
-}
-
-.lnd-contacts-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  flex-wrap: wrap;
-}
-
-.lnd-contact-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 52px;
-  height: 52px;
-  min-width: 52px;
-  min-height: 52px;
-  border-radius: 14px;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  text-decoration: none;
-  position: relative;
-  overflow: hidden;
-  transition: transform .1s ease, filter .1s ease, box-shadow .15s ease;
-  -webkit-tap-highlight-color: transparent;
-  box-shadow:
-    0 6px 16px rgba(0,0,0,.55),
-    0 0 0 1px rgba(255,255,255,.06) inset,
-    0 1px 0 rgba(255,255,255,.14) inset;
-}
-
-.lnd-contact-btn::before {
-  content: "";
-  position: absolute;
-  left: 0; right: 0; top: 0;
-  height: 45%;
-  background: linear-gradient(180deg, rgba(255,255,255,.28) 0%, rgba(255,255,255,0) 100%);
-  pointer-events: none;
-  border-top-left-radius: inherit;
-  border-top-right-radius: inherit;
-}
-
-.lnd-contact-btn::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(120% 80% at 50% 0%, rgba(255,255,255,.22) 0%, transparent 55%);
-  pointer-events: none;
-  border-radius: inherit;
-}
-
-.lnd-contact-btn .lnd-contact-svg {
-  position: relative;
-  z-index: 2;
-  width: 28px;
-  height: 28px;
-  display: block;
-}
-
-/* Telegram иконка — градиент как у почты */
-.lnd-contact-btn.tg {
-  background: linear-gradient(180deg, #4aa8ff 0%, #1f7fe0 55%, #0b5fb3 100%);
-}
-
-/* Самолётик внутри telegram-кнопки больше на 8px, размер самой кнопки не меняется */
-.lnd-contact-btn.tg .lnd-contact-svg {
-  width: 36px;
-  height: 36px;
-}
-
-.lnd-contact-btn:active {
-  transform: scale(0.94);
-  filter: brightness(1.08);
-  box-shadow:
-    0 3px 8px rgba(0,0,0,.5),
-    0 0 0 1px rgba(255,255,255,.08) inset,
-    0 1px 0 rgba(255,255,255,.14) inset;
-}
-
-@media (hover: hover) {
-  .lnd-contact-btn:hover {
-    filter: brightness(1.06);
-    box-shadow:
-      0 8px 22px rgba(0,0,0,.6),
-      0 0 0 1px rgba(255,255,255,.08) inset,
-      0 1px 0 rgba(255,255,255,.16) inset,
-      0 0 22px rgba(63,169,245,.28);
-  }
-}
-
-@media (max-width: 480px) {
-  .lnd-contact-btn { width: 48px; height: 48px; min-width: 48px; min-height: 48px; }
-  .lnd-contact-btn .lnd-contact-svg { width: 26px; height: 26px; }
-  .lnd-contact-btn.tg .lnd-contact-svg { width: 34px; height: 34px; }
 }
 
 .lnd-mobile-note {
@@ -1504,10 +1396,17 @@ button.disabled {
 
 .lnd-mobile-note .txt b { color: var(--text); font-weight: 700; }
 
+/* Мобильная адаптация: note центрируется под кнопкой, hero-actions центрируются */
 @media (max-width: 520px) {
-  .lnd-hero-actions { flex-direction: column; align-items: stretch; }
-  .lnd-hero-actions .lnd-btn { width: 100%; }
+  .lnd-hero-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  .lnd-hero-actions .lnd-btn {
+    width: auto;
+  }
   .lnd-btn { padding: 15px 22px; }
+  .lnd-hero-note { text-align: center; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1520,7 +1419,7 @@ button.disabled {
 
 /* ==== РАЗРЕШЕНИЕ ВЫДЕЛЕНИЯ ТЕКСТА НА ЛЕНДИНГЕ ==== */
 #landing,
-#landing *:not(button):not(.lnd-btn):not(.tg-card):not(.lang-trigger):not(.lang-option):not(.tg-modal-close):not(.lnd-contact-btn):not(.lnd-card.tappable):not(.info-modal-close) {
+#landing *:not(button):not(.lnd-btn):not(.tg-card):not(.lang-trigger):not(.lang-option):not(.tg-modal-close):not(.lnd-card.tappable):not(.info-modal-close) {
   user-select: text;
   -webkit-user-select: text;
   -moz-user-select: text;
@@ -1542,7 +1441,6 @@ button.disabled {
 #landing .lnd-feature span,
 #landing .lnd-mobile-note .txt,
 #landing .lnd-footer,
-#landing .lnd-contacts-label,
 #landing .disclaimer {
   user-select: text;
   -webkit-user-select: text;
@@ -1817,8 +1715,8 @@ button.disabled {
         </div>
 
         <div class="lnd-bot-cta lnd-reveal">
-          <button class="lnd-btn" type="button" data-action="enter-app" aria-label="Начать игру">
-            Начать игру
+          <button class="lnd-btn" type="button" data-action="enter-app" aria-label="Начать тренировку">
+            Начать тренировку
           </button>
         </div>
       </div>
@@ -1906,8 +1804,8 @@ button.disabled {
         </div>
 
         <div class="lnd-reveal" style="margin-top:26px; text-align:center;">
-          <button class="lnd-btn" type="button" data-action="enter-app" aria-label="Начать тренировку за столом">
-            Сесть за стол
+          <button class="lnd-btn" type="button" data-action="enter-app" aria-label="Начать тренировку">
+            Начать тренировку
           </button>
         </div>
       </div>
@@ -2021,17 +1919,6 @@ button.disabled {
           Некоммерческий продукт.
           Не является азартной игрой на реальные деньги.
         </p>
-
-        <div class="lnd-contacts">
-          <div class="lnd-contacts-label">Связаться с автором</div>
-          <div class="lnd-contacts-row">
-            <a class="lnd-contact-btn tg" id="lnd-contact-tg" href="https://t.me/ThePokerWay" target="_blank" rel="noopener noreferrer" aria-label="Написать в Telegram">
-              <svg class="lnd-contact-svg" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-                <path fill="#ffffff" d="M23.06 9.07 8.32 14.76c-.98.4-.97 1.78.01 2.17l3.66 1.4 1.4 4.5c.2.64 1.02.82 1.48.32l1.98-2.14 3.86 2.83c.55.4 1.34.11 1.49-.56l2.66-12.62c.16-.75-.6-1.35-1.8-1.59zM12.7 17.36l8.02-5.02-6.55 6.14-.18 2.55-1.29-3.67z"/>
-              </svg>
-            </a>
-          </div>
-        </div>
       </div>
     </footer>
 
