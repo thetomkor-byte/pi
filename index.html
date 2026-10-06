@@ -1403,6 +1403,23 @@ button.disabled {
   .lnd-hero-note { text-align: center; }
 }
 
+/* ==== МОБИЛЬНОЕ ЦЕНТРИРОВАНИЕ ВЕЕРА КАРТ ==== */
+/* В десктопной версии ничего не меняется. На мобильном веер карт центрируется. */
+@media (max-width: 859px) {
+  .lnd-hero-visual {
+    height: clamp(180px, 42vw, 280px);
+  }
+  .lnd-card-fan {
+    position: relative;
+  }
+  /* Карты центрируются через сдвиг всей группы влево: веер изначально смещён вправо */
+  .lnd-play-card.ten-diamonds { transform: rotate(-22deg) translate(calc(-92% + 32%), 10%); }
+  .lnd-play-card.jack-diamonds { transform: rotate(-11deg) translate(calc(-64% + 32%), 5%); }
+  .lnd-play-card.queen-diamonds { transform: rotate(0deg) translate(calc(-32% + 32%), 0%); }
+  .lnd-play-card.king-diamonds { transform: rotate(11deg) translate(calc(0% + 32%), 0%); }
+  .lnd-play-card.ace-diamonds { transform: rotate(22deg) translate(calc(32% + 32%), 5%); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   #landing { scroll-behavior: auto; }
   .lnd-reveal { transition: none; opacity: 1; transform: none; }
