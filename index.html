@@ -1396,16 +1396,15 @@ button.disabled {
 
 .lnd-mobile-note .txt b { color: var(--text); font-weight: 700; }
 
-/* Мобильная адаптация: note центрируется под кнопкой, hero-actions центрируются */
+/* Мобильная адаптация: кнопка hero растянута, note центрирован под кнопкой */
 @media (max-width: 520px) {
   .lnd-hero-actions {
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
   }
   .lnd-hero-actions .lnd-btn {
-    width: auto;
+    width: 100%;
   }
-  .lnd-btn { padding: 15px 22px; }
   .lnd-hero-note { text-align: center; }
 }
 
