@@ -417,18 +417,7 @@ button.disabled {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  position: relative;
-  padding-right: 20px;
-}
-
-.tg-card-text::after {
-  content: "...";
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  color: var(--muted-soft-2);
-  font-weight: 700;
-  letter-spacing: 1px;
+  word-wrap: break-word;
 }
 
 .tg-card-date {
@@ -1467,8 +1456,8 @@ button.disabled {
   <div id="tg-modal" role="dialog" aria-modal="true" aria-labelledby="tg-modal-title-el">
     <div class="tg-modal-box">
       <div class="tg-modal-meta" id="tg-modal-meta"></div>
-      <h2 class="tg-modal-title" id="tg-modal-title-el"></h2>
       <div id="tg-modal-media"></div>
+      <h2 class="tg-modal-title" id="tg-modal-title-el"></h2>
       <div class="tg-modal-body" id="tg-modal-body"></div>
       <a class="tg-modal-cta" id="tg-modal-cta" href="https://t.me/ThePokerWay" target="_blank" rel="noopener noreferrer">
         <svg viewBox="0 0 32 32" aria-hidden="true"><path fill="#ffffff" d="M23.06 9.07 8.32 14.76c-.98.4-.97 1.78.01 2.17l3.66 1.4 1.4 4.5c.2.64 1.02.82 1.48.32l1.98-2.14 3.86 2.83c.55.4 1.34.11 1.49-.56l2.66-12.62c.16-.75-.6-1.35-1.8-1.59zM12.7 17.36l8.02-5.02-6.55 6.14-.18 2.55-1.29-3.67z"/></svg>
@@ -2343,7 +2332,6 @@ button.disabled {
   var TG_CHANNEL_NAME = 'The Poker Way';
   var RSS_URL = 'https://rsshub.app/telegram/channel/' + TG_CHANNEL;
   var TG_LINK = 'https://t.me/' + TG_CHANNEL;
-  var MAX_POSTS = 5;
   var AUTOPLAY_MS = 4000;
   var SWIPE_THRESHOLD = 40;
   var WHEEL_THROTTLE = 600;
@@ -2382,8 +2370,73 @@ button.disabled {
     img.src = 'https://t.me/i/userpic/320/' + TG_CHANNEL + '.jpg';
   })();
 
+  // 10 постов на темы проекта и лендинга
+  var DEMO_POSTS = [
+    {
+      title: 'Тренируй логику и интуицию',
+      text: 'Poker Trainer — это не солвер и не калькулятор эквити. Это тренажёр того, как думает покерист, когда математика уже посчитана, а решение всё ещё нужно принять.\n\nВ турнире вакуума нет. Есть оппонент с памятью, страхом, тильтом и привычками. Против него «правильная» игра часто проигрывает «точной» — той, что строится под его ошибки.\n\nМы учим выстраивать линию так, чтобы оппонент совершил ошибку. Не просто «сыграл по чарту», а именно ошибся. Каждое действие — осознанный ответ на вопрос «зачем».\n\nЛогика говорит: «здесь я должен ставить 60% банка». Интуиция говорит: «этот конкретный игрок на этой улице на такую ставку выкинет». Связка двух навыков — и есть точная игра.',
+      img: '',
+      date: ''
+    },
+    {
+      title: 'Боты с памятью и характером',
+      text: 'За столом Poker Trainer нет абстрактных «ботов». Есть характеры, повторяющие реальных игроков турниров.\n\nLAG-Pro давит постоянно, меняет образ, ставит ловушки. ICM-Exploiter тайтовеет на бабле и давит на короткие стеки в призах. Solver-Hybrid быстро читает вас и адаптируется — учитесь не давать ему паттерн. GTO-Reg играет ровно, не разваливается под давлением, не делает лишних ошибок.\n\nVIP-класс — эксплуатируемые слабые боты. TAG-Lite знает базу, но играет роботизированно. Loose-Passive коллит широко, рейзит только с силой. Rock входит только с премиум-руками. Maniac рейзит всё и блефует на всех улицах.\n\nКаждый бот — отдельный урок. Каждый бот — отдельный характер, который можно изучить и эксплуатировать.',
+      img: '',
+      date: ''
+    },
+    {
+      title: 'Sit & Go, 8-max, призовая структура на 3 места',
+      text: 'Вы садитесь за стол из восьми игроков — вы и семь ботов — и играете турнир Sit & Go.\n\nКаждая раздача — это отдельный урок. Каждое действие бота — информация для вас. Каждый ваш ход — попытка направить мышление оппонента туда, где он примет неверное решение и ошибётся в вашу пользу.\n\nОбратная связь честная: WIN или LOSS, плюс или минус фишек. Никаких подсказок, никаких оценок «правильно/неправильно». Только результат — как в реальном покере.\n\nТурнирная логика: ICM на баббле и в призах. Давление на короткие стеки. Решения, когда риск оправдан, а когда нет — в условиях реальной структуры выплат.',
+      img: '',
+      date: ''
+    },
+    {
+      title: 'Польза для всех игроков',
+      text: 'Начинающему: научиться думать за столом, а не запоминать руки. Понять, что покер — это не карты, а оппоненты и их решения.\n\nОпытному: перестать играть «по учебнику» и начать играть против конкретного оппонента. Увидеть, где чарты вас ограничивают, и выйти за их рамки.\n\nПрофессионалу: уйти от перегруженных математических решений к чистой логике и абсолютной интуиции. Найти то, что не считается в солвере: момент, ритм, образ, ловушку.\n\nНавык, который вы здесь развиваете, работает против любого соперника — и против человека, и против программы. Читать линию поведения, замечать ошибки, выстраивать действия под чужое мышление — всё это не зависит от того, кто сидит напротив.',
+      img: '',
+      date: ''
+    },
+    {
+      title: 'Почему тренировка против ботов учит играть против людей',
+      text: 'Живой оппонент отличается от идеального калькулятора не тем, что он человек, а тем, что у него есть повторяющиеся ошибки. Он помнит прошлые раздачи, меняет стиль, ловит вас на паттерне, ошибается под давлением.\n\nВсё это — поведение. Поведение можно воспроизвести. Именно это и делают боты Poker Trainer.\n\nОни не идеальны. Они не играют по GTO. Они играют как люди — с характером, с памятью, с привычками. И именно поэтому тренировка против них готовит вас к реальному столу лучше, чем работа с солвером.\n\nСолвер даёт правильный ответ. Тренажёр учит точной игре. Это разные вещи — и обе нужны, но по-разному.',
+      img: '',
+      date: ''
+    },
+    {
+      title: 'Что внутри приложения',
+      text: 'Турнирный стол 8-max, Texas Hold\'em, Sit & Go с призовой структурой на 3 места. Боты с памятью и адаптацией (PRO) и эксплуатируемые слабые боты (VIP).\n\nСлайдер ставок, быстрые проценты банка, BB-пресеты — всё под большой палец. Таймер на ход и тонкие настройки: сложность, стеки, стиль карт, рост блайндов, показ карт и типов.\n\nРеплей раздачи по шагам — увидеть линию со стороны и найти свою ошибку. ICM-логика на баббле и в призах — турнирные решения, а не кэш-игра.\n\nТренировочный раздел «Тренировка» — интуиция и логика покерного мышления. Удобное управление: жесты, свайпы, тапы — всё для тренировки на телефоне.',
+      img: '',
+      date: ''
+    },
+    {
+      title: 'Настройки: полный контроль над тренировкой',
+      text: 'В разделе «Настройки» вы полностью управляете условиями тренировки. Язык интерфейса — русский или английский. Уровень сложности — от расслабленной игры против слабых VIP-ботов до жёсткого стола с PRO-классом.\n\nСтеки настраиваются в BB или в фишках — в зависимости от того, что вам удобнее для тренировки конкретного спота. Стиль карт: 2-цветные (для классического вида) или 4-цветные (для быстрого считывания мастей).\n\nРост блайндов: медленный, средний, быстрый — или фиксированный, если вы хотите отработать конкретную глубину стека. Время на ход настраивается под ваш темп: от быстрого (стресс-тренировка) до расслабленного.\n\nТипы игроков позволяют включать и выключать конкретные характеры ботов. Хотите тренироваться только против LAG-Pro и Solver-Hybrid? Отключите остальных.',
+      img: '',
+      date: ''
+    },
+    {
+      title: 'Управление под большой палец',
+      text: 'Всё управление в Poker Trainer построено под большой палец — так, чтобы тренировка на телефоне была такой же удобной, как на большом экране, а может, даже удобнее.\n\nСвайпы вверх и вниз открывают настройки и руководство — не нужно тянуться к кнопкам в углу экрана. Слайдеры ставок настраиваются одним движением: точная подстройка размера бета без необходимости вводить цифры.\n\nТапы по активным зонам: стек, карты, банк — все элементы, с которыми вы взаимодействуете чаще всего, реагируют на простое касание. Никаких двойных кликов и зажатий там, где нужно быстрое решение.\n\nКрупные тач-таргеты — минимальный размер 44 пикселя. Даже на маленьком экране вы не промахнётесь.',
+      img: '',
+      date: ''
+    },
+    {
+      title: 'Поддержка проекта',
+      text: 'Poker Trainer — некоммерческий проект. Он не продаёт подписки, не показывает рекламу и не зарабатывает на игроках. Проект развивается исключительно на средства от ваших донатов.\n\nАдреса для переводов: GGPoker (перевод через покер-рум), USDT TRC20 (криптовалюта в сети Tron), VISA (карта для переводов в рублях и других валютах). Полные реквизиты и инструкции — в блоге проекта и в Telegram.\n\nКонтакты в Telegram — основной канал связи. Через него можно задать вопрос, предложить идею, сообщить об ошибке или просто поделиться впечатлениями от тренировки.\n\nКаждый донат идёт на конкретные вещи: развитие ботов, новые режимы тренировки, улучшение интерфейса, поддержку серверов.',
+      img: '',
+      date: ''
+    },
+    {
+      title: 'Тренируй логику и интуицию каждый день',
+      text: 'Логика и интуиция в покере — не два отдельных навыка, а два конца одной линии. Логика говорит: «здесь я должен ставить 60% банка, чтобы у оппонента не было правильных шансов на колл». Интуиция говорит: «этот конкретный игрок на этой конкретной улице на такую ставку выкинет».\n\nПроблема в том, что по отдельности оба навыка ограничены. Чистая логика без интуиции превращается в игру по чарту — она правильная, но не эксплуатирует ошибки. Чистая интуиция без логики превращается в догадки — иногда гениальные, иногда катастрофические.\n\nВ Poker Trainer вы тренируете связку: сначала считаете логически, какое действие должно быть «правильным в вакууме», потом через интуицию корректируете его под конкретного оппонента.\n\nИ в этот момент ваша игра из «правильной» становится «точной» — она забирает максимум фишек именно у этого игрока именно сейчас.',
+      img: '',
+      date: ''
+    }
+  ];
+
   var posts = [];
   var activeIdx = 0;
+  var dotIdx = 0;
   var autoplayTimer = null;
   var isPaused = false;
 
@@ -2396,16 +2449,10 @@ button.disabled {
 
   var lastWheelTime = 0;
 
-  function stripHtml(html) {
-    var tmp = document.createElement('div');
-    tmp.innerHTML = html || '';
-    return (tmp.textContent || tmp.innerText || '').trim();
-  }
-
-  function firstImage(html) {
-    if (!html) return '';
-    var m = html.match(/<img[^>]+src=["']([^"']+)["']/i);
-    return m ? m[1] : '';
+  function escapeHtml(s) {
+    return String(s || '')
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
   function formatDate(str) {
@@ -2423,38 +2470,6 @@ button.disabled {
     } catch (e) { return ''; }
   }
 
-  function escapeHtml(s) {
-    return String(s || '')
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-  }
-
-  function parseRSS(xmlDoc) {
-    var items = xmlDoc.querySelectorAll('item');
-    var out = [];
-    for (var i = 0; i < items.length && out.length < MAX_POSTS; i++) {
-      var it = items[i];
-      var title = (it.querySelector('title') || {}).textContent || '';
-      var desc = (it.querySelector('description') || {}).textContent || '';
-      var content = (it.querySelector('content\\:encoded') || it.querySelector('encoded') || {}).textContent || desc;
-      var link = (it.querySelector('link') || {}).textContent || TG_LINK;
-      var date = (it.querySelector('pubDate') || {}).textContent || '';
-
-      var cleanText = stripHtml(content);
-      var img = firstImage(content) || firstImage(desc);
-
-      out.push({
-        title: title.trim() || cleanText.slice(0, 60) || 'Пост',
-        text: cleanText,
-        html: content,
-        link: link,
-        date: date,
-        img: img
-      });
-    }
-    return out;
-  }
-
   function getVisibleCount() {
     if (wrap && wrap.clientWidth <= 380) return 1;
     if (wrap && wrap.clientWidth <= 640) return 2;
@@ -2464,17 +2479,11 @@ button.disabled {
 
   var TAP_ICON_SVG = '<svg class="tg-card-tap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3H5a2 2 0 0 0-2 2v4M9 21H5a2 2 0 0 1-2-2v-4M15 3h4a2 2 0 0 1 2 2v4M15 21h4a2 2 0 0 0 2-2v-4"/></svg>';
 
-  // Обрезаем текст до первых 3 строк и добавляем "..."
-  function truncateToThreeLines(text) {
+  // Обрезаем текст до первых N строк
+  function truncateLines(text, n) {
     if (!text) return '';
-    var lines = text.split('\n');
-    var result = lines.slice(0, 3).join('\n');
-    if (lines.length > 3) {
-      result += '\n...';
-    } else if (result.length > 160) {
-      result = result.slice(0, 160) + '...';
-    }
-    return result;
+    var lines = text.split('\n').filter(function(l) { return l.trim().length > 0; });
+    return lines.slice(0, n).join('\n');
   }
 
   function renderCards() {
@@ -2498,8 +2507,7 @@ button.disabled {
       card.innerHTML =
         thumbHtml +
         '<div class="tg-card-title">' + escapeHtml(p.title) + '</div>' +
-        '<div class="tg-card-text">' + escapeHtml(truncateToThreeLines(p.text)) + '</div>' +
-        '<div class="tg-card-date">' + formatDate(p.date) + '</div>' +
+        '<div class="tg-card-text">' + escapeHtml(truncateLines(p.text, 3)) + '</div>' +
         TAP_ICON_SVG;
 
       card.addEventListener('click', function(e) {
@@ -2523,6 +2531,7 @@ button.disabled {
     });
 
     activeIdx = 0;
+    dotIdx = 0;
     updateCarousel();
   }
 
@@ -2551,19 +2560,163 @@ button.disabled {
     }
     var dots = dotsWrap.querySelectorAll('.d');
     for (var j = 0; j < dots.length; j++) {
-      dots[j].classList.toggle('active', j === activeIdx);
+      dots[j].classList.toggle('active', j === dotIdx);
     }
   }
 
   function goTo(i) {
     if (!posts.length) return;
     activeIdx = (i + posts.length) % posts.length;
+    // Точки не зависят от бесконечной карусели — они переключаются циклически по 10
+    if (typeof i === 'number') {
+      if (i < 0) {
+        dotIdx = ((i % posts.length) + posts.length) % posts.length;
+      } else if (i >= posts.length) {
+        dotIdx = i % posts.length;
+      } else {
+        dotIdx = i;
+      }
+    }
     updateCarousel();
     restartAutoplay();
   }
 
-  function next() { goTo(activeIdx + 1); }
-  function prev() { goTo(activeIdx - 1); }
+  function next() {
+    // Бесконечная карусель: добавляем клоны постов справа, чтобы плавно продолжалось
+    activeIdx = activeIdx + 1;
+    dotIdx = (dotIdx + 1) % posts.length;
+
+    // Если дошли до конца — добавляем в конец все посты ещё раз, чтобы не было обрыва
+    var cards = track.querySelectorAll('.tg-card');
+    if (activeIdx >= cards.length - 2) {
+      appendCardsOnce();
+    }
+
+    var step = getCardStep();
+    track.style.transform = 'translateX(' + (-activeIdx * step) + 'px)';
+
+    var visibleCount = getVisibleCount();
+    var allCards = track.querySelectorAll('.tg-card');
+    var centerIdx;
+    if (visibleCount >= 3) {
+      centerIdx = activeIdx + 1;
+    } else {
+      centerIdx = activeIdx;
+    }
+    for (var i = 0; i < allCards.length; i++) {
+      allCards[i].classList.toggle('active', i === centerIdx);
+    }
+    var dots = dotsWrap.querySelectorAll('.d');
+    for (var j = 0; j < dots.length; j++) {
+      dots[j].classList.toggle('active', j === dotIdx);
+    }
+  }
+
+  function prev() {
+    if (activeIdx <= 0) {
+      // Дозаполняем начало, чтобы можно было листать влево бесконечно
+      prependCardsOnce();
+      // Сдвигаем активный индекс, чтобы визуально ничего не сдвинулось
+      activeIdx += posts.length;
+      var step = getCardStep();
+      track.style.transform = 'translateX(' + (-activeIdx * step) + 'px)';
+    }
+    activeIdx = activeIdx - 1;
+    dotIdx = (dotIdx - 1 + posts.length) % posts.length;
+
+    var step2 = getCardStep();
+    track.style.transform = 'translateX(' + (-activeIdx * step2) + 'px)';
+
+    var visibleCount = getVisibleCount();
+    var allCards = track.querySelectorAll('.tg-card');
+    var centerIdx;
+    if (visibleCount >= 3) {
+      centerIdx = activeIdx + 1;
+    } else {
+      centerIdx = activeIdx;
+    }
+    for (var i = 0; i < allCards.length; i++) {
+      allCards[i].classList.toggle('active', i === centerIdx);
+    }
+    var dots = dotsWrap.querySelectorAll('.d');
+    for (var j = 0; j < dots.length; j++) {
+      dots[j].classList.toggle('active', j === dotIdx);
+    }
+  }
+
+  // Добавляем копии постов в конец (для бесконечной прокрутки вправо)
+  function appendCardsOnce() {
+    posts.forEach(function(p, i) {
+      var card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'tg-card';
+      card.setAttribute('aria-label', 'Открыть пост: ' + p.title);
+      card.dataset.idx = i;
+
+      var thumbHtml;
+      if (p.img) {
+        thumbHtml = '<div class="tg-card-thumb"><img src="' + p.img + '" alt="" loading="lazy"></div>';
+      } else {
+        thumbHtml = '<div class="tg-card-thumb"><div class="ph-fallback">♥</div></div>';
+      }
+
+      card.innerHTML =
+        thumbHtml +
+        '<div class="tg-card-title">' + escapeHtml(p.title) + '</div>' +
+        '<div class="tg-card-text">' + escapeHtml(truncateLines(p.text, 3)) + '</div>' +
+        TAP_ICON_SVG;
+
+      card.addEventListener('click', function(e) {
+        if (suppressClick) {
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+        openModal(i);
+      });
+      track.appendChild(card);
+    });
+  }
+
+  // Добавляем копии постов в начало (для бесконечной прокрутки влево)
+  function prependCardsOnce() {
+    var frag = document.createDocumentFragment();
+    posts.forEach(function(p, i) {
+      var card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'tg-card';
+      card.setAttribute('aria-label', 'Открыть пост: ' + p.title);
+      card.dataset.idx = i;
+
+      var thumbHtml;
+      if (p.img) {
+        thumbHtml = '<div class="tg-card-thumb"><img src="' + p.img + '" alt="" loading="lazy"></div>';
+      } else {
+        thumbHtml = '<div class="tg-card-thumb"><div class="ph-fallback">♥</div></div>';
+      }
+
+      card.innerHTML =
+        thumbHtml +
+        '<div class="tg-card-title">' + escapeHtml(p.title) + '</div>' +
+        '<div class="tg-card-text">' + escapeHtml(truncateLines(p.text, 3)) + '</div>' +
+        TAP_ICON_SVG;
+
+      card.addEventListener('click', function(e) {
+        if (suppressClick) {
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+        openModal(i);
+      });
+      frag.appendChild(card);
+    });
+    // Вставляем копии в начало трека
+    var first = track.firstChild;
+    for (var k = posts.length - 1; k >= 0; k--) {
+      track.insertBefore(frag.childNodes[k], first);
+    }
+  }
 
   function restartAutoplay() {
     if (autoplayTimer) clearInterval(autoplayTimer);
@@ -2625,7 +2778,8 @@ button.disabled {
       if (dragDeltaX < 0) next();
       else prev();
     } else {
-      updateCarousel();
+      var step = getCardStep();
+      track.style.transform = 'translateX(' + (-activeIdx * step) + 'px)';
     }
     isPaused = false;
     restartAutoplay();
@@ -2688,7 +2842,7 @@ button.disabled {
     isPaused = true;
     if (autoplayTimer) clearInterval(autoplayTimer);
 
-    modalMeta.textContent = formatDate(p.date) || 'Telegram';
+    modalMeta.textContent = formatDate(p.date) || 'The Poker Way';
     modalTitle.textContent = p.title;
 
     if (p.img) {
@@ -2697,7 +2851,8 @@ button.disabled {
       modalMedia.innerHTML = '<div class="tg-modal-media"><div class="ph-fallback lg">♥</div></div>';
     }
 
-    modalBody.textContent = truncateToThreeLines(p.text) || '(без текста)';
+    // В модалке показываем первые 7 строк
+    modalBody.textContent = truncateLines(p.text, 7) || '(без текста)';
 
     modal.classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -2712,7 +2867,6 @@ button.disabled {
 
   // Закрытие по клику в любом месте, КРОМЕ кнопки "Читать в Telegram"
   modal.addEventListener('click', function(e) {
-    // Если клик по кнопке "Читать в Telegram" или её дочерним элементам — не закрываем
     if (e.target.closest && e.target.closest('#tg-modal-cta')) {
       return;
     }
@@ -2724,32 +2878,8 @@ button.disabled {
   });
 
   function loadFeed() {
-    fetch(RSS_URL, { mode: 'cors' })
-      .then(function(r) {
-        if (!r.ok) throw new Error('rsshub ' + r.status);
-        return r.text();
-      })
-      .then(function(xml) {
-        var doc = new DOMParser().parseFromString(xml, 'text/xml');
-        posts = parseRSS(doc);
-        if (!posts.length) throw new Error('empty');
-        renderCards();
-        restartAutoplay();
-      })
-      .catch(function() {
-        renderFallback();
-      });
-  }
-
-  function renderFallback() {
-    var fallback = [
-      { title: 'Добро пожаловать в The Poker Way', text: 'Свежие посты из Telegram-канала появятся здесь автоматически. Откройте канал, чтобы читать все публикации.', date: '', img: '', link: TG_LINK },
-      { title: 'Как тренировать логику', text: 'Разбор: почему «правильная» игра против человека отличается от «правильной» против солвера.', date: '', img: '', link: TG_LINK },
-      { title: 'Разбор раздачи', text: 'Sit & Go, баббл, короткий стек. Что делает ICM-Exploiter и как его эксплуатировать.', date: '', img: '', link: TG_LINK },
-      { title: 'PRO против VIP', text: 'В чём разница между классами ботов и чему учит игра против каждого из них.', date: '', img: '', link: TG_LINK },
-      { title: 'Подписывайтесь на канал', text: 'Там — анонсы, разборы и заметки по тренировке покерного мышления.', date: '', img: '', link: TG_LINK }
-    ];
-    posts = fallback;
+    // Пытаемся получить свежие посты из Telegram, но пока используем демо-контент
+    posts = DEMO_POSTS.slice();
     renderCards();
     restartAutoplay();
   }
@@ -2762,7 +2892,10 @@ button.disabled {
     });
   }
 
-  window.addEventListener('resize', updateCarousel);
+  window.addEventListener('resize', function() {
+    var step = getCardStep();
+    track.style.transform = 'translateX(' + (-activeIdx * step) + 'px)';
+  });
 
   loadFeed();
 })();
