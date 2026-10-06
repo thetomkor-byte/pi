@@ -502,13 +502,15 @@ button.disabled {
 
 @keyframes tgFadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-/* Модалка: фиксированная ширина 390px (мобильный эталон).
-   padding 20px → внутренняя ширина контента 350px.
-   Блок текста и картинка заполняют всю внутреннюю ширину (width: 100%). */
+/* МОБИЛЬНАЯ версия (базовая): окно фиксированной высоты 590px,
+   ширина 390px, padding 20px → внутренняя ширина 350px.
+   Всё статично, скролла нет. */
 .tg-modal-box {
   position: relative;
   width: 100%;
   max-width: 390px;
+  height: 590px;
+  max-height: 590px;
   background: linear-gradient(180deg, #141414 0%, #0a0a0a 100%);
   border: 1px solid #3a3018;
   border-radius: 18px;
@@ -520,20 +522,15 @@ button.disabled {
   overflow: hidden;
 }
 
-/* Мобильная версия: окно ФИКСИРОВАННОЙ высоты.
-   Ничего не скроллится, всё статично. */
-@media (max-width: 859px) {
-  .tg-modal-box {
-    height: 620px;
-    max-height: 620px;
-  }
-}
-
-/* Десктопная версия: окно по содержимому. */
+/* ДЕСКТОПНАЯ версия (≥ 860px): окно шире — 620px,
+   высота auto по содержимому, но не больше 700px.
+   padding 20px → внутренняя ширина 580px. */
 @media (min-width: 860px) {
   .tg-modal-box {
+    max-width: 620px;
+    width: 620px;
     height: auto;
-    max-height: 86vh;
+    max-height: 700px;
   }
 }
 
@@ -542,19 +539,7 @@ button.disabled {
   to { transform: translateY(0); opacity: 1; }
 }
 
-/* Шапка поста: THE POKER WAY. Всегда видима сверху. */
-.tg-modal-meta {
-  color: var(--gold);
-  font-size: clamp(10px, 1.6vmin, 12px);
-  font-weight: 800;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  margin-bottom: 10px;
-  flex-shrink: 0;
-}
-
-/* Картинка поста: всегда 16:9, ЗАПОЛНЯЕТ ВСЮ ВНУТРЕННЮЮ ШИРИНУ окна
-   (350px при padding 20px и ширине окна 390px). */
+/* Картинка поста: 16:9, заполняет всю внутреннюю ширину окна. */
 .tg-modal-media {
   position: relative;
   margin: 0 0 16px;
@@ -580,8 +565,7 @@ button.disabled {
   border-radius: 12px;
 }
 
-/* Заголовок поста: ВСЕГДА одна строка, никогда не переносится,
-   никогда не обрезается по высоте (flex-shrink: 0). */
+/* Заголовок — всегда 1 строка, никогда не сжимается. */
 .tg-modal-title {
   color: #fff;
   font-size: clamp(18px, 3.4vmin, 24px);
@@ -594,9 +578,10 @@ button.disabled {
   flex-shrink: 0;
 }
 
-/* Блок текста: ЗАПОЛНЯЕТ ВСЮ ВНУТРЕННЮЮ ШИРИНУ окна (350px при padding 20px).
-   Строго 11 строк (JS-обрезка). overflow: hidden — защита от переполнения.
-   min-height: 0 — позволяет корректно работать в flex-контейнере. */
+/* Тело текста. Ширина = 100% контентной области.
+   На мобиле = 350px (390 − 2×20).
+   На десктопе = 580px (620 − 2×20).
+   overflow: hidden — защита от переполнения. */
 .tg-modal-body {
   color: var(--muted-soft-2);
   font-size: 14px;
@@ -621,8 +606,7 @@ button.disabled {
 
 .tg-modal-body a { color: var(--gold); text-decoration: underline; }
 
-/* Футер: кнопка «Читать в Telegram» + текст под ней.
-   Всегда прижат к нижнему краю окна через margin-top: auto. */
+/* Футер: кнопка + текст под ней, прижаты к нижнему краю окна. */
 .tg-modal-footer {
   margin-top: auto;
   padding-top: 24px;
@@ -1498,7 +1482,6 @@ button.disabled {
 
   <div id="tg-modal" role="dialog" aria-modal="true" aria-labelledby="tg-modal-title-el">
     <div class="tg-modal-box">
-      <div class="tg-modal-meta">The Poker Way</div>
       <div id="tg-modal-media"></div>
       <h2 class="tg-modal-title" id="tg-modal-title-el"></h2>
       <div class="tg-modal-body" id="tg-modal-body"></div>
@@ -2379,50 +2362,40 @@ button.disabled {
 // ============================================================
 //
 // 1. ПОРЯДОК БЛОКОВ В ПОСТЕ:
-//    МОДАЛКА: Шапка THE POKER WAY → Картинка → Заголовок → Текст
+//    МОДАЛКА: Картинка → Заголовок → Текст
 //             → Футер: кнопка «Читать в Telegram» + текст
 //               «Откроется в приложении Telegram» под ней.
 //    КАРУСЕЛЬ: Картинка → Заголовок → Текст → Дата (снизу).
+//    Шапка THE POKER WAY в модалке ОТСУТСТВУЕТ.
 //
-// 2. ЗАГОЛОВОК:
-//    - ВСЕГДА ровно 1 строка, не переносится.
-//    - При переполнении — text-overflow: ellipsis.
-//    - Никогда не обрезается по высоте (flex-shrink: 0).
+// 2. ЗАГОЛОВОК: всегда 1 строка, не переносится, ellipsis.
 //
-// 3. КАРТИНКА:
-//    - Всегда 16:9 (эталон Telegram 1920×1080).
-//    - Любая ориентация кропится под 16:9.
-//    - Заглушка ♥ — в том же блоке 16:9.
-//    - Заполняет всю внутреннюю ширину окна (width: 100%).
+// 3. КАРТИНКА: всегда 16:9, кроп через object-fit: cover,
+//    заполняет всю внутреннюю ширину окна (width: 100%).
 //
-// 4. ТЕКСТ В КАРУСЕЛИ:
-//    - Максимум 3 строки.
-//    - Если обрезан — ' ...' через пробел от целого слова.
+// 4. ТЕКСТ В КАРУСЕЛИ: 3 строки max, обрезка по словам,
+//    ' ...' через пробел от целого слова.
 //
-// 5. ТЕКСТ В МОДАЛКЕ — СТРОГО 11 СТРОК ТЕЛА:
-//    - 1 строка заголовка + 11 строк тела = 12 строк всего.
-//    - Ни при каких обстоятельствах больше.
-//    - Эталон подсчёта — внутренняя ширина блока текста окна.
-//      Внутренняя ширина = 390px (ширина окна) − 2×20px (padding) = 350px.
-//      Один и тот же отбор текста идёт на мобиле и десктопе, потому что
-//      ширина блока текста ФИКСИРОВАНА (width: 100% от контентной области
-//      окна, а окно имеет max-width: 390px и одинаковый padding везде).
-//    - Обрезка в JS через fitParagraphsToBudget(paragraphs, 11).
-//    - .tg-modal-body имеет overflow: hidden — защита от переполнения.
+// 5. ТЕКСТ В МОДАЛКЕ:
+//    - МОБИЛА (≤ 859px): окно 390×590, внутренняя ширина 350px,
+//      лимит 11 строк тела (1 строка заголовка + 11 = 12 строк всего).
+//    - ДЕСКТОП (≥ 860px): окно 620×auto (max 700), внутренняя ширина
+//      580px, лимит строк ДИНАМИЧЕСКИЙ — считается от реальной доступной
+//      высоты под текст в окне, но не больше 15 строк тела
+//      (потолок — 16 строк всего с заголовком).
+//    - Обрезка строго по массиву слов, разрыв по буквам невозможен.
+//    - Многоточие ' ...' через пробел ставится, если хоть слово отрезано.
 //
-// 6. МНОГОТОЧИЕ: ELLIPSIS = ' ...' (пробел + три точки).
+// 6. МНОГОТОЧИЕ: ELLIPSIS = ' ...' (пробел + три обычные точки).
 //
 // 7. РАЗМЕРЫ ОКНА МОДАЛКИ:
-//    - Ширина окна: max-width 390px, padding 20px.
-//    - Внутренняя ширина контента: 350px.
-//    - Блок текста и картинка заполняют всю внутреннюю ширину (width: 100%).
-//    - МОБИЛА (≤ 859px): height ФИКСИРОВАННАЯ 620px. Всё статично.
-//    - ДЕСКТОП (≥ 860px): height auto — окно по содержимому.
-//    - Все блоки защищены flex-shrink: 0 (кроме .tg-modal-body).
-//    - Футер прижат к нижнему краю через margin-top: auto.
+//    - МОБИЛА: height 590px фиксированная, всё статично, скролла нет.
+//    - ДЕСКТОП: height auto по контенту, max-height 700px.
+//    - Все блоки (картинка, заголовок, футер) защищены flex-shrink: 0.
+//    - Только .tg-modal-body — overflow: hidden.
+//    - Футер прижат к нижнему краю окна через margin-top: auto.
 //
-// 8. ПРИМЕНЕНИЕ:
-//    Правила применяются автоматически к любому новому посту.
+// 8. ПРИМЕНЕНИЕ: автоматически к любому новому посту.
 //
 // ============================================================
 
@@ -2436,26 +2409,34 @@ button.disabled {
   var SWIPE_THRESHOLD = 40;
   var WHEEL_THROTTLE = 600;
 
-  // Единая константа многоточия.
+  // Многоточие: пробел + три точки.
   var ELLIPSIS = ' ...';
 
-  // === ПАРАМЕТРЫ ЭТАЛОННОГО ЗАМЕРА ТЕКСТА МОДАЛКИ ===
-  // Ширина окна 390px, padding 20px → внутренняя ширина 350px.
-  var STAGE_WIDTH = 350;
+  // === ЭТАЛОННЫЕ ШИРИНЫ БЛОКА ТЕКСТА ===
+  // Мобила: окно 390px, padding 20px → 350px.
+  // Десктоп: окно 620px, padding 20px → 580px.
+  var STAGE_WIDTH_MOBILE = 350;
+  var STAGE_WIDTH_DESKTOP = 580;
+
+  // Размер шрифта и line-height совпадают с CSS .tg-modal-body.
   var STAGE_FONT_SIZE = 14;
   var STAGE_LINE_HEIGHT = 1.65;
-  // 1 строка заголовка + 11 строк тела = 12 строк всего.
-  var MODAL_TEXT_MAX_LINES = 11;
-  // Лимит строк в карточке карусели.
-  var CARD_TEXT_MAX_LINES = 3;
+
+  // Лимит строк тела.
+  var MODAL_TEXT_MAX_LINES_MOBILE = 11;
+  // Десктоп — динамический, но с потолком 15 строк тела
+  // (1 строка заголовка + 15 = 16 строк всего — жёсткий потолок).
+  var MODAL_TEXT_MAX_LINES_DESKTOP = 15;
 
   var track = document.getElementById('tg-feed-track');
   var wrap = document.getElementById('tg-feed-wrap');
   var dotsWrap = document.getElementById('tg-feed-dots');
   var modal = document.getElementById('tg-modal');
+  var modalBox = modal.querySelector('.tg-modal-box');
   var modalTitle = document.getElementById('tg-modal-title-el');
   var modalMedia = document.getElementById('tg-modal-media');
   var modalBody = document.getElementById('tg-modal-body');
+  var modalFooter = modal.querySelector('.tg-modal-footer');
   var modalCta = document.getElementById('tg-modal-cta');
   var avatarEl = document.getElementById('tg-feed-avatar');
   var nameEl = document.getElementById('tg-feed-name');
@@ -2482,10 +2463,19 @@ button.disabled {
     img.src = 'https://t.me/i/userpic/320/' + TG_CHANNEL + '.jpg';
   })();
 
+  // Текущий активный пост (для пересчёта при resize).
+  var currentPostIndex = -1;
+
+  function isDesktop() {
+    return window.innerWidth >= 860;
+  }
+
+  function getStageWidth() {
+    return isDesktop() ? STAGE_WIDTH_DESKTOP : STAGE_WIDTH_MOBILE;
+  }
+
   // ============================================================
-  // ОФСКРИН-МЕТР: ширина 350px — совпадает с внутренней шириной окна
-  // (390px окно − 2×20px padding). Ширина везде одинаковая, поэтому
-  // обрезка текста идентична на мобиле и десктопе.
+  // ОФСКРИН-МЕТР: ширина устанавливается динамически под режим.
   // ============================================================
 
   var measureEl = null;
@@ -2498,7 +2488,6 @@ button.disabled {
       'pointer-events:none',
       'left:-99999px',
       'top:0',
-      'width:' + STAGE_WIDTH + 'px',
       'font-size:' + STAGE_FONT_SIZE + 'px',
       'line-height:' + STAGE_LINE_HEIGHT,
       'font-family:Inter, "Segoe UI", system-ui, sans-serif',
@@ -2511,9 +2500,10 @@ button.disabled {
     return measureEl;
   }
 
-  function countLines(text) {
+  function countLines(text, stageWidth) {
     if (!text) return 0;
     var el = getMeasureEl();
+    el.style.width = stageWidth + 'px';
     el.textContent = text;
     var lh = STAGE_FONT_SIZE * STAGE_LINE_HEIGHT;
     return Math.max(1, Math.round(el.scrollHeight / lh));
@@ -2530,10 +2520,10 @@ button.disabled {
     return out;
   }
 
-  function fitParagraph(paragraph, maxLines, addEllipsis) {
+  function fitParagraph(paragraph, maxLines, addEllipsis, stageWidth) {
     if (!paragraph) return { text: '', lines: 0, truncated: false };
 
-    var full = countLines(paragraph);
+    var full = countLines(paragraph, stageWidth);
     if (full <= maxLines) {
       return { text: paragraph, lines: full, truncated: false };
     }
@@ -2550,7 +2540,7 @@ button.disabled {
       var candidate = (mid >= words.length)
         ? words.join(' ')
         : (words.slice(0, mid).join(' ') + suffix);
-      var lines = countLines(candidate);
+      var lines = countLines(candidate, stageWidth);
       if (lines <= maxLines) {
         bestCut = mid;
         bestLines = lines;
@@ -2565,20 +2555,20 @@ button.disabled {
       var test = (bestCut >= words.length)
         ? words.join(' ')
         : (words.slice(0, bestCut).join(' ') + suffix);
-      if (countLines(test) <= maxLines) break;
+      if (countLines(test, stageWidth) <= maxLines) break;
       bestCut -= 1;
       guard += 1;
     }
 
     if (bestCut >= words.length) {
       var fullText = words.join(' ');
-      return { text: fullText, lines: countLines(fullText), truncated: false };
+      return { text: fullText, lines: countLines(fullText, stageWidth), truncated: false };
     }
     var out = bestCut > 0 ? (words.slice(0, bestCut).join(' ') + suffix) : '';
-    return { text: out, lines: countLines(out), truncated: true };
+    return { text: out, lines: countLines(out, stageWidth), truncated: true };
   }
 
-  function fitParagraphsToBudget(paragraphs, maxLines) {
+  function fitParagraphsToBudget(paragraphs, maxLines, stageWidth) {
     var result = [];
     var used = 0;
     var truncated = false;
@@ -2593,7 +2583,7 @@ button.disabled {
         break;
       }
 
-      var pLines = countLines(p);
+      var pLines = countLines(p, stageWidth);
 
       if (pLines <= available) {
         if (needBlankBefore) used += 1;
@@ -2602,7 +2592,7 @@ button.disabled {
         continue;
       }
 
-      var fitted = fitParagraph(p, available, true);
+      var fitted = fitParagraph(p, available, true, stageWidth);
       if (fitted.text) {
         if (needBlankBefore) used += 1;
         result.push(fitted.text);
@@ -2620,7 +2610,7 @@ button.disabled {
 
         var usedBeforeLast = 0;
         for (var k = 0; k < result.length - 1; k++) {
-          usedBeforeLast += countLines(result[k]) + 1;
+          usedBeforeLast += countLines(result[k], stageWidth) + 1;
         }
         var lastBudget = maxLines - usedBeforeLast;
 
@@ -2628,7 +2618,7 @@ button.disabled {
         while (loW <= hiW) {
           var midW = Math.floor((loW + hiW) / 2);
           var cand = words.slice(0, midW).join(' ') + suffix;
-          if (countLines(cand) <= lastBudget) {
+          if (countLines(cand, stageWidth) <= lastBudget) {
             bestW = midW;
             loW = midW + 1;
           } else {
@@ -2695,6 +2685,39 @@ button.disabled {
       el.textContent = words.slice(0, bestCut).join(' ') + suffix;
       guard++;
     }
+  }
+
+  // ==== ДИНАМИЧЕСКИЙ ЛИМИТ СТРОК ДЛЯ ДЕСКТОПА ====
+  // Считаем, сколько строк реально помещается в .tg-modal-body,
+  // исходя из доступной высоты окна. Потолок — MODAL_TEXT_MAX_LINES_DESKTOP.
+  function computeDesktopMaxLines() {
+    if (!modalBox || !modalBody || !modalMedia || !modalTitle || !modalFooter) {
+      return MODAL_TEXT_MAX_LINES_DESKTOP;
+    }
+
+    // Общая высота окна на десктопе ограничена 700px (max-height).
+    var boxHeight = 700;
+    // padding окна сверху и снизу — 20+20.
+    var padding = 40;
+    // Реальная высота остальных блоков: meta (0), media, title, footer + их margin.
+    var mediaH = modalMedia.getBoundingClientRect().height;
+    var mediaMargin = 16; // margin-bottom у .tg-modal-media
+    var titleH = modalTitle.getBoundingClientRect().height;
+    var titleMargin = 16; // margin-bottom у .tg-modal-title
+    var footerH = modalFooter.getBoundingClientRect().height;
+    // footer уже содержит padding-top 24.
+
+    var available = boxHeight - padding - mediaH - mediaMargin
+                    - titleH - titleMargin - footerH;
+
+    if (available < 0) available = 0;
+
+    var lh = STAGE_FONT_SIZE * STAGE_LINE_HEIGHT;
+    var lines = Math.floor(available / lh);
+
+    if (lines < 1) lines = 1;
+    if (lines > MODAL_TEXT_MAX_LINES_DESKTOP) lines = MODAL_TEXT_MAX_LINES_DESKTOP;
+    return lines;
   }
 
   var DEMO_POSTS = [
@@ -2828,7 +2851,7 @@ button.disabled {
 
     var textEl = card.querySelector('.tg-card-text');
     requestAnimationFrame(function() {
-      try { fitCardText(textEl, p.text, CARD_TEXT_MAX_LINES); }
+      try { fitCardText(textEl, p.text, 3); }
       catch (e) { textEl.textContent = p.text; }
     });
 
@@ -3082,11 +3105,15 @@ button.disabled {
     else prev();
   }, { passive: false });
 
+  // Открытие модалки: применяем правила для текущего режима
+  // (мобила — фикс 11 строк, десктоп — динамический лимит от высоты окна,
+  //  потолок 15 строк). Ширина эталона тоже зависит от режима.
   function openModal(i) {
     var p = posts[i];
     if (!p) return;
     isPaused = true;
     if (autoplayTimer) clearInterval(autoplayTimer);
+    currentPostIndex = i;
 
     modalTitle.textContent = p.title;
 
@@ -3096,23 +3123,46 @@ button.disabled {
       modalMedia.innerHTML = '<div class="tg-modal-media"><div class="ph-fallback lg">♥</div></div>';
     }
 
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+
+    // После отрисовки — расчёт лимита строк и отбор текста.
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        applyModalText(p);
+      });
+    });
+  }
+
+  function applyModalText(p) {
+    if (!p) return;
+
+    var maxLines;
+    var stageWidth;
+
+    if (isDesktop()) {
+      stageWidth = STAGE_WIDTH_DESKTOP;
+      maxLines = computeDesktopMaxLines();
+    } else {
+      stageWidth = STAGE_WIDTH_MOBILE;
+      maxLines = MODAL_TEXT_MAX_LINES_MOBILE;
+    }
+
     var paragraphs = parseParagraphs(p.text);
-    var fitted = fitParagraphsToBudget(paragraphs, MODAL_TEXT_MAX_LINES);
+    var fitted = fitParagraphsToBudget(paragraphs, maxLines, stageWidth);
 
     var html = '';
     for (var k = 0; k < fitted.paragraphs.length; k++) {
       html += '<p>' + escapeHtml(fitted.paragraphs[k]) + '</p>';
     }
     modalBody.innerHTML = html || '<p></p>';
-
-    modal.classList.add('open');
-    document.body.style.overflow = 'hidden';
   }
 
   function closeModal() {
     modal.classList.remove('open');
     document.body.style.overflow = '';
     isPaused = false;
+    currentPostIndex = -1;
     restartAutoplay();
   }
 
@@ -3141,6 +3191,9 @@ button.disabled {
     });
   }
 
+  // При resize пересобираем текст карточек и открытой модалки
+  // (ширина эталона и лимит строк могут измениться между режимами).
+  var resizeTimer = null;
   window.addEventListener('resize', function() {
     var step = getCardStep();
     track.style.transform = 'translateX(' + (-activeIdx * step) + 'px)';
@@ -3149,8 +3202,15 @@ button.disabled {
       var el = cards[i].querySelector('.tg-card-text');
       var idx = parseInt(cards[i].dataset.idx, 10);
       if (el && posts[idx]) {
-        try { fitCardText(el, posts[idx].text, CARD_TEXT_MAX_LINES); } catch (e) {}
+        try { fitCardText(el, posts[idx].text, 3); } catch (e) {}
       }
+    }
+
+    if (modal.classList.contains('open') && currentPostIndex >= 0) {
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function() {
+        applyModalText(posts[currentPostIndex]);
+      }, 120);
     }
   });
 
