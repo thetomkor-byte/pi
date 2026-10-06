@@ -417,6 +417,18 @@ button.disabled {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  position: relative;
+  padding-right: 20px;
+}
+
+.tg-card-text::after {
+  content: "...";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  color: var(--muted-soft-2);
+  font-weight: 700;
+  letter-spacing: 1px;
 }
 
 .tg-card-date {
@@ -522,29 +534,6 @@ button.disabled {
   to { transform: translateY(0); opacity: 1; }
 }
 
-.tg-modal-close {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  border: 1px solid #3a3018;
-  background: rgba(255,203,43,.05);
-  color: var(--gold);
-  font-size: 20px;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background .15s ease, transform .15s ease;
-  z-index: 2;
-}
-
-.tg-modal-close:active { transform: scale(.92); }
-@media (hover: hover) { .tg-modal-close:hover { background: rgba(255,203,43,.12); } }
-
 .tg-modal-meta {
   color: var(--gold);
   font-size: clamp(10px, 1.6vmin, 12px);
@@ -560,7 +549,6 @@ button.disabled {
   font-weight: 900;
   line-height: 1.2;
   margin-bottom: 16px;
-  padding-right: 30px;
 }
 
 .tg-modal-media {
@@ -663,36 +651,12 @@ button.disabled {
   animation: tgSlideUp .28s cubic-bezier(.22,.61,.36,1);
 }
 
-.info-modal-close {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  border: 1px solid #3a3018;
-  background: rgba(255,203,43,.05);
-  color: var(--gold);
-  font-size: 20px;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background .15s ease, transform .15s ease;
-  z-index: 2;
-}
-
-.info-modal-close:active { transform: scale(.92); }
-@media (hover: hover) { .info-modal-close:hover { background: rgba(255,203,43,.12); } }
-
 .info-modal-title {
   color: #fff;
   font-size: clamp(18px, 3.4vmin, 24px);
   font-weight: 900;
   line-height: 1.2;
   margin-bottom: 16px;
-  padding-right: 30px;
 }
 
 .info-modal-body {
@@ -732,14 +696,28 @@ button.disabled {
   padding: 0 clamp(18px, 4vw, 40px);
 }
 
-.lnd-section { padding: clamp(40px, 8vw, 84px) 0; }
-
-.lnd-section + .lnd-section {
-  border-top: 1px solid rgba(255,255,255,.05);
+.lnd-section {
+  padding: clamp(40px, 8vw, 84px) 0;
+  position: relative;
 }
 
-#landing .lnd-hero + .lnd-section {
-  border-top: 1px solid rgba(255,255,255,.05);
+/* Разделительная линия с плавным исчезновением по краям */
+.lnd-section + .lnd-section::before,
+#landing .lnd-hero + .lnd-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255,255,255,.05) 18%,
+    rgba(255,255,255,.05) 82%,
+    transparent 100%
+  );
+  pointer-events: none;
 }
 
 .lnd-kicker {
@@ -1331,11 +1309,28 @@ button.disabled {
 .lnd-final .lnd-p { margin-left: auto; margin-right: auto; }
 
 .lnd-footer {
-  border-top: 1px solid rgba(255,255,255,.06);
+  position: relative;
   padding: clamp(28px, 5vw, 44px) 0 calc(clamp(40px, 8vw, 60px) + env(safe-area-inset-bottom, 0px));
   color: var(--muted);
   font-size: clamp(11px, 1.7vmin, 13px);
   line-height: 1.6;
+}
+
+.lnd-footer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255,255,255,.06) 18%,
+    rgba(255,255,255,.06) 82%,
+    transparent 100%
+  );
+  pointer-events: none;
 }
 
 .lnd-footer .row {
@@ -1418,7 +1413,7 @@ button.disabled {
 
 /* ==== РАЗРЕШЕНИЕ ВЫДЕЛЕНИЯ ТЕКСТА НА ЛЕНДИНГЕ ==== */
 #landing,
-#landing *:not(button):not(.lnd-btn):not(.tg-card):not(.lang-trigger):not(.lang-option):not(.tg-modal-close):not(.lnd-card.tappable):not(.info-modal-close) {
+#landing *:not(button):not(.lnd-btn):not(.tg-card):not(.lang-trigger):not(.lang-option):not(.lnd-card.tappable) {
   user-select: text;
   -webkit-user-select: text;
   -moz-user-select: text;
@@ -1454,7 +1449,6 @@ button.disabled {
   <!-- ==== POST MODAL ==== -->
   <div id="tg-modal" role="dialog" aria-modal="true" aria-labelledby="tg-modal-title-el">
     <div class="tg-modal-box">
-      <button class="tg-modal-close" type="button" id="tg-modal-close" aria-label="Закрыть">✕</button>
       <div class="tg-modal-meta" id="tg-modal-meta"></div>
       <h2 class="tg-modal-title" id="tg-modal-title-el"></h2>
       <div id="tg-modal-media"></div>
@@ -1470,7 +1464,6 @@ button.disabled {
   <!-- ==== INFO MODAL ==== -->
   <div id="info-modal" role="dialog" aria-modal="true" aria-labelledby="info-modal-title-el">
     <div class="info-modal-box">
-      <button class="info-modal-close" type="button" id="info-modal-close" aria-label="Закрыть">✕</button>
       <h2 class="info-modal-title" id="info-modal-title-el"></h2>
       <div class="info-modal-body" id="info-modal-body"></div>
     </div>
@@ -2285,7 +2278,6 @@ button.disabled {
   'use strict';
 
   var infoModal = document.getElementById('info-modal');
-  var infoModalClose = document.getElementById('info-modal-close');
   var infoTitle = document.getElementById('info-modal-title-el');
   var infoBody = document.getElementById('info-modal-body');
 
@@ -2303,10 +2295,8 @@ button.disabled {
     document.body.style.overflow = '';
   }
 
-  infoModalClose.addEventListener('click', closeInfo);
-  infoModal.addEventListener('click', function(e) {
-    if (e.target === infoModal) closeInfo();
-  });
+  // Закрытие по клику в любом месте экрана
+  infoModal.addEventListener('click', closeInfo);
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape' && infoModal.classList.contains('open')) closeInfo();
   });
@@ -2345,7 +2335,6 @@ button.disabled {
   var wrap = document.getElementById('tg-feed-wrap');
   var dotsWrap = document.getElementById('tg-feed-dots');
   var modal = document.getElementById('tg-modal');
-  var modalClose = document.getElementById('tg-modal-close');
   var modalMeta = document.getElementById('tg-modal-meta');
   var modalTitle = document.getElementById('tg-modal-title-el');
   var modalMedia = document.getElementById('tg-modal-media');
@@ -2358,6 +2347,8 @@ button.disabled {
   if (!track || !modal) return;
 
   modalCta.setAttribute('href', TG_LINK);
+  modalCta.setAttribute('target', '_blank');
+  modalCta.setAttribute('rel', 'noopener noreferrer');
 
   if (nameEl) nameEl.textContent = TG_CHANNEL_NAME;
   if (usernameEl) usernameEl.textContent = '@' + TG_CHANNEL;
@@ -2456,6 +2447,19 @@ button.disabled {
 
   var TAP_ICON_SVG = '<svg class="tg-card-tap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3H5a2 2 0 0 0-2 2v4M9 21H5a2 2 0 0 1-2-2v-4M15 3h4a2 2 0 0 1 2 2v4M15 21h4a2 2 0 0 0 2-2v-4"/></svg>';
 
+  // Обрезаем текст до первых 3 строк и добавляем "..."
+  function truncateToThreeLines(text) {
+    if (!text) return '';
+    var lines = text.split('\n');
+    var result = lines.slice(0, 3).join('\n');
+    if (lines.length > 3) {
+      result += '\n...';
+    } else if (result.length > 160) {
+      result = result.slice(0, 160) + '...';
+    }
+    return result;
+  }
+
   function renderCards() {
     track.innerHTML = '';
     dotsWrap.innerHTML = '';
@@ -2477,7 +2481,7 @@ button.disabled {
       card.innerHTML =
         thumbHtml +
         '<div class="tg-card-title">' + escapeHtml(p.title) + '</div>' +
-        '<div class="tg-card-text">' + escapeHtml(p.text.slice(0, 160)) + '</div>' +
+        '<div class="tg-card-text">' + escapeHtml(truncateToThreeLines(p.text)) + '</div>' +
         '<div class="tg-card-date">' + formatDate(p.date) + '</div>' +
         TAP_ICON_SVG;
 
@@ -2494,7 +2498,10 @@ button.disabled {
       var dot = document.createElement('span');
       dot.className = 'd' + (i === 0 ? ' active' : '');
       dot.dataset.idx = i;
-      dot.addEventListener('click', function() { goTo(i); });
+      dot.addEventListener('click', function(e) {
+        e.stopPropagation();
+        goTo(i);
+      });
       dotsWrap.appendChild(dot);
     });
 
@@ -2673,7 +2680,7 @@ button.disabled {
       modalMedia.innerHTML = '<div class="tg-modal-media"><div class="ph-fallback lg">♥</div></div>';
     }
 
-    modalBody.textContent = p.text || '(без текста)';
+    modalBody.textContent = truncateToThreeLines(p.text) || '(без текста)';
 
     modal.classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -2686,10 +2693,15 @@ button.disabled {
     restartAutoplay();
   }
 
-  modalClose.addEventListener('click', closeModal);
+  // Закрытие по клику в любом месте, КРОМЕ кнопки "Читать в Telegram"
   modal.addEventListener('click', function(e) {
-    if (e.target === modal) closeModal();
+    // Если клик по кнопке "Читать в Telegram" или её дочерним элементам — не закрываем
+    if (e.target.closest && e.target.closest('#tg-modal-cta')) {
+      return;
+    }
+    closeModal();
   });
+
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
   });
