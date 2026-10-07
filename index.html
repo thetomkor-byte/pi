@@ -699,8 +699,6 @@ button.disabled {
   align-items: flex-start;
 }
 
-/* Поднимаем только само слово «GGPOKER» на 3 пикселя вверх.
-   «TRANSFER» и остальное не трогаем. */
 .support-belcard-bank.support-gold-gg-wrap {
   transform: translateY(-3px);
 }
@@ -2659,12 +2657,22 @@ button.disabled {
     isSupportOpen = false;
   }
 
+  // Клик по фону модалки:
+  // - для обычных окошек (не Поддержка) — закрываем ВСЕГДА, где бы ни был клик (включая сам бокс).
+  // - для окошка Поддержка — закрываем ТОЛЬКО если клик был вне самого бокса.
   infoModal.addEventListener('click', function(e) {
+    if (!isSupportOpen) {
+      closeInfo();
+      return;
+    }
+    // Support: закрываем только если клик пришёл ровно по фону (не по боксу и не по его содержимому).
     if (e.target === infoModal) {
       closeInfo();
     }
   });
 
+  // Внутри бокса Поддержки полностью останавливаем всплытие, чтобы клик по карточкам и надписям
+  // не долетал до обработчика на #info-modal и не мог случайно закрыть окошко.
   infoBox.addEventListener('click', function(e) {
     if (isSupportOpen) {
       e.stopPropagation();
