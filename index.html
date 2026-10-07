@@ -121,7 +121,8 @@ button.disabled {
   flex-shrink: 0;
 }
 
-/* Линия под каруселью + под ней мягкое золотое свечение. */
+/* Линия под каруселью + мягкое золотое свечение под ней.
+   Свечение — то же самое, что добавлено внизу под финальной секцией. */
 #tg-feed::after {
   content: "";
   position: absolute;
@@ -142,15 +143,15 @@ button.disabled {
 #tg-feed::before {
   content: "";
   position: absolute;
-  bottom: -28px;
+  bottom: -20px;
   left: clamp(18px, 4vw, 40px);
   right: clamp(18px, 4vw, 40px);
-  height: 28px;
+  height: 20px;
   background: radial-gradient(
-    ellipse 60% 100% at 50% 0%,
+    ellipse 65% 100% at 50% 0%,
     rgba(255,203,43,.10) 0%,
-    rgba(255,203,43,.05) 40%,
-    transparent 75%
+    rgba(255,203,43,.04) 45%,
+    transparent 80%
   );
   pointer-events: none;
   z-index: 0;
@@ -1164,12 +1165,10 @@ button.disabled {
   }
 }
 
-/* Контейнер-строка: POKER TRAINER слева, кнопка-сердечко
-   абсолютно спозиционирована: горизонтально по центру лендинга,
-   вертикально — по центру строки текста POKER TRAINER. */
+/* Строка: только текст POKER TRAINER слева. Ничего не двигаем.
+   position: relative — чтобы сердечко позиционировалось от этой строки. */
 .lnd-logo-row {
   position: relative;
-  display: block;
   margin-bottom: clamp(20px, 4vw, 30px);
   width: 100%;
   min-height: 26px;
@@ -1186,11 +1185,11 @@ button.disabled {
   text-transform: uppercase;
   margin: 0;
   line-height: 1;
-  position: relative;
-  z-index: 1;
 }
 
-/* Кнопка-сердечко — без кружка, точно как сердечко-заглушка. */
+/* Кнопка-сердечко:
+   - по горизонтали центр ровно в центре строки (а строка на всю ширину лендинга) → центр лендинга;
+   - по вертикали центр ровно в центре строки → центр текста POKER TRAINER. */
 .lnd-heart-btn {
   position: absolute;
   top: 50%;
@@ -1649,37 +1648,41 @@ button.disabled {
   overflow: visible;
 }
 
-/* Верхняя линия секции + мягкое золотое свечение под ней —
-   точно такое же, как под линией карусели Telegram. */
+/* Тонкая верхняя линия финальной секции — точно как у линии под каруселью. */
+.lnd-final::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255,255,255,.05) 18%,
+    rgba(255,255,255,.05) 82%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+/* Свечение под верхней линией финальной секции —
+   то же самое, что под линией карусели. */
 .lnd-final::after {
   content: "";
   position: absolute;
   top: 0;
   left: clamp(18px, 4vw, 40px);
   right: clamp(18px, 4vw, 40px);
-  height: 28px;
+  height: 20px;
   background: radial-gradient(
-    ellipse 60% 100% at 50% 0%,
+    ellipse 65% 100% at 50% 0%,
     rgba(255,203,43,.10) 0%,
-    rgba(255,203,43,.05) 40%,
-    transparent 75%
+    rgba(255,203,43,.04) 45%,
+    transparent 80%
   );
   pointer-events: none;
   z-index: 0;
-}
-
-.lnd-final::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 50%;
-  width: 90vmin;
-  height: 90vmin;
-  transform: translate(-50%, -50%);
-  background: radial-gradient(circle, rgba(255,203,43,.10) 0%, transparent 60%);
-  pointer-events: none;
-  z-index: 0;
-  clip-path: inset(50% 0 0 0);
 }
 
 .lnd-final .lnd-h2,
