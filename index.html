@@ -86,15 +86,20 @@ button.disabled {
   align-items: center;
   justify-content: center;
   color: var(--ph-heart);
-  font-size: 22px;
-  font-weight: 900;
   background: var(--ph-bg);
   pointer-events: none;
   user-select: none;
 }
 
-.ph-fallback.lg { font-size: 26px; }
-.ph-fallback.sm { font-size: 18px; }
+/* Сердечко-заглушка как SVG-рисунок. Размер = размеру самолётика (32×32). */
+.ph-fallback .ph-heart-svg {
+  width: 32px;
+  height: 32px;
+  display: block;
+}
+
+.ph-fallback.lg .ph-heart-svg { width: 40px; height: 40px; }
+.ph-fallback.sm .ph-heart-svg { width: 24px; height: 24px; }
 
 /* ==== TELEGRAM FEED CAROUSEL ==== */
 
@@ -138,8 +143,6 @@ button.disabled {
   align-items: center;
   justify-content: center;
   color: var(--ph-heart);
-  font-size: 20px;
-  font-weight: 900;
   position: relative;
 }
 
@@ -150,6 +153,12 @@ button.disabled {
   display: block;
 }
 
+.tg-feed-avatar .ph-heart-svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
 .tg-feed-avatar .fb {
   position: absolute;
   inset: 0;
@@ -157,8 +166,6 @@ button.disabled {
   align-items: center;
   justify-content: center;
   color: var(--ph-heart);
-  font-size: 20px;
-  font-weight: 900;
 }
 
 .tg-feed-name {
@@ -335,10 +342,7 @@ button.disabled {
 
 .tg-feed-track.no-transition { transition: none; }
 
-/* ==== КАРТОЧКА: ЖЁСТКО ЗАФИКСИРОВАННАЯ ВЫСОТА 320px ====
-   Высота карточки НИКОГДА не меняется ни от длины текста,
-   ни от ширины экрана. Текст, который не поместился,
-   просто отсекается по нижнему краю. */
+/* ==== КАРТОЧКА: ЖЁСТКО ЗАФИКСИРОВАННАЯ ВЫСОТА 320px ==== */
 .tg-card {
   flex: 0 0 calc((100% - 28px) / 3);
   min-width: 0;
@@ -398,19 +402,27 @@ button.disabled {
   align-items: center;
   justify-content: center;
   color: var(--ph-heart);
-  font-size: 22px;
-  font-weight: 900;
   background: var(--ph-bg);
 }
 
-/* Область текста: занимает весь остаток высоты карточки.
-   Текст, который не влез, обрезается снизу. */
+/* Область текста: занимает весь остаток высоты карточки. */
 .tg-card-text-wrap {
   position: relative;
   flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
   padding-right: 40px;
+  /* Текст плавно растворяется к нижнему краю — без полосы поверх. */
+  -webkit-mask-image: linear-gradient(to bottom,
+    #000 0,
+    #000 calc(100% - 2.6em),
+    rgba(0,0,0,.55) calc(100% - 1.3em),
+    transparent 100%);
+  mask-image: linear-gradient(to bottom,
+    #000 0,
+    #000 calc(100% - 2.6em),
+    rgba(0,0,0,.55) calc(100% - 1.3em),
+    transparent 100%);
 }
 
 .tg-card-text {
@@ -426,17 +438,7 @@ button.disabled {
   color: #ffffff;
 }
 
-.tg-card-text-fade {
-  position: absolute;
-  left: 0;
-  right: 40px;
-  bottom: 0;
-  height: 2.6em;
-  background: linear-gradient(to bottom, rgba(10,10,10,0) 0%, rgba(10,10,10,.85) 55%, #0a0a0a 100%);
-  pointer-events: none;
-}
-
-/* Telegram-самолётик: в два раза больше прежней рамки (32×32). */
+/* Telegram-самолётик: 32×32. */
 .tg-card-tap-icon {
   position: absolute;
   right: 10px;
@@ -1346,7 +1348,7 @@ button.disabled {
       <div class="tg-feed-head">
         <a class="tg-feed-channel" href="https://t.me/ThePokerWay" target="_blank" rel="noopener noreferrer" aria-label="Открыть канал The Poker Way">
           <span class="tg-feed-avatar" id="tg-feed-avatar">
-            <span class="fb">♥</span>
+            <span class="fb" id="tg-feed-avatar-fb"></span>
           </span>
           <span class="tg-feed-name">
             <span class="n" id="tg-feed-name">The Poker Way</span>
@@ -1931,15 +1933,21 @@ button.disabled {
 </script>
 
 <script>
-// ==== УНИВЕРСАЛЬНАЯ ЗАГЛУШКА ДЛЯ НЕЗАГРУЖЕННЫХ ИЗОБРАЖЕНИЙ ====
+// ==== SVG-СЕРДЕЧКО + УНИВЕРСАЛЬНАЯ ЗАГЛУШКА ДЛЯ НЕЗАГРУЖЕННЫХ ИЗОБРАЖЕНИЙ ====
 (function() {
   'use strict';
+
+  // Сердечко — SVG-рисунок, чтобы размер был точный и одинаковый с самолётиком.
+  var HEART_SVG =
+    '<svg class="ph-heart-svg" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">' +
+      '<path d="M16 28.5C16 28.5 3.5 20.4 3.5 11.9C3.5 7.5 6.9 4.1 11 4.1C13.2 4.1 15.1 5.1 16 6.6C16.9 5.1 18.8 4.1 21 4.1C25.1 4.1 28.5 7.5 28.5 11.9C28.5 20.4 16 28.5 16 28.5Z"/>' +
+    '</svg>';
 
   function makeFallback(extraClass) {
     var el = document.createElement('div');
     el.className = 'ph-fallback' + (extraClass ? ' ' + extraClass : '');
     el.setAttribute('aria-hidden', 'true');
-    el.textContent = '♥';
+    el.innerHTML = HEART_SVG;
     return el;
   }
 
@@ -1968,8 +1976,11 @@ button.disabled {
       }
     }
   });
+
+  // Публикуем SVG, чтобы другие скрипты могли его использовать.
+  window.POKER_HEART_SVG = HEART_SVG;
 })();
-// ==== /УНИВЕРСАЛЬНАЯ ЗАГЛУШКА ====
+// ==== /SVG-СЕРДЕЧКО ====
 </script>
 
 <script>
@@ -2205,14 +2216,15 @@ button.disabled {
 // 3. КАРТИНКА: 16:9, object-fit: cover, width: 100%.
 // 4. ВЫСОТА КАРТОЧКИ ЖЁСТКО ЗАФИКСИРОВАНА В 320px.
 //    Текст внутри обрезается по нижнему краю карточки,
-//    ничего не растит и не сжимает. Последние две строки
-//    плавно затухают.
+//    ничего не растит и не сжимает. Последние строки
+//    плавно растворяются через маску — без полос поверх.
 // 5. ДАТЫ НЕТ. Посты всегда без даты.
 // 6. МОДАЛКИ НЕТ. Клик по карточке сразу открывает Telegram
 //    (в новой вкладке или в приложении) на нужный пост.
 //    Пока это ссылка на канал, потом подставим конкретные посты.
 // 7. Значок в углу карточки — золотистый telegram-самолётик 32×32.
-// 8. ПРАВИЛА ПРИМЕНЯЮТСЯ АВТОМАТИЧЕСКИ к любому новому посту.
+// 8. Сердечко-заглушка — SVG, размер 32×32 (как самолётик).
+// 9. ПРАВИЛА ПРИМЕНЯЮТСЯ АВТОМАТИЧЕСКИ к любому новому посту.
 //
 // ============================================================
 
@@ -2230,6 +2242,7 @@ button.disabled {
   var wrap = document.getElementById('tg-feed-wrap');
   var dotsWrap = document.getElementById('tg-feed-dots');
   var avatarEl = document.getElementById('tg-feed-avatar');
+  var avatarFb = document.getElementById('tg-feed-avatar-fb');
   var nameEl = document.getElementById('tg-feed-name');
   var usernameEl = document.getElementById('tg-feed-username');
 
@@ -2237,6 +2250,10 @@ button.disabled {
 
   if (nameEl) nameEl.textContent = TG_CHANNEL_NAME;
   if (usernameEl) usernameEl.textContent = '@' + TG_CHANNEL;
+
+  // SVG-сердечко (то же, что в общей заглушке). Размер = 32×32, как у самолётика.
+  var HEART_SVG = window.POKER_HEART_SVG || '';
+  if (avatarFb) avatarFb.innerHTML = HEART_SVG;
 
   (function loadAvatar() {
     if (!avatarEl) return;
@@ -2279,11 +2296,9 @@ button.disabled {
     if (p.img) {
       thumbHtml = '<div class="tg-card-thumb"><img src="' + p.img + '" alt="" loading="lazy"></div>';
     } else {
-      thumbHtml = '<div class="tg-card-thumb"><div class="ph-fallback">♥</div></div>';
+      thumbHtml = '<div class="tg-card-thumb"><div class="ph-fallback">' + HEART_SVG + '</div></div>';
     }
 
-    // Заголовок (lead) — это первая жирная белая часть самого текста.
-    // Дальше обычный текст идёт сплошным потоком без переносов строк.
     var fullText = String(p.text || '').replace(/\s+/g, ' ').trim();
     var leadHtml = '<span class="tg-card-lead">' + escapeHtml(p.lead) + '</span>';
     var bodyHtml = leadHtml + ' ' + escapeHtml(fullText);
@@ -2292,7 +2307,6 @@ button.disabled {
       thumbHtml +
       '<div class="tg-card-text-wrap">' +
         '<div class="tg-card-text">' + bodyHtml + '</div>' +
-        '<div class="tg-card-text-fade" aria-hidden="true"></div>' +
       '</div>' +
       TG_ICON_SVG;
 
@@ -2487,7 +2501,6 @@ button.disabled {
     restartAutoplay();
   }
 
-  // Перехватываем клик по карточке после свайпа, чтобы не открывалась ссылка.
   track.addEventListener('click', function(e) {
     if (suppressClick) {
       e.preventDefault();
@@ -2511,7 +2524,6 @@ button.disabled {
 
   wrap.addEventListener('mousedown', function(e) {
     if (e.button !== 0) return;
-    // Не блокируем стандартное поведение: клик по ссылке должен работать.
     onPointerDown(e.clientX, e.clientY);
   });
 
