@@ -593,13 +593,16 @@ button.disabled {
   margin-bottom: 0;
 }
 
-/* ==== КАРТОЧКИ ДОНАТОВ В МОДАЛКЕ ПОДДЕРЖКИ ==== */
+/* ==== КАРТОЧКИ ДОНАТОВ В МОДАЛКЕ ПОДДЕРЖКИ ====
+   Уменьшенный размер: блок 420px по ширине, отцентрирован.
+   Все шрифты и отступы пропорционально уменьшены. */
 
 .belcard-stack {
   position: relative;
   width: 100%;
+  max-width: 420px;
+  margin: 18px auto;
   aspect-ratio: 1.586 / 1;
-  margin: 20px 0;
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
@@ -613,9 +616,9 @@ button.disabled {
   top: 0;
   width: 100%;
   aspect-ratio: 1.586 / 1;
-  border-radius: 14px;
+  border-radius: 11px;
   overflow: hidden;
-  padding: 18px;
+  padding: 13px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -632,32 +635,32 @@ button.disabled {
 .belcard-stack .belcard.belcard-blue {
   background: linear-gradient(135deg, #18387e 0%, #224ba1 45%, #4373c1 100%);
   box-shadow:
-    0 12px 22px -8px rgba(0,0,0,.75),
-    0 6px 10px -4px rgba(0,0,0,.5),
+    0 10px 18px -7px rgba(0,0,0,.75),
+    0 5px 8px -3px rgba(0,0,0,.5),
     inset 0 1px 0 rgba(255,255,255,.25);
 }
 
 .belcard-stack .belcard.belcard-green {
   background: linear-gradient(135deg, #195630 0%, #246b41 45%, #3d8c55 100%);
   box-shadow:
-    0 12px 22px -8px rgba(0,0,0,.65),
-    0 6px 10px -4px rgba(0,0,0,.45),
+    0 10px 18px -7px rgba(0,0,0,.65),
+    0 5px 8px -3px rgba(0,0,0,.45),
     inset 0 1px 0 rgba(255,255,255,.25);
 }
 
 .belcard-stack .belcard.belcard-gray {
   background: linear-gradient(135deg, #3d3548 0%, #4a3f57 45%, #5b4e6b 100%);
   box-shadow:
-    0 12px 22px -8px rgba(0,0,0,.55),
-    0 6px 10px -4px rgba(0,0,0,.4),
+    0 10px 18px -7px rgba(0,0,0,.55),
+    0 5px 8px -3px rgba(0,0,0,.4),
     inset 0 1px 0 rgba(255,255,255,.2);
 }
 
 .belcard-stack .belcard.belcard-gold {
   background: linear-gradient(135deg, #4a3a10 0%, #6b5418 45%, #8a6f24 100%);
   box-shadow:
-    0 12px 22px -8px rgba(0,0,0,.55),
-    0 6px 10px -4px rgba(0,0,0,.4),
+    0 10px 18px -7px rgba(0,0,0,.55),
+    0 5px 8px -3px rgba(0,0,0,.4),
     inset 0 1px 0 rgba(255,255,255,.2);
 }
 
@@ -690,18 +693,18 @@ button.disabled {
 }
 
 .belcard-bank {
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 800;
-  letter-spacing: 1.2px;
+  letter-spacing: 1.1px;
   text-transform: uppercase;
   opacity: 0.9;
 }
 
 .belcard-club-top {
-  font-size: 17px;
+  font-size: 13px;
   font-weight: 900;
   font-style: normal;
-  letter-spacing: 1.5px;
+  letter-spacing: 1.2px;
   text-transform: uppercase;
   opacity: 0.95;
   text-align: right;
@@ -711,11 +714,11 @@ button.disabled {
 
 .belcard-chip {
   position: absolute;
-  top: 38px;
-  left: 18px;
-  width: 34px;
-  height: 26px;
-  border-radius: 4px;
+  top: 28px;
+  left: 13px;
+  width: 26px;
+  height: 20px;
+  border-radius: 3px;
   background: linear-gradient(135deg, #e8d9a0 0%, #c9b46a 50%, #a89040 100%);
   box-shadow: inset 0 0 0 1px rgba(0,0,0,.25);
   z-index: 2;
@@ -734,15 +737,15 @@ button.disabled {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  gap: 8px;
+  gap: 6px;
   margin-top: auto;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .copy-text {
   position: relative;
   display: inline-block;
-  padding-right: 14px;
+  padding-right: 12px;
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
@@ -754,8 +757,8 @@ button.disabled {
   position: absolute;
   right: 0;
   top: 0;
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   pointer-events: none;
   opacity: 1;
   cursor: pointer;
@@ -769,22 +772,22 @@ button.disabled {
   background: transparent;
 }
 .copy-icon::before {
-  width: 4px;
-  height: 4px;
+  width: 3px;
+  height: 3px;
   left: 0;
   top: 2px;
 }
 .copy-icon::after {
-  width: 4px;
-  height: 4px;
+  width: 3px;
+  height: 3px;
   left: 2px;
   top: 0;
 }
 
 .belcard-number {
-  font-size: 17px;
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: 1.5px;
+  letter-spacing: 1.3px;
   text-shadow: 0 1px 2px rgba(0,0,0,.4);
   align-self: flex-end;
   white-space: nowrap;
@@ -796,11 +799,11 @@ button.disabled {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  gap: 8px;
+  gap: 6px;
 }
 
 .belcard-name {
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -808,9 +811,9 @@ button.disabled {
 }
 
 .belcard-currencies-top {
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: .6px;
+  letter-spacing: .5px;
   text-align: right;
   opacity: 0.95;
   white-space: nowrap;
@@ -824,10 +827,10 @@ button.disabled {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  font-size: 19px;
+  font-size: 15px;
   font-weight: 900;
   font-style: normal;
-  letter-spacing: 1.5px;
+  letter-spacing: 1.3px;
   text-transform: uppercase;
   opacity: 0.95;
   text-align: center;
@@ -853,12 +856,12 @@ button.disabled {
   position: relative;
   z-index: 2;
   margin-top: auto;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   text-align: left;
   white-space: nowrap;
-  font-size: 12.5px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.2px;
+  letter-spacing: 0.1px;
   text-shadow: 0 1px 2px rgba(0,0,0,.4);
   display: block;
   width: 100%;
@@ -868,7 +871,7 @@ button.disabled {
   position: relative;
   z-index: 2;
   white-space: nowrap;
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 1px;
 }
@@ -881,9 +884,9 @@ button.disabled {
   background: rgba(20, 18, 16, 0.95);
   color: var(--gold);
   font-weight: 800;
-  font-size: 16px;
-  padding: 10px 18px;
-  border-radius: 10px;
+  font-size: 13px;
+  padding: 8px 14px;
+  border-radius: 8px;
   border: 1px solid #8a6508;
   box-shadow: 0 4px 12px rgba(0,0,0,.8);
   opacity: 0;
@@ -897,11 +900,11 @@ button.disabled {
 }
 
 .gold-gg {
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .gold-name-label {
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: none;
@@ -912,7 +915,7 @@ button.disabled {
 }
 
 .gold-name-value {
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 800;
   letter-spacing: 1px;
   text-shadow: 0 1px 2px rgba(0,0,0,.55);
@@ -925,18 +928,16 @@ button.disabled {
   position: relative;
   z-index: 2;
   margin-top: auto;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   text-align: left;
   white-space: nowrap;
   font-weight: 700;
-  letter-spacing: 0.2px;
+  letter-spacing: 0.1px;
   display: block;
   width: 100%;
   line-height: 1;
 }
 
-/* Убираем у модалки поддержки стандартное поведение заголовка
-   и даём карточкам нормальный воздух. */
 .info-modal-body .support-text {
   color: var(--muted-soft-2);
   font-size: clamp(13px, 2vmin, 15px);
@@ -945,11 +946,11 @@ button.disabled {
 }
 
 .info-modal-body .support-text + .belcard-stack {
-  margin-top: 20px;
+  margin-top: 18px;
 }
 
 .info-modal-body .belcard-stack + .support-text {
-  margin-top: 20px;
+  margin-top: 18px;
 }
 
 /* ==== LANDING ==== */
@@ -2558,7 +2559,6 @@ button.disabled {
 
   if (!infoModal) return;
 
-  // HTML блока с карточками донатов (взято из приложения).
   var SUPPORT_CARDS_HTML =
     '<div class="belcard-stack" id="belcard-stack">' +
       '<div class="belcard belcard-gold" data-card="gold">' +
@@ -2682,10 +2682,6 @@ button.disabled {
     if (e.key === 'Escape' && infoModal.classList.contains('open')) closeInfo();
   });
 
-  // ============================================================
-  // Логика карточек донатов (перелистывание свайпом вверх, двойной
-  // клик, копирование по нажатию). Адаптировано из приложения.
-  // ============================================================
   function bindBelcardDrag(stack) {
     if (!stack || stack.__ptBound) return;
     stack.__ptBound = true;
@@ -2920,7 +2916,6 @@ button.disabled {
       if (isAnimating) return;
       var copyEl = e.target.closest('.copy-text');
       if (copyEl) {
-        // Клик по номеру/имени — копируем, но не перелистываем.
         var card = copyEl.closest('.belcard');
         if (!card) return;
         var currentTop = cards[order[0]];
@@ -2931,7 +2926,6 @@ button.disabled {
         copyToClipboard(text, card);
         return;
       }
-      // Клик по PAYSEND — не мешаем переходу по ссылке.
       if (e.target.closest('.belcard-paysend')) return;
     };
 
