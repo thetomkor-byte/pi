@@ -699,6 +699,11 @@ button.disabled {
   align-items: flex-start;
 }
 
+/* Подъём только у слова GGPOKER на 5 пикселей. */
+.support-belcard.belcard-gold .support-belcard-bank {
+  transform: translateY(-5px);
+}
+
 .support-belcard-bank {
   font-size: clamp(11px, 1.55vmin, 12.5px);
   font-weight: 800;
@@ -904,6 +909,7 @@ button.disabled {
 
 .support-gold-gg {
   font-size: calc(clamp(11px, 1.55vmin, 12.5px) + 3px);
+  display: inline-block;
 }
 
 .support-gold-name-label {
