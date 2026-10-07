@@ -1146,16 +1146,87 @@ button.disabled {
   }
 }
 
+.lnd-logo-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: clamp(20px, 4vw, 30px);
+}
+
 .lnd-logo {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: clamp(20px, 4vw, 30px);
   font-weight: 900;
   letter-spacing: 3px;
   font-size: clamp(12px, 1.8vmin, 14px);
   color: #fff;
   text-transform: uppercase;
+  margin: 0;
+}
+
+.lnd-dollar-btn {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid #8a6508;
+  background: radial-gradient(circle at 50% 40%, #2a2010 0%, #14100a 100%);
+  color: var(--gold);
+  font-family: inherit;
+  font-weight: 900;
+  font-size: 22px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow:
+    0 0 0 1px rgba(255,203,43,.10),
+    0 0 16px rgba(255,203,43,.28),
+    0 0 34px rgba(255,203,43,.18),
+    inset 0 1px 0 rgba(255,203,43,.35);
+  transition: transform .12s ease, box-shadow .18s ease, filter .18s ease;
+}
+
+@media (hover: hover) {
+  .lnd-dollar-btn:hover {
+    box-shadow:
+      0 0 0 1px rgba(255,203,43,.18),
+      0 0 22px rgba(255,203,43,.42),
+      0 0 46px rgba(255,203,43,.24),
+      inset 0 1px 0 rgba(255,203,43,.45);
+    filter: brightness(1.08);
+  }
+}
+
+.lnd-dollar-btn:active {
+  transform: scale(0.94);
+  box-shadow:
+    0 0 0 1px rgba(255,203,43,.22),
+    0 0 26px rgba(255,203,43,.55),
+    0 0 52px rgba(255,203,43,.30),
+    inset 0 1px 0 rgba(255,203,43,.55);
+  filter: brightness(1.15);
+}
+
+.lnd-dollar-btn .dollar-glyph {
+  display: block;
+  transform: translateY(-1px);
+  text-shadow:
+    0 0 6px rgba(255,203,43,.85),
+    0 0 14px rgba(255,203,43,.45);
+}
+
+@media (max-width: 520px) {
+  .lnd-dollar-btn {
+    width: 42px;
+    height: 42px;
+    font-size: 19px;
+  }
 }
 
 .lnd-h1 {
@@ -1779,8 +1850,13 @@ button.disabled {
     <section class="lnd-hero" aria-labelledby="lnd-hero-title">
       <div class="lnd-inner lnd-hero-grid">
         <div class="lnd-hero-copy lnd-reveal">
-          <div class="lnd-logo">
-            <span>Poker Trainer</span>
+          <div class="lnd-logo-row">
+            <div class="lnd-logo">
+              <span>Poker Trainer</span>
+            </div>
+            <button class="lnd-dollar-btn" type="button" data-action="open-support" aria-label="Поддержать автора">
+              <span class="dollar-glyph">$</span>
+            </button>
           </div>
 
           <h1 class="lnd-h1" id="lnd-hero-title">
@@ -2540,7 +2616,7 @@ button.disabled {
 </script>
 
 <script>
-// ==== INFO MODAL (карточки-тапзоны + поддержка) ====
+// ==== INFO MODAL (карточки-тапзоны + поддержка + кнопка $) ====
 (function() {
   'use strict';
 
@@ -2665,7 +2741,6 @@ button.disabled {
       closeInfo();
       return;
     }
-    // Support: закрываем только если клик пришёл ровно по фону (не по боксу и не по его содержимому).
     if (e.target === infoModal) {
       closeInfo();
     }
@@ -2683,6 +2758,7 @@ button.disabled {
     if (e.key === 'Escape' && infoModal.classList.contains('open')) closeInfo();
   });
 
+  // Открытие обычных инфо-модалок по карточкам-тапзонам
   var tappables = document.querySelectorAll('.lnd-card.tappable');
   for (var i = 0; i < tappables.length; i++) {
     (function(card) {
@@ -2696,6 +2772,15 @@ button.disabled {
       });
     })(tappables[i]);
   }
+
+  // Открытие «Поддержи автора» по кнопке $ в hero
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest ? e.target.closest('[data-action="open-support"]') : null;
+    if (!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    openInfo('Поддержка', '', true);
+  });
 
   function initBelcardSupport() {
     var stack = document.getElementById('support-belcard-stack');
