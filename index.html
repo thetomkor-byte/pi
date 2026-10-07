@@ -121,7 +121,6 @@ button.disabled {
   flex-shrink: 0;
 }
 
-/* Плавно исчезающая линия под каруселью — по краям лендинга, не экрана. */
 #tg-feed::after {
   content: "";
   position: absolute;
@@ -571,6 +570,11 @@ button.disabled {
   margin-bottom: 16px;
 }
 
+.info-modal-title.gold {
+  color: var(--gold);
+  text-align: center;
+}
+
 .info-modal-body {
   color: var(--muted-soft-2);
   font-size: clamp(13px, 2vmin, 15px);
@@ -587,6 +591,365 @@ button.disabled {
 
 .info-modal-body p:last-child {
   margin-bottom: 0;
+}
+
+/* ==== КАРТОЧКИ ДОНАТОВ В МОДАЛКЕ ПОДДЕРЖКИ ==== */
+
+.belcard-stack {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1.586 / 1;
+  margin: 20px 0;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  overflow: visible;
+}
+
+.belcard-stack .belcard {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  width: 100%;
+  aspect-ratio: 1.586 / 1;
+  border-radius: 14px;
+  overflow: hidden;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #ffffff;
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+  will-change: transform;
+  transition: transform .38s cubic-bezier(.22,.61,.36,1);
+}
+
+.belcard-stack.dragging .belcard {
+  transition: none;
+}
+
+.belcard-stack .belcard.belcard-blue {
+  background: linear-gradient(135deg, #18387e 0%, #224ba1 45%, #4373c1 100%);
+  box-shadow:
+    0 12px 22px -8px rgba(0,0,0,.75),
+    0 6px 10px -4px rgba(0,0,0,.5),
+    inset 0 1px 0 rgba(255,255,255,.25);
+}
+
+.belcard-stack .belcard.belcard-green {
+  background: linear-gradient(135deg, #195630 0%, #246b41 45%, #3d8c55 100%);
+  box-shadow:
+    0 12px 22px -8px rgba(0,0,0,.65),
+    0 6px 10px -4px rgba(0,0,0,.45),
+    inset 0 1px 0 rgba(255,255,255,.25);
+}
+
+.belcard-stack .belcard.belcard-gray {
+  background: linear-gradient(135deg, #3d3548 0%, #4a3f57 45%, #5b4e6b 100%);
+  box-shadow:
+    0 12px 22px -8px rgba(0,0,0,.55),
+    0 6px 10px -4px rgba(0,0,0,.4),
+    inset 0 1px 0 rgba(255,255,255,.2);
+}
+
+.belcard-stack .belcard.belcard-gold {
+  background: linear-gradient(135deg, #4a3a10 0%, #6b5418 45%, #8a6f24 100%);
+  box-shadow:
+    0 12px 22px -8px rgba(0,0,0,.55),
+    0 6px 10px -4px rgba(0,0,0,.4),
+    inset 0 1px 0 rgba(255,255,255,.2);
+}
+
+.belcard::before {
+  content: "";
+  position: absolute;
+  top: -30%;
+  right: -10%;
+  width: 65%;
+  height: 160%;
+  background: rgba(255,255,255,0.08);
+  transform: rotate(22deg);
+  pointer-events: none;
+}
+.belcard::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(circle at 20% 15%, rgba(255,255,255,0.18) 0%, transparent 45%);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.belcard-top {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.belcard-bank {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+.belcard-club-top {
+  font-size: 17px;
+  font-weight: 900;
+  font-style: normal;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  opacity: 0.95;
+  text-align: right;
+  line-height: 1.2;
+  text-shadow: 0 1px 2px rgba(0,0,0,.35);
+}
+
+.belcard-chip {
+  position: absolute;
+  top: 38px;
+  left: 18px;
+  width: 34px;
+  height: 26px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #e8d9a0 0%, #c9b46a 50%, #a89040 100%);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.25);
+  z-index: 2;
+}
+.belcard-chip::before {
+  content: "";
+  position: absolute;
+  top: 20%; left: 10%; right: 10%; bottom: 20%;
+  border: 1px solid rgba(0,0,0,.25);
+  border-radius: 2px;
+}
+
+.belcard-number-row {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 8px;
+  margin-top: auto;
+  margin-bottom: 10px;
+}
+
+.copy-text {
+  position: relative;
+  display: inline-block;
+  padding-right: 14px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+}
+.copy-text:active { color: var(--gold); }
+
+.copy-icon {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 6px;
+  height: 6px;
+  pointer-events: none;
+  opacity: 1;
+  cursor: pointer;
+}
+.copy-icon::before,
+.copy-icon::after {
+  content: "";
+  position: absolute;
+  border: 1px solid #ffffff;
+  border-radius: 1px;
+  background: transparent;
+}
+.copy-icon::before {
+  width: 4px;
+  height: 4px;
+  left: 0;
+  top: 2px;
+}
+.copy-icon::after {
+  width: 4px;
+  height: 4px;
+  left: 2px;
+  top: 0;
+}
+
+.belcard-number {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-shadow: 0 1px 2px rgba(0,0,0,.4);
+  align-self: flex-end;
+  white-space: nowrap;
+}
+
+.belcard-bottom {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.belcard-name {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.belcard-currencies-top {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .6px;
+  text-align: right;
+  opacity: 0.95;
+  white-space: nowrap;
+  align-self: flex-end;
+  line-height: 1;
+  transform: translateY(-2px);
+}
+
+.belcard-paysend {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 19px;
+  font-weight: 900;
+  font-style: normal;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  opacity: 0.95;
+  text-align: center;
+  color: #ffffff;
+  text-decoration: none;
+  line-height: 1.2;
+  text-shadow: 0 1px 2px rgba(0,0,0,.35);
+  z-index: 4;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  pointer-events: auto;
+}
+.belcard-paysend:link,
+.belcard-paysend:visited,
+.belcard-paysend:hover,
+.belcard-paysend:active {
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.belcard-usdt-line {
+  position: relative;
+  z-index: 2;
+  margin-top: auto;
+  margin-bottom: 10px;
+  text-align: left;
+  white-space: nowrap;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  text-shadow: 0 1px 2px rgba(0,0,0,.4);
+  display: block;
+  width: 100%;
+}
+
+.belcard-bottom-line {
+  position: relative;
+  z-index: 2;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.belcard-copied {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(20, 18, 16, 0.95);
+  color: var(--gold);
+  font-weight: 800;
+  font-size: 16px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: 1px solid #8a6508;
+  box-shadow: 0 4px 12px rgba(0,0,0,.8);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s ease;
+  z-index: 5;
+  white-space: nowrap;
+}
+.belcard-copied.visible {
+  opacity: 1;
+}
+
+.gold-gg {
+  font-size: 14px;
+}
+
+.gold-name-label {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: none;
+  text-shadow: none;
+  display: inline-block;
+  vertical-align: bottom;
+  line-height: 1;
+}
+
+.gold-name-value {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 2px rgba(0,0,0,.55);
+  display: inline-block;
+  vertical-align: bottom;
+  line-height: 1;
+}
+
+.gold-nickname-row {
+  position: relative;
+  z-index: 2;
+  margin-top: auto;
+  margin-bottom: 10px;
+  text-align: left;
+  white-space: nowrap;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  display: block;
+  width: 100%;
+  line-height: 1;
+}
+
+/* Убираем у модалки поддержки стандартное поведение заголовка
+   и даём карточкам нормальный воздух. */
+.info-modal-body .support-text {
+  color: var(--muted-soft-2);
+  font-size: clamp(13px, 2vmin, 15px);
+  line-height: 1.65;
+  margin: 0;
+}
+
+.info-modal-body .support-text + .belcard-stack {
+  margin-top: 20px;
+}
+
+.info-modal-body .belcard-stack + .support-text {
+  margin-top: 20px;
 }
 
 /* ==== LANDING ==== */
@@ -1000,8 +1363,6 @@ button.disabled {
   display: block;
 }
 
-/* Золотая карточка: только спокойная золотая окантовка.
-   Ни свечения, ни сдвига — ни при наведении, ни при нажатии. */
 .lnd-card.gold-edge {
   border-color: #5a4a1a;
   box-shadow: 0 0 0 1px rgba(255,203,43,.08);
@@ -1203,8 +1564,6 @@ button.disabled {
     min-width: 0;
   }
 }
-
-/* ===== ФИНАЛЬНЫЙ БЛОК ===== */
 
 .lnd-final {
   position: relative;
@@ -1783,13 +2142,7 @@ button.disabled {
 
           <button class="lnd-card lnd-reveal tappable" type="button"
                   data-info-title="Поддержка"
-                  data-info-body="Poker Trainer — некоммерческий проект. Он не продаёт подписки, не показывает рекламу и не зарабатывает на игроках. Проект развивается исключительно на средства от ваших донатов.
-
-Адреса для переводов: GGPoker (перевод через покер-рум), USDT TRC20 (криптовалюта в сети Tron), VISA (карта для переводов в рублях и других валютах). Полные реквизиты и инструкции — в блоге проекта и в Telegram.
-
-Контакты в Telegram — основной канал связи. Через него можно задать вопрос, предложить идею, сообщить об ошибке или просто поделиться впечатлениями от тренировки.
-
-Каждый донат идёт на конкретные вещи: развитие ботов, новые режимы тренировки, улучшение интерфейса, поддержку серверов. Без вашей поддержки проект не смог бы существовать в том виде, в котором он есть сейчас.">
+                  data-info-body="В разделе «Поддержка» собраны реквизиты для донатов, блог проекта и контакты в Telegram.">
             <h3>Поддержка</h3>
             <p>Проект развивается только на средства от ваших донатов. Адреса для переводов (GGPoker, USDT TRC20, VISA), блог и контакты в Telegram.</p>
             <svg class="lnd-card-tap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -2205,29 +2558,456 @@ button.disabled {
 
   if (!infoModal) return;
 
-  function openInfo(title, body) {
-    infoTitle.textContent = title || '';
-    var paragraphs = String(body || '').split('\n\n');
+  // HTML блока с карточками донатов (взято из приложения).
+  var SUPPORT_CARDS_HTML =
+    '<div class="belcard-stack" id="belcard-stack">' +
+      '<div class="belcard belcard-gold" data-card="gold">' +
+        '<div class="belcard-top">' +
+          '<div class="belcard-bank" translate="no"><span class="gold-gg">GG</span>POKER</div>' +
+          '<div class="belcard-club-top" translate="no">Transfer</div>' +
+        '</div>' +
+        '<div class="belcard-chip"></div>' +
+        '<div class="gold-nickname-row" translate="no">' +
+          '<span class="gold-name-label">Nickname:</span> ' +
+          '<span class="copy-text gold-name-value" data-copy-value="Lucky Light">Lucky Light<span class="copy-icon"></span></span>' +
+        '</div>' +
+        '<div class="belcard-bottom">' +
+          '<div class="belcard-bottom-line" translate="no">Balance: $</div>' +
+        '</div>' +
+        '<div class="belcard-copied" data-copied="en">Copied</div>' +
+      '</div>' +
+
+      '<div class="belcard belcard-gray" data-card="gray">' +
+        '<div class="belcard-top">' +
+          '<div class="belcard-bank" translate="no">Cryptocurrency</div>' +
+          '<div class="belcard-club-top" translate="no">Tether</div>' +
+        '</div>' +
+        '<div class="belcard-chip"></div>' +
+        '<div class="belcard-usdt-line" translate="no">' +
+          '<span class="copy-text" data-copy-value="TNxHP8tVZUFhFyAxGGtmKEqEm9Cjhbck3A">TNxHP8tVZUFhFyAxGGtmKEqEm9Cjhbck3A<span class="copy-icon"></span></span>' +
+        '</div>' +
+        '<div class="belcard-bottom">' +
+          '<div class="belcard-bottom-line" translate="no">USDT Tether → TRON (TRC20)</div>' +
+        '</div>' +
+        '<div class="belcard-copied" data-copied="en">Copied</div>' +
+      '</div>' +
+
+      '<div class="belcard belcard-blue" data-card="blue">' +
+        '<div class="belcard-top">' +
+          '<div class="belcard-bank" translate="no">BELARUSBANK</div>' +
+          '<div class="belcard-club-top" translate="no">VISA</div>' +
+        '</div>' +
+        '<div class="belcard-chip"></div>' +
+        '<a class="belcard-paysend" href="https://paysend.com/send" target="_blank" rel="noopener noreferrer" translate="no">PAYSEND</a>' +
+        '<div class="belcard-number-row">' +
+          '<div class="belcard-number" translate="no">' +
+            '<span class="copy-text" data-copy-value="4255 1901 3916 7251">4255 1901 3916 7251<span class="copy-icon"></span></span>' +
+          '</div>' +
+          '<div class="belcard-currencies-top" translate="no">USD / EUR</div>' +
+        '</div>' +
+        '<div class="belcard-bottom">' +
+          '<div class="belcard-name" translate="no">' +
+            '<span class="copy-text" data-copy-value="TOM TOT">TOM TOT<span class="copy-icon"></span></span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="belcard-copied" data-copied="en">Copied</div>' +
+      '</div>' +
+
+      '<div class="belcard belcard-green" data-card="green">' +
+        '<div class="belcard-top">' +
+          '<div class="belcard-bank" translate="no">БЕЛАРУСБАНК</div>' +
+          '<div class="belcard-club-top" translate="no">БЕЛКАРТ</div>' +
+        '</div>' +
+        '<div class="belcard-chip"></div>' +
+        '<div class="belcard-number-row">' +
+          '<div class="belcard-number" translate="no">' +
+            '<span class="copy-text" data-copy-value="9112 3801 6012 8254">9112 3801 6012 8254<span class="copy-icon"></span></span>' +
+          '</div>' +
+          '<div class="belcard-currencies-top" translate="no">BYN / RUB</div>' +
+        '</div>' +
+        '<div class="belcard-bottom">' +
+          '<div class="belcard-name" translate="no">' +
+            '<span class="copy-text" data-copy-value="TOM TOT">TOM TOT<span class="copy-icon"></span></span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="belcard-copied" data-copied="ru">Скопировано</div>' +
+      '</div>' +
+    '</div>';
+
+  function buildSupportBody() {
     var html = '';
-    for (var i = 0; i < paragraphs.length; i++) {
-      var p = paragraphs[i].trim();
-      if (!p) continue;
-      html += '<p>' + p.replace(/\n/g, '<br>') + '</p>';
+    html += '<p class="support-text">Poker Trainer — некоммерческий проект. Он не продаёт подписки, не показывает рекламу и не зарабатывает на игроках. Проект развивается исключительно на средства от ваших донатов.</p>';
+    html += SUPPORT_CARDS_HTML;
+    html += '<p class="support-text">Контакты в Telegram — основной канал связи. Через него можно задать вопрос, предложить идею, сообщить об ошибке или просто поделиться впечатлениями от тренировки.</p>';
+    return html;
+  }
+
+  function openInfo(title, body, isSupport) {
+    infoTitle.textContent = title || '';
+    infoTitle.classList.toggle('gold', !!isSupport);
+
+    if (isSupport) {
+      infoBody.innerHTML = buildSupportBody();
+    } else {
+      var paragraphs = String(body || '').split('\n\n');
+      var html = '';
+      for (var i = 0; i < paragraphs.length; i++) {
+        var p = paragraphs[i].trim();
+        if (!p) continue;
+        html += '<p>' + p.replace(/\n/g, '<br>') + '</p>';
+      }
+      infoBody.innerHTML = html || '<p></p>';
     }
-    infoBody.innerHTML = html || '<p></p>';
+
     infoModal.classList.add('open');
     document.body.style.overflow = 'hidden';
+
+    if (isSupport) {
+      var stack = document.getElementById('belcard-stack');
+      if (stack) bindBelcardDrag(stack);
+    }
   }
 
   function closeInfo() {
     infoModal.classList.remove('open');
     document.body.style.overflow = '';
+    var stack = document.getElementById('belcard-stack');
+    if (stack && stack.__ptCleanup) {
+      try { stack.__ptCleanup(); } catch (e) {}
+    }
   }
 
   infoModal.addEventListener('click', closeInfo);
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape' && infoModal.classList.contains('open')) closeInfo();
   });
+
+  // ============================================================
+  // Логика карточек донатов (перелистывание свайпом вверх, двойной
+  // клик, копирование по нажатию). Адаптировано из приложения.
+  // ============================================================
+  function bindBelcardDrag(stack) {
+    if (!stack || stack.__ptBound) return;
+    stack.__ptBound = true;
+
+    var OFFSET = 8;
+    var LIFT = 8;
+    var SWIPE_THRESHOLD = 8;
+
+    var gold = stack.querySelector('.belcard-gold');
+    var gray = stack.querySelector('.belcard-gray');
+    var blue = stack.querySelector('.belcard-blue');
+    var green = stack.querySelector('.belcard-green');
+    if (!gold || !gray || !blue || !green) return;
+
+    var cards = { gold: gold, gray: gray, blue: blue, green: green };
+    var order = ['gold', 'gray', 'blue', 'green'];
+
+    var startY = 0;
+    var dragging = false;
+    var currentLift = 0;
+    var isAnimating = false;
+
+    function topKey() { return order[0]; }
+    function zFor(pos) { return 4 - pos; }
+    function yFor(pos) { return OFFSET * pos; }
+
+    function applyPositions(animated) {
+      for (var i = 0; i < order.length; i++) {
+        var key = order[i];
+        var node = cards[key];
+        if (!node) continue;
+        if (!animated) node.style.transition = 'none';
+        else node.style.transition = 'transform .38s cubic-bezier(.22,.61,.36,1)';
+        node.style.transform = 'translateY(' + yFor(i) + 'px)';
+        node.style.zIndex = String(zFor(i));
+      }
+      if (!animated) {
+        requestAnimationFrame(function() {
+          for (var j = 0; j < order.length; j++) {
+            var n = cards[order[j]];
+            if (!n) continue;
+            n.style.transition = '';
+          }
+        });
+      }
+    }
+
+    function beginDragLift() {
+      var node = cards[topKey()];
+      if (!node) return;
+      node.style.transition = 'none';
+      node.style.transform = 'translateY(' + (-currentLift) + 'px)';
+    }
+
+    function snapBackTop() {
+      var node = cards[topKey()];
+      if (!node) return;
+      node.style.transition = 'transform .26s cubic-bezier(.22,.61,.36,1)';
+      node.style.transform = 'translateY(' + yFor(0) + 'px)';
+    }
+
+    function rotateOnce() {
+      if (isAnimating) return;
+      isAnimating = true;
+
+      var topNode = cards[order[0]];
+      var secondNode = cards[order[1]];
+      var thirdNode = cards[order[2]];
+      var fourthNode = cards[order[3]];
+
+      var newOrder = [order[1], order[2], order[3], order[0]];
+
+      topNode.style.transition = 'transform .38s cubic-bezier(.22,.61,.36,1)';
+      secondNode.style.transition = 'transform .38s cubic-bezier(.22,.61,.36,1)';
+      thirdNode.style.transition = 'transform .38s cubic-bezier(.22,.61,.36,1)';
+      fourthNode.style.transition = 'transform .38s cubic-bezier(.22,.61,.36,1)';
+
+      topNode.style.transform = 'translateY(' + (OFFSET * 3) + 'px)';
+      secondNode.style.transform = 'translateY(0px)';
+      thirdNode.style.transform = 'translateY(' + OFFSET + 'px)';
+      fourthNode.style.transform = 'translateY(' + (OFFSET * 2) + 'px)';
+
+      topNode.style.zIndex = '1';
+      secondNode.style.zIndex = '4';
+      thirdNode.style.zIndex = '3';
+      fourthNode.style.zIndex = '2';
+
+      order = newOrder;
+
+      setTimeout(function() {
+        for (var i = 0; i < order.length; i++) {
+          var n = cards[order[i]];
+          if (!n) continue;
+          n.style.transition = '';
+        }
+        applyPositions(false);
+        isAnimating = false;
+      }, 390);
+
+      currentLift = 0;
+    }
+
+    var onTouchStart = function(e) {
+      if (isAnimating) return;
+      if (e.touches.length !== 1) return;
+      startY = e.touches[0].clientY;
+      dragging = false;
+      currentLift = 0;
+      stack.classList.add('dragging');
+      var node = cards[topKey()];
+      if (node) node.style.transition = 'none';
+    };
+
+    var onTouchMove = function(e) {
+      if (isAnimating) return;
+      if (e.touches.length !== 1) return;
+      var y = e.touches[0].clientY;
+      var dy = startY - y;
+
+      if (!dragging) {
+        if (Math.abs(dy) > 3) {
+          dragging = true;
+        } else {
+          return;
+        }
+      }
+
+      if (dy > 0) {
+        currentLift = Math.max(0, Math.min(LIFT, dy));
+      } else {
+        currentLift = 0;
+      }
+
+      beginDragLift();
+      if (e.cancelable) e.preventDefault();
+    };
+
+    var onTouchEnd = function(e) {
+      if (isAnimating) return;
+      stack.classList.remove('dragging');
+      var wasDragging = dragging;
+      dragging = false;
+
+      if (!wasDragging) return;
+
+      if (currentLift >= SWIPE_THRESHOLD) {
+        rotateOnce();
+      } else {
+        snapBackTop();
+        currentLift = 0;
+        setTimeout(function() {
+          var node = cards[topKey()];
+          if (node) node.style.transition = '';
+        }, 280);
+      }
+    };
+
+    var onTouchCancel = function() {
+      if (isAnimating) return;
+      stack.classList.remove('dragging');
+      dragging = false;
+      snapBackTop();
+      currentLift = 0;
+      setTimeout(function() {
+        var node = cards[topKey()];
+        if (node) node.style.transition = '';
+      }, 280);
+    };
+
+    var mouseDown = false;
+    var mouseStartY = 0;
+    var mouseDragging = false;
+
+    var onMouseDown = function(e) {
+      if (isAnimating) return;
+      if (e.button !== 0) return;
+      mouseDown = true;
+      mouseStartY = e.clientY;
+      mouseDragging = false;
+      currentLift = 0;
+      stack.classList.add('dragging');
+      var node = cards[topKey()];
+      if (node) node.style.transition = 'none';
+      e.preventDefault();
+    };
+
+    var onMouseMove = function(e) {
+      if (!mouseDown || isAnimating) return;
+      var y = e.clientY;
+      var dy = mouseStartY - y;
+      if (!mouseDragging) {
+        if (Math.abs(dy) < 3) return;
+        mouseDragging = true;
+      }
+      if (dy > 0) currentLift = Math.max(0, Math.min(LIFT, dy));
+      else currentLift = 0;
+      beginDragLift();
+    };
+
+    var onMouseUp = function(e) {
+      if (!mouseDown) return;
+      mouseDown = false;
+      stack.classList.remove('dragging');
+      if (isAnimating) return;
+      if (!mouseDragging) {
+        var node = cards[topKey()];
+        if (node) node.style.transition = '';
+        return;
+      }
+      mouseDragging = false;
+
+      if (currentLift >= SWIPE_THRESHOLD) {
+        rotateOnce();
+      } else {
+        snapBackTop();
+        currentLift = 0;
+        setTimeout(function() {
+          var node = cards[topKey()];
+          if (node) node.style.transition = '';
+        }, 280);
+      }
+    };
+
+    var onDblClick = function(e) {
+      if (isAnimating) return;
+      e.preventDefault();
+      e.stopPropagation();
+      rotateOnce();
+    };
+
+    var onStackClick = function(e) {
+      if (isAnimating) return;
+      var copyEl = e.target.closest('.copy-text');
+      if (copyEl) {
+        // Клик по номеру/имени — копируем, но не перелистываем.
+        var card = copyEl.closest('.belcard');
+        if (!card) return;
+        var currentTop = cards[order[0]];
+        if (card !== currentTop) return;
+        e.preventDefault();
+        e.stopPropagation();
+        var text = copyEl.getAttribute('data-copy-value') || copyEl.textContent.trim();
+        copyToClipboard(text, card);
+        return;
+      }
+      // Клик по PAYSEND — не мешаем переходу по ссылке.
+      if (e.target.closest('.belcard-paysend')) return;
+    };
+
+    stack.addEventListener('touchstart', onTouchStart, { passive: true });
+    stack.addEventListener('touchmove', onTouchMove, { passive: false });
+    stack.addEventListener('touchend', onTouchEnd, { passive: false });
+    stack.addEventListener('touchcancel', onTouchCancel, { passive: true });
+    stack.addEventListener('mousedown', onMouseDown);
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+    stack.addEventListener('dblclick', onDblClick);
+    stack.addEventListener('click', onStackClick);
+
+    stack.__ptCleanup = function() {
+      stack.removeEventListener('touchstart', onTouchStart);
+      stack.removeEventListener('touchmove', onTouchMove);
+      stack.removeEventListener('touchend', onTouchEnd);
+      stack.removeEventListener('touchcancel', onTouchCancel);
+      stack.removeEventListener('mousedown', onMouseDown);
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+      stack.removeEventListener('dblclick', onDblClick);
+      stack.removeEventListener('click', onStackClick);
+      stack.__ptBound = false;
+      stack.__ptCleanup = null;
+    };
+
+    applyPositions(false);
+  }
+
+  function copyToClipboard(text, cardEl) {
+    if (!text) return;
+    var succeeded = false;
+
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.top = '-1000px';
+      ta.style.left = '-1000px';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      ta.setSelectionRange(0, ta.value.length);
+      succeeded = document.execCommand && document.execCommand('copy');
+      document.body.removeChild(ta);
+    } catch (e) {
+      succeeded = false;
+    }
+
+    if (succeeded) {
+      showCopiedHint(cardEl);
+      return;
+    }
+
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function() {
+          showCopiedHint(cardEl);
+        }).catch(function() {});
+      }
+    } catch (e) {}
+  }
+
+  function showCopiedHint(cardEl) {
+    if (!cardEl) return;
+    var hint = cardEl.querySelector('.belcard-copied');
+    if (!hint) return;
+    hint.classList.add('visible');
+    clearTimeout(hint.__ptTimer);
+    hint.__ptTimer = setTimeout(function() {
+      hint.classList.remove('visible');
+    }, 1200);
+  }
 
   var tappables = document.querySelectorAll('.lnd-card.tappable');
   for (var i = 0; i < tappables.length; i++) {
@@ -2237,7 +3017,8 @@ button.disabled {
         e.stopPropagation();
         var t = card.getAttribute('data-info-title') || '';
         var b = card.getAttribute('data-info-body') || '';
-        openInfo(t, b);
+        var isSupport = (t === 'Поддержка');
+        openInfo(t, b, isSupport);
       });
     })(tappables[i]);
   }
@@ -2247,32 +3028,6 @@ button.disabled {
 
 <script>
 // ==== TELEGRAM FEED ====
-//
-// ============================================================
-// ПРАВИЛА КАРТОЧЕК ИЗ TELEGRAM
-// ============================================================
-//
-// 1. ПОРЯДОК БЛОКОВ В КАРТОЧКЕ: Картинка → Текст.
-// 2. ЗАГОЛОВОК — не отдельный элемент, а жирное белое
-//    начало самого текста сообщения (как в Telegram).
-// 3. КАРТИНКА: 16:9, object-fit: cover, width: 100%.
-// 4. ВЫСОТА КАРТОЧКИ ЖЁСТКО ЗАФИКСИРОВАНА В 320px.
-//    Текст внутри обрезается по нижнему краю карточки,
-//    ничего не растит и не сжимает. Последние две строки
-//    плавно растворяются через маску — без полос поверх.
-// 5. ДАТЫ НЕТ. Посты всегда без даты.
-// 6. МОДАЛКИ НЕТ. Клик по карточке сразу открывает Telegram
-//    (в новой вкладке или в приложении) на нужный пост.
-//    Пока это ссылка на канал, потом подставим конкретные посты.
-// 7. Значок в углу карточки — золотистый telegram-самолётик 32×32.
-// 8. Сердечко-заглушка — SVG, размер 26×26, с мягким золотистым
-//    свечением. Работает во ВСЕХ заглушках: карточка поста,
-//    аватарка канала. Фон — золотистый градиент (--ph-bg).
-// 9. Линия под каруселью плавно исчезает по краям лендинга.
-// 10. ПРАВИЛА ПРИМЕНЯЮТСЯ АВТОМАТИЧЕСКИ к любому новому посту.
-//
-// ============================================================
-
 (function() {
   'use strict';
 
