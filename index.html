@@ -572,60 +572,6 @@ button.disabled {
   margin-bottom: 0;
 }
 
-/* ==== КНОПКА НАВЕРХ ==== */
-
-#scroll-top-btn {
-  position: fixed;
-  right: 18px;
-  bottom: calc(18px + env(safe-area-inset-bottom, 0px));
-  z-index: 800;
-  width: 48px;
-  height: 48px;
-  border: none;
-  background: transparent;
-  color: var(--gold);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  opacity: 0;
-  transform: translateY(8px) scale(.9);
-  pointer-events: none;
-  transition: opacity .25s ease, transform .25s ease, color .15s ease;
-  -webkit-tap-highlight-color: transparent;
-  padding: 0;
-}
-
-#scroll-top-btn svg {
-  width: 26px;
-  height: 26px;
-  display: block;
-  opacity: .55;
-  transition: opacity .15s ease;
-}
-
-#scroll-top-btn.visible {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-  pointer-events: auto;
-}
-
-@media (hover: hover) {
-  #scroll-top-btn:hover svg { opacity: .85; }
-}
-
-#scroll-top-btn:active svg { opacity: 1; }
-
-@media (max-width: 520px) {
-  #scroll-top-btn {
-    right: 14px;
-    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
-    width: 44px;
-    height: 44px;
-  }
-  #scroll-top-btn svg { width: 24px; height: 24px; }
-}
-
 /* ==== LANDING ==== */
 
 #landing {
@@ -1037,7 +983,8 @@ button.disabled {
   display: block;
 }
 
-/* Золотая карточка: только спокойная золотая окантовка. */
+/* Золотая карточка: только спокойная золотая окантовка.
+   Ни свечения, ни сдвига — ни при наведении, ни при нажатии. */
 .lnd-card.gold-edge {
   border-color: #5a4a1a;
   box-shadow: 0 0 0 1px rgba(255,203,43,.08);
@@ -1766,7 +1713,7 @@ button.disabled {
           <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Турнирный стол 8-max</b>, Texas Hold'em, Sit &amp; Go с призовой структурой на 3 места.</span></div>
           <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Боты с памятью и адаптацией</b> (PRO) и эксплуатируемые слабые боты (VIP).</span></div>
           <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Слайдер ставок</b>, быстрые проценты банка, BB-пресеты — всё под большой палец.</span></div>
-          <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Таймер на ход</b> и тонкие настройки: сложность, стеки, рост блайндов, типы игроков, показ карт.</span></div>
+          <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Таймер на ход</b> и тонкие настройки: сложность, стеки, рост блайндов, показ карт.</span></div>
           <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Реплей раздачи по шагам</b> — увидеть линию со стороны и найти свою ошибку.</span></div>
           <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>ICM-логика</b> на баббле и в призах — турнирные решения, а не кэш-игра.</span></div>
         </div>
@@ -1873,13 +1820,6 @@ button.disabled {
       Играть
     </button>
   </div>
-
-  <button id="scroll-top-btn" type="button" aria-label="Наверх" title="Наверх">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <path d="M12 21V4"/>
-      <path d="M5 11l7-7 7 7"/>
-    </svg>
-  </button>
 
 <script>
 (function() {
@@ -2066,50 +2006,6 @@ button.disabled {
   window.POKER_HEART_SVG = HEART_SVG;
 })();
 // ==== /SVG-СЕРДЕЧКО ====
-</script>
-
-<script>
-// ==== КНОПКА "НАВЕРХ" ====
-(function() {
-  'use strict';
-
-  var btn = document.getElementById('scroll-top-btn');
-  var landing = document.getElementById('landing');
-  if (!btn || !landing) return;
-
-  function getScrollTop() {
-    return landing.scrollTop || 0;
-  }
-
-  function update() {
-    var st = getScrollTop();
-    if (st > 200) btn.classList.add('visible');
-    else btn.classList.remove('visible');
-  }
-
-  var ticking = false;
-  landing.addEventListener('scroll', function() {
-    if (ticking) return;
-    ticking = true;
-    requestAnimationFrame(function() {
-      update();
-      ticking = false;
-    });
-  }, { passive: true });
-
-  btn.addEventListener('click', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    try {
-      landing.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (err) {
-      landing.scrollTop = 0;
-    }
-  });
-
-  update();
-})();
-// ==== /КНОПКА "НАВЕРХ" ====
 </script>
 
 <script>
