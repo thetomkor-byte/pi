@@ -572,6 +572,67 @@ button.disabled {
   margin-bottom: 0;
 }
 
+/* ==== КНОПКА НАВЕРХ ==== */
+
+#scroll-top-btn {
+  position: fixed;
+  right: 18px;
+  bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  z-index: 800;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,203,43,.35);
+  background: rgba(255,203,43,.08);
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(8px) scale(.9);
+  pointer-events: none;
+  transition: opacity .25s ease, transform .25s ease, background .15s ease, border-color .15s ease;
+  -webkit-tap-highlight-color: transparent;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+#scroll-top-btn svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+#scroll-top-btn.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+@media (hover: hover) {
+  #scroll-top-btn:hover {
+    background: rgba(255,203,43,.16);
+    border-color: rgba(255,203,43,.55);
+  }
+}
+
+#scroll-top-btn:active {
+  background: rgba(255,203,43,.22);
+  border-color: rgba(255,203,43,.65);
+  transform: translateY(0) scale(.94);
+}
+
+@media (max-width: 520px) {
+  #scroll-top-btn {
+    right: 14px;
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    width: 44px;
+    height: 44px;
+  }
+  #scroll-top-btn svg { width: 20px; height: 20px; }
+}
+
 /* ==== LANDING ==== */
 
 #landing {
@@ -983,15 +1044,20 @@ button.disabled {
   display: block;
 }
 
+/* Золотая карточка: только спокойная золотая окантовка.
+   Ни свечения, ни сдвига — ни при наведении, ни при нажатии. */
 .lnd-card.gold-edge {
   border-color: #5a4a1a;
-  box-shadow: 0 0 0 1px rgba(255,203,43,.08), 0 0 40px rgba(255,203,43,.05);
+  box-shadow: 0 0 0 1px rgba(255,203,43,.08);
+  transition: none;
 }
 
-.lnd-card.gold-edge:hover {
+.lnd-card.gold-edge:hover,
+.lnd-card.gold-edge:active {
   border-color: #5a4a1a;
-  box-shadow: 0 0 0 1px rgba(255,203,43,.08), 0 0 0 40px rgba(255,203,43,.05);
+  box-shadow: 0 0 0 1px rgba(255,203,43,.08);
   transform: none;
+  background: linear-gradient(180deg, #131313 0%, #0a0a0a 100%);
 }
 
 .lnd-card .icon {
@@ -1639,13 +1705,10 @@ button.disabled {
           <div class="lnd-card gold-edge">
             <h3>Почему тренировка против ботов учит играть против людей</h3>
             <p>
-              Навык, который вы здесь развиваете, работает против любого соперника — и против человека, и против программы.
-              Читать линию поведения, замечать ошибки, выстраивать действия под чужое мышление — всё это не зависит от того, кто сидит напротив.
+              Навык, который вы развиваете в приложении, работает против любого соперника — и против человека, и против программы. Читать линию поведения, замечать ошибки, выстраивать действия под чужое мышление — всё это не зависит от того, кто сидит напротив.
             </p>
             <p>
-              Живой оппонент отличается от идеального калькулятора не тем, что он человек, а тем, что у него есть
-              <b>повторяющиеся ошибки</b>. Он помнит прошлые раздачи, меняет стиль, ловит вас на паттерне, ошибается под давлением.
-              Всё это — поведение. Поведение можно воспроизвести. Именно это и делают боты Poker Trainer.
+              Живой оппонент отличается от идеального калькулятора не тем, что он человек, а тем, что у него есть повторяющиеся ошибки. Он помнит прошлые раздачи, меняет стиль, ловит вас на паттерне, ошибается под давлением. Всё это — поведение. Поведение можно воспроизвести. Именно это и делают боты Poker Trainer.
             </p>
           </div>
         </div>
@@ -1688,7 +1751,7 @@ button.disabled {
             </svg>
           </div>
           <div class="txt">
-            <b>Сделано в первую очередь для телефона.</b> Управление под большой палец, безопасные отступы под «монобровь» и «домашнюю полоску», свайпы вверх/вниз для настроек и руководства, двойные тапы по стеку и картам, крупные тач-таргеты. Открывается прямо в браузере — устанавливать ничего не нужно.
+            Приложение оптимизировано под мобильные устройства. Управление одной рукой, безопасные отступы под вырез экрана и системную панель, свайпы открывают панели, тапы и удержания по стеку и картам, крупные зоны нажатия. Бесплатно, без регистрации и установки — работает прямо в браузере.
           </div>
         </div>
 
@@ -1818,6 +1881,13 @@ button.disabled {
       Играть
     </button>
   </div>
+
+  <button id="scroll-top-btn" type="button" aria-label="Наверх" title="Наверх">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M12 19V5"/>
+      <path d="M5 12l7-7 7 7"/>
+    </svg>
+  </button>
 
 <script>
 (function() {
@@ -2004,6 +2074,50 @@ button.disabled {
   window.POKER_HEART_SVG = HEART_SVG;
 })();
 // ==== /SVG-СЕРДЕЧКО ====
+</script>
+
+<script>
+// ==== КНОПКА "НАВЕРХ" ====
+(function() {
+  'use strict';
+
+  var btn = document.getElementById('scroll-top-btn');
+  var landing = document.getElementById('landing');
+  if (!btn || !landing) return;
+
+  function getScrollTop() {
+    return landing.scrollTop || 0;
+  }
+
+  function update() {
+    var st = getScrollTop();
+    if (st > 200) btn.classList.add('visible');
+    else btn.classList.remove('visible');
+  }
+
+  var ticking = false;
+  landing.addEventListener('scroll', function() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function() {
+      update();
+      ticking = false;
+    });
+  }, { passive: true });
+
+  btn.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      landing.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err) {
+      landing.scrollTop = 0;
+    }
+  });
+
+  update();
+})();
+// ==== /КНОПКА "НАВЕРХ" ====
 </script>
 
 <script>
