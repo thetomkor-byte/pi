@@ -699,13 +699,13 @@ button.disabled {
   align-items: flex-start;
 }
 
-/* Сдвиг верхней строки золотой карточки вверх — плавающий, как было (5px). */
+/* Сдвиг верхней строки золотой карточки вниз на 5 пикселей. */
 .support-belcard.belcard-gold .support-belcard-top {
-  transform: translateY(-5px);
+  transform: translateY(5px);
 }
 
 .support-belcard-bank {
-  font-size: clamp(11px, 1.6vmin, 13px);
+  font-size: clamp(11px, 1.55vmin, 12.5px);
   font-weight: 800;
   letter-spacing: 1.2px;
   text-transform: uppercase;
@@ -713,7 +713,7 @@ button.disabled {
 }
 
 .support-belcard-club-top {
-  font-size: clamp(13px, 2vmin, 18px);
+  font-size: clamp(13px, 1.9vmin, 17px);
   font-weight: 900;
   font-style: normal;
   letter-spacing: 1.5px;
@@ -795,7 +795,7 @@ button.disabled {
 }
 
 .support-belcard-number {
-  font-size: clamp(14px, 2.3vmin, 18px);
+  font-size: clamp(14px, 2.2vmin, 17px);
   font-weight: 700;
   letter-spacing: 1.5px;
   text-shadow: 0 1px 2px rgba(0,0,0,.4);
@@ -813,7 +813,7 @@ button.disabled {
 }
 
 .support-belcard-name {
-  font-size: clamp(12px, 1.9vmin, 15px);
+  font-size: clamp(12px, 1.85vmin, 14.5px);
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -821,7 +821,7 @@ button.disabled {
 }
 
 .support-belcard-currencies-top {
-  font-size: clamp(11px, 1.7vmin, 13px);
+  font-size: clamp(11px, 1.65vmin, 12.5px);
   font-weight: 700;
   letter-spacing: .6px;
   text-align: right;
@@ -837,7 +837,7 @@ button.disabled {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  font-size: clamp(15px, 2.3vmin, 20px);
+  font-size: clamp(15px, 2.2vmin, 19px);
   font-weight: 900;
   font-style: normal;
   letter-spacing: 1.5px;
@@ -869,7 +869,7 @@ button.disabled {
   margin-bottom: clamp(6px, 1.2vmin, 10px);
   text-align: left;
   white-space: nowrap;
-  font-size: clamp(11px, 2vmin, 13.5px);
+  font-size: clamp(11px, 1.9vmin, 13px);
   font-weight: 700;
   letter-spacing: 0.2px;
   text-shadow: 0 1px 2px rgba(0,0,0,.4);
@@ -881,7 +881,7 @@ button.disabled {
   position: relative;
   z-index: 2;
   white-space: nowrap;
-  font-size: clamp(12px, 1.9vmin, 15px);
+  font-size: clamp(12px, 1.85vmin, 14.5px);
   font-weight: 700;
   letter-spacing: 1px;
 }
@@ -894,7 +894,7 @@ button.disabled {
   background: rgba(20, 18, 16, 0.95);
   color: var(--gold);
   font-weight: 800;
-  font-size: clamp(14px, 1.9vmin, 17px);
+  font-size: clamp(14px, 1.85vmin, 16.5px);
   padding: 10px 20px;
   border-radius: 10px;
   border: 1px solid #8a6508;
@@ -908,11 +908,11 @@ button.disabled {
 .support-belcard-copied.visible { opacity: 1; }
 
 .support-gold-gg {
-  font-size: calc(clamp(11px, 1.6vmin, 13px) + 3px);
+  font-size: calc(clamp(11px, 1.55vmin, 12.5px) + 3px);
 }
 
 .support-gold-name-label {
-  font-size: clamp(12px, 1.9vmin, 15px);
+  font-size: clamp(12px, 1.85vmin, 14.5px);
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: none;
@@ -922,7 +922,7 @@ button.disabled {
 }
 
 .support-gold-name-value {
-  font-size: calc(clamp(12px, 1.9vmin, 15px) + 2px);
+  font-size: calc(clamp(12px, 1.85vmin, 14.5px) + 2px);
   font-weight: 800;
   letter-spacing: 1px;
   text-shadow: 0 1px 2px rgba(0,0,0,.55);
@@ -945,12 +945,10 @@ button.disabled {
   line-height: 1;
 }
 
-/* Отступ сверху — плавающий, нижняя граница поднята (на телефоне заметнее),
-   верхняя — как была (чтобы на компьютере не «уезжало»). */
 .support-thanks {
   text-align: center;
   color: var(--muted-soft-2);
-  font-size: clamp(13px, 1.9vmin, 15px);
+  font-size: clamp(13px, 1.85vmin, 14.5px);
   line-height: 1.5;
   margin-top: clamp(16px, 2.8vmin, 20px);
   letter-spacing: .3px;
@@ -2660,8 +2658,6 @@ button.disabled {
     isSupportOpen = false;
   }
 
-  // Клик по затемнённому фону закрывает.
-  // Клик по окошку поддержки — НЕ закрывает (infoBox останавливает всплытие).
   infoModal.addEventListener('click', function(e) {
     if (e.target === infoModal) {
       closeInfo();
@@ -2692,7 +2688,6 @@ button.disabled {
     })(tappables[i]);
   }
 
-  // ==== ЛОГИКА ПЕРЕЛИСТЫВАНИЯ КАРТОЧЕК ПОДДЕРЖКИ (внутри модалки) ====
   function initBelcardSupport() {
     var stack = document.getElementById('support-belcard-stack');
     if (!stack) return;
