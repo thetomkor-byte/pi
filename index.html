@@ -572,18 +572,18 @@ button.disabled {
   margin-bottom: 0;
 }
 
-/* ==== КНОПКА НАВЕРХ ==== */
+/* ==== КНОПКА НАВЕРХ: только контурная стрелка, без фона и круга ==== */
 
 #scroll-top-btn {
   position: fixed;
   right: 18px;
   bottom: calc(18px + env(safe-area-inset-bottom, 0px));
   z-index: 800;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  border: 1px solid rgba(255,203,43,.35);
-  background: rgba(255,203,43,.08);
+  width: 44px;
+  height: 44px;
+  border-radius: 0;
+  border: none;
+  background: transparent;
   color: var(--gold);
   display: flex;
   align-items: center;
@@ -592,16 +592,16 @@ button.disabled {
   opacity: 0;
   transform: translateY(8px) scale(.9);
   pointer-events: none;
-  transition: opacity .25s ease, transform .25s ease, background .15s ease, border-color .15s ease;
+  transition: opacity .25s ease, transform .25s ease;
   -webkit-tap-highlight-color: transparent;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  padding: 0;
 }
 
 #scroll-top-btn svg {
-  width: 22px;
-  height: 22px;
+  width: 28px;
+  height: 28px;
   display: block;
+  overflow: visible;
 }
 
 #scroll-top-btn.visible {
@@ -610,27 +610,18 @@ button.disabled {
   pointer-events: auto;
 }
 
-@media (hover: hover) {
-  #scroll-top-btn:hover {
-    background: rgba(255,203,43,.16);
-    border-color: rgba(255,203,43,.55);
-  }
-}
-
 #scroll-top-btn:active {
-  background: rgba(255,203,43,.22);
-  border-color: rgba(255,203,43,.65);
-  transform: translateY(0) scale(.94);
+  transform: translateY(0) scale(.92);
 }
 
 @media (max-width: 520px) {
   #scroll-top-btn {
-    right: 14px;
-    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
-    width: 44px;
-    height: 44px;
+    right: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    width: 40px;
+    height: 40px;
   }
-  #scroll-top-btn svg { width: 20px; height: 20px; }
+  #scroll-top-btn svg { width: 26px; height: 26px; }
 }
 
 /* ==== LANDING ==== */
@@ -1664,7 +1655,7 @@ button.disabled {
             <article class="lnd-bot">
               <span class="badge vip-maniac">VIP · 4</span>
               <h4>Maniac</h4>
-              <p>Рейзит всё, блефует на всех улицах, играет на эмоциях. Учит терпению и хладнокровию: ждать руку, вэлью-бетить плотно и не блефовать вообще.</p>
+              <p>Рейзит всё, блефует на всех улицах, играет на эмоциях. Учит терпению и хладнокровию: ждать руку, плотно вэлью-бетить и никогда не блефовать против него.</p>
             </article>
           </div>
         </div>
@@ -1687,7 +1678,7 @@ button.disabled {
         <div class="lnd-grid-3">
           <article class="lnd-card lnd-reveal">
             <h3>Начинающему</h3>
-            <p>Научиться думать за столом, а не запоминать руки. Понять, что покер — это не карты, а оппоненты и их решения. Научиться задавать вопросы каждым действием.</p>
+            <p>Научиться думать за столом, а не запоминать руки. Понять, что покер — это не карты, а оппоненты и их решения. Научиться задавать себе вопрос перед каждым действием.</p>
           </article>
 
           <article class="lnd-card lnd-reveal">
@@ -1734,7 +1725,7 @@ button.disabled {
 
           <article class="lnd-card lnd-reveal">
             <h3>Честная обратная связь</h3>
-            <p>WIN или LOSS, плюс или минус фишек. Никаких подсказок, никаких оценок «правильно/неправильно». Только результат — как в реальном покере.</p>
+            <p>WIN или LOSS, плюс или минус фишек. Никаких подсказок, никаких оценок. Только результат — как в реальном покере.</p>
           </article>
 
           <article class="lnd-card lnd-reveal">
@@ -1774,7 +1765,7 @@ button.disabled {
           <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Турнирный стол 8-max</b>, Texas Hold'em, Sit &amp; Go с призовой структурой на 3 места.</span></div>
           <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Боты с памятью и адаптацией</b> (PRO) и эксплуатируемые слабые боты (VIP).</span></div>
           <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Слайдер ставок</b>, быстрые проценты банка, BB-пресеты — всё под большой палец.</span></div>
-          <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Таймер на ход</b> и тонкие настройки: сложность, стеки, стиль карт, рост блайндов, показ карт/типов.</span></div>
+          <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span>Таймер на ход и тонкие настройки: сложность, стеки, стиль, типы, рост блайндов, показ карт.</span></div>
           <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Реплей раздачи по шагам</b> — увидеть линию со стороны и найти свою ошибку.</span></div>
           <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>ICM-логика</b> на баббле и в призах — турнирные решения, а не кэш-игра.</span></div>
         </div>
@@ -1819,7 +1810,7 @@ button.disabled {
 
 Крупные тач-таргеты — минимальный размер 44 пикселя по гайдлайнам Apple и Google. Даже на маленьком экране вы не промахнётесь. Safe-area учитывает «монобровь» и «домашнюю полоску» на современных телефонах — ничто не перекрывает важные элементы управления.">
             <h3>Управление</h3>
-            <p>Всё управление строится под большой палец для удобства тренировки на телефоне: свайпы, слайдеры, тапы по активным зонам, тапы с задержкой.</p>
+            <p>Всё управление строится под большой палец для удобной тренировки с телефона: свайпы, слайдеры, тапы по активным зонам, тапы и удержания.</p>
             <svg class="lnd-card-tap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M9 3H5a2 2 0 0 0-2 2v4M9 21H5a2 2 0 0 1-2-2v-4M15 3h4a2 2 0 0 1 2 2v4M15 21h4a2 2 0 0 0 2-2v-4"/>
             </svg>
@@ -1883,9 +1874,9 @@ button.disabled {
   </div>
 
   <button id="scroll-top-btn" type="button" aria-label="Наверх" title="Наверх">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <path d="M12 19V5"/>
-      <path d="M5 12l7-7 7 7"/>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M12 20 L12 4" />
+      <path d="M5 11 L12 4 L19 11" />
     </svg>
   </button>
 
