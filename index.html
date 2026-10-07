@@ -597,19 +597,19 @@ button.disabled {
 
 .info-modal-box--support .info-modal-title {
   color: var(--gold);
-  font-size: clamp(13px, 2vmin, 17px);
+  font-size: clamp(13px, 1.8vmin, 15px);
   text-transform: uppercase;
   letter-spacing: 1px;
   text-align: center;
   font-weight: 900;
-  margin-bottom: clamp(16px, 2.6vmin, 20px);
+  margin-bottom: clamp(16px, 2.4vmin, 18px);
 }
 
 .support-belcard-stack {
   position: relative;
   width: 100%;
   aspect-ratio: 1.586 / 1;
-  margin-bottom: calc(clamp(16px, 2.6vmin, 22px) + 8px + 8px + 6px);
+  margin-bottom: calc(clamp(14px, 2.4vmin, 20px) + 8px + 8px + 6px);
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
@@ -699,13 +699,13 @@ button.disabled {
   align-items: flex-start;
 }
 
-/* Сдвиг верхней строки золотой карточки вверх. */
+/* Сдвиг верхней строки золотой карточки вверх — плавающий, как было (5px). */
 .support-belcard.belcard-gold .support-belcard-top {
-  transform: translateY(clamp(-7px, -1.4vmin, -4px));
+  transform: translateY(-5px);
 }
 
 .support-belcard-bank {
-  font-size: clamp(12px, 1.85vmin, 14px);
+  font-size: clamp(11px, 1.6vmin, 13px);
   font-weight: 800;
   letter-spacing: 1.2px;
   text-transform: uppercase;
@@ -713,7 +713,7 @@ button.disabled {
 }
 
 .support-belcard-club-top {
-  font-size: clamp(14px, 2.3vmin, 19px);
+  font-size: clamp(13px, 2vmin, 18px);
   font-weight: 900;
   font-style: normal;
   letter-spacing: 1.5px;
@@ -728,8 +728,8 @@ button.disabled {
   position: absolute;
   top: clamp(30px, 4.7vmin, 40px);
   left: clamp(12px, 2.2vmin, 18px);
-  width: clamp(28px, 4.3vmin, 36px);
-  height: clamp(22px, 3.3vmin, 28px);
+  width: clamp(27px, 4.1vmin, 35px);
+  height: clamp(21px, 3.1vmin, 27px);
   border-radius: 4px;
   background: linear-gradient(135deg, #e8d9a0 0%, #c9b46a 50%, #a89040 100%);
   box-shadow: inset 0 0 0 1px rgba(0,0,0,.25);
@@ -757,7 +757,7 @@ button.disabled {
 .support-copy-text {
   position: relative;
   display: inline-block;
-  padding-right: 16px;
+  padding-right: 14px;
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
@@ -769,8 +769,8 @@ button.disabled {
   position: absolute;
   right: 0;
   top: 0;
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   pointer-events: none;
 }
 .support-copy-icon::before,
@@ -795,7 +795,7 @@ button.disabled {
 }
 
 .support-belcard-number {
-  font-size: clamp(15px, 2.5vmin, 19px);
+  font-size: clamp(14px, 2.3vmin, 18px);
   font-weight: 700;
   letter-spacing: 1.5px;
   text-shadow: 0 1px 2px rgba(0,0,0,.4);
@@ -813,7 +813,7 @@ button.disabled {
 }
 
 .support-belcard-name {
-  font-size: clamp(13px, 2.1vmin, 16px);
+  font-size: clamp(12px, 1.9vmin, 15px);
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -821,7 +821,7 @@ button.disabled {
 }
 
 .support-belcard-currencies-top {
-  font-size: clamp(12px, 1.85vmin, 14px);
+  font-size: clamp(11px, 1.7vmin, 13px);
   font-weight: 700;
   letter-spacing: .6px;
   text-align: right;
@@ -837,7 +837,7 @@ button.disabled {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  font-size: clamp(16px, 2.55vmin, 21px);
+  font-size: clamp(15px, 2.3vmin, 20px);
   font-weight: 900;
   font-style: normal;
   letter-spacing: 1.5px;
@@ -869,7 +869,7 @@ button.disabled {
   margin-bottom: clamp(6px, 1.2vmin, 10px);
   text-align: left;
   white-space: nowrap;
-  font-size: clamp(12px, 2.15vmin, 14.5px);
+  font-size: clamp(11px, 2vmin, 13.5px);
   font-weight: 700;
   letter-spacing: 0.2px;
   text-shadow: 0 1px 2px rgba(0,0,0,.4);
@@ -881,7 +881,7 @@ button.disabled {
   position: relative;
   z-index: 2;
   white-space: nowrap;
-  font-size: clamp(13px, 2.1vmin, 16px);
+  font-size: clamp(12px, 1.9vmin, 15px);
   font-weight: 700;
   letter-spacing: 1px;
 }
@@ -894,7 +894,7 @@ button.disabled {
   background: rgba(20, 18, 16, 0.95);
   color: var(--gold);
   font-weight: 800;
-  font-size: clamp(15px, 2.05vmin, 18px);
+  font-size: clamp(14px, 1.9vmin, 17px);
   padding: 10px 20px;
   border-radius: 10px;
   border: 1px solid #8a6508;
@@ -908,11 +908,11 @@ button.disabled {
 .support-belcard-copied.visible { opacity: 1; }
 
 .support-gold-gg {
-  font-size: calc(clamp(12px, 1.85vmin, 14px) + 3px);
+  font-size: calc(clamp(11px, 1.6vmin, 13px) + 3px);
 }
 
 .support-gold-name-label {
-  font-size: clamp(13px, 2.1vmin, 16px);
+  font-size: clamp(12px, 1.9vmin, 15px);
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: none;
@@ -922,7 +922,7 @@ button.disabled {
 }
 
 .support-gold-name-value {
-  font-size: calc(clamp(13px, 2.1vmin, 16px) + 2px);
+  font-size: calc(clamp(12px, 1.9vmin, 15px) + 2px);
   font-weight: 800;
   letter-spacing: 1px;
   text-shadow: 0 1px 2px rgba(0,0,0,.55);
@@ -945,14 +945,14 @@ button.disabled {
   line-height: 1;
 }
 
-/* Отступ сверху — плавающий, но с поднятой нижней границей,
-   чтобы на телефоне текст не заходил под карточки. */
+/* Отступ сверху — плавающий, нижняя граница поднята (на телефоне заметнее),
+   верхняя — как была (чтобы на компьютере не «уезжало»). */
 .support-thanks {
   text-align: center;
   color: var(--muted-soft-2);
-  font-size: clamp(13px, 2.1vmin, 16px);
+  font-size: clamp(13px, 1.9vmin, 15px);
   line-height: 1.5;
-  margin-top: clamp(18px, 4vmin, 30px);
+  margin-top: clamp(16px, 2.8vmin, 20px);
   letter-spacing: .3px;
 }
 
@@ -2661,14 +2661,13 @@ button.disabled {
   }
 
   // Клик по затемнённому фону закрывает.
-  // Клик по окошку поддержки — НЕ закрывает (для этого infoBox останавливает всплытие).
+  // Клик по окошку поддержки — НЕ закрывает (infoBox останавливает всплытие).
   infoModal.addEventListener('click', function(e) {
     if (e.target === infoModal) {
       closeInfo();
     }
   });
 
-  // Клик по самому окошку поддержки — не закрывает.
   infoBox.addEventListener('click', function(e) {
     if (isSupportOpen) {
       e.stopPropagation();
