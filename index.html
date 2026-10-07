@@ -97,11 +97,19 @@ button.disabled {
   width: 26px;
   height: 26px;
   display: block;
-  filter: drop-shadow(0 0 10px rgba(184,146,74,.65));
+  filter: drop-shadow(0 0 6px rgba(184,146,74,.75)) drop-shadow(0 0 14px rgba(184,146,74,.45));
 }
 
-.ph-fallback.lg .ph-heart-svg { width: 34px; height: 34px; filter: drop-shadow(0 0 14px rgba(184,146,74,.7)); }
-.ph-fallback.sm .ph-heart-svg { width: 20px; height: 20px; filter: drop-shadow(0 0 8px rgba(184,146,74,.6)); }
+.ph-fallback.lg .ph-heart-svg {
+  width: 34px;
+  height: 34px;
+  filter: drop-shadow(0 0 8px rgba(184,146,74,.75)) drop-shadow(0 0 18px rgba(184,146,74,.45));
+}
+.ph-fallback.sm .ph-heart-svg {
+  width: 20px;
+  height: 20px;
+  filter: drop-shadow(0 0 5px rgba(184,146,74,.75)) drop-shadow(0 0 12px rgba(184,146,74,.45));
+}
 
 /* ==== TELEGRAM FEED CAROUSEL ==== */
 
@@ -160,7 +168,7 @@ button.disabled {
   width: 22px;
   height: 22px;
   display: block;
-  filter: drop-shadow(0 0 8px rgba(184,146,74,.65));
+  filter: drop-shadow(0 0 5px rgba(184,146,74,.8)) drop-shadow(0 0 12px rgba(184,146,74,.5));
 }
 
 .tg-feed-avatar .fb {
@@ -1036,12 +1044,18 @@ button.disabled {
   height: 8px;
   border-radius: 50%;
   background: var(--pro-color);
-  box-shadow: 0 0 12px rgba(74,58,104,1), 0 0 22px rgba(74,58,104,.65);
+  box-shadow:
+    0 0 6px rgba(74,58,104,1),
+    0 0 16px rgba(74,58,104,.85),
+    0 0 28px rgba(74,58,104,.55);
 }
 
 .lnd-bot-group-title .dot.vip {
   background: var(--vip-color);
-  box-shadow: 0 0 12px rgba(50,74,110,1), 0 0 22px rgba(50,74,110,.65);
+  box-shadow:
+    0 0 6px rgba(50,74,110,1),
+    0 0 16px rgba(50,74,110,.85),
+    0 0 28px rgba(50,74,110,.55);
 }
 
 .lnd-bot-grid {
@@ -1077,6 +1091,7 @@ button.disabled {
   margin-bottom: 12px;
   text-transform: uppercase;
   border: none;
+  box-shadow: none;
 }
 
 .badge.pro-gto,
@@ -1084,7 +1099,6 @@ button.disabled {
 .badge.pro-icm,
 .badge.pro-lag {
   background: var(--pro-color);
-  box-shadow: 0 0 10px rgba(74,58,104,.85), 0 0 18px rgba(74,58,104,.45);
 }
 
 .badge.vip-taglite,
@@ -1092,7 +1106,6 @@ button.disabled {
 .badge.vip-rock,
 .badge.vip-maniac {
   background: var(--vip-color);
-  box-shadow: 0 0 10px rgba(50,74,110,.85), 0 0 18px rgba(50,74,110,.45);
 }
 
 .lnd-bot h4 {
@@ -2233,8 +2246,9 @@ button.disabled {
 //    (в новой вкладке или в приложении) на нужный пост.
 //    Пока это ссылка на канал, потом подставим конкретные посты.
 // 7. Значок в углу карточки — золотистый telegram-самолётик 32×32.
-// 8. Сердечко-заглушка — SVG, размер 26×26 (чуть меньше самолётика,
-//    чтобы визуально совпадать), с прозрачностью .75 и мягким свечением.
+// 8. Сердечко-заглушка — SVG, размер 26×26, с мягким золотистым
+//    свечением. Работает во ВСЕХ заглушках: карточка поста,
+//    аватарка канала. Фон — золотистый градиент (--ph-bg).
 // 9. ПРАВИЛА ПРИМЕНЯЮТСЯ АВТОМАТИЧЕСКИ к любому новому посту.
 //
 // ============================================================
