@@ -699,9 +699,10 @@ button.disabled {
   align-items: flex-start;
 }
 
-/* Сдвиг именно надписи GGPOKER на 2 пикселя вверх. */
-.support-belcard.belcard-gold .support-belcard-bank {
-  transform: translateY(-2px);
+/* Поднимаем только само слово «GGPOKER» на 3 пикселя вверх.
+   «TRANSFER» и остальное не трогаем. */
+.support-belcard-bank.support-gold-gg-wrap {
+  transform: translateY(-3px);
 }
 
 .support-belcard-bank {
@@ -2558,7 +2559,7 @@ button.disabled {
     '<div class="support-belcard-stack" id="support-belcard-stack">' +
       '<div class="support-belcard belcard-gold" data-card="gold">' +
         '<div class="support-belcard-top">' +
-          '<div class="support-belcard-bank" translate="no"><span class="support-gold-gg">GG</span>POKER</div>' +
+          '<div class="support-belcard-bank support-gold-gg-wrap" translate="no"><span class="support-gold-gg">GG</span>POKER</div>' +
           '<div class="support-belcard-club-top" translate="no">Transfer</div>' +
         '</div>' +
         '<div class="support-belcard-chip"></div>' +
