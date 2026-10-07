@@ -691,13 +691,17 @@ button.disabled {
   border-radius: inherit;
 }
 
-/* Верхняя строка: левый и правый текст выровнены по нижнему краю букв. */
 .support-belcard-top {
   position: relative;
   z-index: 2;
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: flex-start;
+}
+
+/* Сдвиг именно надписи GGPOKER на 2 пикселя вверх. */
+.support-belcard.belcard-gold .support-belcard-bank {
+  transform: translateY(-2px);
 }
 
 .support-belcard-bank {
