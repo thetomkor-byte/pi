@@ -121,8 +121,7 @@ button.disabled {
   flex-shrink: 0;
 }
 
-/* Линия под каруселью + под ней мягкое золотое свечение.
-   Свечение отступает от краёв экрана так же, как и линия. */
+/* Линия под каруселью + под ней мягкое золотое свечение. */
 #tg-feed::after {
   content: "";
   position: absolute;
@@ -1165,14 +1164,15 @@ button.disabled {
   }
 }
 
-/* Контейнер-строка: POKER TRAINER + кнопка $. Центрирование по горизонтали. */
+/* Контейнер-строка: POKER TRAINER слева, кнопка-сердечко
+   абсолютно спозиционирована: горизонтально по центру лендинга,
+   вертикально — по центру строки текста POKER TRAINER. */
 .lnd-logo-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
+  position: relative;
+  display: block;
   margin-bottom: clamp(20px, 4vw, 30px);
   width: 100%;
+  min-height: 26px;
 }
 
 .lnd-logo {
@@ -1186,11 +1186,16 @@ button.disabled {
   text-transform: uppercase;
   margin: 0;
   line-height: 1;
+  position: relative;
+  z-index: 1;
 }
 
-/* Кнопка $ — без кружка, стиль как у сердечка-заглушки. */
-.lnd-dollar-btn {
-  flex-shrink: 0;
+/* Кнопка-сердечко — без кружка, точно как сердечко-заглушка. */
+.lnd-heart-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1201,42 +1206,40 @@ button.disabled {
   cursor: pointer;
   color: var(--ph-heart);
   opacity: .75;
-  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
-  font-weight: 900;
-  line-height: 1;
+  line-height: 0;
   -webkit-tap-highlight-color: transparent;
   filter: drop-shadow(0 0 6px rgba(184,146,74,.75)) drop-shadow(0 0 14px rgba(184,146,74,.45));
   transition: opacity .18s ease, filter .18s ease, transform .12s ease;
+  z-index: 2;
 }
 
-.lnd-dollar-btn .dollar-glyph {
+.lnd-heart-btn .ph-heart-svg {
+  width: 26px;
+  height: 26px;
   display: block;
-  font-size: 26px;
-  line-height: 1;
-  transform: translateY(-1px);
+  filter: none;
 }
 
 @media (hover: hover) {
-  .lnd-dollar-btn:hover {
+  .lnd-heart-btn:hover {
     opacity: .95;
     filter: drop-shadow(0 0 8px rgba(184,146,74,.85)) drop-shadow(0 0 18px rgba(184,146,74,.55));
   }
 }
 
-.lnd-dollar-btn:active {
-  transform: scale(0.94);
+.lnd-heart-btn:active {
+  transform: translate(-50%, -50%) scale(0.94);
   opacity: 1;
   filter: drop-shadow(0 0 9px rgba(184,146,74,.95)) drop-shadow(0 0 22px rgba(184,146,74,.6));
 }
 
 @media (max-width: 520px) {
   .lnd-logo-row {
-    gap: 10px;
     margin-bottom: clamp(18px, 4vw, 24px);
   }
-  .lnd-dollar-btn .dollar-glyph {
-    font-size: 22px;
-    transform: translateY(-1px);
+  .lnd-heart-btn .ph-heart-svg {
+    width: 22px;
+    height: 22px;
   }
 }
 
@@ -1647,7 +1650,7 @@ button.disabled {
 }
 
 /* Верхняя линия секции + мягкое золотое свечение под ней —
-   идентично свечению под линией карусели Telegram. */
+   точно такое же, как под линией карусели Telegram. */
 .lnd-final::after {
   content: "";
   position: absolute;
@@ -1884,8 +1887,10 @@ button.disabled {
             <div class="lnd-logo">
               <span>Poker Trainer</span>
             </div>
-            <button class="lnd-dollar-btn" type="button" data-action="open-support" aria-label="Поддержать автора">
-              <span class="dollar-glyph">$</span>
+            <button class="lnd-heart-btn" type="button" data-action="open-support" aria-label="Поддержать автора">
+              <svg class="ph-heart-svg" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+                <path d="M16 28.5C16 28.5 3.5 20.4 3.5 11.9C3.5 7.5 6.9 4.1 11 4.1C13.2 4.1 15.1 5.1 16 6.6C16.9 5.1 18.8 4.1 21 4.1C25.1 4.1 28.5 7.5 28.5 11.9C28.5 20.4 16 28.5 16 28.5Z"/>
+              </svg>
             </button>
           </div>
 
@@ -2208,9 +2213,7 @@ button.disabled {
 
 Стеки отображаются в BB или в фишках — как удобнее для конкретного спота. Стиль карт — 2-цветный для классического вида или 4-цветный для быстрого считывания мастей.
 
-Рост блайндов идёт по числу сыгранных раздач — удобно отрабатывать разную глубину стека. Время на ход настраивается под ваш темп: 10 секунд или без ограничения.
-
-Бейджи типов игроков показывают, против кого вы играете за столом. Открытие карт ботов помогает разбирать нестандартные линии и учиться на чужом мышлении.">
+Рост блайндов идёт по числу сыгранных раздач. Время на ход выбирается под ваш темп: 10 секунд или без ограничения. Бейджи типов игроков показывают, против кого вы играете за столом.">
             <h3>Настройки</h3>
             <p>Язык, уровень сложности, стеки (BB/фишки), стиль карт (2/4-цветные), рост блайндов, время на ход, типы игроков, показ карт (скрытие/открытие).</p>
             <svg class="lnd-card-tap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -2640,7 +2643,7 @@ button.disabled {
 </script>
 
 <script>
-// ==== INFO MODAL (карточки-тапзоны + поддержка + кнопка $) ====
+// ==== INFO MODAL (карточки-тапзоны + поддержка + кнопка-сердечко) ====
 (function() {
   'use strict';
 
