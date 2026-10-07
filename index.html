@@ -519,7 +519,7 @@ button.disabled {
   .lang-trigger { height: 28px; padding: 0 8px; letter-spacing: 1px; }
 }
 
-/* ==== INFO MODAL ==== */
+/* ==== INFO MODAL (карточки-тапзоны + поддержка) ==== */
 
 #info-modal {
   position: fixed;
@@ -570,11 +570,6 @@ button.disabled {
   margin-bottom: 16px;
 }
 
-.info-modal-title.gold {
-  color: var(--gold);
-  text-align: center;
-}
-
 .info-modal-body {
   color: var(--muted-soft-2);
   font-size: clamp(13px, 2vmin, 15px);
@@ -593,32 +588,44 @@ button.disabled {
   margin-bottom: 0;
 }
 
-/* ==== КАРТОЧКИ ДОНАТОВ В МОДАЛКЕ ПОДДЕРЖКИ ====
-   Уменьшенный размер: блок 420px по ширине, отцентрирован.
-   Все шрифты и отступы пропорционально уменьшены. */
+/* ==== SUPPORT (карточки автора в модалке) ==== */
 
-.belcard-stack {
+.info-modal-box.info-modal-box--support {
+  max-width: 460px;
+  padding: clamp(18px, 3.4vw, 28px);
+}
+
+.info-modal-box--support .info-modal-title {
+  color: var(--gold);
+  font-size: clamp(13px, 2.1vmin, 16px);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  text-align: center;
+  font-weight: 900;
+  margin-bottom: clamp(16px, 3vw, 22px);
+}
+
+.support-belcard-stack {
   position: relative;
   width: 100%;
-  max-width: 420px;
-  margin: 18px auto;
   aspect-ratio: 1.586 / 1;
+  margin-bottom: clamp(18px, 3.4vw, 26px);
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
   overflow: visible;
 }
 
-.belcard-stack .belcard {
+.support-belcard {
   position: absolute;
   left: 0;
   right: 0;
   top: 0;
   width: 100%;
   aspect-ratio: 1.586 / 1;
-  border-radius: 11px;
+  border-radius: clamp(10px, 1.8vmin, 14px);
   overflow: hidden;
-  padding: 13px;
+  padding: clamp(14px, 2.6vmin, 20px);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -628,43 +635,43 @@ button.disabled {
   transition: transform .38s cubic-bezier(.22,.61,.36,1);
 }
 
-.belcard-stack.dragging .belcard {
+.support-belcard-stack.dragging .support-belcard {
   transition: none;
 }
 
-.belcard-stack .belcard.belcard-blue {
+.support-belcard.belcard-blue {
   background: linear-gradient(135deg, #18387e 0%, #224ba1 45%, #4373c1 100%);
   box-shadow:
-    0 10px 18px -7px rgba(0,0,0,.75),
-    0 5px 8px -3px rgba(0,0,0,.5),
+    0 12px 22px -8px rgba(0,0,0,.75),
+    0 6px 10px -4px rgba(0,0,0,.5),
     inset 0 1px 0 rgba(255,255,255,.25);
 }
 
-.belcard-stack .belcard.belcard-green {
+.support-belcard.belcard-green {
   background: linear-gradient(135deg, #195630 0%, #246b41 45%, #3d8c55 100%);
   box-shadow:
-    0 10px 18px -7px rgba(0,0,0,.65),
-    0 5px 8px -3px rgba(0,0,0,.45),
+    0 12px 22px -8px rgba(0,0,0,.65),
+    0 6px 10px -4px rgba(0,0,0,.45),
     inset 0 1px 0 rgba(255,255,255,.25);
 }
 
-.belcard-stack .belcard.belcard-gray {
+.support-belcard.belcard-gray {
   background: linear-gradient(135deg, #3d3548 0%, #4a3f57 45%, #5b4e6b 100%);
   box-shadow:
-    0 10px 18px -7px rgba(0,0,0,.55),
-    0 5px 8px -3px rgba(0,0,0,.4),
+    0 12px 22px -8px rgba(0,0,0,.55),
+    0 6px 10px -4px rgba(0,0,0,.4),
     inset 0 1px 0 rgba(255,255,255,.2);
 }
 
-.belcard-stack .belcard.belcard-gold {
+.support-belcard.belcard-gold {
   background: linear-gradient(135deg, #4a3a10 0%, #6b5418 45%, #8a6f24 100%);
   box-shadow:
-    0 10px 18px -7px rgba(0,0,0,.55),
-    0 5px 8px -3px rgba(0,0,0,.4),
+    0 12px 22px -8px rgba(0,0,0,.55),
+    0 6px 10px -4px rgba(0,0,0,.4),
     inset 0 1px 0 rgba(255,255,255,.2);
 }
 
-.belcard::before {
+.support-belcard::before {
   content: "";
   position: absolute;
   top: -30%;
@@ -675,7 +682,7 @@ button.disabled {
   transform: rotate(22deg);
   pointer-events: none;
 }
-.belcard::after {
+.support-belcard::after {
   content: "";
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -684,7 +691,7 @@ button.disabled {
   border-radius: inherit;
 }
 
-.belcard-top {
+.support-belcard-top {
   position: relative;
   z-index: 2;
   display: flex;
@@ -692,19 +699,19 @@ button.disabled {
   align-items: flex-start;
 }
 
-.belcard-bank {
-  font-size: 10px;
+.support-belcard-bank {
+  font-size: clamp(11px, 1.7vmin, 13px);
   font-weight: 800;
-  letter-spacing: 1.1px;
+  letter-spacing: 1.2px;
   text-transform: uppercase;
   opacity: 0.9;
 }
 
-.belcard-club-top {
-  font-size: 13px;
+.support-belcard-club-top {
+  font-size: clamp(13px, 2.1vmin, 18px);
   font-weight: 900;
   font-style: normal;
-  letter-spacing: 1.2px;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   opacity: 0.95;
   text-align: right;
@@ -712,18 +719,18 @@ button.disabled {
   text-shadow: 0 1px 2px rgba(0,0,0,.35);
 }
 
-.belcard-chip {
+.support-belcard-chip {
   position: absolute;
-  top: 28px;
-  left: 13px;
-  width: 26px;
-  height: 20px;
-  border-radius: 3px;
+  top: clamp(32px, 5vmin, 42px);
+  left: clamp(14px, 2.6vmin, 20px);
+  width: clamp(28px, 4.4vmin, 38px);
+  height: clamp(22px, 3.4vmin, 29px);
+  border-radius: 4px;
   background: linear-gradient(135deg, #e8d9a0 0%, #c9b46a 50%, #a89040 100%);
   box-shadow: inset 0 0 0 1px rgba(0,0,0,.25);
   z-index: 2;
 }
-.belcard-chip::before {
+.support-belcard-chip::before {
   content: "";
   position: absolute;
   top: 20%; left: 10%; right: 10%; bottom: 20%;
@@ -731,89 +738,87 @@ button.disabled {
   border-radius: 2px;
 }
 
-.belcard-number-row {
+.support-belcard-number-row {
   position: relative;
   z-index: 2;
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  gap: 6px;
+  gap: 8px;
   margin-top: auto;
-  margin-bottom: 8px;
+  margin-bottom: clamp(6px, 1.2vmin, 10px);
 }
 
-.copy-text {
+.support-copy-text {
   position: relative;
   display: inline-block;
-  padding-right: 12px;
+  padding-right: 16px;
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
   -webkit-user-drag: none;
 }
-.copy-text:active { color: var(--gold); }
+.support-copy-text:active { color: var(--gold); }
 
-.copy-icon {
+.support-copy-icon {
   position: absolute;
   right: 0;
   top: 0;
-  width: 5px;
-  height: 5px;
+  width: 7px;
+  height: 7px;
   pointer-events: none;
-  opacity: 1;
-  cursor: pointer;
 }
-.copy-icon::before,
-.copy-icon::after {
+.support-copy-icon::before,
+.support-copy-icon::after {
   content: "";
   position: absolute;
   border: 1px solid #ffffff;
   border-radius: 1px;
   background: transparent;
 }
-.copy-icon::before {
-  width: 3px;
-  height: 3px;
+.support-copy-icon::before {
+  width: 5px;
+  height: 5px;
   left: 0;
   top: 2px;
 }
-.copy-icon::after {
-  width: 3px;
-  height: 3px;
+.support-copy-icon::after {
+  width: 5px;
+  height: 5px;
   left: 2px;
   top: 0;
 }
 
-.belcard-number {
-  font-size: 13px;
+.support-belcard-number {
+  font-size: clamp(14px, 2.4vmin, 19px);
   font-weight: 700;
-  letter-spacing: 1.3px;
+  letter-spacing: 1.5px;
   text-shadow: 0 1px 2px rgba(0,0,0,.4);
   align-self: flex-end;
   white-space: nowrap;
 }
 
-.belcard-bottom {
+.support-belcard-bottom {
   position: relative;
   z-index: 2;
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  gap: 6px;
+  gap: 8px;
 }
 
-.belcard-name {
-  font-size: 11px;
+.support-belcard-name {
+  font-size: clamp(12px, 1.9vmin, 15px);
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
   white-space: nowrap;
 }
 
-.belcard-currencies-top {
-  font-size: 10px;
+.support-belcard-currencies-top {
+  font-size: clamp(11px, 1.7vmin, 13px);
   font-weight: 700;
-  letter-spacing: .5px;
+  letter-spacing: .6px;
   text-align: right;
   opacity: 0.95;
   white-space: nowrap;
@@ -822,15 +827,15 @@ button.disabled {
   transform: translateY(-2px);
 }
 
-.belcard-paysend {
+.support-belcard-paysend {
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  font-size: 15px;
+  font-size: clamp(15px, 2.4vmin, 21px);
   font-weight: 900;
   font-style: normal;
-  letter-spacing: 1.3px;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   opacity: 0.95;
   text-align: center;
@@ -844,39 +849,39 @@ button.disabled {
   -webkit-tap-highlight-color: transparent;
   pointer-events: auto;
 }
-.belcard-paysend:link,
-.belcard-paysend:visited,
-.belcard-paysend:hover,
-.belcard-paysend:active {
+.support-belcard-paysend:link,
+.support-belcard-paysend:visited,
+.support-belcard-paysend:hover,
+.support-belcard-paysend:active {
   color: #ffffff;
   text-decoration: none;
 }
 
-.belcard-usdt-line {
+.support-belcard-usdt-line {
   position: relative;
   z-index: 2;
   margin-top: auto;
-  margin-bottom: 8px;
+  margin-bottom: clamp(6px, 1.2vmin, 10px);
   text-align: left;
   white-space: nowrap;
-  font-size: 10px;
+  font-size: clamp(11px, 2vmin, 14px);
   font-weight: 700;
-  letter-spacing: 0.1px;
+  letter-spacing: 0.2px;
   text-shadow: 0 1px 2px rgba(0,0,0,.4);
   display: block;
   width: 100%;
 }
 
-.belcard-bottom-line {
+.support-belcard-bottom-line {
   position: relative;
   z-index: 2;
   white-space: nowrap;
-  font-size: 11px;
+  font-size: clamp(12px, 1.9vmin, 15px);
   font-weight: 700;
   letter-spacing: 1px;
 }
 
-.belcard-copied {
+.support-belcard-copied {
   position: absolute;
   left: 50%;
   top: 50%;
@@ -884,9 +889,9 @@ button.disabled {
   background: rgba(20, 18, 16, 0.95);
   color: var(--gold);
   font-weight: 800;
-  font-size: 13px;
-  padding: 8px 14px;
-  border-radius: 8px;
+  font-size: clamp(13px, 1.9vmin, 17px);
+  padding: 10px 20px;
+  border-radius: 10px;
   border: 1px solid #8a6508;
   box-shadow: 0 4px 12px rgba(0,0,0,.8);
   opacity: 0;
@@ -895,27 +900,24 @@ button.disabled {
   z-index: 5;
   white-space: nowrap;
 }
-.belcard-copied.visible {
-  opacity: 1;
+.support-belcard-copied.visible { opacity: 1; }
+
+.support-gold-gg {
+  font-size: calc(clamp(11px, 1.7vmin, 13px) + 3px);
 }
 
-.gold-gg {
-  font-size: 12px;
-}
-
-.gold-name-label {
-  font-size: 11px;
+.support-gold-name-label {
+  font-size: clamp(12px, 1.9vmin, 15px);
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: none;
-  text-shadow: none;
   display: inline-block;
   vertical-align: bottom;
   line-height: 1;
 }
 
-.gold-name-value {
-  font-size: 13px;
+.support-gold-name-value {
+  font-size: calc(clamp(12px, 1.9vmin, 15px) + 2px);
   font-weight: 800;
   letter-spacing: 1px;
   text-shadow: 0 1px 2px rgba(0,0,0,.55);
@@ -924,34 +926,60 @@ button.disabled {
   line-height: 1;
 }
 
-.gold-nickname-row {
+.support-gold-nickname-row {
   position: relative;
   z-index: 2;
   margin-top: auto;
-  margin-bottom: 8px;
+  margin-bottom: clamp(6px, 1.2vmin, 10px);
   text-align: left;
   white-space: nowrap;
   font-weight: 700;
-  letter-spacing: 0.1px;
+  letter-spacing: 0.2px;
   display: block;
   width: 100%;
   line-height: 1;
 }
 
-.info-modal-body .support-text {
+.support-thanks {
+  text-align: center;
   color: var(--muted-soft-2);
-  font-size: clamp(13px, 2vmin, 15px);
-  line-height: 1.65;
-  margin: 0;
+  font-size: clamp(12px, 1.9vmin, 14px);
+  line-height: 1.5;
+  margin-top: 4px;
+  letter-spacing: .3px;
 }
 
-.info-modal-body .support-text + .belcard-stack {
-  margin-top: 18px;
-}
+/* ==== КНОПКА СКАЧАТЬ ==== */
 
-.info-modal-body .belcard-stack + .support-text {
-  margin-top: 18px;
+#scroll-top-btn {
+  position: fixed;
+  right: 18px;
+  bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  z-index: 800;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,203,43,.35);
+  background: rgba(255,203,43,.08);
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(8px) scale(.9);
+  pointer-events: none;
+  transition: opacity .25s ease, transform .25s ease, background .15s ease, border-color .15s ease;
+  -webkit-tap-highlight-color: transparent;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
+#scroll-top-btn svg { width: 22px; height: 22px; display: block; }
+#scroll-top-btn.visible { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+@media (hover: hover) {
+  #scroll-top-btn:hover { background: rgba(255,203,43,.16); border-color: rgba(255,203,43,.55); }
+}
+#scroll-top-btn:active { background: rgba(255,203,43,.22); border-color: rgba(255,203,43,.65); transform: translateY(0) scale(.94); }
 
 /* ==== LANDING ==== */
 
@@ -1280,17 +1308,6 @@ button.disabled {
   .lnd-grid-3 { grid-template-columns: repeat(3, 1fr); }
 }
 
-.lnd-grid-2 {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: clamp(14px, 2.4vw, 22px);
-  margin-top: clamp(18px, 3vw, 28px);
-}
-
-@media (min-width: 760px) {
-  .lnd-grid-2 { grid-template-columns: repeat(2, 1fr); }
-}
-
 .lnd-grid-3-sections {
   display: grid;
   grid-template-columns: 1fr;
@@ -1565,6 +1582,8 @@ button.disabled {
     min-width: 0;
   }
 }
+
+/* ===== ФИНАЛЬНЫЙ БЛОК ===== */
 
 .lnd-final {
   position: relative;
@@ -2143,9 +2162,9 @@ button.disabled {
 
           <button class="lnd-card lnd-reveal tappable" type="button"
                   data-info-title="Поддержка"
-                  data-info-body="В разделе «Поддержка» собраны реквизиты для донатов, блог проекта и контакты в Telegram.">
+                  data-info-body="Poker Trainer — некоммерческий проект. Без подписок, без рекламы, без платы за доступ. Существует исключительно на вашу поддержку.">
             <h3>Поддержка</h3>
-            <p>Проект развивается только на средства от ваших донатов. Адреса для переводов (GGPoker, USDT TRC20, VISA), блог и контакты в Telegram.</p>
+            <p>Poker Trainer — некоммерческий проект. Без подписок, без рекламы, без платы за доступ. Существует исключительно на вашу поддержку.</p>
             <svg class="lnd-card-tap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M9 3H5a2 2 0 0 0-2 2v4M9 21H5a2 2 0 0 1-2-2v-4M15 3h4a2 2 0 0 1 2 2v4M15 21h4a2 2 0 0 0 2-2v-4"/>
             </svg>
@@ -2549,106 +2568,99 @@ button.disabled {
 </script>
 
 <script>
-// ==== INFO MODAL (карточки-тапзоны) ====
+// ==== INFO MODAL (карточки-тапзоны + поддержка) ====
 (function() {
   'use strict';
 
   var infoModal = document.getElementById('info-modal');
   var infoTitle = document.getElementById('info-modal-title-el');
   var infoBody = document.getElementById('info-modal-body');
+  var infoBox = infoModal ? infoModal.querySelector('.info-modal-box') : null;
 
-  if (!infoModal) return;
+  if (!infoModal || !infoBox) return;
 
-  var SUPPORT_CARDS_HTML =
-    '<div class="belcard-stack" id="belcard-stack">' +
-      '<div class="belcard belcard-gold" data-card="gold">' +
-        '<div class="belcard-top">' +
-          '<div class="belcard-bank" translate="no"><span class="gold-gg">GG</span>POKER</div>' +
-          '<div class="belcard-club-top" translate="no">Transfer</div>' +
+  var SUPPORT_HTML =
+    '<div class="support-belcard-stack" id="support-belcard-stack">' +
+      '<div class="support-belcard belcard-gold" data-card="gold">' +
+        '<div class="support-belcard-top">' +
+          '<div class="support-belcard-bank" translate="no"><span class="support-gold-gg">GG</span>POKER</div>' +
+          '<div class="support-belcard-club-top" translate="no">Transfer</div>' +
         '</div>' +
-        '<div class="belcard-chip"></div>' +
-        '<div class="gold-nickname-row" translate="no">' +
-          '<span class="gold-name-label">Nickname:</span> ' +
-          '<span class="copy-text gold-name-value" data-copy-value="Lucky Light">Lucky Light<span class="copy-icon"></span></span>' +
+        '<div class="support-belcard-chip"></div>' +
+        '<div class="support-gold-nickname-row" translate="no">' +
+          '<span class="support-gold-name-label">Nickname:</span> ' +
+          '<span class="support-copy-text support-gold-name-value" data-copy-value="Lucky Light">Lucky Light<span class="support-copy-icon"></span></span>' +
         '</div>' +
-        '<div class="belcard-bottom">' +
-          '<div class="belcard-bottom-line" translate="no">Balance: $</div>' +
+        '<div class="support-belcard-bottom">' +
+          '<div class="support-belcard-bottom-line" translate="no">Balance: $</div>' +
         '</div>' +
-        '<div class="belcard-copied" data-copied="en">Copied</div>' +
+        '<div class="support-belcard-copied" data-copied="en">Copied</div>' +
       '</div>' +
-
-      '<div class="belcard belcard-gray" data-card="gray">' +
-        '<div class="belcard-top">' +
-          '<div class="belcard-bank" translate="no">Cryptocurrency</div>' +
-          '<div class="belcard-club-top" translate="no">Tether</div>' +
+      '<div class="support-belcard belcard-gray" data-card="gray">' +
+        '<div class="support-belcard-top">' +
+          '<div class="support-belcard-bank" translate="no">Cryptocurrency</div>' +
+          '<div class="support-belcard-club-top" translate="no">Tether</div>' +
         '</div>' +
-        '<div class="belcard-chip"></div>' +
-        '<div class="belcard-usdt-line" translate="no">' +
-          '<span class="copy-text" data-copy-value="TNxHP8tVZUFhFyAxGGtmKEqEm9Cjhbck3A">TNxHP8tVZUFhFyAxGGtmKEqEm9Cjhbck3A<span class="copy-icon"></span></span>' +
+        '<div class="support-belcard-chip"></div>' +
+        '<div class="support-belcard-usdt-line" translate="no">' +
+          '<span class="support-copy-text" data-copy-value="TNxHP8tVZUFhFyAxGGtmKEqEm9Cjhbck3A">TNxHP8tVZUFhFyAxGGtmKEqEm9Cjhbck3A<span class="support-copy-icon"></span></span>' +
         '</div>' +
-        '<div class="belcard-bottom">' +
-          '<div class="belcard-bottom-line" translate="no">USDT Tether → TRON (TRC20)</div>' +
+        '<div class="support-belcard-bottom">' +
+          '<div class="support-belcard-bottom-line" translate="no">USDT Tether → TRON (TRC20)</div>' +
         '</div>' +
-        '<div class="belcard-copied" data-copied="en">Copied</div>' +
+        '<div class="support-belcard-copied" data-copied="en">Copied</div>' +
       '</div>' +
-
-      '<div class="belcard belcard-blue" data-card="blue">' +
-        '<div class="belcard-top">' +
-          '<div class="belcard-bank" translate="no">BELARUSBANK</div>' +
-          '<div class="belcard-club-top" translate="no">VISA</div>' +
+      '<div class="support-belcard belcard-blue" data-card="blue">' +
+        '<div class="support-belcard-top">' +
+          '<div class="support-belcard-bank" translate="no">BELARUSBANK</div>' +
+          '<div class="support-belcard-club-top" translate="no">VISA</div>' +
         '</div>' +
-        '<div class="belcard-chip"></div>' +
-        '<a class="belcard-paysend" href="https://paysend.com/send" target="_blank" rel="noopener noreferrer" translate="no">PAYSEND</a>' +
-        '<div class="belcard-number-row">' +
-          '<div class="belcard-number" translate="no">' +
-            '<span class="copy-text" data-copy-value="4255 1901 3916 7251">4255 1901 3916 7251<span class="copy-icon"></span></span>' +
+        '<div class="support-belcard-chip"></div>' +
+        '<a class="support-belcard-paysend" href="https://paysend.com/send" target="_blank" rel="noopener noreferrer" translate="no">PAYSEND</a>' +
+        '<div class="support-belcard-number-row">' +
+          '<div class="support-belcard-number" translate="no">' +
+            '<span class="support-copy-text" data-copy-value="4255 1901 3916 7251">4255 1901 3916 7251<span class="support-copy-icon"></span></span>' +
           '</div>' +
-          '<div class="belcard-currencies-top" translate="no">USD / EUR</div>' +
+          '<div class="support-belcard-currencies-top" translate="no">USD / EUR</div>' +
         '</div>' +
-        '<div class="belcard-bottom">' +
-          '<div class="belcard-name" translate="no">' +
-            '<span class="copy-text" data-copy-value="TOM TOT">TOM TOT<span class="copy-icon"></span></span>' +
-          '</div>' +
-        '</div>' +
-        '<div class="belcard-copied" data-copied="en">Copied</div>' +
-      '</div>' +
-
-      '<div class="belcard belcard-green" data-card="green">' +
-        '<div class="belcard-top">' +
-          '<div class="belcard-bank" translate="no">БЕЛАРУСБАНК</div>' +
-          '<div class="belcard-club-top" translate="no">БЕЛКАРТ</div>' +
-        '</div>' +
-        '<div class="belcard-chip"></div>' +
-        '<div class="belcard-number-row">' +
-          '<div class="belcard-number" translate="no">' +
-            '<span class="copy-text" data-copy-value="9112 3801 6012 8254">9112 3801 6012 8254<span class="copy-icon"></span></span>' +
-          '</div>' +
-          '<div class="belcard-currencies-top" translate="no">BYN / RUB</div>' +
-        '</div>' +
-        '<div class="belcard-bottom">' +
-          '<div class="belcard-name" translate="no">' +
-            '<span class="copy-text" data-copy-value="TOM TOT">TOM TOT<span class="copy-icon"></span></span>' +
+        '<div class="support-belcard-bottom">' +
+          '<div class="support-belcard-name" translate="no">' +
+            '<span class="support-copy-text" data-copy-value="TOM TOT">TOM TOT<span class="support-copy-icon"></span></span>' +
           '</div>' +
         '</div>' +
-        '<div class="belcard-copied" data-copied="ru">Скопировано</div>' +
+        '<div class="support-belcard-copied" data-copied="en">Copied</div>' +
       '</div>' +
-    '</div>';
-
-  function buildSupportBody() {
-    var html = '';
-    html += '<p class="support-text">Poker Trainer — некоммерческий проект. Он не продаёт подписки, не показывает рекламу и не зарабатывает на игроках. Проект развивается исключительно на средства от ваших донатов.</p>';
-    html += SUPPORT_CARDS_HTML;
-    html += '<p class="support-text">Контакты в Telegram — основной канал связи. Через него можно задать вопрос, предложить идею, сообщить об ошибке или просто поделиться впечатлениями от тренировки.</p>';
-    return html;
-  }
+      '<div class="support-belcard belcard-green" data-card="green">' +
+        '<div class="support-belcard-top">' +
+          '<div class="support-belcard-bank" translate="no">БЕЛАРУСБАНК</div>' +
+          '<div class="support-belcard-club-top" translate="no">БЕЛКАРТ</div>' +
+        '</div>' +
+        '<div class="support-belcard-chip"></div>' +
+        '<div class="support-belcard-number-row">' +
+          '<div class="support-belcard-number" translate="no">' +
+            '<span class="support-copy-text" data-copy-value="9112 3801 6012 8254">9112 3801 6012 8254<span class="support-copy-icon"></span></span>' +
+          '</div>' +
+          '<div class="support-belcard-currencies-top" translate="no">BYN / RUB</div>' +
+        '</div>' +
+        '<div class="support-belcard-bottom">' +
+          '<div class="support-belcard-name" translate="no">' +
+            '<span class="support-copy-text" data-copy-value="TOM TOT">TOM TOT<span class="support-copy-icon"></span></span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="support-belcard-copied" data-copied="ru">Скопировано</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="support-thanks">Благодарю за вашу поддержку</div>';
 
   function openInfo(title, body, isSupport) {
     infoTitle.textContent = title || '';
-    infoTitle.classList.toggle('gold', !!isSupport);
 
     if (isSupport) {
-      infoBody.innerHTML = buildSupportBody();
+      infoBox.classList.add('info-modal-box--support');
+      infoBody.innerHTML = SUPPORT_HTML;
+      initBelcardSupport();
     } else {
+      infoBox.classList.remove('info-modal-box--support');
       var paragraphs = String(body || '').split('\n\n');
       var html = '';
       for (var i = 0; i < paragraphs.length; i++) {
@@ -2661,20 +2673,11 @@ button.disabled {
 
     infoModal.classList.add('open');
     document.body.style.overflow = 'hidden';
-
-    if (isSupport) {
-      var stack = document.getElementById('belcard-stack');
-      if (stack) bindBelcardDrag(stack);
-    }
   }
 
   function closeInfo() {
     infoModal.classList.remove('open');
     document.body.style.overflow = '';
-    var stack = document.getElementById('belcard-stack');
-    if (stack && stack.__ptCleanup) {
-      try { stack.__ptCleanup(); } catch (e) {}
-    }
   }
 
   infoModal.addEventListener('click', closeInfo);
@@ -2682,9 +2685,24 @@ button.disabled {
     if (e.key === 'Escape' && infoModal.classList.contains('open')) closeInfo();
   });
 
-  function bindBelcardDrag(stack) {
-    if (!stack || stack.__ptBound) return;
-    stack.__ptBound = true;
+  var tappables = document.querySelectorAll('.lnd-card.tappable');
+  for (var i = 0; i < tappables.length; i++) {
+    (function(card) {
+      card.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var t = card.getAttribute('data-info-title') || '';
+        var b = card.getAttribute('data-info-body') || '';
+        var isSupport = (t === 'Поддержка');
+        openInfo(t, b, isSupport);
+      });
+    })(tappables[i]);
+  }
+
+  // ==== ЛОГИКА ПЕРЕЛИСТЫВАНИЯ КАРТОЧЕК ПОДДЕРЖКИ (внутри модалки) ====
+  function initBelcardSupport() {
+    var stack = document.getElementById('support-belcard-stack');
+    if (!stack) return;
 
     var OFFSET = 8;
     var LIFT = 8;
@@ -2721,9 +2739,9 @@ button.disabled {
       if (!animated) {
         requestAnimationFrame(function() {
           for (var j = 0; j < order.length; j++) {
-            var n = cards[order[j]];
-            if (!n) continue;
-            n.style.transition = '';
+            var k = order[j];
+            var nd = cards[k];
+            if (nd) nd.style.transition = '';
           }
         });
       }
@@ -2772,10 +2790,10 @@ button.disabled {
       order = newOrder;
 
       setTimeout(function() {
-        for (var i = 0; i < order.length; i++) {
-          var n = cards[order[i]];
-          if (!n) continue;
-          n.style.transition = '';
+        for (var j = 0; j < order.length; j++) {
+          var k = order[j];
+          var nd = cards[k];
+          if (nd) nd.style.transition = '';
         }
         applyPositions(false);
         isAnimating = false;
@@ -2784,7 +2802,80 @@ button.disabled {
       currentLift = 0;
     }
 
-    var onTouchStart = function(e) {
+    function isTopCard(el) { return el === cards[order[0]]; }
+
+    // ==== Копирование по тапу на номер/имя ====
+    var lastCopyTs = 0;
+    var COPY_COOLDOWN = 400;
+
+    stack.addEventListener('click', function(e) {
+      var paysend = e.target.closest('.support-belcard-paysend');
+      if (paysend) return;
+
+      var copyEl = e.target.closest('.support-copy-text');
+      if (!copyEl) return;
+
+      var card = copyEl.closest('.support-belcard');
+      if (!card) return;
+      if (!isTopCard(card)) return;
+
+      var now = Date.now();
+      if (now - lastCopyTs < COPY_COOLDOWN) return;
+      lastCopyTs = now;
+
+      var text = copyEl.getAttribute('data-copy-value') || copyEl.textContent.trim();
+      copySupportText(text, card);
+    });
+
+    function showCopied(cardEl) {
+      if (!cardEl) return;
+      var hint = cardEl.querySelector('.support-belcard-copied');
+      if (!hint) return;
+      hint.classList.add('visible');
+      clearTimeout(hint._timer);
+      hint._timer = setTimeout(function() {
+        hint.classList.remove('visible');
+      }, 1200);
+    }
+
+    function copySupportText(text, cardEl) {
+      if (!text || !cardEl) return;
+      var succeeded = false;
+
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.top = '-1000px';
+        ta.style.left = '-1000px';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        ta.setSelectionRange(0, ta.value.length);
+        succeeded = document.execCommand && document.execCommand('copy');
+        document.body.removeChild(ta);
+      } catch (err) {
+        succeeded = false;
+      }
+
+      if (succeeded) {
+        showCopied(cardEl);
+        return;
+      }
+
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function() {
+            showCopied(cardEl);
+          }).catch(function() {});
+        }
+      } catch (err) {}
+    }
+
+    // ==== Свайп (touch + mouse + dblclick) ====
+    stack.addEventListener('touchstart', function(e) {
       if (isAnimating) return;
       if (e.touches.length !== 1) return;
       startY = e.touches[0].clientY;
@@ -2793,33 +2884,27 @@ button.disabled {
       stack.classList.add('dragging');
       var node = cards[topKey()];
       if (node) node.style.transition = 'none';
-    };
+    }, { passive: true });
 
-    var onTouchMove = function(e) {
+    stack.addEventListener('touchmove', function(e) {
       if (isAnimating) return;
       if (e.touches.length !== 1) return;
       var y = e.touches[0].clientY;
       var dy = startY - y;
 
       if (!dragging) {
-        if (Math.abs(dy) > 3) {
-          dragging = true;
-        } else {
-          return;
-        }
+        if (dy < -3 || dy > 3) dragging = true;
+        else return;
       }
 
-      if (dy > 0) {
-        currentLift = Math.max(0, Math.min(LIFT, dy));
-      } else {
-        currentLift = 0;
-      }
+      if (dy > 0) currentLift = Math.max(0, Math.min(LIFT, dy));
+      else currentLift = 0;
 
       beginDragLift();
-      if (e.cancelable) e.preventDefault();
-    };
+      e.preventDefault();
+    }, { passive: false });
 
-    var onTouchEnd = function(e) {
+    stack.addEventListener('touchend', function(e) {
       if (isAnimating) return;
       stack.classList.remove('dragging');
       var wasDragging = dragging;
@@ -2837,9 +2922,9 @@ button.disabled {
           if (node) node.style.transition = '';
         }, 280);
       }
-    };
+    }, { passive: false });
 
-    var onTouchCancel = function() {
+    stack.addEventListener('touchcancel', function() {
       if (isAnimating) return;
       stack.classList.remove('dragging');
       dragging = false;
@@ -2849,13 +2934,13 @@ button.disabled {
         var node = cards[topKey()];
         if (node) node.style.transition = '';
       }, 280);
-    };
+    }, { passive: true });
 
     var mouseDown = false;
     var mouseStartY = 0;
     var mouseDragging = false;
 
-    var onMouseDown = function(e) {
+    stack.addEventListener('mousedown', function(e) {
       if (isAnimating) return;
       if (e.button !== 0) return;
       mouseDown = true;
@@ -2866,9 +2951,9 @@ button.disabled {
       var node = cards[topKey()];
       if (node) node.style.transition = 'none';
       e.preventDefault();
-    };
+    });
 
-    var onMouseMove = function(e) {
+    stack.addEventListener('mousemove', function(e) {
       if (!mouseDown || isAnimating) return;
       var y = e.clientY;
       var dy = mouseStartY - y;
@@ -2879,9 +2964,9 @@ button.disabled {
       if (dy > 0) currentLift = Math.max(0, Math.min(LIFT, dy));
       else currentLift = 0;
       beginDragLift();
-    };
+    });
 
-    var onMouseUp = function(e) {
+    stack.addEventListener('mouseup', function(e) {
       if (!mouseDown) return;
       mouseDown = false;
       stack.classList.remove('dragging');
@@ -2903,118 +2988,34 @@ button.disabled {
           if (node) node.style.transition = '';
         }, 280);
       }
-    };
+    });
 
-    var onDblClick = function(e) {
+    stack.addEventListener('mouseleave', function(e) {
+      if (!mouseDown) return;
+      mouseDown = false;
+      stack.classList.remove('dragging');
+      if (!mouseDragging) {
+        var node = cards[topKey()];
+        if (node) node.style.transition = '';
+        return;
+      }
+      mouseDragging = false;
+      snapBackTop();
+      currentLift = 0;
+      setTimeout(function() {
+        var node = cards[topKey()];
+        if (node) node.style.transition = '';
+      }, 280);
+    });
+
+    stack.addEventListener('dblclick', function(e) {
       if (isAnimating) return;
       e.preventDefault();
       e.stopPropagation();
       rotateOnce();
-    };
-
-    var onStackClick = function(e) {
-      if (isAnimating) return;
-      var copyEl = e.target.closest('.copy-text');
-      if (copyEl) {
-        var card = copyEl.closest('.belcard');
-        if (!card) return;
-        var currentTop = cards[order[0]];
-        if (card !== currentTop) return;
-        e.preventDefault();
-        e.stopPropagation();
-        var text = copyEl.getAttribute('data-copy-value') || copyEl.textContent.trim();
-        copyToClipboard(text, card);
-        return;
-      }
-      if (e.target.closest('.belcard-paysend')) return;
-    };
-
-    stack.addEventListener('touchstart', onTouchStart, { passive: true });
-    stack.addEventListener('touchmove', onTouchMove, { passive: false });
-    stack.addEventListener('touchend', onTouchEnd, { passive: false });
-    stack.addEventListener('touchcancel', onTouchCancel, { passive: true });
-    stack.addEventListener('mousedown', onMouseDown);
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseup', onMouseUp);
-    stack.addEventListener('dblclick', onDblClick);
-    stack.addEventListener('click', onStackClick);
-
-    stack.__ptCleanup = function() {
-      stack.removeEventListener('touchstart', onTouchStart);
-      stack.removeEventListener('touchmove', onTouchMove);
-      stack.removeEventListener('touchend', onTouchEnd);
-      stack.removeEventListener('touchcancel', onTouchCancel);
-      stack.removeEventListener('mousedown', onMouseDown);
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('mouseup', onMouseUp);
-      stack.removeEventListener('dblclick', onDblClick);
-      stack.removeEventListener('click', onStackClick);
-      stack.__ptBound = false;
-      stack.__ptCleanup = null;
-    };
+    });
 
     applyPositions(false);
-  }
-
-  function copyToClipboard(text, cardEl) {
-    if (!text) return;
-    var succeeded = false;
-
-    try {
-      var ta = document.createElement('textarea');
-      ta.value = text;
-      ta.setAttribute('readonly', '');
-      ta.style.position = 'fixed';
-      ta.style.top = '-1000px';
-      ta.style.left = '-1000px';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.focus();
-      ta.select();
-      ta.setSelectionRange(0, ta.value.length);
-      succeeded = document.execCommand && document.execCommand('copy');
-      document.body.removeChild(ta);
-    } catch (e) {
-      succeeded = false;
-    }
-
-    if (succeeded) {
-      showCopiedHint(cardEl);
-      return;
-    }
-
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(function() {
-          showCopiedHint(cardEl);
-        }).catch(function() {});
-      }
-    } catch (e) {}
-  }
-
-  function showCopiedHint(cardEl) {
-    if (!cardEl) return;
-    var hint = cardEl.querySelector('.belcard-copied');
-    if (!hint) return;
-    hint.classList.add('visible');
-    clearTimeout(hint.__ptTimer);
-    hint.__ptTimer = setTimeout(function() {
-      hint.classList.remove('visible');
-    }, 1200);
-  }
-
-  var tappables = document.querySelectorAll('.lnd-card.tappable');
-  for (var i = 0; i < tappables.length; i++) {
-    (function(card) {
-      card.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        var t = card.getAttribute('data-info-title') || '';
-        var b = card.getAttribute('data-info-body') || '';
-        var isSupport = (t === 'Поддержка');
-        openInfo(t, b, isSupport);
-      });
-    })(tappables[i]);
   }
 })();
 // ==== /INFO MODAL ====
