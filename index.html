@@ -89,17 +89,19 @@ button.disabled {
   background: var(--ph-bg);
   pointer-events: none;
   user-select: none;
+  opacity: .75;
 }
 
-/* Сердечко-заглушка как SVG-рисунок. Размер = размеру самолётика (32×32). */
+/* Сердечко-заглушка как SVG-рисунок. Чуть меньше самолётика,
+   чтобы визуально совпадать по размеру. */
 .ph-fallback .ph-heart-svg {
-  width: 32px;
-  height: 32px;
+  width: 26px;
+  height: 26px;
   display: block;
 }
 
-.ph-fallback.lg .ph-heart-svg { width: 40px; height: 40px; }
-.ph-fallback.sm .ph-heart-svg { width: 24px; height: 24px; }
+.ph-fallback.lg .ph-heart-svg { width: 34px; height: 34px; }
+.ph-fallback.sm .ph-heart-svg { width: 20px; height: 20px; }
 
 /* ==== TELEGRAM FEED CAROUSEL ==== */
 
@@ -144,6 +146,7 @@ button.disabled {
   justify-content: center;
   color: var(--ph-heart);
   position: relative;
+  opacity: .75;
 }
 
 .tg-feed-avatar img {
@@ -403,25 +406,28 @@ button.disabled {
   justify-content: center;
   color: var(--ph-heart);
   background: var(--ph-bg);
+  opacity: .75;
 }
 
-/* Область текста: занимает весь остаток высоты карточки. */
+/* Область текста: занимает весь остаток высоты карточки.
+   Плавное затухание теперь растянуто на две строки. */
 .tg-card-text-wrap {
   position: relative;
   flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
   padding-right: 40px;
-  /* Текст плавно растворяется к нижнему краю — без полосы поверх. */
   -webkit-mask-image: linear-gradient(to bottom,
     #000 0,
-    #000 calc(100% - 2.6em),
-    rgba(0,0,0,.55) calc(100% - 1.3em),
+    #000 calc(100% - 3.4em),
+    rgba(0,0,0,.55) calc(100% - 1.9em),
+    rgba(0,0,0,.15) calc(100% - 0.7em),
     transparent 100%);
   mask-image: linear-gradient(to bottom,
     #000 0,
-    #000 calc(100% - 2.6em),
-    rgba(0,0,0,.55) calc(100% - 1.3em),
+    #000 calc(100% - 3.4em),
+    rgba(0,0,0,.55) calc(100% - 1.9em),
+    rgba(0,0,0,.15) calc(100% - 0.7em),
     transparent 100%);
 }
 
@@ -1937,7 +1943,6 @@ button.disabled {
 (function() {
   'use strict';
 
-  // Сердечко — SVG-рисунок, чтобы размер был точный и одинаковый с самолётиком.
   var HEART_SVG =
     '<svg class="ph-heart-svg" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">' +
       '<path d="M16 28.5C16 28.5 3.5 20.4 3.5 11.9C3.5 7.5 6.9 4.1 11 4.1C13.2 4.1 15.1 5.1 16 6.6C16.9 5.1 18.8 4.1 21 4.1C25.1 4.1 28.5 7.5 28.5 11.9C28.5 20.4 16 28.5 16 28.5Z"/>' +
@@ -1977,7 +1982,6 @@ button.disabled {
     }
   });
 
-  // Публикуем SVG, чтобы другие скрипты могли его использовать.
   window.POKER_HEART_SVG = HEART_SVG;
 })();
 // ==== /SVG-СЕРДЕЧКО ====
@@ -2216,14 +2220,15 @@ button.disabled {
 // 3. КАРТИНКА: 16:9, object-fit: cover, width: 100%.
 // 4. ВЫСОТА КАРТОЧКИ ЖЁСТКО ЗАФИКСИРОВАНА В 320px.
 //    Текст внутри обрезается по нижнему краю карточки,
-//    ничего не растит и не сжимает. Последние строки
+//    ничего не растит и не сжимает. Последние две строки
 //    плавно растворяются через маску — без полос поверх.
 // 5. ДАТЫ НЕТ. Посты всегда без даты.
 // 6. МОДАЛКИ НЕТ. Клик по карточке сразу открывает Telegram
 //    (в новой вкладке или в приложении) на нужный пост.
 //    Пока это ссылка на канал, потом подставим конкретные посты.
 // 7. Значок в углу карточки — золотистый telegram-самолётик 32×32.
-// 8. Сердечко-заглушка — SVG, размер 32×32 (как самолётик).
+// 8. Сердечко-заглушка — SVG, размер 26×26 (чуть меньше самолётика,
+//    чтобы визуально совпадать), с прозрачностью .75.
 // 9. ПРАВИЛА ПРИМЕНЯЮТСЯ АВТОМАТИЧЕСКИ к любому новому посту.
 //
 // ============================================================
@@ -2251,7 +2256,6 @@ button.disabled {
   if (nameEl) nameEl.textContent = TG_CHANNEL_NAME;
   if (usernameEl) usernameEl.textContent = '@' + TG_CHANNEL;
 
-  // SVG-сердечко (то же, что в общей заглушке). Размер = 32×32, как у самолётика.
   var HEART_SVG = window.POKER_HEART_SVG || '';
   if (avatarFb) avatarFb.innerHTML = HEART_SVG;
 
@@ -2280,7 +2284,6 @@ button.disabled {
     return 3;
   }
 
-  // Иконка telegram-самолётика. Размер задан в CSS (32×32).
   var TG_ICON_SVG = '<svg class="tg-card-tap-icon" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true"><path d="M23.06 9.07 8.32 14.76c-.98.4-.97 1.78.01 2.17l3.66 1.4 1.4 4.5c.2.64 1.02.82 1.48.32l1.98-2.14 3.86 2.83c.55.4 1.34.11 1.49-.56l2.66-12.62c.16-.75-.6-1.35-1.8-1.59zM12.7 17.36l8.02-5.02-6.55 6.14-.18 2.55-1.29-3.67z"/></svg>';
 
   function buildCardNode(p, i) {
