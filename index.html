@@ -1146,12 +1146,15 @@ button.disabled {
   }
 }
 
+/* Контейнер-строка: POKER TRAINER + кнопка $. Центрируется по горизонтали.
+   Элементы выровнены по центру вертикальной оси — кнопка ровно напротив текста. */
 .lnd-logo-row {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  justify-content: flex-start;
+  gap: 14px;
   margin-bottom: clamp(20px, 4vw, 30px);
+  width: 100%;
 }
 
 .lnd-logo {
@@ -1164,6 +1167,7 @@ button.disabled {
   color: #fff;
   text-transform: uppercase;
   margin: 0;
+  line-height: 1;
 }
 
 .lnd-dollar-btn {
@@ -1190,6 +1194,17 @@ button.disabled {
     0 0 34px rgba(255,203,43,.18),
     inset 0 1px 0 rgba(255,203,43,.35);
   transition: transform .12s ease, box-shadow .18s ease, filter .18s ease;
+  position: relative;
+}
+
+.lnd-dollar-btn .dollar-glyph {
+  display: block;
+  line-height: 1;
+  transform: translateY(-1px);
+  text-shadow:
+    0 0 6px rgba(255,203,43,.85),
+    0 0 14px rgba(255,203,43,.45);
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
 }
 
 @media (hover: hover) {
@@ -1213,19 +1228,22 @@ button.disabled {
   filter: brightness(1.15);
 }
 
-.lnd-dollar-btn .dollar-glyph {
-  display: block;
-  transform: translateY(-1px);
-  text-shadow:
-    0 0 6px rgba(255,203,43,.85),
-    0 0 14px rgba(255,203,43,.45);
-}
-
+/* Мобильная версия: компактнее, символ $ идеально по центру */
 @media (max-width: 520px) {
+  .lnd-logo-row {
+    gap: 10px;
+    margin-bottom: clamp(18px, 4vw, 24px);
+  }
   .lnd-dollar-btn {
-    width: 42px;
-    height: 42px;
-    font-size: 19px;
+    width: 38px;
+    height: 38px;
+    font-size: 17px;
+    line-height: 1;
+  }
+  .lnd-dollar-btn .dollar-glyph {
+    font-size: 17px;
+    line-height: 1;
+    transform: translateY(0);
   }
 }
 
@@ -2733,9 +2751,6 @@ button.disabled {
     isSupportOpen = false;
   }
 
-  // Клик по фону модалки:
-  // - для обычных окошек (не Поддержка) — закрываем ВСЕГДА, где бы ни был клик (включая сам бокс).
-  // - для окошка Поддержка — закрываем ТОЛЬКО если клик был вне самого бокса.
   infoModal.addEventListener('click', function(e) {
     if (!isSupportOpen) {
       closeInfo();
@@ -2746,8 +2761,6 @@ button.disabled {
     }
   });
 
-  // Внутри бокса Поддержки полностью останавливаем всплытие, чтобы клик по карточкам и надписям
-  // не долетал до обработчика на #info-modal и не мог случайно закрыть окошко.
   infoBox.addEventListener('click', function(e) {
     if (isSupportOpen) {
       e.stopPropagation();
@@ -2758,7 +2771,6 @@ button.disabled {
     if (e.key === 'Escape' && infoModal.classList.contains('open')) closeInfo();
   });
 
-  // Открытие обычных инфо-модалок по карточкам-тапзонам
   var tappables = document.querySelectorAll('.lnd-card.tappable');
   for (var i = 0; i < tappables.length; i++) {
     (function(card) {
@@ -2773,7 +2785,6 @@ button.disabled {
     })(tappables[i]);
   }
 
-  // Открытие «Поддержи автора» по кнопке $ в hero
   document.addEventListener('click', function(e) {
     var btn = e.target.closest ? e.target.closest('[data-action="open-support"]') : null;
     if (!btn) return;
