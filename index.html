@@ -1873,6 +1873,17 @@ button.disabled {
   display: block;
 }
 
+/* Самолётик Telegram — крупнее остальных, как самолётик в постах карусели */
+.bottom-icon.bottom-icon--tg {
+  width: 32px;
+  height: 32px;
+}
+
+.bottom-icon.bottom-icon--tg svg {
+  width: 32px;
+  height: 32px;
+}
+
 .bottom-icon:active {
   transform: scale(0.9);
   opacity: 1;
@@ -1886,43 +1897,18 @@ button.disabled {
   }
 }
 
-/* ===== ЗАТУХАНИЕ СОДЕРЖИМОГО СВЕРХУ И СНИЗУ ===== */
+/* ===== ЗАТУХАНИЕ СОДЕРЖИМОГО СНИЗУ ===== */
 
-/* Верхнее затухание содержимого лендинга. Короткое.
-   Само содержимое становится прозрачным — не наложение слоя. */
-.lnd-fade-top,
 .lnd-fade-bottom {
   position: fixed;
   left: 0;
   right: 0;
+  bottom: 0;
+  height: 160px;
   pointer-events: none;
   z-index: 850;
   opacity: 0;
   transition: opacity .35s ease;
-}
-
-.lnd-fade-top.visible,
-.lnd-fade-bottom.visible {
-  opacity: 1;
-}
-
-.lnd-fade-top {
-  top: 0;
-  height: 70px;
-  background: linear-gradient(
-    to bottom,
-    #000 0%,
-    rgba(0,0,0,.92) 35%,
-    rgba(0,0,0,.55) 65%,
-    rgba(0,0,0,0) 100%
-  );
-  -webkit-mask-image: none;
-  mask-image: none;
-}
-
-.lnd-fade-bottom {
-  bottom: 0;
-  height: 160px;
   background: linear-gradient(
     to top,
     #000 0%,
@@ -1931,6 +1917,10 @@ button.disabled {
     rgba(0,0,0,.25) 80%,
     rgba(0,0,0,0) 100%
   );
+}
+
+.lnd-fade-bottom.visible {
+  opacity: 1;
 }
 </style>
 </head>
@@ -2381,7 +2371,6 @@ button.disabled {
 
   </div>
 
-  <div class="lnd-fade-top" id="lnd-fade-top" aria-hidden="true"></div>
   <div class="lnd-fade-bottom" id="lnd-fade-bottom" aria-hidden="true"></div>
 
   <div id="bottom-bar" aria-hidden="true">
@@ -2396,7 +2385,7 @@ button.disabled {
         <path d="M16 28.5C16 28.5 3.5 20.4 3.5 11.9C3.5 7.5 6.9 4.1 11 4.1C13.2 4.1 15.1 5.1 16 6.6C16.9 5.1 18.8 4.1 21 4.1C25.1 4.1 28.5 7.5 28.5 11.9C28.5 20.4 16 28.5 16 28.5Z"/>
       </svg>
     </button>
-    <a class="bottom-icon" href="https://t.me/ThePokerWay" target="_blank" rel="noopener noreferrer" aria-label="Открыть канал в Telegram">
+    <a class="bottom-icon bottom-icon--tg" href="https://t.me/ThePokerWay" target="_blank" rel="noopener noreferrer" aria-label="Открыть канал в Telegram">
       <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
         <path d="M23.06 9.07 8.32 14.76c-.98.4-.97 1.78.01 2.17l3.66 1.4 1.4 4.5c.2.64 1.02.82 1.48.32l1.98-2.14 3.86 2.83c.55.4 1.34.11 1.49-.56l2.66-12.62c.16-.75-.6-1.35-1.8-1.59zM12.7 17.36l8.02-5.02-6.55 6.14-.18 2.55-1.29-3.67z"/>
       </svg>
@@ -3677,13 +3666,12 @@ button.disabled {
 </script>
 
 <script>
-// ==== BOTTOM BAR + FADE CONTENT ====
+// ==== BOTTOM BAR + FADE BOTTOM ====
 (function() {
   'use strict';
 
   var landing = document.getElementById('landing');
   var bottomBar = document.getElementById('bottom-bar');
-  var fadeTop = document.getElementById('lnd-fade-top');
   var fadeBottom = document.getElementById('lnd-fade-bottom');
 
   if (!landing || !bottomBar) return;
@@ -3696,11 +3684,9 @@ button.disabled {
     isVisible = v;
     if (v) {
       bottomBar.classList.add('visible');
-      if (fadeTop) fadeTop.classList.add('visible');
       if (fadeBottom) fadeBottom.classList.add('visible');
     } else {
       bottomBar.classList.remove('visible');
-      if (fadeTop) fadeTop.classList.remove('visible');
       if (fadeBottom) fadeBottom.classList.remove('visible');
     }
   }
