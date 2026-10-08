@@ -116,7 +116,7 @@ button.disabled {
 #tg-feed {
   position: relative;
   z-index: 1;
-  background: linear-gradient(180deg, #0a0a0a 0%, #000 100%);
+  background: #000;
   padding: 16px 0 14px;
   flex-shrink: 0;
 }
@@ -1824,6 +1824,114 @@ button.disabled {
   -webkit-user-select: text;
   cursor: text;
 }
+
+/* ===== НИЖНЯЯ ПАНЕЛЬ С ТРЕМЯ ИКОНКАМИ ===== */
+
+#bottom-bar {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
+  transform: translate(-50%, 20px);
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .35s ease, transform .35s cubic-bezier(.22,.61,.36,1);
+}
+
+#bottom-bar.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
+}
+
+.bottom-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  color: var(--ph-heart);
+  opacity: .75;
+  cursor: pointer;
+  line-height: 0;
+  -webkit-tap-highlight-color: transparent;
+  filter: drop-shadow(0 0 6px rgba(184,146,74,.7)) drop-shadow(0 0 14px rgba(184,146,74,.4));
+  transition: opacity .18s ease, filter .18s ease, transform .12s ease;
+}
+
+.bottom-icon svg {
+  width: 26px;
+  height: 26px;
+  display: block;
+}
+
+.bottom-icon:active {
+  transform: scale(0.9);
+  opacity: 1;
+  filter: drop-shadow(0 0 9px rgba(184,146,74,.95)) drop-shadow(0 0 22px rgba(184,146,74,.6));
+}
+
+@media (hover: hover) {
+  .bottom-icon:hover {
+    opacity: .95;
+    filter: drop-shadow(0 0 8px rgba(184,146,74,.85)) drop-shadow(0 0 18px rgba(184,146,74,.55));
+  }
+}
+
+/* ===== ЗАТУХАНИЕ СОДЕРЖИМОГО СВЕРХУ И СНИЗУ ===== */
+
+/* Верхнее затухание содержимого лендинга. Короткое.
+   Само содержимое становится прозрачным — не наложение слоя. */
+.lnd-fade-top,
+.lnd-fade-bottom {
+  position: fixed;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 850;
+  opacity: 0;
+  transition: opacity .35s ease;
+}
+
+.lnd-fade-top.visible,
+.lnd-fade-bottom.visible {
+  opacity: 1;
+}
+
+.lnd-fade-top {
+  top: 0;
+  height: 70px;
+  background: linear-gradient(
+    to bottom,
+    #000 0%,
+    rgba(0,0,0,.92) 35%,
+    rgba(0,0,0,.55) 65%,
+    rgba(0,0,0,0) 100%
+  );
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+.lnd-fade-bottom {
+  bottom: 0;
+  height: 160px;
+  background: linear-gradient(
+    to top,
+    #000 0%,
+    rgba(0,0,0,.95) 25%,
+    rgba(0,0,0,.65) 55%,
+    rgba(0,0,0,.25) 80%,
+    rgba(0,0,0,0) 100%
+  );
+}
 </style>
 </head>
 <body>
@@ -2273,10 +2381,26 @@ button.disabled {
 
   </div>
 
-  <div id="landing-sticky-cta" aria-hidden="true">
-    <button class="lnd-btn" type="button" data-action="enter-app" aria-label="Играть">
-      Играть
+  <div class="lnd-fade-top" id="lnd-fade-top" aria-hidden="true"></div>
+  <div class="lnd-fade-bottom" id="lnd-fade-bottom" aria-hidden="true"></div>
+
+  <div id="bottom-bar" aria-hidden="true">
+    <button class="bottom-icon" type="button" data-action="enter-app" aria-label="Начать тренировку">
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="4" y="6" width="14" height="20" rx="2" transform="rotate(-8 11 16)"/>
+        <rect x="14" y="6" width="14" height="20" rx="2" transform="rotate(8 21 16)"/>
+      </svg>
     </button>
+    <button class="bottom-icon" type="button" data-action="open-support" aria-label="Поддержать автора">
+      <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+        <path d="M16 28.5C16 28.5 3.5 20.4 3.5 11.9C3.5 7.5 6.9 4.1 11 4.1C13.2 4.1 15.1 5.1 16 6.6C16.9 5.1 18.8 4.1 21 4.1C25.1 4.1 28.5 7.5 28.5 11.9C28.5 20.4 16 28.5 16 28.5Z"/>
+      </svg>
+    </button>
+    <a class="bottom-icon" href="https://t.me/ThePokerWay" target="_blank" rel="noopener noreferrer" aria-label="Открыть канал в Telegram">
+      <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+        <path d="M23.06 9.07 8.32 14.76c-.98.4-.97 1.78.01 2.17l3.66 1.4 1.4 4.5c.2.64 1.02.82 1.48.32l1.98-2.14 3.86 2.83c.55.4 1.34.11 1.49-.56l2.66-12.62c.16-.75-.6-1.35-1.8-1.59zM12.7 17.36l8.02-5.02-6.55 6.14-.18 2.55-1.29-3.67z"/>
+      </svg>
+    </a>
   </div>
 
 <script>
@@ -3125,6 +3249,7 @@ button.disabled {
   var AUTOPLAY_MS = 4000;
   var SWIPE_THRESHOLD = 40;
   var WHEEL_THROTTLE = 600;
+  var DOTS_COUNT = 9;
 
   var track = document.getElementById('tg-feed-track');
   var wrap = document.getElementById('tg-feed-wrap');
@@ -3199,26 +3324,34 @@ button.disabled {
     return card;
   }
 
-  function renderCards() {
-    track.innerHTML = '';
+  function buildDots() {
     dotsWrap.innerHTML = '';
-
-    posts.forEach(function(p, i) {
-      track.appendChild(buildCardNode(p, i));
-
+    for (var i = 0; i < DOTS_COUNT; i++) {
       var dot = document.createElement('span');
       dot.className = 'd' + (i === 0 ? ' active' : '');
-      dot.dataset.idx = i;
+      dot.dataset.slot = i;
       dot.addEventListener('click', function(e) {
         e.stopPropagation();
-        goTo(i);
+        var slot = parseInt(this.dataset.slot, 10);
+        var target = dotSlotToCardIdx(slot);
+        goToAbsolute(target);
       });
       dotsWrap.appendChild(dot);
-    });
+    }
+  }
 
-    activeIdx = 0;
-    dotIdx = 0;
-    updateCarousel();
+  function dotSlotToCardIdx(slot) {
+    if (totalPosts <= 1) return 0;
+    if (DOTS_COUNT <= 1) return 0;
+    var ratio = slot / (DOTS_COUNT - 1);
+    return Math.round(ratio * (totalPosts - 1));
+  }
+
+  function renderCards() {
+    track.innerHTML = '';
+    posts.forEach(function(p, i) {
+      track.appendChild(buildCardNode(p, i));
+    });
   }
 
   function appendCardsOnce() {
@@ -3257,67 +3390,66 @@ button.disabled {
     for (var i = 0; i < cards.length; i++) {
       cards[i].classList.toggle('active', i === centerIdx);
     }
+
+    var absIdx = ((activeIdx % totalPosts) + totalPosts) % totalPosts;
+    var slot = cardIdxToDotSlot(absIdx);
     var dots = dotsWrap.querySelectorAll('.d');
     for (var j = 0; j < dots.length; j++) {
-      dots[j].classList.toggle('active', j === dotIdx);
+      dots[j].classList.toggle('active', j === slot);
     }
+  }
+
+  function cardIdxToDotSlot(cardIdx) {
+    if (totalPosts <= 1) return 0;
+    if (DOTS_COUNT <= 1) return 0;
+    var ratio = cardIdx / (totalPosts - 1);
+    return Math.max(0, Math.min(DOTS_COUNT - 1, Math.round(ratio * (DOTS_COUNT - 1))));
   }
 
   function goTo(i) {
     if (!posts.length) return;
-    activeIdx = (i + posts.length) % posts.length;
-    dotIdx = ((i % posts.length) + posts.length) % posts.length;
+    activeIdx = i;
+    updateCarousel();
+    restartAutoplay();
+  }
+
+  function goToAbsolute(i) {
+    if (!posts.length) return;
+    var base = activeIdx - (((activeIdx % totalPosts) + totalPosts) % totalPosts);
+    activeIdx = base + ((i % totalPosts) + totalPosts) % totalPosts;
+    var cards = track.querySelectorAll('.tg-card');
+    if (activeIdx < 0) {
+      prependCardsOnce();
+      activeIdx += totalPosts;
+    }
+    while (activeIdx >= cards.length - 2) {
+      appendCardsOnce();
+      cards = track.querySelectorAll('.tg-card');
+    }
     updateCarousel();
     restartAutoplay();
   }
 
   function next() {
     activeIdx = activeIdx + 1;
-    dotIdx = (dotIdx + 1) % posts.length;
 
     var cards = track.querySelectorAll('.tg-card');
     if (activeIdx >= cards.length - 2) {
       appendCardsOnce();
     }
 
-    var step = getCardStep();
-    track.style.transform = 'translateX(' + (-activeIdx * step) + 'px)';
-
-    var visibleCount = getVisibleCount();
-    var allCards = track.querySelectorAll('.tg-card');
-    var centerIdx = (visibleCount >= 3) ? activeIdx + 1 : activeIdx;
-    for (var i = 0; i < allCards.length; i++) {
-      allCards[i].classList.toggle('active', i === centerIdx);
-    }
-    var dots = dotsWrap.querySelectorAll('.d');
-    for (var j = 0; j < dots.length; j++) {
-      dots[j].classList.toggle('active', j === dotIdx);
-    }
+    updateCarousel();
   }
 
   function prev() {
     if (activeIdx <= 0) {
       prependCardsOnce();
-      activeIdx += posts.length;
+      activeIdx += totalPosts;
       var step0 = getCardStep();
       track.style.transform = 'translateX(' + (-activeIdx * step0) + 'px)';
     }
     activeIdx = activeIdx - 1;
-    dotIdx = (dotIdx - 1 + posts.length) % posts.length;
-
-    var step2 = getCardStep();
-    track.style.transform = 'translateX(' + (-activeIdx * step2) + 'px)';
-
-    var visibleCount = getVisibleCount();
-    var allCards = track.querySelectorAll('.tg-card');
-    var centerIdx = (visibleCount >= 3) ? activeIdx + 1 : activeIdx;
-    for (var i = 0; i < allCards.length; i++) {
-      allCards[i].classList.toggle('active', i === centerIdx);
-    }
-    var dots = dotsWrap.querySelectorAll('.d');
-    for (var j = 0; j < dots.length; j++) {
-      dots[j].classList.toggle('active', j === dotIdx);
-    }
+    updateCarousel();
   }
 
   function restartAutoplay() {
@@ -3509,8 +3641,8 @@ button.disabled {
   ];
 
   var posts = DEMO_POSTS.slice();
+  var totalPosts = posts.length;
   var activeIdx = 0;
-  var dotIdx = 0;
   var autoplayTimer = null;
   var isPaused = false;
 
@@ -3523,7 +3655,9 @@ button.disabled {
 
   var lastWheelTime = 0;
 
+  buildDots();
   renderCards();
+  updateCarousel();
   restartAutoplay();
 
   var feedEl = document.getElementById('tg-feed');
@@ -3540,6 +3674,61 @@ button.disabled {
   });
 })();
 // ==== /TELEGRAM FEED ====
+</script>
+
+<script>
+// ==== BOTTOM BAR + FADE CONTENT ====
+(function() {
+  'use strict';
+
+  var landing = document.getElementById('landing');
+  var bottomBar = document.getElementById('bottom-bar');
+  var fadeTop = document.getElementById('lnd-fade-top');
+  var fadeBottom = document.getElementById('lnd-fade-bottom');
+
+  if (!landing || !bottomBar) return;
+
+  var SCROLL_THRESHOLD = 3;
+  var isVisible = false;
+
+  function setVisible(v) {
+    if (v === isVisible) return;
+    isVisible = v;
+    if (v) {
+      bottomBar.classList.add('visible');
+      if (fadeTop) fadeTop.classList.add('visible');
+      if (fadeBottom) fadeBottom.classList.add('visible');
+    } else {
+      bottomBar.classList.remove('visible');
+      if (fadeTop) fadeTop.classList.remove('visible');
+      if (fadeBottom) fadeBottom.classList.remove('visible');
+    }
+  }
+
+  function onScroll() {
+    var y = landing.scrollTop || landing.pageYOffset || 0;
+    if (y > SCROLL_THRESHOLD) setVisible(true);
+    else setVisible(false);
+  }
+
+  landing.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('load', onScroll);
+  onScroll();
+
+  if (bottomBar) {
+    bottomBar.addEventListener('click', function(e) {
+      var t = e.target;
+      if (!t || !t.closest) return;
+      var trigger = t.closest('[data-action="enter-app"]');
+      if (!trigger) return;
+      e.preventDefault();
+      e.stopPropagation();
+      var fakeBtn = document.querySelector('[data-action="enter-app"]');
+      if (fakeBtn) fakeBtn.click();
+    });
+  }
+})();
+// ==== /BOTTOM BAR ====
 </script>
 </body>
 </html>
