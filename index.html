@@ -1634,12 +1634,12 @@ button.disabled {
   position: relative;
   text-align: center;
   padding: clamp(46px, 9vw, 90px) 0 clamp(60px, 11vw, 120px);
-  overflow: visible;
 }
 
-/* Радиальное свечение за заголовком финальной секции — как было. */
-.lnd-final::before {
-  content: "";
+/* Мягкое золотистое свечение вниз от линии — как в верхней секции «Тренируй логику».
+   Отдельный слой, лежит внутри секции, поверх её фона, но под текстом и кнопкой.
+   Никакие внешние линии и слои его не перекрывают. */
+.lnd-final-glow {
   position: absolute;
   top: 0;
   left: 50%;
@@ -1683,6 +1683,7 @@ button.disabled {
 
 .lnd-footer {
   position: relative;
+  flex-shrink: 0;
   padding: clamp(28px, 5vw, 44px) 0 calc(clamp(40px, 8vw, 60px) + env(safe-area-inset-bottom, 0px));
   color: var(--muted);
   font-size: clamp(11px, 1.7vmin, 13px);
@@ -2239,6 +2240,7 @@ button.disabled {
     </section>
 
     <section class="lnd-section lnd-final" aria-labelledby="lnd-final-title">
+      <div class="lnd-final-glow" aria-hidden="true"></div>
       <div class="lnd-final-rule" aria-hidden="true"></div>
       <div class="lnd-inner">
         <h2 class="lnd-h2 lnd-reveal" id="lnd-final-title">
