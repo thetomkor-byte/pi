@@ -15,7 +15,6 @@
 <meta name="format-detection" content="telephone=no,date=no,address=no,email=no" />
 <meta name="theme-color" content="#000000" />
 <meta name="msapplication-navbutton-color" content="#000000" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="copyright" content="All rights reserved" />
 <title>Poker Trainer</title>
@@ -1828,6 +1827,21 @@ button.disabled {
   cursor: text;
 }
 
+/* ===== ЧЁРНАЯ ПОДЛОЖКА ПОД ИКОНКАМИ ВНИЗУ ЭКРАНА =====
+   Невидимая, сливается с чёрным фоном лендинга.
+   Перехватывает самый нижний пиксель экрана, чтобы браузер
+   никогда не подкрасил нижнюю панель в золотой цвет. */
+#bottom-bar-underlay {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 90px;
+  background: #000;
+  pointer-events: none;
+  z-index: 899;
+}
+
 /* ===== НИЖНЯЯ ПАНЕЛЬ С ИКОНКАМИ ===== */
 
 #bottom-bar {
@@ -1843,7 +1857,7 @@ button.disabled {
   padding: 0 clamp(18px, 4vw, 40px);
   opacity: 0;
   pointer-events: none;
-  transform: translateY(16px);
+  transform: translateY(12px);
   transition: opacity .55s cubic-bezier(.22,.61,.36,1),
               transform .55s cubic-bezier(.22,.61,.36,1);
   will-change: opacity, transform;
@@ -1889,11 +1903,12 @@ button.disabled {
   display: block;
 }
 
-/* Самолётик: картинка крупнее и без «воздуха» по краям,
-   чтобы край птички визуально совпал с краем карт и сердечка. */
+/* Самолётик: чуть сдвинут влево, чтобы край птички визуально
+   отстоял от сердечка так же, как край карт. */
 .bottom-icon.bottom-icon-tg {
   width: 26px;
   height: 26px;
+  margin-left: -3px;
 }
 
 .bottom-icon.bottom-icon-tg svg {
@@ -1916,10 +1931,11 @@ button.disabled {
   }
 }
 
-/* Стрелка вверх — прижата к правому краю */
+/* Стрелка вверх — на правом краю контента лендинга.
+   Тот же отступ, что у карточек, текстов и кнопок. */
 #bottom-to-top {
   position: absolute;
-  right: clamp(18px, 4vw, 40px);
+  right: 0;
   top: 50%;
   transform: translateY(-50%);
   display: inline-flex;
@@ -1957,6 +1973,32 @@ button.disabled {
     opacity: .95;
     filter: drop-shadow(0 0 8px rgba(184,146,74,.85)) drop-shadow(0 0 18px rgba(184,146,74,.55));
   }
+}
+
+/* Контейнер внутренний — чтобы стрелка прижималась к краю контента,
+   а иконки по центру оставались по центру экрана. */
+.bottom-bar-row {
+  position: relative;
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 clamp(18px, 4vw, 40px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  height: 26px;
+}
+
+.bottom-bar-row .bottom-icon {
+  flex: 0 0 auto;
+}
+
+.bottom-bar-row #bottom-to-top {
+  position: absolute;
+  right: clamp(18px, 4vw, 40px);
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 /* ===== ЗАТУХАНИЕ СОДЕРЖИМОГО СВЕРХУ И СНИЗУ ===== */
@@ -2019,6 +2061,8 @@ button.disabled {
 </style>
 </head>
 <body>
+
+  <div id="bottom-bar-underlay" aria-hidden="true"></div>
 
   <div id="info-modal" role="dialog" aria-modal="true" aria-labelledby="info-modal-title-el">
     <div class="info-modal-box">
@@ -2469,7 +2513,7 @@ button.disabled {
   <div class="lnd-fade-bottom" id="lnd-fade-bottom" aria-hidden="true"></div>
 
   <div id="bottom-bar" aria-hidden="true">
-    <div class="bottom-bar-center">
+    <div class="bottom-bar-row">
       <button class="bottom-icon" type="button" data-action="enter-app" aria-label="Начать тренировку">
         <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <rect x="4" y="6" width="14" height="20" rx="2" transform="rotate(-8 11 16)"/>
@@ -2486,14 +2530,14 @@ button.disabled {
           <path d="M23.06 9.07 8.32 14.76c-.98.4-.97 1.78.01 2.17l3.66 1.4 1.4 4.5c.2.64 1.02.82 1.48.32l1.98-2.14 3.86 2.83c.55.4 1.34.11 1.49-.56l2.66-12.62c.16-.75-.6-1.35-1.8-1.59zM12.7 17.36l8.02-5.02-6.55 6.14-.18 2.55-1.29-3.67z"/>
         </svg>
       </a>
-    </div>
 
-    <button id="bottom-to-top" type="button" aria-label="Наверх">
-      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M16 25V8"/>
-        <path d="M9 15l7-7 7 7"/>
-      </svg>
-    </button>
+      <button id="bottom-to-top" type="button" aria-label="Наверх">
+        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M16 25V8"/>
+          <path d="M9 15l7-7 7 7"/>
+        </svg>
+      </button>
+    </div>
   </div>
 
 <script>
