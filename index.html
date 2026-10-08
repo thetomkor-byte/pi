@@ -1825,27 +1825,38 @@ button.disabled {
   cursor: text;
 }
 
-/* ===== НИЖНЯЯ ПАНЕЛЬ С ТРЕМЯ ИКОНКАМИ ===== */
+/* ===== НИЖНЯЯ ПАНЕЛЬ С ИКОНКАМИ ===== */
 
 #bottom-bar {
   position: fixed;
-  left: 50%;
+  left: 0;
+  right: 0;
   bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
-  transform: translate(-50%, 20px);
   z-index: 900;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 22px;
+  padding: 0 clamp(18px, 4vw, 40px);
   opacity: 0;
   pointer-events: none;
-  transition: opacity .35s ease, transform .35s cubic-bezier(.22,.61,.36,1);
+  transform: translateY(16px);
+  transition: opacity .55s cubic-bezier(.22,.61,.36,1),
+              transform .55s cubic-bezier(.22,.61,.36,1);
+  will-change: opacity, transform;
 }
 
 #bottom-bar.visible {
   opacity: 1;
   pointer-events: auto;
-  transform: translate(-50%, 0);
+  transform: translateY(0);
+}
+
+.bottom-bar-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
 }
 
 .bottom-icon {
@@ -1865,6 +1876,7 @@ button.disabled {
   -webkit-tap-highlight-color: transparent;
   filter: drop-shadow(0 0 6px rgba(184,146,74,.7)) drop-shadow(0 0 14px rgba(184,146,74,.4));
   transition: opacity .18s ease, filter .18s ease, transform .12s ease;
+  text-decoration: none;
 }
 
 .bottom-icon svg {
@@ -1873,15 +1885,9 @@ button.disabled {
   display: block;
 }
 
-/* Самолётик Telegram — крупнее остальных, как самолётик в постах карусели */
-.bottom-icon.bottom-icon--tg {
-  width: 32px;
-  height: 32px;
-}
-
-.bottom-icon.bottom-icon--tg svg {
-  width: 32px;
-  height: 32px;
+.bottom-icon.bottom-icon-tg svg {
+  width: 34px;
+  height: 34px;
 }
 
 .bottom-icon:active {
@@ -1897,30 +1903,105 @@ button.disabled {
   }
 }
 
-/* ===== ЗАТУХАНИЕ СОДЕРЖИМОГО СНИЗУ ===== */
+/* Стрелка вверх — прижата к правому краю */
+#bottom-to-top {
+  position: absolute;
+  right: clamp(18px, 4vw, 40px);
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  color: var(--ph-heart);
+  opacity: .75;
+  cursor: pointer;
+  line-height: 0;
+  -webkit-tap-highlight-color: transparent;
+  filter: drop-shadow(0 0 6px rgba(184,146,74,.7)) drop-shadow(0 0 14px rgba(184,146,74,.4));
+  transition: opacity .18s ease, filter .18s ease, transform .12s ease;
+}
 
+#bottom-to-top svg {
+  width: 26px;
+  height: 26px;
+  display: block;
+}
+
+#bottom-to-top:active {
+  transform: translateY(-50%) scale(0.9);
+  opacity: 1;
+  filter: drop-shadow(0 0 9px rgba(184,146,74,.95)) drop-shadow(0 0 22px rgba(184,146,74,.6));
+}
+
+@media (hover: hover) {
+  #bottom-to-top:hover {
+    opacity: .95;
+    filter: drop-shadow(0 0 8px rgba(184,146,74,.85)) drop-shadow(0 0 18px rgba(184,146,74,.55));
+  }
+}
+
+/* ===== ЗАТУХАНИЕ СОДЕРЖИМОГО СВЕРХУ И СНИЗУ ===== */
+
+.lnd-fade-top,
 .lnd-fade-bottom {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 0;
-  height: 160px;
   pointer-events: none;
   z-index: 850;
   opacity: 0;
-  transition: opacity .35s ease;
+  transition: opacity .55s cubic-bezier(.22,.61,.36,1),
+              transform .55s cubic-bezier(.22,.61,.36,1);
+  will-change: opacity, transform;
+}
+
+.lnd-fade-top.visible,
+.lnd-fade-bottom.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.lnd-fade-top {
+  top: 0;
+  height: 20px;
+  transform: translateY(-8px);
   background: linear-gradient(
-    to top,
-    #000 0%,
-    rgba(0,0,0,.95) 25%,
-    rgba(0,0,0,.65) 55%,
-    rgba(0,0,0,.25) 80%,
+    to bottom,
+    rgba(0,0,0,1) 0%,
+    rgba(0,0,0,.92) 10%,
+    rgba(0,0,0,.78) 22%,
+    rgba(0,0,0,.6) 36%,
+    rgba(0,0,0,.42) 50%,
+    rgba(0,0,0,.26) 64%,
+    rgba(0,0,0,.14) 76%,
+    rgba(0,0,0,.06) 88%,
     rgba(0,0,0,0) 100%
   );
 }
 
-.lnd-fade-bottom.visible {
-  opacity: 1;
+.lnd-fade-bottom {
+  bottom: 0;
+  height: 160px;
+  transform: translateY(8px);
+  background: linear-gradient(
+    to top,
+    rgba(0,0,0,1) 0%,
+    rgba(0,0,0,.96) 12%,
+    rgba(0,0,0,.86) 26%,
+    rgba(0,0,0,.72) 40%,
+    rgba(0,0,0,.56) 54%,
+    rgba(0,0,0,.4) 66%,
+    rgba(0,0,0,.26) 76%,
+    rgba(0,0,0,.14) 86%,
+    rgba(0,0,0,.06) 94%,
+    rgba(0,0,0,0) 100%
+  );
 }
 </style>
 </head>
@@ -2371,25 +2452,35 @@ button.disabled {
 
   </div>
 
+  <div class="lnd-fade-top" id="lnd-fade-top" aria-hidden="true"></div>
   <div class="lnd-fade-bottom" id="lnd-fade-bottom" aria-hidden="true"></div>
 
   <div id="bottom-bar" aria-hidden="true">
-    <button class="bottom-icon" type="button" data-action="enter-app" aria-label="Начать тренировку">
-      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <rect x="4" y="6" width="14" height="20" rx="2" transform="rotate(-8 11 16)"/>
-        <rect x="14" y="6" width="14" height="20" rx="2" transform="rotate(8 21 16)"/>
+    <div class="bottom-bar-center">
+      <button class="bottom-icon" type="button" data-action="enter-app" aria-label="Начать тренировку">
+        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="4" y="6" width="14" height="20" rx="2" transform="rotate(-8 11 16)"/>
+          <rect x="14" y="6" width="14" height="20" rx="2" transform="rotate(8 21 16)"/>
+        </svg>
+      </button>
+      <button class="bottom-icon" type="button" data-action="open-support" aria-label="Поддержать автора">
+        <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+          <path d="M16 28.5C16 28.5 3.5 20.4 3.5 11.9C3.5 7.5 6.9 4.1 11 4.1C13.2 4.1 15.1 5.1 16 6.6C16.9 5.1 18.8 4.1 21 4.1C25.1 4.1 28.5 7.5 28.5 11.9C28.5 20.4 16 28.5 16 28.5Z"/>
+        </svg>
+      </button>
+      <a class="bottom-icon bottom-icon-tg" href="https://t.me/ThePokerWay" target="_blank" rel="noopener noreferrer" aria-label="Открыть канал в Telegram">
+        <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+          <path d="M23.06 9.07 8.32 14.76c-.98.4-.97 1.78.01 2.17l3.66 1.4 1.4 4.5c.2.64 1.02.82 1.48.32l1.98-2.14 3.86 2.83c.55.4 1.34.11 1.49-.56l2.66-12.62c.16-.75-.6-1.35-1.8-1.59zM12.7 17.36l8.02-5.02-6.55 6.14-.18 2.55-1.29-3.67z"/>
+        </svg>
+      </a>
+    </div>
+
+    <button id="bottom-to-top" type="button" aria-label="Наверх">
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M16 25V8"/>
+        <path d="M9 15l7-7 7 7"/>
       </svg>
     </button>
-    <button class="bottom-icon" type="button" data-action="open-support" aria-label="Поддержать автора">
-      <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
-        <path d="M16 28.5C16 28.5 3.5 20.4 3.5 11.9C3.5 7.5 6.9 4.1 11 4.1C13.2 4.1 15.1 5.1 16 6.6C16.9 5.1 18.8 4.1 21 4.1C25.1 4.1 28.5 7.5 28.5 11.9C28.5 20.4 16 28.5 16 28.5Z"/>
-      </svg>
-    </button>
-    <a class="bottom-icon bottom-icon--tg" href="https://t.me/ThePokerWay" target="_blank" rel="noopener noreferrer" aria-label="Открыть канал в Telegram">
-      <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
-        <path d="M23.06 9.07 8.32 14.76c-.98.4-.97 1.78.01 2.17l3.66 1.4 1.4 4.5c.2.64 1.02.82 1.48.32l1.98-2.14 3.86 2.83c.55.4 1.34.11 1.49-.56l2.66-12.62c.16-.75-.6-1.35-1.8-1.59zM12.7 17.36l8.02-5.02-6.55 6.14-.18 2.55-1.29-3.67z"/>
-      </svg>
-    </a>
   </div>
 
 <script>
@@ -3666,13 +3757,15 @@ button.disabled {
 </script>
 
 <script>
-// ==== BOTTOM BAR + FADE BOTTOM ====
+// ==== BOTTOM BAR + FADE CONTENT + TO TOP ====
 (function() {
   'use strict';
 
   var landing = document.getElementById('landing');
   var bottomBar = document.getElementById('bottom-bar');
+  var fadeTop = document.getElementById('lnd-fade-top');
   var fadeBottom = document.getElementById('lnd-fade-bottom');
+  var toTop = document.getElementById('bottom-to-top');
 
   if (!landing || !bottomBar) return;
 
@@ -3684,9 +3777,11 @@ button.disabled {
     isVisible = v;
     if (v) {
       bottomBar.classList.add('visible');
+      if (fadeTop) fadeTop.classList.add('visible');
       if (fadeBottom) fadeBottom.classList.add('visible');
     } else {
       bottomBar.classList.remove('visible');
+      if (fadeTop) fadeTop.classList.remove('visible');
       if (fadeBottom) fadeBottom.classList.remove('visible');
     }
   }
@@ -3711,6 +3806,18 @@ button.disabled {
       e.stopPropagation();
       var fakeBtn = document.querySelector('[data-action="enter-app"]');
       if (fakeBtn) fakeBtn.click();
+    });
+  }
+
+  if (toTop) {
+    toTop.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      try {
+        landing.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (err) {
+        landing.scrollTop = 0;
+      }
     });
   }
 })();
