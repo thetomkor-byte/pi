@@ -410,16 +410,25 @@ button.disabled {
 
 .lang-option.inactive { opacity: .55; }
 
-.tg-feed-track-wrap {
-  overflow: hidden;
+/* ==== СИММЕТРИЧНАЯ МАСКА: паддинги снаружи, маска внутри ==== */
+
+/* Внешний слой — здесь только паддинги и ограничение ширины. Никакой маски. */
+.tg-feed-outer {
   max-width: 1120px;
   margin: 0 auto;
   padding: 0 clamp(18px, 4vw, 40px);
   position: relative;
+}
+
+/* Внутренний слой — здесь маска. Паддингов НЕТ.
+   Маска отсчитывает 6% ровно от края первой карточки слева
+   и ровно от края последней карточки справа — абсолютно симметрично. */
+.tg-feed-track-wrap {
+  overflow: hidden;
+  position: relative;
   touch-action: pan-x;
   overscroll-behavior: contain;
   cursor: grab;
-  /* Зеркальное затухание: слева 6% и справа 6% — одинаково */
   -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 6%, #000 94%, transparent 100%);
   mask-image: linear-gradient(to right, transparent 0%, #000 6%, #000 94%, transparent 100%);
 }
@@ -2275,8 +2284,10 @@ button.disabled {
           </div>
         </div>
       </div>
-      <div class="tg-feed-track-wrap" id="tg-feed-wrap">
-        <div class="tg-feed-track" id="tg-feed-track"></div>
+      <div class="tg-feed-outer">
+        <div class="tg-feed-track-wrap" id="tg-feed-wrap">
+          <div class="tg-feed-track" id="tg-feed-track"></div>
+        </div>
       </div>
       <div class="tg-feed-dots" id="tg-feed-dots"></div>
     </section>
