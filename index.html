@@ -40,7 +40,6 @@
   --vip-color: #324a6e;
   --ph-bg: radial-gradient(circle at 50% 40%, #1f1a0e 0%, #0f0d08 100%);
   --ph-heart: #b8924a;
-  /* Чуть светлее и золотистее — только для сердечка в нижней панели */
   --ph-heart-bright: #c69a52;
 }
 
@@ -1962,25 +1961,24 @@ button.disabled {
   touch-action: manipulation;
 }
 
-/* ==== СЕРДЕЧКО В НИЖНЕЙ ПАНЕЛИ — совсем чуть-чуть ярче и золотистее ==== */
-/* Цвет самого сердечка чуть светлее и золотистее, чем у карт и самолётика */
+/* ==== СЕРДЕЧКО В НИЖНЕЙ ПАНЕЛИ — заметнее, чем карты и самолётик ==== */
+/* Свечение увеличено: 5/12/22 px, непрозрачности .55/.38/.20 */
 .bottom-icon.bottom-icon--heart {
   color: var(--ph-heart-bright);
-  /* Базовое свечение чуть ярче — добавлен третий слабый слой */
-  filter: drop-shadow(0 0 4px rgba(198,154,82,.42)) drop-shadow(0 0 9px rgba(198,154,82,.26)) drop-shadow(0 0 16px rgba(198,154,82,.12));
+  filter: drop-shadow(0 0 5px rgba(198,154,82,.55)) drop-shadow(0 0 12px rgba(198,154,82,.38)) drop-shadow(0 0 22px rgba(198,154,82,.20));
 }
 
 @media (hover: hover) {
   .bottom-icon.bottom-icon--heart:hover {
-    opacity: .95;
-    filter: drop-shadow(0 0 8px rgba(198,154,82,.90)) drop-shadow(0 0 18px rgba(198,154,82,.60)) drop-shadow(0 0 28px rgba(198,154,82,.32));
+    opacity: 1;
+    filter: drop-shadow(0 0 10px rgba(198,154,82,1)) drop-shadow(0 0 22px rgba(198,154,82,.75)) drop-shadow(0 0 36px rgba(198,154,82,.42));
   }
 }
 
 .bottom-icon.bottom-icon--heart:active {
   transform: scale(0.9);
   opacity: 1;
-  filter: drop-shadow(0 0 9px rgba(198,154,82,.98)) drop-shadow(0 0 22px rgba(198,154,82,.65)) drop-shadow(0 0 32px rgba(198,154,82,.38));
+  filter: drop-shadow(0 0 11px rgba(198,154,82,1)) drop-shadow(0 0 26px rgba(198,154,82,.85)) drop-shadow(0 0 42px rgba(198,154,82,.5));
 }
 
 .bottom-icon:focus,
