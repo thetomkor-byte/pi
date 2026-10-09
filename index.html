@@ -415,7 +415,6 @@ button.disabled {
   touch-action: pan-x;
   overscroll-behavior: contain;
   cursor: grab;
-  /* Зеркальное затухание: слева 6% и справа 6% — эталон — левая сторона */
   -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 6%, #000 94%, transparent 100%);
   mask-image: linear-gradient(to right, transparent 0%, #000 6%, #000 94%, transparent 100%);
 }
@@ -1344,6 +1343,7 @@ button.disabled {
   flex-wrap: wrap;
   gap: 12px;
   align-items: center;
+  margin-top: -4px;
 }
 
 .lnd-hero-note {
