@@ -58,8 +58,6 @@ html, body {
   color-scheme: dark;
 }
 
-/* ==== СКРОЛЛ: МОБИЛЬНЫЙ — СКРЫТ ПОЛНОСТЬЮ, ДЕСКТОП — СТАНДАРТНЫЙ ==== */
-
 html, body, #landing, #info-modal {
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -141,7 +139,6 @@ button.disabled {
   cursor: default;
 }
 
-/* ==== УНИВЕРСАЛЬНАЯ ЗАГЛУШКА ==== */
 .ph-fallback {
   position: absolute;
   inset: 0;
@@ -172,8 +169,6 @@ button.disabled {
   height: 20px;
   filter: drop-shadow(0 0 5px rgba(184,146,74,.75)) drop-shadow(0 0 12px rgba(184,146,74,.45));
 }
-
-/* ==== TELEGRAM FEED CAROUSEL ==== */
 
 #tg-feed {
   position: relative;
@@ -584,8 +579,6 @@ button.disabled {
   .lang-trigger { height: 28px; padding: 0 8px; letter-spacing: 1px; }
 }
 
-/* ==== INFO MODAL (карточки-тапзоны + поддержка) ==== */
-
 #info-modal {
   position: fixed;
   inset: 0;
@@ -657,8 +650,6 @@ button.disabled {
 .info-modal-body p:last-child {
   margin-bottom: 0;
 }
-
-/* ==== SUPPORT (карточки автора в модалке) ==== */
 
 .info-modal-box.info-modal-box--support {
   max-width: 380px;
@@ -1023,8 +1014,6 @@ button.disabled {
   letter-spacing: .3px;
 }
 
-/* ==== LANDING ==== */
-
 #landing {
   position: fixed;
   inset: 0;
@@ -1172,14 +1161,15 @@ button.disabled {
 }
 
 /* ===== HERO ===== */
-
+/* padding-bottom увеличен на 10px — расстояние от низа карт до разделительной линии следующей секции стало больше на 10px.
+   Ничего больше в hero-секции не изменено. */
 #landing .lnd-hero {
   position: relative;
   z-index: 2;
   display: flex;
   align-items: flex-start;
   padding: 0;
-  padding-bottom: clamp(28px, 6vw, 56px);
+  padding-bottom: calc(clamp(28px, 6vw, 56px) + 10px);
   overflow: visible;
 }
 
@@ -1724,8 +1714,6 @@ button.disabled {
   }
 }
 
-/* ===== ФИНАЛЬНЫЙ БЛОК ===== */
-
 .lnd-final {
   position: relative;
   text-align: center;
@@ -1917,8 +1905,6 @@ button.disabled {
   cursor: text;
 }
 
-/* ===== НИЖНЯЯ ПАНЕЛЬ С ИКОНКАМИ ===== */
-
 #bottom-bar {
   position: fixed;
   left: 0;
@@ -2040,8 +2026,6 @@ button.disabled {
     filter: drop-shadow(0 0 8px rgba(184,146,74,.85)) drop-shadow(0 0 18px rgba(184,146,74,.55)) drop-shadow(0 0 28px rgba(184,146,74,.4));
   }
 }
-
-/* ===== ЗАТУХАНИЕ СОДЕРЖИМОГО СВЕРХУ И СНИЗУ ===== */
 
 .lnd-fade-bottom {
   position: fixed;
@@ -2838,7 +2822,6 @@ button.disabled {
 </script>
 
 <script>
-// ==== SVG-СЕРДЕЧКО + УНИВЕРСАЛЬНАЯ ЗАГЛУШКА ДЛЯ НЕЗАГРУЖЕННЫХ ИЗОБРАЖЕНИЙ ====
 (function() {
   'use strict';
 
@@ -2883,11 +2866,9 @@ button.disabled {
 
   window.POKER_HEART_SVG = HEART_SVG;
 })();
-// ==== /SVG-СЕРДЕЧКО ====
 </script>
 
 <script>
-// ==== LANDING ====
 (function() {
   'use strict';
 
@@ -2986,11 +2967,9 @@ button.disabled {
   });
 
 })();
-// ==== /LANDING ====
 </script>
 
 <script>
-// ==== LANGUAGE SELECT ====
 (function() {
   'use strict';
 
@@ -3052,11 +3031,9 @@ button.disabled {
 
   window.addEventListener('pagehide', close);
 })();
-// ==== /LANGUAGE SELECT ====
 </script>
 
 <script>
-// ==== INFO MODAL (карточки-тапзоны + поддержка + кнопка-сердечко) ====
 (function() {
   'use strict';
 
@@ -3530,11 +3507,9 @@ button.disabled {
     applyPositions(false);
   }
 })();
-// ==== /INFO MODAL ====
 </script>
 
 <script>
-// ==== TELEGRAM FEED ====
 (function() {
   'use strict';
 
@@ -3968,11 +3943,9 @@ button.disabled {
     track.style.transform = 'translateX(' + (-activeIdx * step) + 'px)';
   });
 })();
-// ==== /TELEGRAM FEED ====
 </script>
 
 <script>
-// ==== BOTTOM BAR + FADE CONTENT ====
 (function() {
   'use strict';
 
@@ -4020,7 +3993,6 @@ button.disabled {
     });
   }
 })();
-// ==== /BOTTOM BAR ====
 </script>
 </body>
 </html>
