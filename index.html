@@ -1915,10 +1915,24 @@ button.disabled {
   filter: drop-shadow(0 0 9px rgba(184,146,74,.95)) drop-shadow(0 0 22px rgba(184,146,74,.6));
 }
 
+/* Самолётику при нажатии добавляем третий слой свечения — чтобы визуально
+   сравняться с сердечком (у самолётика тоньше контур, свечение «теряется»). */
+.bottom-icon.bottom-icon-tg:active {
+  filter: drop-shadow(0 0 9px rgba(184,146,74,.95)) drop-shadow(0 0 22px rgba(184,146,74,.6)) drop-shadow(0 0 32px rgba(184,146,74,.45));
+}
+
 @media (hover: hover) {
   .bottom-icon:hover {
     opacity: .95;
     filter: drop-shadow(0 0 8px rgba(184,146,74,.85)) drop-shadow(0 0 18px rgba(184,146,74,.55));
+  }
+}
+
+/* Самолётику при наведении добавляем третий слой свечения — чтобы визуально
+   сравняться с сердечком. */
+@media (hover: hover) {
+  .bottom-icon.bottom-icon-tg:hover {
+    filter: drop-shadow(0 0 8px rgba(184,146,74,.85)) drop-shadow(0 0 18px rgba(184,146,74,.55)) drop-shadow(0 0 28px rgba(184,146,74,.4));
   }
 }
 
