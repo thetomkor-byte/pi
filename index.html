@@ -576,8 +576,6 @@ button.disabled {
   margin-bottom: 16px;
 }
 
-/* Заголовок обычной инфо-модалки — как в «Настройках» и «Управлении»:
-   слева, белый, первая буква большая, остальные маленькие. */
 .info-modal-title.title-normal-case {
   text-transform: none;
   text-align: left;
@@ -1022,7 +1020,7 @@ button.disabled {
   font-weight: 800;
   letter-spacing: 2px;
   text-transform: uppercase;
-  margin-bottom: 14px;
+  margin-bottom: 20px;
   opacity: .9;
 }
 
@@ -1163,7 +1161,7 @@ button.disabled {
 .lnd-logo-row {
   position: relative;
   display: block;
-  margin-bottom: clamp(20px, 4vw, 30px);
+  margin-bottom: 20px;
   width: 100%;
   min-height: 26px;
 }
@@ -1232,7 +1230,7 @@ button.disabled {
 
 @media (max-width: 520px) {
   .lnd-logo-row {
-    margin-bottom: clamp(18px, 4vw, 24px);
+    margin-bottom: 20px;
   }
   .lnd-heart-btn {
     height: 22px;
@@ -1902,10 +1900,6 @@ button.disabled {
   display: block;
 }
 
-/* Самолётик: картинка крупнее и без «воздуха» по краям,
-   чтобы край птички визуально совпал с краем карт и сердечка.
-   Сдвинут влево на 6px, чтобы левый край птички встал на такое же
-   визуальное расстояние от сердечка, как правый край карт. */
 .bottom-icon.bottom-icon-tg {
   width: 26px;
   height: 26px;
@@ -1942,14 +1936,7 @@ button.disabled {
   }
 }
 
-/* ===== ЗАТУХАНИЕ СОДЕРЖИМОГО СВЕРХУ И СНИЗУ =====
-   Двухслойная схема:
-   - внешний слой — плотный чёрный #000 у самого края экрана, полностью непрозрачный;
-   - внутренний слой — мягкое затухание через mask-image с очень плавной кривой.
-   Полупрозрачные пиксели не касаются края экрана — браузер не подкрашивается.
-
-   ВЕРХНЯЯ ПОЛОСА — всегда видима, 10px: 3px плотного чёрного + 7px очень мягкого затухания.
-   НИЖНЯЯ ПОЛОСА — появляется/исчезает при прокрутке. */
+/* ===== ЗАТУХАНИЕ СОДЕРЖИМОГО СВЕРХУ И СНИЗУ ===== */
 
 .lnd-fade-bottom {
   position: fixed;
@@ -1965,11 +1952,6 @@ button.disabled {
 .lnd-fade-bottom.visible {
   opacity: 1;
 }
-
-/* ---- ВЕРХ: общая высота 10px, всегда видима ----
-   внешний слой (у самого верха) — 3px плотного чёрного;
-   внутренний слой (ниже) — 7px мягкого затухания через mask-image.
-   Градиент многоступенчатый, очень плавный — без видимых полос. */
 
 .lnd-fade-top {
   position: fixed;
@@ -2047,10 +2029,6 @@ button.disabled {
     rgba(0,0,0,0) 100%
   );
 }
-
-/* ---- НИЗ: общая высота 120px ----
-   внешний слой (у самого низа) — 40px плотного чёрного;
-   внутренний слой (выше) — 80px мягкого затухания через mask-image. */
 
 .lnd-fade-bottom {
   bottom: 0;
