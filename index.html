@@ -1955,9 +1955,11 @@ button.disabled {
    Двухслойная схема:
    - внешний слой — плотный чёрный #000 у самого края экрана, полностью непрозрачный;
    - внутренний слой — мягкое затухание через mask-image с очень плавной кривой.
-   Полупрозрачные пиксели не касаются края экрана — браузер не подкрашивается. */
+   Полупрозрачные пиксели не касаются края экрана — браузер не подкрашивается.
 
-.lnd-fade-top,
+   ВЕРХНЯЯ ПОЛОСА — всегда видима, без появления и исчезновения.
+   НИЖНЯЯ ПОЛОСА — появляется/исчезает при прокрутке. */
+
 .lnd-fade-bottom {
   position: fixed;
   left: 0;
@@ -1969,16 +1971,20 @@ button.disabled {
   will-change: opacity;
 }
 
-.lnd-fade-top.visible,
 .lnd-fade-bottom.visible {
   opacity: 1;
 }
 
-/* ---- ВЕРХ: общая высота 20px ----
+/* ---- ВЕРХ: общая высота 20px, всегда видима ----
    внешний слой (у самого верха) — 8px плотного чёрного;
    внутренний слой (ниже) — 12px мягкого затухания через mask-image. */
 
 .lnd-fade-top {
+  position: fixed;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 850;
   top: 0;
   height: 20px;
   display: flex;
@@ -3865,7 +3871,6 @@ button.disabled {
 
   var landing = document.getElementById('landing');
   var bottomBar = document.getElementById('bottom-bar');
-  var fadeTop = document.getElementById('lnd-fade-top');
   var fadeBottom = document.getElementById('lnd-fade-bottom');
 
   if (!landing || !bottomBar) return;
@@ -3878,11 +3883,9 @@ button.disabled {
     isVisible = v;
     if (v) {
       bottomBar.classList.add('visible');
-      if (fadeTop) fadeTop.classList.add('visible');
       if (fadeBottom) fadeBottom.classList.add('visible');
     } else {
       bottomBar.classList.remove('visible');
-      if (fadeTop) fadeTop.classList.remove('visible');
       if (fadeBottom) fadeBottom.classList.remove('visible');
     }
   }
