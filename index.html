@@ -1877,7 +1877,9 @@ button.disabled {
   padding: 0;
   margin: 0;
   border: none;
+  outline: none;
   background: transparent;
+  box-shadow: none;
   color: var(--ph-heart);
   opacity: .75;
   cursor: pointer;
@@ -1887,6 +1889,16 @@ button.disabled {
   transition: opacity .18s ease, filter .18s ease, transform .12s ease;
   text-decoration: none;
   overflow: visible;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.bottom-icon:focus,
+.bottom-icon:focus-visible,
+.bottom-icon:active {
+  outline: none;
+  box-shadow: none;
+  border: none;
 }
 
 .bottom-icon svg {
@@ -1903,10 +1915,10 @@ button.disabled {
 }
 
 .bottom-icon.bottom-icon-tg svg {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   display: block;
-  margin: -5px;
+  margin: -6px;
 }
 
 .bottom-icon:active {
