@@ -120,6 +120,28 @@ button.disabled {
   filter: drop-shadow(0 0 5px rgba(184,146,74,.75)) drop-shadow(0 0 12px rgba(184,146,74,.45));
 }
 
+/* ==== BLACK TOP / BOTTOM (под панелями браузера, всегда видны) ==== */
+
+#black-top,
+#black-bottom {
+  position: fixed;
+  left: 0;
+  right: 0;
+  background: #000;
+  pointer-events: none;
+  z-index: 999999;
+}
+
+#black-top {
+  top: 0;
+  height: calc(env(safe-area-inset-top, 0px) + 2px);
+}
+
+#black-bottom {
+  bottom: 0;
+  height: calc(env(safe-area-inset-bottom, 0px) + 2px);
+}
+
 /* ==== TELEGRAM FEED CAROUSEL ==== */
 
 #tg-feed {
@@ -2567,6 +2589,9 @@ button.disabled {
 
   <div class="lnd-fade-top" id="lnd-fade-top" aria-hidden="true"></div>
   <div class="lnd-fade-bottom" id="lnd-fade-bottom" aria-hidden="true"></div>
+
+  <div id="black-top" aria-hidden="true"></div>
+  <div id="black-bottom" aria-hidden="true"></div>
 
   <div id="bottom-bar" aria-hidden="true">
     <div class="bottom-bar-center">
