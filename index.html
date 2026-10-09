@@ -58,6 +58,37 @@ html, body {
   color-scheme: dark;
 }
 
+/* ==== ПОЛНОЕ СКРЫТИЕ ПОЛОСЫ ПРОКРУТКИ ВЕЗДЕ ==== */
+html, body, #landing, #landing *, #info-modal, #info-modal * {
+  scrollbar-width: none;           /* Firefox */
+  -ms-overflow-style: none;        /* IE/Edge */
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+#landing::-webkit-scrollbar,
+#landing *::-webkit-scrollbar,
+#info-modal::-webkit-scrollbar,
+#info-modal *::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+  background: transparent !important;
+}
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb,
+#landing::-webkit-scrollbar-thumb,
+#info-modal::-webkit-scrollbar-thumb {
+  background: transparent !important;
+  display: none !important;
+}
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track,
+#landing::-webkit-scrollbar-track,
+#info-modal::-webkit-scrollbar-track {
+  background: transparent !important;
+  display: none !important;
+}
+
 html {
   -ms-touch-action: manipulation;
   -webkit-text-size-adjust: 100%;
@@ -395,6 +426,9 @@ button.disabled {
   overflow: hidden;
   position: relative;
   text-decoration: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .tg-card.active {
@@ -980,7 +1014,11 @@ button.disabled {
   display: flex;
   flex-direction: column;
   padding-bottom: calc(env(safe-area-inset-bottom, 0px));
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
+
+#landing::-webkit-scrollbar { width: 0; height: 0; display: none; }
 
 #landing.hidden { display: none !important; }
 
@@ -1076,6 +1114,16 @@ button.disabled {
   text-decoration: none;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  outline: none;
+}
+
+.lnd-btn:focus,
+.lnd-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 3px 0 #8a6508, inset 0 1px 0 rgba(255,255,255,.35);
 }
 
 .lnd-btn:active {
@@ -1202,10 +1250,21 @@ button.disabled {
   opacity: .75;
   line-height: 0;
   -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
   filter: drop-shadow(0 0 6px rgba(184,146,74,.75)) drop-shadow(0 0 14px rgba(184,146,74,.45));
   transition: opacity .18s ease, filter .18s ease, transform .12s ease;
   z-index: 3;
   height: 26px;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.lnd-heart-btn:focus,
+.lnd-heart-btn:focus-visible {
+  outline: none;
 }
 
 .lnd-heart-btn .ph-heart-svg {
@@ -1408,6 +1467,16 @@ button.disabled {
   flex-direction: column;
   gap: 8px;
   width: 100%;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  outline: none;
+}
+
+.lnd-card.tappable:focus,
+.lnd-card.tappable:focus-visible {
+  outline: none;
 }
 
 .lnd-card.tappable:active {
@@ -1836,7 +1905,7 @@ button.disabled {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
   z-index: 900;
   display: flex;
   align-items: center;
@@ -1847,6 +1916,13 @@ button.disabled {
   pointer-events: none;
   transition: opacity .75s cubic-bezier(.22,.61,.36,1);
   will-change: opacity;
+}
+
+/* Мобильная версия: 10px отступ снизу (безопасную зону оставляем) */
+@media (max-width: 640px) {
+  #bottom-bar {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
+  }
 }
 
 #bottom-bar.visible {
@@ -1878,26 +1954,38 @@ button.disabled {
   cursor: pointer;
   line-height: 0;
   -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
   filter: drop-shadow(0 0 4px rgba(184,146,74,.35)) drop-shadow(0 0 8px rgba(184,146,74,.2));
   transition: opacity .18s ease, filter .18s ease, transform .12s ease;
   text-decoration: none;
   overflow: visible;
   -webkit-appearance: none;
   appearance: none;
+  touch-action: manipulation;
 }
 
 .bottom-icon:focus,
 .bottom-icon:focus-visible,
-.bottom-icon:active {
+.bottom-icon:active,
+.bottom-icon:hover {
   outline: none;
   box-shadow: none;
   border: none;
+  background: transparent;
 }
 
 .bottom-icon svg {
   width: 26px;
   height: 26px;
   display: block;
+  -webkit-user-drag: none;
+  user-select: none;
+  pointer-events: none;
 }
 
 .bottom-icon.bottom-icon-tg {
