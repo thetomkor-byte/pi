@@ -1648,9 +1648,6 @@ button.disabled {
   padding: clamp(46px, 9vw, 90px) 0 clamp(60px, 11vw, 120px);
 }
 
-/* Мягкое золотистое свечение вниз от линии — как в верхней секции «Тренируй логику».
-   Отдельный слой, лежит внутри секции, поверх её фона, но под текстом и кнопкой.
-   Никакие внешние линии и слои его не перекрывают. */
 .lnd-final-glow {
   position: absolute;
   top: 0;
@@ -1674,8 +1671,6 @@ button.disabled {
 .lnd-final .lnd-h2 { margin-left: auto; margin-right: auto; max-width: 18ch; }
 .lnd-final .lnd-p { margin-left: auto; margin-right: auto; }
 
-/* Тонкая золотая линия сверху финальной секции — отдельным элементом.
-   Рисует точно такую же линию, как под каруселью Telegram. */
 .lnd-final-rule {
   position: absolute;
   top: 0;
@@ -1930,8 +1925,6 @@ button.disabled {
   filter: drop-shadow(0 0 9px rgba(184,146,74,.95)) drop-shadow(0 0 22px rgba(184,146,74,.6));
 }
 
-/* Самолётику при нажатии добавляем третий слой свечения — чтобы визуально
-   сравняться с сердечком (у самолётика тоньше контур, свечение «теряется»). */
 .bottom-icon.bottom-icon-tg:active {
   filter: drop-shadow(0 0 9px rgba(184,146,74,.95)) drop-shadow(0 0 22px rgba(184,146,74,.6)) drop-shadow(0 0 32px rgba(184,146,74,.45));
 }
@@ -1943,8 +1936,6 @@ button.disabled {
   }
 }
 
-/* Самолётику при наведении добавляем третий слой свечения — чтобы визуально
-   сравняться с сердечком. */
 @media (hover: hover) {
   .bottom-icon.bottom-icon-tg:hover {
     filter: drop-shadow(0 0 8px rgba(184,146,74,.85)) drop-shadow(0 0 18px rgba(184,146,74,.55)) drop-shadow(0 0 28px rgba(184,146,74,.4));
@@ -1957,7 +1948,7 @@ button.disabled {
    - внутренний слой — мягкое затухание через mask-image с очень плавной кривой.
    Полупрозрачные пиксели не касаются края экрана — браузер не подкрашивается.
 
-   ВЕРХНЯЯ ПОЛОСА — всегда видима, без появления и исчезновения.
+   ВЕРХНЯЯ ПОЛОСА — всегда видима, 10px: 3px плотного чёрного + 7px очень мягкого затухания.
    НИЖНЯЯ ПОЛОСА — появляется/исчезает при прокрутке. */
 
 .lnd-fade-bottom {
@@ -1975,9 +1966,10 @@ button.disabled {
   opacity: 1;
 }
 
-/* ---- ВЕРХ: общая высота 20px, всегда видима ----
-   внешний слой (у самого верха) — 8px плотного чёрного;
-   внутренний слой (ниже) — 12px мягкого затухания через mask-image. */
+/* ---- ВЕРХ: общая высота 10px, всегда видима ----
+   внешний слой (у самого верха) — 3px плотного чёрного;
+   внутренний слой (ниже) — 7px мягкого затухания через mask-image.
+   Градиент многоступенчатый, очень плавный — без видимых полос. */
 
 .lnd-fade-top {
   position: fixed;
@@ -1986,7 +1978,7 @@ button.disabled {
   pointer-events: none;
   z-index: 850;
   top: 0;
-  height: 20px;
+  height: 10px;
   display: flex;
   flex-direction: column;
   background: transparent;
@@ -1995,45 +1987,63 @@ button.disabled {
 .lnd-fade-top::before {
   content: "";
   display: block;
-  height: 8px;
+  height: 3px;
   background: #000;
 }
 
 .lnd-fade-top::after {
   content: "";
   display: block;
-  height: 12px;
+  height: 7px;
   background: #000;
   -webkit-mask-image: linear-gradient(
     to bottom,
     rgba(0,0,0,1) 0%,
-    rgba(0,0,0,.96) 8%,
-    rgba(0,0,0,.9) 18%,
-    rgba(0,0,0,.82) 28%,
-    rgba(0,0,0,.72) 38%,
-    rgba(0,0,0,.6) 48%,
-    rgba(0,0,0,.48) 58%,
-    rgba(0,0,0,.36) 68%,
-    rgba(0,0,0,.26) 76%,
-    rgba(0,0,0,.17) 84%,
-    rgba(0,0,0,.1) 90%,
-    rgba(0,0,0,.05) 95%,
+    rgba(0,0,0,1) 4%,
+    rgba(0,0,0,.99) 10%,
+    rgba(0,0,0,.97) 16%,
+    rgba(0,0,0,.95) 22%,
+    rgba(0,0,0,.92) 28%,
+    rgba(0,0,0,.88) 34%,
+    rgba(0,0,0,.84) 40%,
+    rgba(0,0,0,.79) 46%,
+    rgba(0,0,0,.73) 52%,
+    rgba(0,0,0,.66) 58%,
+    rgba(0,0,0,.58) 63%,
+    rgba(0,0,0,.5) 68%,
+    rgba(0,0,0,.42) 73%,
+    rgba(0,0,0,.34) 78%,
+    rgba(0,0,0,.26) 82%,
+    rgba(0,0,0,.19) 86%,
+    rgba(0,0,0,.13) 90%,
+    rgba(0,0,0,.08) 93%,
+    rgba(0,0,0,.04) 96%,
+    rgba(0,0,0,.015) 98%,
     rgba(0,0,0,0) 100%
   );
   mask-image: linear-gradient(
     to bottom,
     rgba(0,0,0,1) 0%,
-    rgba(0,0,0,.96) 8%,
-    rgba(0,0,0,.9) 18%,
-    rgba(0,0,0,.82) 28%,
-    rgba(0,0,0,.72) 38%,
-    rgba(0,0,0,.6) 48%,
-    rgba(0,0,0,.48) 58%,
-    rgba(0,0,0,.36) 68%,
-    rgba(0,0,0,.26) 76%,
-    rgba(0,0,0,.17) 84%,
-    rgba(0,0,0,.1) 90%,
-    rgba(0,0,0,.05) 95%,
+    rgba(0,0,0,1) 4%,
+    rgba(0,0,0,.99) 10%,
+    rgba(0,0,0,.97) 16%,
+    rgba(0,0,0,.95) 22%,
+    rgba(0,0,0,.92) 28%,
+    rgba(0,0,0,.88) 34%,
+    rgba(0,0,0,.84) 40%,
+    rgba(0,0,0,.79) 46%,
+    rgba(0,0,0,.73) 52%,
+    rgba(0,0,0,.66) 58%,
+    rgba(0,0,0,.58) 63%,
+    rgba(0,0,0,.5) 68%,
+    rgba(0,0,0,.42) 73%,
+    rgba(0,0,0,.34) 78%,
+    rgba(0,0,0,.26) 82%,
+    rgba(0,0,0,.19) 86%,
+    rgba(0,0,0,.13) 90%,
+    rgba(0,0,0,.08) 93%,
+    rgba(0,0,0,.04) 96%,
+    rgba(0,0,0,.015) 98%,
     rgba(0,0,0,0) 100%
   );
 }
@@ -3060,11 +3070,6 @@ button.disabled {
     isSupportOpen = false;
   }
 
-  /* Правила закрытия:
-     - обычная инфо-модалка (Настройки, Управление, Поддержка-текст, Логика, Интуиция, Связка)
-       закрывается по любому тапу/клику где угодно — по фону, по окошку, по тексту.
-     - окошко «Поддержи автора» (банковские карточки) закрывается ТОЛЬКО по клику
-       ровно по затемнённому фону (e.target === infoModal). */
   infoModal.addEventListener('click', function(e) {
     if (isSupportOpen) {
       if (e.target === infoModal) closeInfo();
@@ -3091,9 +3096,6 @@ button.disabled {
         e.stopPropagation();
         var t = card.getAttribute('data-info-title') || '';
         var b = card.getAttribute('data-info-body') || '';
-        /* Карточка «Поддержка» теперь — обычная инфо-модалка (текст).
-           Окошко «Поддержи автора» с банковскими карточками открывается
-           ТОЛЬКО кнопкой-сердечком через data-action="open-support". */
         openInfo(t, b, false);
       });
     })(tappables[i]);
