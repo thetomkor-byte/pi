@@ -40,6 +40,8 @@
   --vip-color: #324a6e;
   --ph-bg: radial-gradient(circle at 50% 40%, #1f1a0e 0%, #0f0d08 100%);
   --ph-heart: #b8924a;
+  /* Чуть светлее и золотистее — только для сердечка в нижней панели */
+  --ph-heart-bright: #c69a52;
 }
 
 html, body {
@@ -1960,6 +1962,27 @@ button.disabled {
   touch-action: manipulation;
 }
 
+/* ==== СЕРДЕЧКО В НИЖНЕЙ ПАНЕЛИ — совсем чуть-чуть ярче и золотистее ==== */
+/* Цвет самого сердечка чуть светлее и золотистее, чем у карт и самолётика */
+.bottom-icon.bottom-icon--heart {
+  color: var(--ph-heart-bright);
+  /* Базовое свечение чуть ярче — добавлен третий слабый слой */
+  filter: drop-shadow(0 0 4px rgba(198,154,82,.42)) drop-shadow(0 0 9px rgba(198,154,82,.26)) drop-shadow(0 0 16px rgba(198,154,82,.12));
+}
+
+@media (hover: hover) {
+  .bottom-icon.bottom-icon--heart:hover {
+    opacity: .95;
+    filter: drop-shadow(0 0 8px rgba(198,154,82,.90)) drop-shadow(0 0 18px rgba(198,154,82,.60)) drop-shadow(0 0 28px rgba(198,154,82,.32));
+  }
+}
+
+.bottom-icon.bottom-icon--heart:active {
+  transform: scale(0.9);
+  opacity: 1;
+  filter: drop-shadow(0 0 9px rgba(198,154,82,.98)) drop-shadow(0 0 22px rgba(198,154,82,.65)) drop-shadow(0 0 32px rgba(198,154,82,.38));
+}
+
 .bottom-icon:focus,
 .bottom-icon:focus-visible,
 .bottom-icon:active,
@@ -2016,12 +2039,6 @@ button.disabled {
 }
 
 /* ===== ЗАТУХАНИЕ СОДЕРЖИМОГО СВЕРХУ И СНИЗУ ===== */
-/* 
-   НИЖНЯЯ ПАНЕЛЬ: общая высота 60px.
-   Нижние 50px — плотный чёрный.
-   Верхние 10px — очень мягкое затухание с плотным хвостом ступеней,
-   чтобы убрать светлую полоску в конце.
-*/
 
 .lnd-fade-bottom {
   position: fixed;
@@ -2123,7 +2140,6 @@ button.disabled {
   );
 }
 
-/* Нижняя панель: общая высота 60px. */
 .lnd-fade-bottom {
   bottom: 0;
   height: 60px;
@@ -2132,7 +2148,6 @@ button.disabled {
   background: transparent;
 }
 
-/* Нижние 50px — плотный чёрный. */
 .lnd-fade-bottom::before {
   content: "";
   display: block;
@@ -2140,11 +2155,6 @@ button.disabled {
   background: #000;
 }
 
-/* Верхние 10px — очень мягкое затухание с плотным хвостом ступеней.
-   Начало градиента мягко спускается от 0.95 до 0.85 — то есть верхний край
-   затухания уже значительно прозрачный, что даёт ощущение мягкой дымки.
-   Последние ступени сделаны крайне мелкими (0.0001 → 0.00002 → 0),
-   чтобы полностью убрать светлую полоску в самом конце. */
 .lnd-fade-bottom::after {
   content: "";
   display: block;
@@ -2681,7 +2691,7 @@ button.disabled {
           <rect x="14" y="6" width="14" height="20" rx="2" transform="rotate(8 21 16)" fill="#3a2c10"/>
         </svg>
       </button>
-      <button class="bottom-icon" type="button" data-action="open-support" aria-label="Поддержать автора">
+      <button class="bottom-icon bottom-icon--heart" type="button" data-action="open-support" aria-label="Поддержать автора">
         <svg viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
           <path d="M16 28.5C16 28.5 3.5 20.4 3.5 11.9C3.5 7.5 6.9 4.1 11 4.1C13.2 4.1 15.1 5.1 16 6.6C16.9 5.1 18.8 4.1 21 4.1C25.1 4.1 28.5 7.5 28.5 11.9C28.5 20.4 16 28.5 16 28.5Z"/>
         </svg>
