@@ -58,35 +58,64 @@ html, body {
   color-scheme: dark;
 }
 
-/* ==== ПОЛНОЕ СКРЫТИЕ ПОЛОСЫ ПРОКРУТКИ ВЕЗДЕ ==== */
-html, body, #landing, #landing *, #info-modal, #info-modal * {
-  scrollbar-width: none;           /* Firefox */
-  -ms-overflow-style: none;        /* IE/Edge */
+/* ==== СКРОЛЛ: МОБИЛЬНЫЙ — СКРЫТ ПОЛНОСТЬЮ, ДЕСКТОП — СТАНДАРТНЫЙ ==== */
+
+/* По умолчанию (мобильный, узкий экран) — полоса прокрутки скрыта везде */
+html, body, #landing, #info-modal {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 html::-webkit-scrollbar,
 body::-webkit-scrollbar,
 #landing::-webkit-scrollbar,
-#landing *::-webkit-scrollbar,
 #info-modal::-webkit-scrollbar,
+#landing *::-webkit-scrollbar,
 #info-modal *::-webkit-scrollbar {
   width: 0 !important;
   height: 0 !important;
   display: none !important;
   background: transparent !important;
 }
-html::-webkit-scrollbar-thumb,
-body::-webkit-scrollbar-thumb,
-#landing::-webkit-scrollbar-thumb,
-#info-modal::-webkit-scrollbar-thumb {
-  background: transparent !important;
-  display: none !important;
-}
-html::-webkit-scrollbar-track,
-body::-webkit-scrollbar-track,
-#landing::-webkit-scrollbar-track,
-#info-modal::-webkit-scrollbar-track {
-  background: transparent !important;
-  display: none !important;
+
+/* Десктоп (ширина > 640px) — возвращаем стандартную полосу прокрутки для #landing */
+@media (min-width: 641px) {
+  #landing {
+    scrollbar-width: auto;
+    -ms-overflow-style: auto;
+  }
+  #landing::-webkit-scrollbar {
+    width: 10px !important;
+    height: 10px !important;
+    display: block !important;
+    background: #0a0a0a !important;
+  }
+  #landing::-webkit-scrollbar-track {
+    background: #0a0a0a !important;
+  }
+  #landing::-webkit-scrollbar-thumb {
+    background: #2a2520 !important;
+    border-radius: 5px;
+    border: 2px solid #0a0a0a;
+  }
+  #landing::-webkit-scrollbar-thumb:hover {
+    background: #3a3520 !important;
+  }
+  /* Внутренние скролл-контейнеры (модалка, карусель-обёртки) — оставляем скрытыми */
+  #info-modal::-webkit-scrollbar,
+  #landing *::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+    background: transparent !important;
+  }
+  #info-modal {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  #landing * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
 }
 
 html {
@@ -390,8 +419,9 @@ button.disabled {
   touch-action: pan-x;
   overscroll-behavior: contain;
   cursor: grab;
-  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 6%, #000 94%, transparent 100%);
-  mask-image: linear-gradient(to right, transparent 0, #000 6%, #000 94%, transparent 100%);
+  /* Зеркальное затухание: слева 6% и справа 6% — одинаково */
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 6%, #000 94%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, #000 6%, #000 94%, transparent 100%);
 }
 
 .tg-feed-track-wrap.dragging { cursor: grabbing; }
@@ -1014,11 +1044,7 @@ button.disabled {
   display: flex;
   flex-direction: column;
   padding-bottom: calc(env(safe-area-inset-bottom, 0px));
-  scrollbar-width: none;
-  -ms-overflow-style: none;
 }
-
-#landing::-webkit-scrollbar { width: 0; height: 0; display: none; }
 
 #landing.hidden { display: none !important; }
 
