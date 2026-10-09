@@ -60,7 +60,6 @@ html, body {
 
 /* ==== СКРОЛЛ: МОБИЛЬНЫЙ — СКРЫТ ПОЛНОСТЬЮ, ДЕСКТОП — СТАНДАРТНЫЙ ==== */
 
-/* По умолчанию (мобильный, узкий экран) — полоса прокрутки скрыта везде */
 html, body, #landing, #info-modal {
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -77,7 +76,6 @@ body::-webkit-scrollbar,
   background: transparent !important;
 }
 
-/* Десктоп (ширина > 640px) — возвращаем стандартную полосу прокрутки для #landing */
 @media (min-width: 641px) {
   #landing {
     scrollbar-width: auto;
@@ -100,7 +98,6 @@ body::-webkit-scrollbar,
   #landing::-webkit-scrollbar-thumb:hover {
     background: #3a3520 !important;
   }
-  /* Внутренние скролл-контейнеры (модалка, карусель-обёртки) — оставляем скрытыми */
   #info-modal::-webkit-scrollbar,
   #landing *::-webkit-scrollbar {
     width: 0 !important;
@@ -186,7 +183,6 @@ button.disabled {
   flex-shrink: 0;
 }
 
-/* Тонкая линия под каруселью — как было в исходнике. Без свечения. */
 #tg-feed::after {
   content: "";
   position: absolute;
@@ -410,25 +406,16 @@ button.disabled {
 
 .lang-option.inactive { opacity: .55; }
 
-/* ==== СИММЕТРИЧНАЯ МАСКА: паддинги снаружи, маска внутри ==== */
-
-/* Внешний слой — здесь только паддинги и ограничение ширины. Никакой маски. */
-.tg-feed-outer {
+.tg-feed-track-wrap {
+  overflow: hidden;
   max-width: 1120px;
   margin: 0 auto;
   padding: 0 clamp(18px, 4vw, 40px);
   position: relative;
-}
-
-/* Внутренний слой — здесь маска. Паддингов НЕТ.
-   Маска отсчитывает 6% ровно от края первой карточки слева
-   и ровно от края последней карточки справа — абсолютно симметрично. */
-.tg-feed-track-wrap {
-  overflow: hidden;
-  position: relative;
   touch-action: pan-x;
   overscroll-behavior: contain;
   cursor: grab;
+  /* Зеркальное затухание: слева 6% и справа 6% — эталон — левая сторона */
   -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 6%, #000 94%, transparent 100%);
   mask-image: linear-gradient(to right, transparent 0%, #000 6%, #000 94%, transparent 100%);
 }
@@ -1240,7 +1227,6 @@ button.disabled {
   }
 }
 
-/* Строка: текст POKER TRAINER слева. */
 .lnd-logo-row {
   position: relative;
   display: block;
@@ -1264,10 +1250,6 @@ button.disabled {
   z-index: 1;
 }
 
-/* Кнопка-сердечко. Позиционируется относительно .lnd-hero (внешняя секция):
-   - left: 50% + translateX(-50%) — центр ширины страницы;
-   - top совпадает с началом строки .lnd-logo-row (текст POKER TRAINER).
-   Так сердечко всегда по центру лендинга, на одной линии с текстом. */
 .lnd-heart-btn {
   position: absolute;
   top: calc(clamp(10px, 1.6vw, 16px) + 8px);
@@ -1953,7 +1935,6 @@ button.disabled {
   will-change: opacity;
 }
 
-/* Мобильная версия: 10px отступ снизу (безопасную зону оставляем) */
 @media (max-width: 640px) {
   #bottom-bar {
     bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
@@ -2237,10 +2218,6 @@ button.disabled {
   );
 }
 
-/* ==== СДВИГ БЛОКА ЗАГОЛОВКА ВВЕРХ НА 4px ==== */
-/* POKER TRAINER остаётся на месте (отступ 20px), а весь блок
-   от «Тренируй логику и интуицию» и ниже поднимается на 4 пикселя.
-   Реализовано через margin-top: -4px у заголовка. */
 .lnd-hero-copy .lnd-h1 {
   margin-top: -4px;
 }
@@ -2284,10 +2261,8 @@ button.disabled {
           </div>
         </div>
       </div>
-      <div class="tg-feed-outer">
-        <div class="tg-feed-track-wrap" id="tg-feed-wrap">
-          <div class="tg-feed-track" id="tg-feed-track"></div>
-        </div>
+      <div class="tg-feed-track-wrap" id="tg-feed-wrap">
+        <div class="tg-feed-track" id="tg-feed-track"></div>
       </div>
       <div class="tg-feed-dots" id="tg-feed-dots"></div>
     </section>
