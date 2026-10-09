@@ -14,7 +14,11 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="format-detection" content="telephone=no,date=no,address=no,email=no" />
 <meta name="theme-color" content="#000000" />
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#000000" />
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000000" />
 <meta name="msapplication-navbutton-color" content="#000000" />
+<meta name="msapplication-TileColor" content="#000000" />
+<meta name="color-scheme" content="dark" />
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="copyright" content="All rights reserved" />
 <title>Poker Trainer</title>
@@ -55,6 +59,7 @@ html, body {
   left: 0;
   right: 0;
   bottom: 0;
+  color-scheme: dark;
 }
 
 html {
@@ -64,6 +69,7 @@ html {
   -ms-text-size-adjust: 100%;
   text-size-adjust: 100%;
   background: var(--bg-bottom);
+  color-scheme: dark;
 }
 
 body {
@@ -72,6 +78,7 @@ body {
   text-size-adjust: 100%;
   -ms-touch-action: manipulation;
   background: var(--bg-bottom);
+  color-scheme: dark;
 }
 
 button { cursor: pointer; }
@@ -1840,7 +1847,7 @@ button.disabled {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
   z-index: 900;
   display: flex;
   align-items: center;
@@ -1850,8 +1857,8 @@ button.disabled {
   opacity: 0;
   pointer-events: none;
   transform: translateY(16px);
-  transition: opacity .55s cubic-bezier(.22,.61,.36,1),
-              transform .55s cubic-bezier(.22,.61,.36,1);
+  transition: opacity .75s cubic-bezier(.22,.61,.36,1),
+              transform .75s cubic-bezier(.22,.61,.36,1);
   will-change: opacity, transform;
 }
 
@@ -1951,7 +1958,11 @@ button.disabled {
   }
 }
 
-/* ===== ЗАТУХАНИЕ СОДЕРЖИМОГО СВЕРХУ И СНИЗУ ===== */
+/* ===== ЗАТУХАНИЕ СОДЕРЖИМОГО СВЕРХУ И СНИЗУ =====
+   Двухслойная схема:
+   - внешний слой — плотный чёрный #000 у самого края экрана, полностью непрозрачный;
+   - внутренний слой — мягкое затухание через mask-image с очень плавной кривой.
+   Полупрозрачные пиксели не касаются края экрана — браузер не подкрашивается. */
 
 .lnd-fade-top,
 .lnd-fade-bottom {
@@ -1961,8 +1972,8 @@ button.disabled {
   pointer-events: none;
   z-index: 850;
   opacity: 0;
-  transition: opacity .55s cubic-bezier(.22,.61,.36,1),
-              transform .55s cubic-bezier(.22,.61,.36,1);
+  transition: opacity .75s cubic-bezier(.22,.61,.36,1),
+              transform .75s cubic-bezier(.22,.61,.36,1);
   will-change: opacity, transform;
 }
 
@@ -1972,39 +1983,132 @@ button.disabled {
   transform: translateY(0);
 }
 
+/* ---- ВЕРХ: общая высота 20px ----
+   внешний слой (у самого верха) — 8px плотного чёрного;
+   внутренний слой (ниже) — 12px мягкого затухания через mask-image. */
+
 .lnd-fade-top {
   top: 0;
   height: 20px;
   transform: translateY(-8px);
-  background: linear-gradient(
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+}
+
+.lnd-fade-top::before {
+  content: "";
+  display: block;
+  height: 8px;
+  background: #000;
+}
+
+.lnd-fade-top::after {
+  content: "";
+  display: block;
+  height: 12px;
+  background: #000;
+  -webkit-mask-image: linear-gradient(
     to bottom,
     rgba(0,0,0,1) 0%,
-    rgba(0,0,0,.92) 10%,
-    rgba(0,0,0,.78) 22%,
-    rgba(0,0,0,.6) 36%,
-    rgba(0,0,0,.42) 50%,
-    rgba(0,0,0,.26) 64%,
-    rgba(0,0,0,.14) 76%,
-    rgba(0,0,0,.06) 88%,
+    rgba(0,0,0,.96) 8%,
+    rgba(0,0,0,.9) 18%,
+    rgba(0,0,0,.82) 28%,
+    rgba(0,0,0,.72) 38%,
+    rgba(0,0,0,.6) 48%,
+    rgba(0,0,0,.48) 58%,
+    rgba(0,0,0,.36) 68%,
+    rgba(0,0,0,.26) 76%,
+    rgba(0,0,0,.17) 84%,
+    rgba(0,0,0,.1) 90%,
+    rgba(0,0,0,.05) 95%,
+    rgba(0,0,0,0) 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(0,0,0,1) 0%,
+    rgba(0,0,0,.96) 8%,
+    rgba(0,0,0,.9) 18%,
+    rgba(0,0,0,.82) 28%,
+    rgba(0,0,0,.72) 38%,
+    rgba(0,0,0,.6) 48%,
+    rgba(0,0,0,.48) 58%,
+    rgba(0,0,0,.36) 68%,
+    rgba(0,0,0,.26) 76%,
+    rgba(0,0,0,.17) 84%,
+    rgba(0,0,0,.1) 90%,
+    rgba(0,0,0,.05) 95%,
     rgba(0,0,0,0) 100%
   );
 }
 
+/* ---- НИЗ: общая высота 120px ----
+   внешний слой (у самого низа) — 40px плотного чёрного;
+   внутренний слой (выше) — 80px мягкого затухания через mask-image. */
+
 .lnd-fade-bottom {
   bottom: 0;
-  height: 160px;
+  height: 120px;
   transform: translateY(8px);
-  background: linear-gradient(
+  display: flex;
+  flex-direction: column-reverse;
+  background: transparent;
+}
+
+.lnd-fade-bottom::before {
+  content: "";
+  display: block;
+  height: 40px;
+  background: #000;
+}
+
+.lnd-fade-bottom::after {
+  content: "";
+  display: block;
+  height: 80px;
+  background: #000;
+  -webkit-mask-image: linear-gradient(
     to top,
     rgba(0,0,0,1) 0%,
-    rgba(0,0,0,.96) 12%,
-    rgba(0,0,0,.86) 26%,
+    rgba(0,0,0,1) 4%,
+    rgba(0,0,0,.98) 10%,
+    rgba(0,0,0,.95) 16%,
+    rgba(0,0,0,.91) 22%,
+    rgba(0,0,0,.86) 28%,
+    rgba(0,0,0,.8) 34%,
     rgba(0,0,0,.72) 40%,
-    rgba(0,0,0,.56) 54%,
-    rgba(0,0,0,.4) 66%,
-    rgba(0,0,0,.26) 76%,
-    rgba(0,0,0,.14) 86%,
-    rgba(0,0,0,.06) 94%,
+    rgba(0,0,0,.64) 46%,
+    rgba(0,0,0,.55) 52%,
+    rgba(0,0,0,.46) 58%,
+    rgba(0,0,0,.37) 64%,
+    rgba(0,0,0,.29) 70%,
+    rgba(0,0,0,.21) 76%,
+    rgba(0,0,0,.15) 81%,
+    rgba(0,0,0,.1) 86%,
+    rgba(0,0,0,.06) 90%,
+    rgba(0,0,0,.03) 94%,
+    rgba(0,0,0,0) 100%
+  );
+  mask-image: linear-gradient(
+    to top,
+    rgba(0,0,0,1) 0%,
+    rgba(0,0,0,1) 4%,
+    rgba(0,0,0,.98) 10%,
+    rgba(0,0,0,.95) 16%,
+    rgba(0,0,0,.91) 22%,
+    rgba(0,0,0,.86) 28%,
+    rgba(0,0,0,.8) 34%,
+    rgba(0,0,0,.72) 40%,
+    rgba(0,0,0,.64) 46%,
+    rgba(0,0,0,.55) 52%,
+    rgba(0,0,0,.46) 58%,
+    rgba(0,0,0,.37) 64%,
+    rgba(0,0,0,.29) 70%,
+    rgba(0,0,0,.21) 76%,
+    rgba(0,0,0,.15) 81%,
+    rgba(0,0,0,.1) 86%,
+    rgba(0,0,0,.06) 90%,
+    rgba(0,0,0,.03) 94%,
     rgba(0,0,0,0) 100%
   );
 }
@@ -3777,7 +3881,7 @@ button.disabled {
 
   if (!landing || !bottomBar) return;
 
-  var SCROLL_THRESHOLD = 3;
+  var SCROLL_THRESHOLD = 2;
   var isVisible = false;
 
   function setVisible(v) {
