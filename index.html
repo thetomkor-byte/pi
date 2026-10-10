@@ -1254,6 +1254,7 @@ button.disabled {
   color: var(--ph-heart);
   opacity: .75;
   line-height: 0;
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -1269,11 +1270,12 @@ button.disabled {
   -webkit-appearance: none;
   appearance: none;
   touch-action: manipulation;
-  -webkit-touch-callout: none;
 }
 
 .lnd-heart-btn,
-.lnd-heart-btn * {
+.lnd-heart-btn *,
+.lnd-heart-btn *::before,
+.lnd-heart-btn *::after {
   -webkit-tap-highlight-color: transparent !important;
   -webkit-touch-callout: none !important;
   -webkit-user-select: none !important;
@@ -1281,28 +1283,41 @@ button.disabled {
   -ms-user-select: none !important;
   user-select: none !important;
   -webkit-user-drag: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
   outline: none !important;
+  outline-color: transparent !important;
+  border-color: transparent !important;
+  -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
 }
 
 .lnd-heart-btn::selection,
-.lnd-heart-btn *::selection {
-  background: transparent;
-  color: inherit;
+.lnd-heart-btn *::selection,
+.lnd-heart-btn path::selection {
+  background: transparent !important;
+  color: inherit !important;
 }
 .lnd-heart-btn::-moz-selection,
-.lnd-heart-btn *::-moz-selection {
-  background: transparent;
-  color: inherit;
+.lnd-heart-btn *::-moz-selection,
+.lnd-heart-btn path::-moz-selection {
+  background: transparent !important;
+  color: inherit !important;
 }
 
 .lnd-heart-btn:focus,
 .lnd-heart-btn:focus-visible,
 .lnd-heart-btn:hover,
-.lnd-heart-btn:active {
+.lnd-heart-btn:active,
+.lnd-heart-btn:visited {
   outline: none !important;
+  outline-color: transparent !important;
+  outline-style: none !important;
+  outline-width: 0 !important;
   box-shadow: none !important;
   border: none !important;
   background: transparent !important;
+  -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+  -webkit-touch-callout: none !important;
 }
 
 .lnd-heart-btn .ph-heart-svg {
@@ -1313,6 +1328,18 @@ button.disabled {
   -webkit-user-drag: none;
   user-select: none;
   pointer-events: none;
+  -webkit-touch-callout: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  outline: none !important;
+  border: none !important;
+}
+
+.lnd-heart-btn .ph-heart-svg path {
+  -webkit-touch-callout: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  outline: none !important;
+  border: none !important;
+  stroke: none !important;
 }
 
 @media (hover: hover) {
@@ -2263,6 +2290,44 @@ button.disabled {
 .lnd-hero-copy .lnd-h1 {
   margin-top: -4px;
 }
+
+/* ===== ЖЁСТКОЕ ОТКЛЮЧЕНИЕ ВЫДЕЛЕНИЯ И LONG-PRESS ДЛЯ КНОПКИ-СЕРДЕЧКА В HERO ===== */
+.lnd-heart-btn,
+.lnd-heart-btn *,
+.lnd-heart-btn svg,
+.lnd-heart-btn path {
+  -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+  -webkit-user-drag: none !important;
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+.lnd-heart-btn {
+  touch-action: manipulation !important;
+  -webkit-touch-action: manipulation !important;
+}
+
+@media (pointer: coarse) {
+  .lnd-heart-btn,
+  .lnd-heart-btn *,
+  .lnd-heart-btn svg,
+  .lnd-heart-btn path {
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -2310,7 +2375,7 @@ button.disabled {
     </section>
 
     <section class="lnd-hero" aria-labelledby="lnd-hero-title">
-      <div class="lnd-heart-btn" id="lnd-heart-btn" role="button" tabindex="0" data-action="open-support" aria-label="Поддержать автора">
+      <div class="lnd-heart-btn" id="lnd-heart-btn" data-action="open-support" aria-label="Поддержать автора">
         <svg class="ph-heart-svg" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
           <path d="M16 28.5C16 28.5 3.5 20.4 3.5 11.9C3.5 7.5 6.9 4.1 11 4.1C13.2 4.1 15.1 5.1 16 6.6C16.9 5.1 18.8 4.1 21 4.1C25.1 4.1 28.5 7.5 28.5 11.9C28.5 20.4 16 28.5 16 28.5Z"/>
         </svg>
@@ -2637,7 +2702,7 @@ button.disabled {
         <div class="lnd-grid-3-sections">
           <button class="lnd-card lnd-reveal tappable" type="button"
                   data-info-title="Настройки"
-                  data-info-body="В разделе «Настройки» вы полностью управляете условиями тренировки. Язык интерфейса — русский или английский, сложность — от мягкой игры с VIP до жёсткого стола с PRO.
+                  data-info-body="В разделе «Настройки» вы управляете условиями тренировки. Язык интерфейса — русский или английский, сложность — от мягкой игры с VIP до жёсткого стола с PRO.
 
 Стеки отображаются в BB или в фишках — как удобнее для конкретного спота. Стиль карт — 2-цветный для классического вида или 4-цветный для быстрого считывания мастей.
 
@@ -3250,16 +3315,36 @@ button.disabled {
   if (heartBtn) {
     heartBtn.addEventListener('touchstart', function(e) {
       e.preventDefault();
+      e.stopPropagation();
       heartBtn.classList.add('is-active');
     }, { passive: false });
     heartBtn.addEventListener('touchend', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
       heartBtn.classList.remove('is-active');
-    }, { passive: true });
+      heartBtn.click();
+    }, { passive: false });
     heartBtn.addEventListener('touchcancel', function(e) {
       heartBtn.classList.remove('is-active');
     }, { passive: true });
-    heartBtn.addEventListener('mousedown', function(e) {
+    heartBtn.addEventListener('touchmove', function(e) {
       e.preventDefault();
+      e.stopPropagation();
+    }, { passive: false });
+    heartBtn.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    });
+    heartBtn.addEventListener('selectstart', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    });
+    heartBtn.addEventListener('mousedown', function(e) {
+      if (e.pointerType === 'mouse') {
+        e.preventDefault();
+      }
       heartBtn.classList.add('is-active');
     });
     heartBtn.addEventListener('mouseup', function() {
@@ -3267,12 +3352,6 @@ button.disabled {
     });
     heartBtn.addEventListener('mouseleave', function() {
       heartBtn.classList.remove('is-active');
-    });
-    heartBtn.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        heartBtn.click();
-      }
     });
   }
 
