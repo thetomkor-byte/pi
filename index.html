@@ -1262,23 +1262,47 @@ button.disabled {
   user-select: none;
   -webkit-user-drag: none;
   filter: drop-shadow(0 0 6px rgba(184,146,74,.75)) drop-shadow(0 0 14px rgba(184,146,74,.45));
-  transition: opacity .18s ease, filter .18s ease, transform .12s ease;
+  transition: opacity .18s ease, filter .18s ease;
   z-index: 3;
   height: 26px;
   outline: none;
   -webkit-appearance: none;
   appearance: none;
   touch-action: manipulation;
+  -webkit-touch-callout: none;
+}
+
+.lnd-heart-btn,
+.lnd-heart-btn * {
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+  -webkit-user-drag: none !important;
+  outline: none !important;
+}
+
+.lnd-heart-btn::selection,
+.lnd-heart-btn *::selection {
+  background: transparent;
+  color: inherit;
+}
+.lnd-heart-btn::-moz-selection,
+.lnd-heart-btn *::-moz-selection {
+  background: transparent;
+  color: inherit;
 }
 
 .lnd-heart-btn:focus,
 .lnd-heart-btn:focus-visible,
 .lnd-heart-btn:hover,
 .lnd-heart-btn:active {
-  outline: none;
-  box-shadow: none;
-  border: none;
-  background: transparent;
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  background: transparent !important;
 }
 
 .lnd-heart-btn .ph-heart-svg {
@@ -1298,8 +1322,7 @@ button.disabled {
   }
 }
 
-.lnd-heart-btn:active {
-  transform: translateX(-50%) scale(0.94);
+.lnd-heart-btn.is-active {
   opacity: 1;
   filter: drop-shadow(0 0 9px rgba(184,146,74,.95)) drop-shadow(0 0 22px rgba(184,146,74,.6));
 }
@@ -1766,7 +1789,7 @@ button.disabled {
 .lnd-footer {
   position: relative;
   flex-shrink: 0;
-  padding: clamp(28px, 5vw, 44px) 0 calc(clamp(40px, 8vw, 60px) + 12px + env(safe-area-inset-bottom, 0px));
+  padding: clamp(28px, 5vw, 44px) 0 calc(clamp(40px, 8vw, 60px) + 14px + env(safe-area-inset-bottom, 0px));
   color: var(--muted);
   font-size: clamp(11px, 1.7vmin, 13px);
   line-height: 1.6;
@@ -2287,11 +2310,11 @@ button.disabled {
     </section>
 
     <section class="lnd-hero" aria-labelledby="lnd-hero-title">
-      <button class="lnd-heart-btn" type="button" data-action="open-support" aria-label="Поддержать автора">
+      <div class="lnd-heart-btn" id="lnd-heart-btn" role="button" tabindex="0" data-action="open-support" aria-label="Поддержать автора">
         <svg class="ph-heart-svg" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
           <path d="M16 28.5C16 28.5 3.5 20.4 3.5 11.9C3.5 7.5 6.9 4.1 11 4.1C13.2 4.1 15.1 5.1 16 6.6C16.9 5.1 18.8 4.1 21 4.1C25.1 4.1 28.5 7.5 28.5 11.9C28.5 20.4 16 28.5 16 28.5Z"/>
         </svg>
-      </button>
+      </div>
 
       <div class="lnd-inner lnd-hero-grid">
         <div class="lnd-hero-copy lnd-reveal">
@@ -2382,9 +2405,9 @@ button.disabled {
 
           <button class="lnd-card lnd-reveal tappable" type="button"
                   data-info-title="Интуиция"
-                  data-info-body="Интуиция в покере — это способность считать исход раздачи из поля информации до того, как карты открылись. Это не мистика и не «чуйка». Это накопленный опыт, который мозг обрабатывает быстрее, чем сознание успевает облечь его в слова. Она работает не вместо логики, а поверх неё — там, где логика уже посчитала варианты и осталось выбрать точный.
+                  data-info-body="Интуиция в покере — это способность считать исход раздачи из поля информации до того, как карты открылись. Это не мистика и не «чуйка». Это опыт, который мозг обрабатывает быстрее, чем сознание успевает облечь его в слова. Она работает не вместо логики, а поверх неё — там, где логика уже посчитала варианты и осталось выбрать точный.
 
-Вы учитесь читать линию поведения оппонента: темп ставок, их размеры, повторяющиеся ошибки, смену образа. Замечать, когда он блефует третий раз за один круг за столом. Чувствовать слоуплей — когда игрок, который только что давил, вдруг начинает чекать и коллировать — это не слабость, а приманка, и опытный игрок отличает одно от другого мгновенно.
+Вы учитесь читать линию поведения оппонента: темп ставок, их размеры, ошибки, смену образа. Замечать, когда он блефует третий раз за один круг за столом. Чувствовать слоуплей — когда игрок, который только что давил, вдруг начинает чекать и коллировать — это не слабость, а приманка, и опытный игрок отличает одно от другого мгновенно.
 
 В Poker Trainer интуиция тренируется через многократное повторение и наблюдение. Боты играют по-разному каждый раз, но их характеры стабильны — и со временем вы начинаете узнавать их решения ещё до того, как они сделаны. Это и есть интуиция в чистом виде: быстрое считывание повторяющегося поведения, отточенное до автоматизма.">
             <div class="icon" aria-hidden="true">
@@ -2402,7 +2425,7 @@ button.disabled {
 
           <button class="lnd-card lnd-reveal tappable" type="button"
                   data-info-title="Связка логики и интуиции"
-                  data-info-body="Логика и интуиция в покере — не два отдельных навыка, а два конца одной линии. Логика говорит: «здесь я должен ставить 60% банка, чтобы у оппонента не было правильных шансов на колл». Интуиция говорит: «этот конкретный игрок на этой конкретной улице на такую ставку выкинет». Одно без другого теряет силу.
+                  data-info-body="Логика и интуиция в покере — не два отдельных навыка, а два конца одной линии. Логика говорит: «здесь я должен ставить 60% банка, чтобы у оппонента не было правильных шансов на колл». Интуиция говорит: «этот конкретный игрок на этой конкретной улице на такую ставку выкинет». Одно без другого теряет силу, только вместе они дают точное решение.
 
 Проблема в том, что по отдельности оба навыка ограничены. Чистая логика без интуиции превращается в игру по чарту — она правильная, но не эксплуатирует ошибки. Чистая интуиция без логики превращается в догадки — иногда гениальные, иногда катастрофические. Сила появляется только там, где одно подкрепляет другое.
 
@@ -2642,11 +2665,7 @@ button.disabled {
 
           <button class="lnd-card lnd-reveal tappable" type="button"
                   data-info-title="Поддержка"
-                  data-info-body="Poker Trainer — некоммерческий проект. Без подписок, без рекламы, без платы за доступ. Проект существует и развивается исключительно на средства от ваших донатов.
-
-Адреса для переводов: GGPoker (перевод через покер-рум), USDT TRC20 (криптовалюта в сети Tron), VISA (карта для переводов в долларах и других валютах) или запрос в Telegram.
-
-Контакты в Telegram — основной канал связи. Через него можно задать вопрос, предложить идею, сообщить об ошибке или просто поделиться впечатлениями от тренировки.">
+                  data-info-body="Poker Trainer — некоммерческий проект. Без подписок, без рекламы, без платы за доступ. Проект существует исключительно на средства от вашей поддержки.">
             <h3>Поддержка</h3>
             <p>Poker Trainer — некоммерческий проект. Без подписок, без рекламы, без платы за доступ. Проект существует и развивается исключительно на средства от ваших донатов.</p>
             <svg class="lnd-card-tap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -3222,6 +3241,36 @@ button.disabled {
     e.stopPropagation();
     openInfo('Поддержка', '', true);
   });
+
+  var heartBtn = document.getElementById('lnd-heart-btn');
+  if (heartBtn) {
+    heartBtn.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      heartBtn.classList.add('is-active');
+    }, { passive: false });
+    heartBtn.addEventListener('touchend', function(e) {
+      heartBtn.classList.remove('is-active');
+    }, { passive: true });
+    heartBtn.addEventListener('touchcancel', function(e) {
+      heartBtn.classList.remove('is-active');
+    }, { passive: true });
+    heartBtn.addEventListener('mousedown', function(e) {
+      e.preventDefault();
+      heartBtn.classList.add('is-active');
+    });
+    heartBtn.addEventListener('mouseup', function() {
+      heartBtn.classList.remove('is-active');
+    });
+    heartBtn.addEventListener('mouseleave', function() {
+      heartBtn.classList.remove('is-active');
+    });
+    heartBtn.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        heartBtn.click();
+      }
+    });
+  }
 
   function initBelcardSupport() {
     var stack = document.getElementById('support-belcard-stack');
