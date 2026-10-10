@@ -2362,7 +2362,7 @@ button.disabled {
         </a>
 
         <div class="tg-feed-right">
-          <div class="tg-feed-title"><span class="dot"></span> Из Telegram</div>
+          <div class="tg-feed-title"><span class="dot"></span> <span data-i18n="tg.feedTitle">Из Telegram</span></div>
 
           <div class="lang-select" id="lang-select">
             <button type="button" class="lang-trigger" id="lang-trigger" aria-haspopup="listbox" aria-expanded="false">
@@ -2398,17 +2398,17 @@ button.disabled {
           </div>
 
           <h1 class="lnd-h1" id="lnd-hero-title">
-            Тренируй <span class="gold">логику</span> и <span class="gold">интуицию</span>
+            <span data-i18n="hero.h1.p1">Тренируй </span><span class="gold" data-i18n="hero.h1.p2">логику</span><span data-i18n="hero.h1.p3"> и </span><span class="gold" data-i18n="hero.h1.p4">интуицию</span>
           </h1>
 
-          <p class="lnd-sub">
+          <p class="lnd-sub" data-i18n="hero.sub">
             Симулятор турнирного стола с ботами PRO и VIP, имитирующими поведение человека.
             Тренажёр для развития логики и интуиции за покерным столом.
             Бесплатно. Без установки. Без регистрации.
           </p>
 
           <div class="lnd-hero-actions">
-            <button class="lnd-btn" type="button" data-action="enter-app" aria-label="Начать тренировку">
+            <button class="lnd-btn" type="button" data-action="enter-app" aria-label="Начать тренировку" data-i18n="hero.btn">
               Начать тренировку
             </button>
           </div>
@@ -2447,9 +2447,11 @@ button.disabled {
     <section class="lnd-section" aria-labelledby="lnd-why-title">
       <div class="lnd-inner">
         <div class="lnd-reveal">
-          <div class="lnd-kicker">Почему это работает</div>
-          <h2 class="lnd-h2" id="lnd-why-title">Солвер даёт правильный ответ. <span class="gold">Тренажёр учит точной игре</span></h2>
-          <p class="lnd-lead">
+          <div class="lnd-kicker" data-i18n="why.kicker">Почему это работает</div>
+          <h2 class="lnd-h2" id="lnd-why-title">
+            <span data-i18n="why.h2.p1">Солвер даёт правильный ответ. </span><span class="gold" data-i18n="why.h2.p2">Тренажёр учит точной игре</span>
+          </h2>
+          <p class="lnd-lead" data-i18n="why.lead">
             Солверы, калькуляторы эквити и GTO-тренажёры отвечают на вопрос «как играть правильно в вакууме».
             Но в турнире вакуума нет. Есть оппонент с памятью, страхом, тильтом и привычками.
             Против него «правильная» игра часто проигрывает «точной» — той, что строится под его ошибки.
@@ -2458,59 +2460,47 @@ button.disabled {
 
         <div class="lnd-grid-3">
           <button class="lnd-card lnd-reveal tappable" type="button"
-                  data-info-title="Логика"
-                  data-info-body="Логика в покере — это не про «правильные» решения по чарту, а про построение линии, при которой оппонент совершает ошибку. Каждое ваше действие должно иметь цель: заставить его сделать колл, когда он позади; фолд, когда он впереди; рейз, когда он блефует. Без этой цели действие превращается в угадывание, и вы теряете контроль над раздачей.
-
-Вы учитесь задавать вопрос «зачем» перед каждым ходом. Не «что я должен сделать по GTO», а «что я хочу, чтобы сделал оппонент после моего действия». В этом и есть ключевое отличие правильной игры от точной: первая соответствует теории, вторая — управляет чужим решением и заставляет его ошибиться именно там, где вам выгодно.
-
-За столом Poker Trainer логика тренируется через анализ линии каждого бота. Почему LAG-Pro рейзит именно здесь, почему ICM-Exploiter на баббле играет тайтовее, почему Solver-Hybrid меняет паттерн именно против вас. Вы начинаете видеть логику за чужими решениями — и постепенно строите свою так, чтобы управлять чужой.">
+                  data-info-title-key="modal.logic.title"
+                  data-info-body-key="modal.logic.body">
             <div class="icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
               </svg>
             </div>
-            <h3>Логика</h3>
-            <p>Выстроить линию так, чтобы оппонент совершил ошибку, а не просто «сыграл по чарту». Каждое действие — осознанный ответ на вопрос «зачем».</p>
+            <h3 data-i18n="why.card.logic.title">Логика</h3>
+            <p data-i18n="why.card.logic.text">Выстроить линию так, чтобы оппонент совершил ошибку, а не просто «сыграл по чарту». Каждое действие — осознанный ответ на вопрос «зачем».</p>
             <svg class="lnd-card-tap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M9 3H5a2 2 0 0 0-2 2v4M9 21H5a2 2 0 0 1-2-2v-4M15 3h4a2 2 0 0 1 2 2v4M15 21h4a2 2 0 0 0 2-2v-4"/>
             </svg>
           </button>
 
           <button class="lnd-card lnd-reveal tappable" type="button"
-                  data-info-title="Интуиция"
-                  data-info-body="Интуиция в покере — это способность считать исход раздачи из поля информации до того, как карты открылись. Это не мистика и не «чуйка». Это опыт, который мозг обрабатывает быстрее, чем сознание успевает облечь его в слова. Она работает не вместо логики, а поверх неё — там, где логика уже посчитала варианты и осталось выбрать точный.
-
-Вы учитесь читать линию поведения оппонента: темп ставок, их размеры, ошибки, смену образа. Замечать, когда он блефует третий раз за один круг за столом. Чувствовать слоуплей — когда игрок, который только что давил, вдруг начинает чекать и коллировать — это не слабость, а приманка, и опытный игрок отличает одно от другого мгновенно.
-
-В Poker Trainer интуиция тренируется через многократное повторение и наблюдение. Боты играют по-разному каждый раз, но их характеры стабильны — и со временем вы начинаете узнавать их решения ещё до того, как они сделаны. Это и есть интуиция в чистом виде: быстрое считывание повторяющегося поведения, отточенное до автоматизма.">
+                  data-info-title-key="modal.intuition.title"
+                  data-info-body-key="modal.intuition.body">
             <div class="icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
                 <circle cx="12" cy="12" r="3"/>
               </svg>
             </div>
-            <h3>Интуиция</h3>
-            <p>Считать исход раздачи из поля информации до того, как карты открылись. Читать линию поведения и замечать повторяющиеся ошибки.</p>
+            <h3 data-i18n="why.card.intuition.title">Интуиция</h3>
+            <p data-i18n="why.card.intuition.text">Считать исход раздачи из поля информации до того, как карты открылись. Читать линию поведения и замечать повторяющиеся ошибки.</p>
             <svg class="lnd-card-tap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M9 3H5a2 2 0 0 0-2 2v4M9 21H5a2 2 0 0 1-2-2v-4M15 3h4a2 2 0 0 1 2 2v4M15 21h4a2 2 0 0 0 2-2v-4"/>
             </svg>
           </button>
 
           <button class="lnd-card lnd-reveal tappable" type="button"
-                  data-info-title="Связка логики и интуиции"
-                  data-info-body="Логика и интуиция в покере — не два отдельных навыка, а два конца одной линии. Логика говорит: «здесь я должен ставить 60% банка, чтобы у оппонента не было правильных шансов на колл». Интуиция говорит: «этот конкретный игрок на этой конкретной улице на такую ставку выкинет». Одно без другого теряет силу, только вместе они дают точное решение.
-
-Проблема в том, что по отдельности оба навыка ограничены. Чистая логика без интуиции превращается в игру по чарту — она правильная, но не эксплуатирует ошибки. Чистая интуиция без логики превращается в догадки — иногда гениальные, иногда катастрофические. Сила появляется только там, где одно подкрепляет другое.
-
-В Poker Trainer вы тренируете именно связку. Сначала считаете логически, какое действие было бы правильным в вакууме, потом через интуицию корректируете его под конкретного оппонента. И в этот момент ваша игра из правильной становится точной — она не просто соответствует теории, она забирает максимум фишек именно у этого игрока именно сейчас.">
+                  data-info-title-key="modal.link.title"
+                  data-info-body-key="modal.link.body">
             <div class="icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5"/>
                 <path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5"/>
               </svg>
             </div>
-            <h3>Связка логики и интуиции</h3>
-            <p>Мало знать, кто сильнее на вскрытии. Нужно выстроить действия так, чтобы выиграть максимум фишек, а не просто забрать банк.</p>
+            <h3 data-i18n="why.card.link.title">Связка логики и интуиции</h3>
+            <p data-i18n="why.card.link.text">Мало знать, кто сильнее на вскрытии. Нужно выстроить действия так, чтобы выиграть максимум фишек, а не просто забрать банк.</p>
             <svg class="lnd-card-tap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M9 3H5a2 2 0 0 0-2 2v4M9 21H5a2 2 0 0 1-2-2v-4M15 3h4a2 2 0 0 1 2 2v4M15 21h4a2 2 0 0 0 2-2v-4"/>
             </svg>
@@ -2522,74 +2512,76 @@ button.disabled {
     <section class="lnd-section" aria-labelledby="lnd-bots-title">
       <div class="lnd-inner">
         <div class="lnd-reveal">
-          <div class="lnd-kicker">Против кого ты играешь</div>
-          <h2 class="lnd-h2" id="lnd-bots-title">Боты с <span class="gold">памятью и характером</span>, а не таблицы и расчёты</h2>
-          <p class="lnd-lead">
+          <div class="lnd-kicker" data-i18n="bots.kicker">Против кого ты играешь</div>
+          <h2 class="lnd-h2" id="lnd-bots-title">
+            <span data-i18n="bots.h2.p1">Боты с </span><span class="gold" data-i18n="bots.h2.p2">памятью и характером</span><span data-i18n="bots.h2.p3">, а не таблицы и расчёты</span>
+          </h2>
+          <p class="lnd-lead" data-i18n="bots.lead">
             За столом Poker Trainer нет абстрактных «ботов». Есть характеры, повторяющие реальных игроков турниров.
             Два класса — PRO и VIP, четыре типа игроков в каждом классе.
           </p>
         </div>
 
         <div class="lnd-bot-group lnd-reveal">
-          <div class="lnd-bot-group-title"><span class="dot"></span> Класс PRO — сильные соперники</div>
+          <div class="lnd-bot-group-title"><span class="dot"></span> <span data-i18n="bots.pro.title">Класс PRO — сильные соперники</span></div>
           <div class="lnd-bot-grid cols-4">
             <article class="lnd-bot">
               <span class="badge pro-lag">PRO · 1</span>
               <h4>LAG-Pro</h4>
-              <p>Топ мирового уровня. Постоянное давление, смена образа, ловушки, тонкие вэлью-беты, точные блефы. Тренирует умение строить ловушку — для неё нужна безупречная логика.</p>
+              <p data-i18n="bots.lag.text">Топ мирового уровня. Постоянное давление, смена образа, ловушки, тонкие вэлью-беты, точные блефы. Тренирует умение строить ловушку — для неё нужна безупречная логика.</p>
             </article>
 
             <article class="lnd-bot">
               <span class="badge pro-icm">PRO · 2</span>
               <h4>ICM-Exploiter</h4>
-              <p>Чистый турнирный расчёт. На бабле тайтовеет, в призах давит на короткие стеки. Тренирует турнирные решения: когда риск оправдан, а когда — нет. Каждое решение имеет свою цену.</p>
+              <p data-i18n="bots.icm.text">Чистый турнирный расчёт. На бабле тайтовее, в призах давит на короткие стеки. Тренирует турнирные решения: когда риск оправдан, а когда — нет. Каждое решение имеет свою цену.</p>
             </article>
 
             <article class="lnd-bot">
               <span class="badge pro-solver">PRO · 3</span>
               <h4>Solver-Hybrid</h4>
-              <p>Быстро читает вас и адаптируется. Тренирует вариативность: как только он понял ваш паттерн — вы уже проиграли раздачу. Учитесь не давать паттерн и оставаться непредсказуемым.</p>
+              <p data-i18n="bots.solver.text">Быстро читает вас и адаптируется. Тренирует вариативность: как только он понял ваш паттерн — вы уже проиграли раздачу. Учитесь не давать паттерн и оставаться непредсказуемым.</p>
             </article>
 
             <article class="lnd-bot">
               <span class="badge pro-gto">PRO · 4</span>
               <h4>GTO-Reg</h4>
-              <p>Честный крепкий регуляр. Играет ровно, не разваливается под давлением, не делает лишних ошибок. Тренирует точную игру и дисциплину. Точность важнее блефа и риска.</p>
+              <p data-i18n="bots.gto.text">Честный крепкий регуляр. Играет ровно, не разваливается под давлением, не делает лишних ошибок. Тренирует точную игру и дисциплину. Точность важнее блефа и риска.</p>
             </article>
           </div>
         </div>
 
         <div class="lnd-bot-group lnd-reveal">
-          <div class="lnd-bot-group-title"><span class="dot vip"></span> Класс VIP — слабые соперники</div>
+          <div class="lnd-bot-group-title"><span class="dot vip"></span> <span data-i18n="bots.vip.title">Класс VIP — слабые соперники</span></div>
           <div class="lnd-bot-grid cols-4">
             <article class="lnd-bot">
               <span class="badge vip-taglite">VIP · 1</span>
               <h4>TAG-Lite</h4>
-              <p>Знает базу, но играет роботизированно. Слаб на ривере, его 3-беты предсказуемы. Тренирует ломать шаблон: баррелить там, где он фолдит, и блефовать там, где не ждёт.</p>
+              <p data-i18n="bots.taglite.text">Знает базу, но играет роботизированно. Слаб на ривере, его 3-беты предсказуемы. Тренирует ломать шаблон: баррелить там, где он фолдит, и блефовать там, где не ждёт.</p>
             </article>
 
             <article class="lnd-bot">
               <span class="badge vip-loose">VIP · 2</span>
               <h4>Loose-Passive</h4>
-              <p>Коллит широко, агрессии почти нет, его рейз — всегда сила. Тренирует дисциплину: не блефовать, плотно вэлью-бетить и не тратить фишки там, где он не выкидывает.</p>
+              <p data-i18n="bots.loose.text">Коллит широко, агрессии почти нет, его рейз — всегда сила. Тренирует дисциплину: не блефовать, плотно вэлью-бетить и не тратить фишки там, где он не выкидывает.</p>
             </article>
 
             <article class="lnd-bot">
               <span class="badge vip-rock">VIP · 3</span>
               <h4>Rock</h4>
-              <p>Только премиум-руки, абсолютно предсказуем. Вошёл — у него рука. Тренирует читать слабость и забирать бесплатно: стилить блайнды и фолдить против его крупных ставок.</p>
+              <p data-i18n="bots.rock.text">Только премиум-руки, абсолютно предсказуем. Вошёл — у него рука. Тренирует читать слабость и забирать бесплатно: стилить блайнды и фолдить против его крупных ставок.</p>
             </article>
 
             <article class="lnd-bot">
               <span class="badge vip-maniac">VIP · 4</span>
               <h4>Maniac</h4>
-              <p>Рейзит всё, блефует на всех улицах, играет на эмоциях. Тренирует терпение и хладнокровие: ждать свою руку, плотно вэлью-бетить и никогда не блефовать в ответ.</p>
+              <p data-i18n="bots.maniac.text">Рейзит всё, блефует на всех улицах, играет на эмоциях. Тренирует терпение и хладнокровие: ждать свою руку, плотно вэлью-бетить и никогда не блефовать в ответ.</p>
             </article>
           </div>
         </div>
 
         <div class="lnd-bot-cta lnd-reveal">
-          <button class="lnd-btn" type="button" data-action="enter-app" aria-label="Начать тренировку">
+          <button class="lnd-btn" type="button" data-action="enter-app" aria-label="Начать тренировку" data-i18n="bots.btn">
             Начать тренировку
           </button>
         </div>
@@ -2599,34 +2591,36 @@ button.disabled {
     <section class="lnd-section" aria-labelledby="lnd-benefit-title">
       <div class="lnd-inner">
         <div class="lnd-reveal">
-          <div class="lnd-kicker">Чему ты научишься</div>
-          <h2 class="lnd-h2" id="lnd-benefit-title">Польза <span class="gold">для всех игроков</span></h2>
+          <div class="lnd-kicker" data-i18n="benefit.kicker">Чему ты научишься</div>
+          <h2 class="lnd-h2" id="lnd-benefit-title">
+            <span data-i18n="benefit.h2.p1">Польза </span><span class="gold" data-i18n="benefit.h2.p2">для всех игроков</span>
+          </h2>
         </div>
 
         <div class="lnd-grid-3">
           <article class="lnd-card lnd-reveal">
-            <h3>Начинающему</h3>
-            <p>Научиться думать за столом, а не запоминать руки. Понять, что покер — это не карты, а оппоненты и их решения. Научиться задавать себе вопрос перед каждым действием.</p>
+            <h3 data-i18n="benefit.beginner.title">Начинающему</h3>
+            <p data-i18n="benefit.beginner.text">Научиться думать за столом, а не запоминать руки. Понять, что покер — это не карты, а оппоненты и их решения. Научиться задавать себе вопрос перед каждым действием.</p>
           </article>
 
           <article class="lnd-card lnd-reveal">
-            <h3>Опытному</h3>
-            <p>Перестать играть «по учебнику» и начать играть против конкретного оппонента. Увидеть, где чарты вас ограничивают. Читать людей и обыгрывать их ошибки, а не их карты.</p>
+            <h3 data-i18n="benefit.advanced.title">Опытному</h3>
+            <p data-i18n="benefit.advanced.text">Перестать играть «по учебнику» и начать играть против конкретного оппонента. Увидеть, где чарты вас ограничивают. Читать людей и обыгрывать их ошибки, а не их карты.</p>
           </article>
 
           <article class="lnd-card lnd-reveal">
-            <h3>Профессионалу</h3>
-            <p>Уйти от перегруженных математических решений к чистой логике и абсолютной интуиции. Найти то, что не считается в солвере: момент, ритм, образ, ловушку.</p>
+            <h3 data-i18n="benefit.pro.title">Профессионалу</h3>
+            <p data-i18n="benefit.pro.text">Уйти от перегруженных математических решений к чистой логике и абсолютной интуиции. Найти то, что не считается в солвере: момент, ритм, образ, ловушку.</p>
           </article>
         </div>
 
         <div class="lnd-reveal" style="margin-top:30px;">
           <div class="lnd-card gold-edge">
-            <h3>Почему тренировка против ботов учит играть против людей</h3>
-            <p>
+            <h3 data-i18n="benefit.gold.title">Почему тренировка против ботов учит играть против людей</h3>
+            <p data-i18n="benefit.gold.p1">
               Навык, который вы развиваете в приложении, работает против любого соперника — и против человека, и против программы. Читать линию поведения, замечать ошибки, выстраивать действия под чужое мышление — всё это не зависит от того, кто сидит напротив.
             </p>
-            <p>
+            <p data-i18n="benefit.gold.p2">
               Живой оппонент отличается от идеального калькулятора не тем, что он человек, а тем, что у него есть повторяющиеся ошибки. Он помнит прошлые раздачи, меняет стиль, ловит вас на паттерне, ошибается под давлением. Всё это — поведение. Поведение можно воспроизвести. Именно это и делают боты Poker Trainer.
             </p>
           </div>
@@ -2637,9 +2631,11 @@ button.disabled {
     <section class="lnd-section" aria-labelledby="lnd-how-title">
       <div class="lnd-inner">
         <div class="lnd-reveal">
-          <div class="lnd-kicker">Как устроена игра</div>
-          <h2 class="lnd-h2" id="lnd-how-title">Sit &amp; Go, 8 игроков, <span class="gold">призовая структура на 3 места</span></h2>
-          <p class="lnd-lead">
+          <div class="lnd-kicker" data-i18n="how.kicker">Как устроена игра</div>
+          <h2 class="lnd-h2" id="lnd-how-title">
+            <span data-i18n="how.h2.p1">Sit &amp; Go, 8 игроков, </span><span class="gold" data-i18n="how.h2.p2">призовая структура на 3 места</span>
+          </h2>
+          <p class="lnd-lead" data-i18n="how.lead">
             Вы садитесь за стол из восьми игроков (вы и семь ботов) и играете турнир Sit &amp; Go.
             Каждая раздача — это отдельный урок. Каждое действие бота — информация для вас.
           </p>
@@ -2647,18 +2643,18 @@ button.disabled {
 
         <div class="lnd-grid-3">
           <article class="lnd-card lnd-reveal">
-            <h3>Каждая раздача — урок</h3>
-            <p>Каждый ваш ход — попытка направить мышление оппонента туда, где он примет неверное решение и ошибётся в вашу пользу.</p>
+            <h3 data-i18n="how.card.lesson.title">Каждая раздача — урок</h3>
+            <p data-i18n="how.card.lesson.text">Каждый ваш ход — попытка направить мышление оппонента туда, где он примет неверное решение и ошибётся в вашу пользу.</p>
           </article>
 
           <article class="lnd-card lnd-reveal">
-            <h3>Честная обратная связь</h3>
-            <p>WIN или LOSS, плюс или минус фишек. Никаких подсказок, никаких оценок. Только результат — как в реальном покере.</p>
+            <h3 data-i18n="how.card.feedback.title">Честная обратная связь</h3>
+            <p data-i18n="how.card.feedback.text">WIN или LOSS, плюс или минус фишек. Никаких подсказок, никаких оценок. Только результат — как в реальном покере.</p>
           </article>
 
           <article class="lnd-card lnd-reveal">
-            <h3>Турнирная логика</h3>
-            <p>ICM на баббле и в призах. Давление на короткие стеки. Решения, когда риск оправдан, а когда нет — в условиях реальной структуры выплат.</p>
+            <h3 data-i18n="how.card.icm.title">Турнирная логика</h3>
+            <p data-i18n="how.card.icm.text">ICM на баббле и в призах. Давление на короткие стеки. Решения, когда риск оправдан, а когда нет — в условиях реальной структуры выплат.</p>
           </article>
         </div>
 
@@ -2669,13 +2665,13 @@ button.disabled {
               <line x1="12" y1="18" x2="12" y2="18"/>
             </svg>
           </div>
-          <div class="txt">
+          <div class="txt" data-i18n="how.mobile">
             Приложение оптимизировано под мобильные устройства. Управление одной рукой, безопасные отступы под вырез экрана и системную панель, свайпы открывают панели, тапы и удержания по стеку и картам, крупные зоны нажатия. Бесплатно, без регистрации и установки — работает прямо в браузере.
           </div>
         </div>
 
         <div class="lnd-reveal" style="margin-top:26px; text-align:center;">
-          <button class="lnd-btn" type="button" data-action="enter-app" aria-label="Начать тренировку">
+          <button class="lnd-btn" type="button" data-action="enter-app" aria-label="Начать тренировку" data-i18n="how.btn">
             Начать тренировку
           </button>
         </div>
@@ -2685,17 +2681,19 @@ button.disabled {
     <section class="lnd-section" aria-labelledby="lnd-features-title">
       <div class="lnd-inner">
         <div class="lnd-reveal">
-          <div class="lnd-kicker">Что внутри приложения</div>
-          <h2 class="lnd-h2" id="lnd-features-title">Инструменты <span class="gold">точной игры</span></h2>
+          <div class="lnd-kicker" data-i18n="features.kicker">Что внутри приложения</div>
+          <h2 class="lnd-h2" id="lnd-features-title">
+            <span data-i18n="features.h2.p1">Инструменты </span><span class="gold" data-i18n="features.h2.p2">точной игры</span>
+          </h2>
         </div>
 
         <div class="lnd-features">
-          <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Турнирный стол 8-max</b>, Texas Hold'em, Sit &amp; Go с призовой структурой на 3 места.</span></div>
-          <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Боты с памятью и адаптацией</b> (PRO) и эксплуатируемые слабые боты (VIP).</span></div>
-          <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Слайдер ставок</b>, быстрые проценты банка, BB-пресеты — всё под большой палец.</span></div>
-          <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Таймер на ход</b> и тонкие настройки: сложность, стеки, рост блайндов, показ карт.</span></div>
-          <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>Реплей раздачи по шагам</b> — увидеть линию со стороны и найти свою ошибку.</span></div>
-          <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span><b>ICM-логика</b> на баббле и в призах — турнирные решения, а не кэш-игра.</span></div>
+          <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span data-i18n="features.1"><b>Турнирный стол 8-max</b>, Texas Hold'em, Sit &amp; Go с призовой структурой на 3 места.</span></div>
+          <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span data-i18n="features.2"><b>Боты с памятью и адаптацией</b> (PRO) и эксплуатируемые слабые боты (VIP).</span></div>
+          <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span data-i18n="features.3"><b>Слайдер ставок</b>, быстрые проценты банка, BB-пресеты — всё под большой палец.</span></div>
+          <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span data-i18n="features.4"><b>Таймер на ход</b> и тонкие настройки: сложность, стеки, рост блайндов, показ карт.</span></div>
+          <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span data-i18n="features.5"><b>Реплей раздачи по шагам</b> — увидеть линию со стороны и найти свою ошибку.</span></div>
+          <div class="lnd-feature lnd-reveal"><span class="tick">✓</span><span data-i18n="features.6"><b>ICM-логика</b> на баббле и в призах — турнирные решения, а не кэш-игра.</span></div>
         </div>
       </div>
     </section>
@@ -2703,48 +2701,38 @@ button.disabled {
     <section class="lnd-section" aria-labelledby="lnd-sections-title">
       <div class="lnd-inner">
         <div class="lnd-reveal">
-          <div class="lnd-kicker">Разделы и режимы</div>
-          <h2 class="lnd-h2" id="lnd-sections-title">Как <span class="gold">ориентироваться</span> внутри</h2>
+          <div class="lnd-kicker" data-i18n="sections.kicker">Разделы и режимы</div>
+          <h2 class="lnd-h2" id="lnd-sections-title">
+            <span data-i18n="sections.h2.p1">Как </span><span class="gold" data-i18n="sections.h2.p2">ориентироваться</span><span data-i18n="sections.h2.p3"> внутри</span>
+          </h2>
         </div>
 
         <div class="lnd-grid-3-sections">
           <button class="lnd-card lnd-reveal tappable" type="button"
-                  data-info-title="Настройки"
-                  data-info-body="В разделе «Настройки» вы управляете условиями тренировки. Язык интерфейса — русский или английский, сложность — от мягкой игры с VIP до жёсткого стола с PRO.
-
-Стеки отображаются в BB или в фишках — как удобнее для конкретного спота. Стиль карт — 2-цветный для классического вида или 4-цветный для быстрого считывания мастей.
-
-Блайнды растут по числу сыгранных раздач. Время на ход выбирается под ваш темп: 10 секунд или без ограничения. Бейджи типов игроков показывают, против кого вы играете.">
-            <h3>Настройки</h3>
-            <p>Язык, уровень сложности, стеки (BB/фишки), стиль карт (2/4-цветные), рост блайндов, время на ход, типы игроков, показ карт (скрытие/открытие).</p>
+                  data-info-title-key="modal.settings.title"
+                  data-info-body-key="modal.settings.body">
+            <h3 data-i18n="sections.settings.title">Настройки</h3>
+            <p data-i18n="sections.settings.text">Язык, уровень сложности, стеки (BB/фишки), стиль карт (2/4-цветные), рост блайндов, время на ход, типы игроков, показ карт (скрытие/открытие).</p>
             <svg class="lnd-card-tap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M9 3H5a2 2 0 0 0-2 2v4M9 21H5a2 2 0 0 1-2-2v-4M15 3h4a2 2 0 0 1 2 2v4M15 21h4a2 2 0 0 0 2-2v-4"/>
             </svg>
           </button>
 
           <button class="lnd-card lnd-reveal tappable" type="button"
-                  data-info-title="Управление"
-                  data-info-body="Всё управление — под большой палец. Свайпы вверх и вниз открывают и закрывают настройки, не отрываясь от игры. Тренировка на телефоне — удобнее большого экрана.
-
-Слайдер ставки регулируется одним движением — точный размер бета без ручного ввода цифр. Тапы по стеку, картам и таймеру срабатывают мгновенно, без двойных кликов.
-
-Нажатие на кнопках захватывает слайдер, а движение вверх или вниз задаёт сумму ставки. Долгое нажатие на картах героя скрывает их для тренировки интуиции.">
-            <h3>Управление</h3>
-            <p>Всё управление строится под большой палец для удобной тренировки с телефона: свайпы, слайдеры, тапы по активным зонам, тапы и удержания.</p>
+                  data-info-title-key="modal.control.title"
+                  data-info-body-key="modal.control.body">
+            <h3 data-i18n="sections.control.title">Управление</h3>
+            <p data-i18n="sections.control.text">Всё управление строится под большой палец для удобной тренировки с телефона: свайпы, слайдеры, тапы по активным зонам, тапы и удержания.</p>
             <svg class="lnd-card-tap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M9 3H5a2 2 0 0 0-2 2v4M9 21H5a2 2 0 0 1-2-2v-4M15 3h4a2 2 0 0 1 2 2v4M15 21h4a2 2 0 0 0 2-2v-4"/>
             </svg>
           </button>
 
           <button class="lnd-card lnd-reveal tappable" type="button"
-                  data-info-title="Поддержка"
-                  data-info-body="Poker Trainer — некоммерческий проект. Без подписок, без рекламы, без платы за доступ. Проект существует исключительно на средства от вашей поддержки.
-
-Адреса для переводов: GGPoker (перевод через покер-рум), USDT TRC20 (криптовалюта в сети Tron), VISA (карта для переводов в долларах и других валютах) или запрос в Telegram.
-
-Контакты в Telegram — основной канал связи. Через него можно задать вопрос, предложить идею, сообщить об ошибке или просто поделиться впечатлениями от тренировки.">
-            <h3>Поддержка</h3>
-            <p>Poker Trainer — некоммерческий проект. Без подписок, без рекламы, без платы за доступ. Проект существует на средства от вашей поддержки.</p>
+                  data-info-title-key="modal.support.title"
+                  data-info-body-key="modal.support.body">
+            <h3 data-i18n="sections.support.title">Поддержка</h3>
+            <p data-i18n="sections.support.text">Poker Trainer — некоммерческий проект. Без подписок, без рекламы, без платы за доступ. Проект существует на средства от вашей поддержки.</p>
             <svg class="lnd-card-tap-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M9 3H5a2 2 0 0 0-2 2v4M9 21H5a2 2 0 0 1-2-2v-4M15 3h4a2 2 0 0 1 2 2v4M15 21h4a2 2 0 0 0 2-2v-4"/>
             </svg>
@@ -2758,13 +2746,13 @@ button.disabled {
       <div class="lnd-final-rule" aria-hidden="true"></div>
       <div class="lnd-inner">
         <h2 class="lnd-h2 lnd-reveal" id="lnd-final-title">
-          Готов тренировать <span class="gold">логику</span> и <span class="gold">интуицию</span>?
+          <span data-i18n="final.h2.p1">Готов тренировать </span><span class="gold" data-i18n="final.h2.p2">логику</span><span data-i18n="final.h2.p3"> и </span><span class="gold" data-i18n="final.h2.p4">интуицию</span><span data-i18n="final.h2.p5">?</span>
         </h2>
-        <p class="lnd-p lnd-reveal" style="margin-left:auto;margin-right:auto;">
+        <p class="lnd-p lnd-reveal" style="margin-left:auto;margin-right:auto;" data-i18n="final.p">
           Бесплатно. Без установки. Без регистрации.
         </p>
         <div class="lnd-reveal" style="margin-top:26px;">
-          <button class="lnd-btn" type="button" data-action="enter-app" aria-label="Начать тренировку">
+          <button class="lnd-btn" type="button" data-action="enter-app" aria-label="Начать тренировку" data-i18n="final.btn">
             Начать тренировку
           </button>
         </div>
@@ -2775,9 +2763,9 @@ button.disabled {
       <div class="lnd-inner">
         <div class="row">
           <div class="brand">Poker Trainer</div>
-          <div class="copy">© Все права защищены</div>
+          <div class="copy" data-i18n="footer.copy">© Все права защищены</div>
         </div>
-        <p class="disclaimer" style="margin-top:14px;">
+        <p class="disclaimer" style="margin-top:14px;" data-i18n="footer.disclaimer">
           Тренажёр для тренировки покерных навыков.
           Некоммерческий проект.
           Не является азартной игрой на реальные деньги.
@@ -3101,6 +3089,350 @@ button.disabled {
 (function() {
   'use strict';
 
+  var I18N = {
+    ru: {
+      'tg.feedTitle': 'Из Telegram',
+
+      'hero.h1.p1': 'Тренируй ',
+      'hero.h1.p2': 'логику',
+      'hero.h1.p3': ' и ',
+      'hero.h1.p4': 'интуицию',
+      'hero.sub': 'Симулятор турнирного стола с ботами PRO и VIP, имитирующими поведение человека.\nТренажёр для развития логики и интуиции за покерным столом.\nБесплатно. Без установки. Без регистрации.',
+      'hero.btn': 'Начать тренировку',
+
+      'why.kicker': 'Почему это работает',
+      'why.h2.p1': 'Солвер даёт правильный ответ. ',
+      'why.h2.p2': 'Тренажёр учит точной игре',
+      'why.lead': 'Солверы, калькуляторы эквити и GTO-тренажёры отвечают на вопрос «как играть правильно в вакууме».\nНо в турнире вакуума нет. Есть оппонент с памятью, страхом, тильтом и привычками.\nПротив него «правильная» игра часто проигрывает «точной» — той, что строится под его ошибки.',
+      'why.card.logic.title': 'Логика',
+      'why.card.logic.text': 'Выстроить линию так, чтобы оппонент совершил ошибку, а не просто «сыграл по чарту». Каждое действие — осознанный ответ на вопрос «зачем».',
+      'why.card.intuition.title': 'Интуиция',
+      'why.card.intuition.text': 'Считать исход раздачи из поля информации до того, как карты открылись. Читать линию поведения и замечать повторяющиеся ошибки.',
+      'why.card.link.title': 'Связка логики и интуиции',
+      'why.card.link.text': 'Мало знать, кто сильнее на вскрытии. Нужно выстроить действия так, чтобы выиграть максимум фишек, а не просто забрать банк.',
+
+      'bots.kicker': 'Против кого ты играешь',
+      'bots.h2.p1': 'Боты с ',
+      'bots.h2.p2': 'памятью и характером',
+      'bots.h2.p3': ', а не таблицы и расчёты',
+      'bots.lead': 'За столом Poker Trainer нет абстрактных «ботов». Есть характеры, повторяющие реальных игроков турниров.\nДва класса — PRO и VIP, четыре типа игроков в каждом классе.',
+      'bots.pro.title': 'Класс PRO — сильные соперники',
+      'bots.lag.text': 'Топ мирового уровня. Постоянное давление, смена образа, ловушки, тонкие вэлью-беты, точные блефы. Тренирует умение строить ловушку — для неё нужна безупречная логика.',
+      'bots.icm.text': 'Чистый турнирный расчёт. На бабле тайтовее, в призах давит на короткие стеки. Тренирует турнирные решения: когда риск оправдан, а когда — нет. Каждое решение имеет свою цену.',
+      'bots.solver.text': 'Быстро читает вас и адаптируется. Тренирует вариативность: как только он понял ваш паттерн — вы уже проиграли раздачу. Учитесь не давать паттерн и оставаться непредсказуемым.',
+      'bots.gto.text': 'Честный крепкий регуляр. Играет ровно, не разваливается под давлением, не делает лишних ошибок. Тренирует точную игру и дисциплину. Точность важнее блефа и риска.',
+      'bots.vip.title': 'Класс VIP — слабые соперники',
+      'bots.taglite.text': 'Знает базу, но играет роботизированно. Слаб на ривере, его 3-беты предсказуемы. Тренирует ломать шаблон: баррелить там, где он фолдит, и блефовать там, где не ждёт.',
+      'bots.loose.text': 'Коллит широко, агрессии почти нет, его рейз — всегда сила. Тренирует дисциплину: не блефовать, плотно вэлью-бетить и не тратить фишки там, где он не выкидывает.',
+      'bots.rock.text': 'Только премиум-руки, абсолютно предсказуем. Вошёл — у него рука. Тренирует читать слабость и забирать бесплатно: стилить блайнды и фолдить против его крупных ставок.',
+      'bots.maniac.text': 'Рейзит всё, блефует на всех улицах, играет на эмоциях. Тренирует терпение и хладнокровие: ждать свою руку, плотно вэлью-бетить и никогда не блефовать в ответ.',
+      'bots.btn': 'Начать тренировку',
+
+      'benefit.kicker': 'Чему ты научишься',
+      'benefit.h2.p1': 'Польза ',
+      'benefit.h2.p2': 'для всех игроков',
+      'benefit.beginner.title': 'Начинающему',
+      'benefit.beginner.text': 'Научиться думать за столом, а не запоминать руки. Понять, что покер — это не карты, а оппоненты и их решения. Научиться задавать себе вопрос перед каждым действием.',
+      'benefit.advanced.title': 'Опытному',
+      'benefit.advanced.text': 'Перестать играть «по учебнику» и начать играть против конкретного оппонента. Увидеть, где чарты вас ограничивают. Читать людей и обыгрывать их ошибки, а не их карты.',
+      'benefit.pro.title': 'Профессионалу',
+      'benefit.pro.text': 'Уйти от перегруженных математических решений к чистой логике и абсолютной интуиции. Найти то, что не считается в солвере: момент, ритм, образ, ловушку.',
+      'benefit.gold.title': 'Почему тренировка против ботов учит играть против людей',
+      'benefit.gold.p1': 'Навык, который вы развиваете в приложении, работает против любого соперника — и против человека, и против программы. Читать линию поведения, замечать ошибки, выстраивать действия под чужое мышление — всё это не зависит от того, кто сидит напротив.',
+      'benefit.gold.p2': 'Живой оппонент отличается от идеального калькулятора не тем, что он человек, а тем, что у него есть повторяющиеся ошибки. Он помнит прошлые раздачи, меняет стиль, ловит вас на паттерне, ошибается под давлением. Всё это — поведение. Поведение можно воспроизвести. Именно это и делают боты Poker Trainer.',
+
+      'how.kicker': 'Как устроена игра',
+      'how.h2.p1': 'Sit & Go, 8 игроков, ',
+      'how.h2.p2': 'призовая структура на 3 места',
+      'how.lead': 'Вы садитесь за стол из восьми игроков (вы и семь ботов) и играете турнир Sit & Go.\nКаждая раздача — это отдельный урок. Каждое действие бота — информация для вас.',
+      'how.card.lesson.title': 'Каждая раздача — урок',
+      'how.card.lesson.text': 'Каждый ваш ход — попытка направить мышление оппонента туда, где он примет неверное решение и ошибётся в вашу пользу.',
+      'how.card.feedback.title': 'Честная обратная связь',
+      'how.card.feedback.text': 'WIN или LOSS, плюс или минус фишек. Никаких подсказок, никаких оценок. Только результат — как в реальном покере.',
+      'how.card.icm.title': 'Турнирная логика',
+      'how.card.icm.text': 'ICM на баббле и в призах. Давление на короткие стеки. Решения, когда риск оправдан, а когда нет — в условиях реальной структуры выплат.',
+      'how.mobile': 'Приложение оптимизировано под мобильные устройства. Управление одной рукой, безопасные отступы под вырез экрана и системную панель, свайпы открывают панели, тапы и удержания по стеку и картам, крупные зоны нажатия. Бесплатно, без регистрации и установки — работает прямо в браузере.',
+      'how.btn': 'Начать тренировку',
+
+      'features.kicker': 'Что внутри приложения',
+      'features.h2.p1': 'Инструменты ',
+      'features.h2.p2': 'точной игры',
+      'features.1': '<b>Турнирный стол 8-max</b>, Texas Hold\'em, Sit & Go с призовой структурой на 3 места.',
+      'features.2': '<b>Боты с памятью и адаптацией</b> (PRO) и эксплуатируемые слабые боты (VIP).',
+      'features.3': '<b>Слайдер ставок</b>, быстрые проценты банка, BB-пресеты — всё под большой палец.',
+      'features.4': '<b>Таймер на ход</b> и тонкие настройки: сложность, стеки, рост блайндов, показ карт.',
+      'features.5': '<b>Реплей раздачи по шагам</b> — увидеть линию со стороны и найти свою ошибку.',
+      'features.6': '<b>ICM-логика</b> на баббле и в призах — турнирные решения, а не кэш-игра.',
+
+      'sections.kicker': 'Разделы и режимы',
+      'sections.h2.p1': 'Как ',
+      'sections.h2.p2': 'ориентироваться',
+      'sections.h2.p3': ' внутри',
+      'sections.settings.title': 'Настройки',
+      'sections.settings.text': 'Язык, уровень сложности, стеки (BB/фишки), стиль карт (2/4-цветные), рост блайндов, время на ход, типы игроков, показ карт (скрытие/открытие).',
+      'sections.control.title': 'Управление',
+      'sections.control.text': 'Всё управление строится под большой палец для удобной тренировки с телефона: свайпы, слайдеры, тапы по активным зонам, тапы и удержания.',
+      'sections.support.title': 'Поддержка',
+      'sections.support.text': 'Poker Trainer — некоммерческий проект. Без подписок, без рекламы, без платы за доступ. Проект существует на средства от вашей поддержки.',
+
+      'final.h2.p1': 'Готов тренировать ',
+      'final.h2.p2': 'логику',
+      'final.h2.p3': ' и ',
+      'final.h2.p4': 'интуицию',
+      'final.h2.p5': '?',
+      'final.p': 'Бесплатно. Без установки. Без регистрации.',
+      'final.btn': 'Начать тренировку',
+
+      'footer.copy': '© Все права защищены',
+      'footer.disclaimer': 'Тренажёр для тренировки покерных навыков.\nНекоммерческий проект.\nНе является азартной игрой на реальные деньги.',
+
+      'modal.logic.title': 'Логика',
+      'modal.logic.body': 'Логика в покере — это не про «правильные» решения по чарту, а про построение линии, при которой оппонент совершает ошибку. Каждое ваше действие должно иметь цель: заставить его сделать колл, когда он позади; фолд, когда он впереди; рейз, когда он блефует. Без этой цели действие превращается в угадывание, и вы теряете контроль над раздачей.\n\nВы учитесь задавать вопрос «зачем» перед каждым ходом. Не «что я должен сделать по GTO», а «что я хочу, чтобы сделал оппонент после моего действия». В этом и есть ключевое отличие правильной игры от точной: первая соответствует теории, вторая — управляет чужим решением и заставляет его ошибиться именно там, где вам выгодно.\n\nЗа столом Poker Trainer логика тренируется через анализ линии каждого бота. Почему LAG-Pro рейзит именно здесь, почему ICM-Exploiter на баббле играет тайтовее, почему Solver-Hybrid меняет паттерн именно против вас. Вы начинаете видеть логику за чужими решениями — и постепенно строите свою так, чтобы управлять чужой.',
+      'modal.intuition.title': 'Интуиция',
+      'modal.intuition.body': 'Интуиция в покере — это способность считать исход раздачи из поля информации до того, как карты открылись. Это не мистика и не «чуйка». Это опыт, который мозг обрабатывает быстрее, чем сознание успевает облечь его в слова. Она работает не вместо логики, а поверх неё — там, где логика уже посчитала варианты и осталось выбрать точный.\n\nВы учитесь читать линию поведения оппонента: темп ставок, их размеры, ошибки, смену образа. Замечать, когда он блефует третий раз за один круг за столом. Чувствовать слоуплей — когда игрок, который только что давил, вдруг начинает чекать и коллировать — это не слабость, а приманка, и опытный игрок отличает одно от другого мгновенно.\n\nВ Poker Trainer интуиция тренируется через многократное повторение и наблюдение. Боты играют по-разному каждый раз, но их характеры стабильны — и со временем вы начинаете узнавать их решения ещё до того, как они сделаны. Это и есть интуиция в чистом виде: быстрое считывание повторяющегося поведения, отточенное до автоматизма.',
+      'modal.link.title': 'Связка логики и интуиции',
+      'modal.link.body': 'Логика и интуиция в покере — не два отдельных навыка, а два конца одной линии. Логика говорит: «здесь я должен ставить 60% банка, чтобы у оппонента не было правильных шансов на колл». Интуиция говорит: «этот конкретный игрок на этой конкретной улице на такую ставку выкинет». Одно без другого теряет силу, только вместе они дают точное решение.\n\nПроблема в том, что по отдельности оба навыка ограничены. Чистая логика без интуиции превращается в игру по чарту — она правильная, но не эксплуатирует ошибки. Чистая интуиция без логики превращается в догадки — иногда гениальные, иногда катастрофические. Сила появляется только там, где одно подкрепляет другое.\n\nВ Poker Trainer вы тренируете именно связку. Сначала считаете логически, какое действие было бы правильным в вакууме, потом через интуицию корректируете его под конкретного оппонента. И в этот момент ваша игра из правильной становится точной — она не просто соответствует теории, она забирает максимум фишек именно у этого игрока именно сейчас.',
+      'modal.settings.title': 'Настройки',
+      'modal.settings.body': 'В разделе «Настройки» вы управляете условиями тренировки. Язык интерфейса — русский или английский, сложность — от мягкой игры с VIP до жёсткого стола с PRO.\n\nСтеки отображаются в BB или в фишках — как удобнее для конкретного спота. Стиль карт — 2-цветный для классического вида или 4-цветный для быстрого считывания мастей.\n\nБлайнды растут по числу сыгранных раздач. Время на ход выбирается под ваш темп: 10 секунд или без ограничения. Бейджи типов игроков показывают, против кого вы играете.',
+      'modal.control.title': 'Управление',
+      'modal.control.body': 'Всё управление — под большой палец. Свайпы вверх и вниз открывают и закрывают настройки, не отрываясь от игры. Тренировка на телефоне — удобнее большого экрана.\n\nСлайдер ставки регулируется одним движением — точный размер бета без ручного ввода цифр. Тапы по стеку, картам и таймеру срабатывают мгновенно, без двойных кликов.\n\nНажатие на кнопках захватывает слайдер, а движение вверх или вниз задаёт сумму ставки. Долгое нажатие на картах героя скрывает их для тренировки интуиции.',
+      'modal.support.title': 'Поддержка',
+      'modal.support.body': 'Poker Trainer — некоммерческий проект. Без подписок, без рекламы, без платы за доступ. Проект существует исключительно на средства от вашей поддержки.\n\nАдреса для переводов: GGPoker (перевод через покер-рум), USDT TRC20 (криптовалюта в сети Tron), VISA (карта для переводов в долларах и других валютах) или запрос в Telegram.\n\nКонтакты в Telegram — основной канал связи. Через него можно задать вопрос, предложить идею, сообщить об ошибке или просто поделиться впечатлениями от тренировки.',
+
+      'modal.supportAuthor.title': 'ПОДДЕРЖИ АВТОРА',
+      'modal.supportThanks': 'Благодарю за поддержку'
+    },
+
+    en: {
+      'tg.feedTitle': 'From Telegram',
+
+      'hero.h1.p1': 'Train ',
+      'hero.h1.p2': 'logic',
+      'hero.h1.p3': ' and ',
+      'hero.h1.p4': 'intuition',
+      'hero.sub': 'Tournament table simulator with PRO and VIP bots that mimic human behavior.\nA trainer for developing logic and intuition at the poker table.\nFree. No install. No sign-up.',
+      'hero.btn': 'Start training',
+
+      'why.kicker': 'Why it works',
+      'why.h2.p1': 'A solver gives the right answer. ',
+      'why.h2.p2': 'The trainer teaches precise play',
+      'why.lead': 'Solvers, equity calculators and GTO trainers answer the question "how to play correctly in a vacuum".\nBut there is no vacuum in a tournament. There is an opponent with memory, fear, tilt and habits.\nAgainst him, "correct" play often loses to "precise" play — the one built around his mistakes.',
+      'why.card.logic.title': 'Logic',
+      'why.card.logic.text': 'Build a line that forces the opponent to make a mistake, not just "play by the chart". Every action is a conscious answer to the question "why".',
+      'why.card.intuition.title': 'Intuition',
+      'why.card.intuition.text': 'Read the outcome of the hand from the information field before the cards are revealed. Read the behavior line and notice repeating mistakes.',
+      'why.card.link.title': 'Logic and intuition combined',
+      'why.card.link.text': 'It is not enough to know who is ahead at showdown. You need to build your actions to win the maximum chips, not just take the pot.',
+
+      'bots.kicker': 'Who you play against',
+      'bots.h2.p1': 'Bots with ',
+      'bots.h2.p2': 'memory and character',
+      'bots.h2.p3': ', not charts and calculations',
+      'bots.lead': 'There are no abstract "bots" at the Poker Trainer table. There are characters that mimic real tournament players.\nTwo classes — PRO and VIP, four player types in each class.',
+      'bots.pro.title': 'PRO class — strong opponents',
+      'bots.lag.text': 'World-class. Constant pressure, image shifts, traps, thin value bets, precise bluffs. Trains your ability to set a trap — that requires flawless logic.',
+      'bots.icm.text': 'Pure tournament math. Plays tighter on the bubble, pressures short stacks in the money. Trains tournament decisions: when risk is justified and when it is not. Every decision has its price.',
+      'bots.solver.text': 'Reads you fast and adapts. Trains variability: once he has figured out your pattern — you have already lost the hand. Learn not to give him a pattern and stay unpredictable.',
+      'bots.gto.text': 'An honest, solid regular. Plays evenly, does not fall apart under pressure, does not make unnecessary mistakes. Trains precise play and discipline. Precision matters more than bluffing and risk.',
+      'bots.vip.title': 'VIP class — weak opponents',
+      'bots.taglite.text': 'Knows the basics but plays robotically. Weak on the river, his 3-bets are predictable. Trains you to break the pattern: barrel where he folds, and bluff where he does not expect it.',
+      'bots.loose.text': 'Calls wide, almost no aggression, his raise is always strength. Trains discipline: do not bluff, value bet thickly, and do not waste chips where he will not fold.',
+      'bots.rock.text': 'Only premium hands, absolutely predictable. If he entered — he has a hand. Trains you to read weakness and take it down for free: steal blinds and fold against his big bets.',
+      'bots.maniac.text': 'Raises everything, bluffs on every street, plays on emotion. Trains patience and composure: wait for your hand, value bet thickly, and never bluff back at him.',
+      'bots.btn': 'Start training',
+
+      'benefit.kicker': 'What you will learn',
+      'benefit.h2.p1': 'Value ',
+      'benefit.h2.p2': 'for every player',
+      'benefit.beginner.title': 'For a beginner',
+      'benefit.beginner.text': 'Learn to think at the table instead of memorizing hands. Understand that poker is not about cards — it is about opponents and their decisions. Learn to ask yourself a question before every action.',
+      'benefit.advanced.title': 'For an experienced player',
+      'benefit.advanced.text': 'Stop playing "by the book" and start playing against a specific opponent. See where charts limit you. Read people and exploit their mistakes, not their cards.',
+      'benefit.pro.title': 'For a pro',
+      'benefit.pro.text': 'Move away from overloaded math toward pure logic and absolute intuition. Find what solvers cannot calculate: the moment, the rhythm, the image, the trap.',
+      'benefit.gold.title': 'Why training against bots teaches you to play against people',
+      'benefit.gold.p1': 'The skill you develop in the app works against any opponent — a human or a program. Reading behavior lines, spotting mistakes, building actions around someone else\'s thinking — none of that depends on who is sitting across from you.',
+      'benefit.gold.p2': 'A live opponent differs from an ideal calculator not because he is human, but because he has repeating mistakes. He remembers past hands, changes style, catches you on a pattern, makes mistakes under pressure. All of that is behavior. Behavior can be reproduced. That is exactly what Poker Trainer bots do.',
+
+      'how.kicker': 'How the game works',
+      'how.h2.p1': 'Sit & Go, 8 players, ',
+      'how.h2.p2': '3-place payout structure',
+      'how.lead': 'You sit down at an eight-player table (you and seven bots) and play a Sit & Go tournament.\nEvery hand is a separate lesson. Every bot action is information for you.',
+      'how.card.lesson.title': 'Every hand is a lesson',
+      'how.card.lesson.text': 'Every move you make is an attempt to steer the opponent\'s thinking toward the place where he will make the wrong decision and err in your favor.',
+      'how.card.feedback.title': 'Honest feedback',
+      'how.card.feedback.text': 'WIN or LOSS, plus or minus chips. No hints, no grades. Only the result — like in real poker.',
+      'how.card.icm.title': 'Tournament logic',
+      'how.card.icm.text': 'ICM on the bubble and in the money. Pressure on short stacks. Decisions on when risk is justified and when it is not — under a real payout structure.',
+      'how.mobile': 'The app is optimized for mobile devices. One-handed controls, safe-area insets for the notch and system bar, swipes open the panels, taps and holds on the stack and cards, large tap targets. Free, no sign-up and no install — works right in the browser.',
+      'how.btn': 'Start training',
+
+      'features.kicker': 'What is inside the app',
+      'features.h2.p1': 'Tools of ',
+      'features.h2.p2': 'precise play',
+      'features.1': '<b>8-max tournament table</b>, Texas Hold\'em, Sit & Go with a 3-place payout structure.',
+      'features.2': '<b>Bots with memory and adaptation</b> (PRO) and exploitable weak bots (VIP).',
+      'features.3': '<b>Bet slider</b>, quick pot percentages, BB presets — all under your thumb.',
+      'features.4': '<b>Action timer</b> and fine-tuned settings: difficulty, stacks, blind growth, card visibility.',
+      'features.5': '<b>Step-by-step hand replay</b> — see the line from the outside and find your mistake.',
+      'features.6': '<b>ICM logic</b> on the bubble and in the money — tournament decisions, not cash-game play.',
+
+      'sections.kicker': 'Sections and modes',
+      'sections.h2.p1': 'How to ',
+      'sections.h2.p2': 'navigate',
+      'sections.h2.p3': ' inside',
+      'sections.settings.title': 'Settings',
+      'sections.settings.text': 'Language, difficulty, stacks (BB/chips), card style (2/4-color), blind growth, action timer, player types, card visibility (hidden/revealed).',
+      'sections.control.title': 'Controls',
+      'sections.control.text': 'All controls are designed for one thumb for comfortable phone training: swipes, sliders, taps on active zones, taps and holds.',
+      'sections.support.title': 'Support',
+      'sections.support.text': 'Poker Trainer is a non-commercial project. No subscriptions, no ads, no paywall. The project exists entirely on support from you.',
+
+      'final.h2.p1': 'Ready to train ',
+      'final.h2.p2': 'logic',
+      'final.h2.p3': ' and ',
+      'final.h2.p4': 'intuition',
+      'final.h2.p5': '?',
+      'final.p': 'Free. No install. No sign-up.',
+      'final.btn': 'Start training',
+
+      'footer.copy': '© All rights reserved',
+      'footer.disclaimer': 'A trainer for poker skills.\nNon-commercial project.\nNot a real-money gambling game.',
+
+      'modal.logic.title': 'Logic',
+      'modal.logic.body': 'Logic in poker is not about "correct" chart decisions — it is about building a line in which the opponent makes a mistake. Every action you take must have a purpose: to make him call when he is behind, fold when he is ahead, or raise when he is bluffing. Without that purpose, the action turns into guessing, and you lose control of the hand.\n\nYou learn to ask "why" before every move. Not "what should I do by GTO", but "what do I want the opponent to do after my action". This is the key difference between correct play and precise play: the first follows theory, the second controls the opponent\'s decision and forces him to err exactly where it benefits you.\n\nAt the Poker Trainer table, logic is trained by analyzing each bot\'s line. Why LAG-Pro raises here, why ICM-Exploiter plays tighter on the bubble, why Solver-Hybrid changes his pattern specifically against you. You begin to see the logic behind others\' decisions — and gradually build your own to control theirs.',
+      'modal.intuition.title': 'Intuition',
+      'modal.intuition.body': 'Intuition in poker is the ability to read the outcome of a hand from the information field before the cards are revealed. It is not mysticism and not a "gut feeling". It is experience that the brain processes faster than the conscious mind can put into words. It works not instead of logic but on top of it — at the point where logic has already weighed the options and only the precise pick remains.\n\nYou learn to read the opponent\'s behavior line: betting pace, sizing, mistakes, image shifts. To notice when he bluffs for the third time in one orbit. To feel the slowplay — when a player who was just applying pressure suddenly starts checking and calling — that is not weakness, it is bait, and an experienced player tells one from the other instantly.\n\nIn Poker Trainer, intuition is trained through repetition and observation. Bots play differently every time, but their characters stay consistent — and over time you begin to recognize their decisions before they are made. That is intuition in its purest form: fast reading of repeating behavior, sharpened to the point of automatic response.',
+      'modal.link.title': 'Logic and intuition combined',
+      'modal.link.body': 'Logic and intuition in poker are not two separate skills but two ends of one line. Logic says: "I should bet 60% of the pot here so the opponent does not have the right odds to call". Intuition says: "this specific player on this specific street will fold to a bet of that size". One without the other loses power, only together do they produce a precise decision.\n\nThe problem is that on their own both skills are limited. Pure logic without intuition turns into chart play — correct, but it does not exploit mistakes. Pure intuition without logic turns into guesswork — sometimes brilliant, sometimes catastrophic. Strength appears only where one reinforces the other.\n\nIn Poker Trainer, you train exactly that combination. First, you work out logically what the correct action would be in a vacuum, then through intuition you adjust it to the specific opponent. And at that moment your play turns from correct into precise — it does not just match theory, it extracts the maximum chips from this specific player right now.',
+      'modal.settings.title': 'Settings',
+      'modal.settings.body': 'In the Settings section you fully control the training conditions. Interface language — Russian or English, difficulty — from a soft game against VIP bots to a tough table with PRO.\n\nStacks are shown in BB or chips — whichever is more convenient for the spot. Card style — 2-color for the classic look or 4-color for faster suit reading.\n\nBlinds rise by hands played. Action timer is chosen to match your pace: 10 seconds or no limit. Player type badges show who you are playing against at the table.',
+      'modal.control.title': 'Controls',
+      'modal.control.body': 'Everything is built for one thumb. Swipes up and down open and close the panels without taking your hand off the game. Phone training is more comfortable than a big screen.\n\nThe bet slider is adjusted with a single motion — precise bet sizing without typing numbers. Taps on stack, cards and timer react instantly, with no double taps.\n\nHolding the percentage buttons grabs the slider, and moving up or down sets the bet amount. Long-pressing your hole cards hides them for intuition training.',
+      'modal.support.title': 'Support',
+      'modal.support.body': 'Poker Trainer is a non-commercial project. No subscriptions, no ads, no paywall. The project exists entirely on support from you.\n\nTransfer addresses: GGPoker (transfer via the poker room), USDT TRC20 (crypto on the Tron network), VISA (card for transfers in USD and other currencies), or just ask in Telegram.\n\nTelegram contacts are the main channel of communication. Through it you can ask a question, suggest an idea, report a bug, or simply share your impressions of training.',
+
+      'modal.supportAuthor.title': 'SUPPORT THE AUTHOR',
+      'modal.supportThanks': 'Thank you for your support'
+    }
+  };
+
+  var STORAGE_KEY = 'pokerTrainerLang';
+  var currentLang = 'ru';
+
+  function setHTML(el, html) {
+    if (!el) return;
+    if (html && html.indexOf('<') !== -1) {
+      el.innerHTML = html;
+    } else {
+      el.textContent = html;
+    }
+  }
+
+  function applyTranslations(lang) {
+    var dict = I18N[lang];
+    if (!dict) return;
+
+    var nodes = document.querySelectorAll('[data-i18n]');
+    for (var i = 0; i < nodes.length; i++) {
+      var node = nodes[i];
+      var key = node.getAttribute('data-i18n');
+      if (!key) continue;
+      var val = dict[key];
+      if (val == null) continue;
+      var tag = node.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') {
+        node.value = val;
+      } else if (tag === 'BUTTON') {
+        if (node.hasAttribute('data-i18n') && !node.querySelector('[data-i18n]')) {
+          node.textContent = val;
+        } else {
+          setHTML(node, val);
+        }
+      } else {
+        setHTML(node, val);
+      }
+    }
+
+    try { document.documentElement.setAttribute('lang', lang); } catch (e) {}
+
+    var opts = document.querySelectorAll('.lang-option');
+    for (var j = 0; j < opts.length; j++) {
+      var o = opts[j];
+      var isActive = o.getAttribute('data-lang') === lang;
+      o.classList.toggle('active', isActive);
+      o.classList.toggle('inactive', !isActive);
+      o.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    }
+
+    var cur = document.getElementById('lang-current');
+    if (cur) cur.textContent = lang.toUpperCase();
+
+    try {
+      var infoModal = document.getElementById('info-modal');
+      if (infoModal && infoModal.classList.contains('open')) {
+        var infoBody = document.getElementById('info-modal-body');
+        var infoTitle = document.getElementById('info-modal-title-el');
+        if (infoBody && infoBody.dataset.modalBodyKey) {
+          var bodyKey = infoBody.dataset.modalBodyKey;
+          var titleKey = infoBody.dataset.modalTitleKey;
+          if (bodyKey && dict[bodyKey]) {
+            var paragraphs = String(dict[bodyKey] || '').split('\n\n');
+            var html = '';
+            for (var p = 0; p < paragraphs.length; p++) {
+              var txt = paragraphs[p].trim();
+              if (!txt) continue;
+              html += '<p>' + txt.replace(/\n/g, '<br>') + '</p>';
+            }
+            infoBody.innerHTML = html || '<p></p>';
+          }
+          if (titleKey && dict[titleKey] && infoTitle) {
+            infoTitle.textContent = dict[titleKey];
+          }
+        }
+      }
+    } catch (e) {}
+  }
+
+  function detectInitialLang() {
+    try {
+      var saved = null;
+      try { saved = localStorage.getItem(STORAGE_KEY); } catch (e) { saved = null; }
+      if (saved === 'ru' || saved === 'en') return saved;
+
+      var nav = (navigator.languages && navigator.languages[0]) || navigator.language || navigator.userLanguage || '';
+      nav = String(nav).toLowerCase();
+      if (nav.indexOf('ru') === 0) return 'ru';
+      return 'en';
+    } catch (e) {
+      return 'ru';
+    }
+  }
+
+  function setLang(lang, persist) {
+    if (lang !== 'ru' && lang !== 'en') return;
+    currentLang = lang;
+    applyTranslations(lang);
+    if (persist) {
+      try { localStorage.setItem(STORAGE_KEY, lang); } catch (e) {}
+    }
+  }
+
+  currentLang = detectInitialLang();
+  applyTranslations(currentLang);
+
+  window.POKER_I18N = {
+    getLang: function() { return currentLang; },
+    setLang: setLang,
+    dict: I18N
+  };
+})();
+</script>
+
+<script>
+(function() {
+  'use strict';
+
   var select = document.getElementById('lang-select');
   var trigger = document.getElementById('lang-trigger');
   var current = document.getElementById('lang-current');
@@ -3118,17 +3450,6 @@ button.disabled {
     trigger.setAttribute('aria-expanded', 'true');
   }
 
-  function setLang(lang) {
-    for (var i = 0; i < options.length; i++) {
-      var o = options[i];
-      var isActive = o.getAttribute('data-lang') === lang;
-      o.classList.toggle('active', isActive);
-      o.classList.toggle('inactive', !isActive);
-      o.setAttribute('aria-selected', isActive ? 'true' : 'false');
-    }
-    if (current) current.textContent = lang.toUpperCase();
-  }
-
   trigger.addEventListener('click', function(e) {
     e.preventDefault();
     e.stopPropagation();
@@ -3141,7 +3462,10 @@ button.disabled {
       opt.addEventListener('click', function(e) {
         e.preventDefault();
         e.stopPropagation();
-        setLang(opt.getAttribute('data-lang'));
+        var lang = opt.getAttribute('data-lang');
+        if (window.POKER_I18N) {
+          window.POKER_I18N.setLang(lang, true);
+        }
         close();
       });
     })(options[i]);
@@ -3245,22 +3569,38 @@ button.disabled {
         '<div class="support-belcard-copied" data-copied="ru">Скопировано</div>' +
       '</div>' +
     '</div>' +
-    '<div class="support-thanks">Благодарю за поддержку</div>';
+    '<div class="support-thanks" data-i18n="modal.supportThanks">Благодарю за поддержку</div>';
 
-  function openInfo(title, body, isSupport) {
+  function openInfo(titleKey, bodyKey, isSupport) {
     if (isSupport) {
       isSupportOpen = true;
-      infoTitle.textContent = 'ПОДДЕРЖИ АВТОРА';
+
+      var lang = (window.POKER_I18N && window.POKER_I18N.getLang) ? window.POKER_I18N.getLang() : 'ru';
+      var dict = (window.POKER_I18N && window.POKER_I18N.dict && window.POKER_I18N.dict[lang]) ? window.POKER_I18N.dict[lang] : null;
+
+      infoTitle.textContent = (dict && dict['modal.supportAuthor.title']) ? dict['modal.supportAuthor.title'] : 'ПОДДЕРЖИ АВТОРА';
       infoTitle.classList.remove('title-normal-case');
       infoBox.classList.add('info-modal-box--support');
       infoBody.innerHTML = SUPPORT_HTML;
+      var thanks = infoBody.querySelector('[data-i18n="modal.supportThanks"]');
+      if (thanks && dict) {
+        thanks.textContent = dict['modal.supportThanks'] || thanks.textContent;
+      }
       initBelcardSupport();
     } else {
       isSupportOpen = false;
-      infoTitle.textContent = title || '';
       infoTitle.classList.add('title-normal-case');
       infoBox.classList.remove('info-modal-box--support');
-      var paragraphs = String(body || '').split('\n\n');
+
+      var lang2 = (window.POKER_I18N && window.POKER_I18N.getLang) ? window.POKER_I18N.getLang() : 'ru';
+      var dict2 = (window.POKER_I18N && window.POKER_I18N.dict && window.POKER_I18N.dict[lang2]) ? window.POKER_I18N.dict[lang2] : null;
+
+      var titleText = (dict2 && titleKey && dict2[titleKey]) ? dict2[titleKey] : (titleKey || '');
+      var bodyText = (dict2 && bodyKey && dict2[bodyKey]) ? dict2[bodyKey] : '';
+
+      infoTitle.textContent = titleText;
+
+      var paragraphs = String(bodyText || '').split('\n\n');
       var html = '';
       for (var i = 0; i < paragraphs.length; i++) {
         var p = paragraphs[i].trim();
@@ -3268,6 +3608,9 @@ button.disabled {
         html += '<p>' + p.replace(/\n/g, '<br>') + '</p>';
       }
       infoBody.innerHTML = html || '<p></p>';
+
+      infoBody.dataset.modalTitleKey = titleKey || '';
+      infoBody.dataset.modalBodyKey = bodyKey || '';
     }
 
     infoModal.classList.add('open');
@@ -3278,6 +3621,10 @@ button.disabled {
     infoModal.classList.remove('open');
     document.body.style.overflow = '';
     isSupportOpen = false;
+    try {
+      delete infoBody.dataset.modalTitleKey;
+      delete infoBody.dataset.modalBodyKey;
+    } catch (e) {}
   }
 
   infoModal.addEventListener('click', function(e) {
@@ -3304,9 +3651,9 @@ button.disabled {
       card.addEventListener('click', function(e) {
         e.preventDefault();
         e.stopPropagation();
-        var t = card.getAttribute('data-info-title') || '';
-        var b = card.getAttribute('data-info-body') || '';
-        openInfo(t, b, false);
+        var tk = card.getAttribute('data-info-title-key') || '';
+        var bk = card.getAttribute('data-info-body-key') || '';
+        openInfo(tk, bk, false);
       });
     })(tappables[i]);
   }
@@ -3316,7 +3663,7 @@ button.disabled {
     if (!btn) return;
     e.preventDefault();
     e.stopPropagation();
-    openInfo('Поддержка', '', true);
+    openInfo('modal.support.title', 'modal.support.body', true);
   });
 
   var heartBtn = document.getElementById('lnd-heart-btn');
