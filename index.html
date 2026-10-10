@@ -1257,7 +1257,10 @@ button.disabled {
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
   user-select: none;
+  -webkit-user-drag: none;
   filter: drop-shadow(0 0 6px rgba(184,146,74,.75)) drop-shadow(0 0 14px rgba(184,146,74,.45));
   transition: opacity .18s ease, filter .18s ease, transform .12s ease;
   z-index: 3;
@@ -1265,11 +1268,17 @@ button.disabled {
   outline: none;
   -webkit-appearance: none;
   appearance: none;
+  touch-action: manipulation;
 }
 
 .lnd-heart-btn:focus,
-.lnd-heart-btn:focus-visible {
+.lnd-heart-btn:focus-visible,
+.lnd-heart-btn:hover,
+.lnd-heart-btn:active {
   outline: none;
+  box-shadow: none;
+  border: none;
+  background: transparent;
 }
 
 .lnd-heart-btn .ph-heart-svg {
@@ -1277,6 +1286,9 @@ button.disabled {
   height: 26px;
   display: block;
   filter: none;
+  -webkit-user-drag: none;
+  user-select: none;
+  pointer-events: none;
 }
 
 @media (hover: hover) {
@@ -2457,25 +2469,25 @@ button.disabled {
             <article class="lnd-bot">
               <span class="badge vip-taglite">VIP · 1</span>
               <h4>TAG-Lite</h4>
-              <p>Знает базу, но играет роботизированно. Не адаптируется, слаб на ривере, 3-беты предсказуемы. Учит ломать шаблон: баррелить там, где он фолдит, и блефовать там, где не ждёт.</p>
+              <p>Знает базу, но играет роботизированно. Не адаптируется, слаб на ривере, его 3-беты предсказуемы. Тренирует ломать шаблон: баррелить там, где он всегда фолдит, и блефовать там, где не ждёт.</p>
             </article>
 
             <article class="lnd-bot">
               <span class="badge vip-loose">VIP · 2</span>
               <h4>Loose-Passive</h4>
-              <p>Коллит широко, агрессии почти нет, его рейз — всегда сила. Учит дисциплине: не блефовать и вэлью-бетить плотно. Не тратить фишки там, где он не выкидывает.</p>
+              <p>Коллит широко, агрессии почти нет, его рейз — всегда сила. Тренирует дисциплину: не блефовать, плотно вэлью-бетить и не тратить фишки там, где он не выкидывает.</p>
             </article>
 
             <article class="lnd-bot">
               <span class="badge vip-rock">VIP · 3</span>
               <h4>Rock</h4>
-              <p>Только премиум-руки, абсолютно предсказуем. Вошёл — у него рука. Учит читать слабость и забирать бесплатно: стилить блайнды и фолдить против крупных ставок.</p>
+              <p>Только премиум-руки, абсолютно предсказуем. Вошёл — у него рука. Тренирует читать слабость и забирать бесплатно: стилить блайнды и фолдить против его крупных ставок.</p>
             </article>
 
             <article class="lnd-bot">
               <span class="badge vip-maniac">VIP · 4</span>
               <h4>Maniac</h4>
-              <p>Рейзит всё, блефует на всех улицах, играет на эмоциях. Учит терпению и хладнокровию: ждать руку, плотно вэлью-бетить и никогда не блефовать против него.</p>
+              <p>Рейзит всё, блефует на всех улицах, играет на эмоциях. Тренирует терпение и хладнокровие: ждать свою руку, плотно вэлью-бетить и никогда не блефовать в ответ.</p>
             </article>
           </div>
         </div>
