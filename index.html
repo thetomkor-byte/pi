@@ -840,19 +840,21 @@ button.disabled {
   position: absolute;
   border: 1px solid #ffffff;
   border-radius: 1px;
-  background: transparent;
+  background: #c8c8c8;
 }
 .support-copy-icon::before {
   width: 5px;
   height: 5px;
-  left: 0;
-  top: 2px;
+  left: 2px;
+  top: 0;
+  z-index: 1;
 }
 .support-copy-icon::after {
   width: 5px;
   height: 5px;
-  left: 2px;
-  top: 0;
+  left: 0;
+  top: 2px;
+  z-index: 2;
 }
 
 .support-belcard-number {
